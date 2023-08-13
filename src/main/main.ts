@@ -71,8 +71,11 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 1130,
+    height: 850,
+    minWidth: 1130,
+    minHeight: 850,
+    frame: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
