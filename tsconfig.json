@@ -4,8 +4,7 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "incremental": true,
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ES2021",
     "lib": [
       "dom",
       "es2021"
@@ -26,5 +25,5 @@
     "release/build",
     "release/app/dist",
     ".erb/dll"
-  ]
+  ],
 }
