@@ -2,10 +2,10 @@ import { DataSource } from 'typeorm';
 
 /* eslint-disable import/prefer-default-export */
 export const SqliteDataSource = new DataSource({
-  type: 'sqlite',
-  database: ':memory:',
-  entities: [`models/*.ts`],
+  type: 'better-sqlite3',
+  database: 'src/main/database/db.sqlite',
+  entities: [`src/main/models/*.ts`],
   logging: true,
   synchronize: Boolean(process.env.SYNCHRONIZE) ?? true,
-  migrations: [`migrations/*.ts`],
+  migrations: [`src/main/migrations/*.ts`],
 });

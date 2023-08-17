@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import bcrypt from 'bcrypt';
+import { IsMobilePhone, Length, IsEmail, IsDate, Min } from 'class-validator';
 
 @Entity()
 export class User {
@@ -8,23 +9,29 @@ export class User {
   id: number;
 
   @Column()
+  @Length(3, 20)
   first_name: string;
 
   @Column()
+  @Length(3, 20)
   last_name: string;
 
   @Column()
+  @IsDate()
   birth_date: Date;
 
   @Column()
+  @IsMobilePhone('en-PH')
   phone_number: string;
 
   @Column({
     unique: true,
   })
+  @IsEmail()
   email: string;
 
   @Column()
+  @Min(10)
   address: string;
 
   @Column()
