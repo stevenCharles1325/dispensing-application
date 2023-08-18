@@ -12,7 +12,19 @@
   "scripts": {
     "rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
     "postinstall": "npm run rebuild && npm run link-modules",
-    "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
+    "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts",
+    "typeorm": "npx typeorm-ts-node-commonjs --dataSource ./datasource.ts",
+    "typeorm:migration:run": "npm run typeorm migration:run",
+    "typeorm:migration:show": "npm run typeorm migration:show",
+    "typeorm:migration:generate": "npm run typeorm migration:generate src/main/database/migrations/Migration --timestamp",
+    "typeorm:migration:revert": "npm run typeorm migration:revert"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "bcrypt": "^5.1.1",
+    "class-validator": "^0.14.0",
+    "reflect-metadata": "^0.1.13",
+    "sqlite3": "^5.1.6",
+    "typeorm": "^0.3.17"
+  }
 }

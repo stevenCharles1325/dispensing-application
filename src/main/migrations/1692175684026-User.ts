@@ -16,12 +16,14 @@ export class User1692175684026 implements MigrationInterface {
           {
             name: 'id',
             type: 'int',
+            isNullable: true,
             isPrimary: true,
             isGenerated: true,
           },
           {
             name: 'lead_id',
             type: 'int',
+            isNullable: true,
           },
           {
             name: 'first_name',

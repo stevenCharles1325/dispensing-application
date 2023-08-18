@@ -1,6 +1,6 @@
 // import react from 'react';
 
-import { Box, Card, Divider, Typography } from '@mui/material';
+import { Box, Button, Card, Divider, Typography } from '@mui/material';
 import Header from 'renderer/components/Headers';
 import SideBar from 'renderer/components/Navigations/SideBar';
 import tabs from 'renderer/enums/SideBarTabs';
@@ -11,6 +11,20 @@ function Home() {
     state.navBarOpen,
     state.toggleNavBar,
   ]);
+
+  const createUser = async () => {
+    const response = await window.electron.ipcRenderer.createUser({
+      first_name: 'John',
+      last_name: 'Doe',
+      birth_date: new Date(),
+      phone_number: '09123',
+      address: 'tae makati',
+      email: 'sampletae123@gmail.com',
+      password: 'tae',
+    });
+
+    console.log(response);
+  };
 
   return (
     <div className="w-full h-full bg-transparent">
@@ -44,6 +58,7 @@ function Home() {
             </Typography>
           </Card>
         </Box>
+        <Button onClick={createUser}>Create User</Button>
       </div>
     </div>
   );

@@ -72,6 +72,7 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
+  console.log(app.isPackaged);
   mainWindow = new BrowserWindow({
     show: false,
     width: 1130,
@@ -81,6 +82,7 @@ const createWindow = async () => {
     frame: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      nodeIntegration: true,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),

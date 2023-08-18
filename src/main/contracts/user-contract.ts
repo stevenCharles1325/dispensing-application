@@ -12,4 +12,6 @@ export default interface UserContract {
   address: string;
 
   password: string;
+
+  lead_id?: number;
 }

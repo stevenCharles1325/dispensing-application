@@ -1,11 +1,14 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import UserContract from './contracts/user-contract';
 
 export type Channels = 'ipc-example';
 
 const electronHandler = {
   ipcRenderer: {
+    createUser: async (payload: UserContract) =>
+      ipcRenderer.invoke('user:create', payload),
     sendMessage(channel: Channels, ...args: unknown[]) {
       ipcRenderer.send(channel, ...args);
     },

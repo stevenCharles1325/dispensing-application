@@ -12,24 +12,26 @@
     "jsx": "react-jsx",
     "strict": true,
     "sourceMap": true,
-    "baseUrl": "./src",
+    "baseUrl": "src",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "allowJs": true,
     "outDir": ".erb/dll",
+    "rootDir": ".",
     "paths": {
-      "*": [
-        "*",
-        "./src/main/types/*"
+      "Contracts/*": [
+        "main/contracts/*"
+      ],
+      "Events/*": [
+        "main/events/*"
+      ],
+      "Models/*": [
+        "main/models/*"
       ]
-    },
+    }
   },
-  "include": [
-    "src/main/types/*.d.ts",
-    "src/**/*"
-  ],
   "exclude": [
     "test",
     "release/build",
