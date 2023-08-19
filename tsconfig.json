@@ -1,4 +1,9 @@
 {
+  "ts-node": {
+    "require": [
+      "tsconfig-paths/register"
+    ]
+  },
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -21,6 +26,9 @@
     "outDir": ".erb/dll",
     "rootDir": ".",
     "paths": {
+      "Main/*": [
+        "main/*"
+      ],
       "Contracts/*": [
         "main/contracts/*"
       ],
@@ -29,6 +37,12 @@
       ],
       "Models/*": [
         "main/models/*"
+      ],
+      "Modules/*": [
+        "main/modules/*"
+      ],
+      "Repositories/*": [
+        "main/repositories/*"
       ]
     }
   },

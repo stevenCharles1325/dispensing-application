@@ -7,8 +7,16 @@ export type Channels = 'ipc-example';
 
 const electronHandler = {
   ipcRenderer: {
+    // POS FUNCTIONS
     createUser: async (payload: UserContract) =>
       ipcRenderer.invoke('user:create', payload),
+
+    updateUser: async (id: number, payload: UserContract) =>
+      ipcRenderer.invoke('user:update', id, payload),
+
+    deleteUser: async (id: number) => ipcRenderer.invoke('user:delete', id),
+
+    // MAIN FUNCTIONS
     sendMessage(channel: Channels, ...args: unknown[]) {
       ipcRenderer.send(channel, ...args);
     },
