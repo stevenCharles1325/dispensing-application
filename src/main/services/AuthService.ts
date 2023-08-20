@@ -7,12 +7,14 @@ import jwt from 'jsonwebtoken';
 import AuthContract from 'Main/contracts/auth-contract';
 import { User } from 'Main/database/models/User';
 import AuthConfig from 'Main/config/auth';
+import Store from 'electron-store';
 
 export default class AuthService {
   constructor(
     public readonly config: typeof AuthConfig,
     public readonly userRepo: typeof UserRepository,
-    public readonly encryptor: typeof bcrypt
+    public readonly encryptor: typeof bcrypt,
+    private store: Store = new Store()
   ) {}
 
   private parseTimeExpression(expression: string): Date {
@@ -48,12 +50,32 @@ export default class AuthService {
     return expirationTime;
   }
 
+  private generateToken(payload: Partial<User>): [string, string] {
+    const token = jwt.sign(payload, this.config.key, {
+      expiresIn: this.config.token_expires_at,
+    });
+
+    const refresh_token = jwt.sign(payload, this.config.key, {
+      expiresIn: this.config.refresh_token_expires_at,
+    });
+
+    return [token, refresh_token];
+  }
+
+  private set authUser(payload: AuthContract<User>) {
+    this.store.set('POS_AUTH_USER', payload);
+  }
+
+  private get authUser(): AuthContract<User> {
+    return this.store.get('POS_AUTH_USER') as AuthContract<User>;
+  }
+
   public async authenticate(
     email: string,
     password: string
-  ): Promise<POSError | AuthContract<User>> {
+  ): Promise<POSError | AuthContract<User> | null> {
     const user = await this.userRepo.findOneBy({ email });
-    let result: POSError | AuthContract<User> = null;
+    let result: POSError | AuthContract<User> | null = null;
 
     if (user) {
       try {
@@ -70,42 +92,26 @@ export default class AuthService {
           };
         } else {
           // Generate token
-          const token = jwt.sign(
-            {
-              email: user.email,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              phone_number: user.phone_number,
-            },
-            this.config.key,
-            {
-              expiresIn: this.config.token_expires_at,
-            }
-          );
+          const user_data = {
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            phone_number: user.phone_number,
+          };
 
-          const refresh_token = jwt.sign(
-            {
-              email: user.email,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              phone_number: user.phone_number,
-            },
-            this.config.key,
-            {
-              expiresIn: this.config.refresh_token_expires_at,
-            }
-          );
+          const [token, refresh_token] = this.generateToken(user_data);
 
           const payload: AuthContract<User> = {
             token,
             refresh_token,
-            user:
+            user,
             expires_at: this.parseTimeExpression(this.config.token_expires_at),
             refresh_token_expires_at: this.parseTimeExpression(
               this.config.refresh_token_expires_at
             ),
           };
 
+          this.authUser = payload;
           return payload;
         }
       } catch (err) {
