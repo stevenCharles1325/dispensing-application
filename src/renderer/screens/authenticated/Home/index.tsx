@@ -14,13 +14,11 @@ function Home() {
 
   const createUser = async () => {
     const response = await window.electron.ipcRenderer.updateUser(1, {
-      first_name: 'John',
+      first_name: 'John12',
       last_name: 'Doe',
       birth_date: new Date(),
-      phone_number: '+639150726023',
+      phone_number: '+639150726024',
       address: 'tae makati',
-      email: 'sampletae123345@gmail.com',
-      password: 'taeTAE123@@@',
     });
 
     console.log(response);

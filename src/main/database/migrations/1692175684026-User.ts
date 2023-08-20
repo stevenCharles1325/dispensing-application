@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import {
   MigrationInterface,
   QueryRunner,
@@ -8,7 +7,7 @@ import {
 } from 'typeorm';
 
 export class User1692175684026 implements MigrationInterface {
-  async up(queryRunner: QueryRunner): Promise<void> {
+  public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
         name: 'users',
@@ -100,7 +99,7 @@ export class User1692175684026 implements MigrationInterface {
     );
   }
 
-  async down(queryRunner: QueryRunner): Promise<void> {
+  public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropForeignKey('users', 'lead_id');
     await queryRunner.dropIndex('users', 'IDX_LEAD_USER');
     await queryRunner.dropTable('users');

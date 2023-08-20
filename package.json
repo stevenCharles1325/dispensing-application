@@ -36,7 +36,7 @@
   "scripts": {
     "typeorm:migration:run": "cd src/main && npx typeorm-ts-node-commonjs --dataSource ./datasource.ts migration:run",
     "typeorm:migration:show": "cd src/main && npx typeorm-ts-node-commonjs --dataSource ./datasource.ts migration:show",
-    "typeorm:migration:generate": "cd src/main && npx typeorm-ts-node-commonjs --dataSource ./datasource.ts migration:generate src/main/database/migrations/Migration --timestamp",
+    "typeorm:migration:generate": "cd src/main && npx typeorm-ts-node-commonjs --dataSource ./datasource.ts migration:generate ./migrations --timestamp",
     "typeorm:migration:revert": "cd src/main && npx typeorm-ts-node-commonjs --dataSource ./datasource.ts migration:revert",
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",

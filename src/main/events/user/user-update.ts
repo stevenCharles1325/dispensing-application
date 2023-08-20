@@ -8,21 +8,20 @@ import handleError from 'Modules/error-handler';
 const userUpdate = async (
   event: IpcMainInvokeEvent,
   id: number,
-  payload: UserContract
+  payload: Partial<UserContract>
 ): Promise<ResponseContract> => {
-  const errors = await validator(payload);
-
-  if (errors.length) {
-    return {
-      data: null,
-      errors,
-      status: 'ERROR',
-    };
-  }
-
   try {
     const user = await UserRepository.findOneByOrFail({ id });
     user.merge(payload);
+
+    const errors = await validator(user);
+
+    if (errors.length) {
+      return {
+        errors,
+        status: 'ERROR',
+      };
+    }
 
     const data = await UserRepository.save(user);
     return {

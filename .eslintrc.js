@@ -3,6 +3,8 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
+    'import/prefer-default-export': 'off',
+    'class-methods-use-this': 'off',
     'import/order': 'off',
     'dot-notation': 'off',
     'import/no-extraneous-dependencies': 'off',

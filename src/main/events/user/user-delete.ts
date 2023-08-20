@@ -1,6 +1,6 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import { SqliteDataSource } from 'Main/datasource';
-import { User } from 'Models/User';
+import { User } from 'Main/database/models/User';
 import ResponseContract from 'Contracts/response-contract';
 
 const userDelete = async (

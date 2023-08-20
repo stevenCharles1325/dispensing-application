@@ -1,5 +1,5 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
-import { User } from 'Models/User';
+import { User } from 'Main/database/models/User';
 import UserRepository from 'Main/repositories/User-repository';
 import handleError from 'Modules/error-handler';
 import validator from 'Modules/validator';
