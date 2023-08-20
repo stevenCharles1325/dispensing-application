@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
-import POSError from 'Contracts/pos-error';
-import POSValidationError from 'Contracts/pos-validation-error';
+import POSError from 'Contracts/pos-error-contract';
+import POSValidationError from 'Contracts/pos-validation-error-contract';
 import { QueryFailedError, EntityNotFoundError } from 'typeorm';
 
 type ErrorWithMessage = {

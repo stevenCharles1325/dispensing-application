@@ -1,4 +1,4 @@
-import POSError from './pos-error';
+import POSError from './pos-error-contract';
 
 export default interface POSValidationError extends POSError {
   field: string;

@@ -3,6 +3,9 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
+    'promise/always-return': 'off',
+    'no-empty-function': 'off',
+    'no-useless-constructor': 'off',
     'import/prefer-default-export': 'off',
     'class-methods-use-this': 'off',
     'import/order': 'off',

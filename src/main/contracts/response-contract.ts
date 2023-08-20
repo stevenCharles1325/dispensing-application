@@ -1,6 +1,6 @@
 import { ValidationError } from 'class-validator';
-import POSError from './pos-error';
-import POSValidationError from './pos-validation-error';
+import POSError from './pos-error-contract';
+import POSValidationError from './pos-validation-error-contract';
 
 export default interface ResponseContract {
   data?: any;

@@ -1,4 +1,4 @@
-import PermissionContract from './permission';
+import PermissionContract from './permission-contract';
 
 export default interface RoleContract {
   name: string;
