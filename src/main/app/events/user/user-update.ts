@@ -1,9 +1,9 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
-import UserRepository from 'Repositories/User-repository';
-import validator from 'Modules/validator';
+import UserRepository from 'Main/app/repositories/User-repository';
+import validator from 'Main/app/modules/validator';
 import ResponseContract from 'Contracts/response-contract';
 import UserContract from 'Contracts/user-contract';
-import handleError from 'Modules/error-handler';
+import handleError from 'Main/app/modules/error-handler';
 
 const userUpdate = async (
   event: IpcMainInvokeEvent,

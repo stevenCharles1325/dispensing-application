@@ -1,5 +1,5 @@
 import { join } from 'path';
-import requireAll from './modules/require-all';
+import requireAll from './app/modules/require-all';
 
 const events = requireAll(join(__dirname, 'events'), true);
 

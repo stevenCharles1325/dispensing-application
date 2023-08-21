@@ -14,8 +14,8 @@ export class User1692175684026 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'int',
-            isNullable: true,
+            type: 'integer',
+            generationStrategy: 'increment',
             isPrimary: true,
             isGenerated: true,
           },
@@ -23,6 +23,7 @@ export class User1692175684026 implements MigrationInterface {
             name: 'lead_id',
             type: 'int',
             isNullable: true,
+            foreignKeyConstraintName: 'lead',
           },
           {
             name: 'first_name',
@@ -100,7 +101,7 @@ export class User1692175684026 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('users', 'lead_id');
+    await queryRunner.dropForeignKey('users', 'lead');
     await queryRunner.dropIndex('users', 'IDX_LEAD_USER');
     await queryRunner.dropTable('users');
   }

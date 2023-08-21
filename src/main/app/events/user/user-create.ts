@@ -1,8 +1,8 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import { User } from 'Main/database/models/User';
-import UserRepository from 'Main/repositories/User-repository';
-import handleError from 'Modules/error-handler';
-import validator from 'Modules/validator';
+import UserRepository from 'Main/app/repositories/User-repository';
+import handleError from 'Main/app/modules/error-handler';
+import validator from 'Main/app/modules/validator';
 import UserContract from 'Contracts/user-contract';
 import ResponseContract from 'Contracts/response-contract';
 

@@ -1,5 +1,5 @@
 import { validate } from 'class-validator';
-import POSValidationError from 'Contracts/pos-validation-error';
+import POSValidationError from 'Contracts/pos-validation-error-contract';
 
 export default async function validator(model: object) {
   const validationErrors = await validate(model);

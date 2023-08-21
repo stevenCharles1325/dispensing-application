@@ -13,8 +13,8 @@ export class Auth1692522821716 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'int',
-            isNullable: true,
+            type: 'integer',
+            generationStrategy: 'increment',
             isPrimary: true,
             isGenerated: true,
           },
@@ -22,6 +22,7 @@ export class Auth1692522821716 implements MigrationInterface {
             name: 'user_id',
             type: 'int',
             isNullable: false,
+            foreignKeyConstraintName: 'user',
           },
           {
             name: 'token',
@@ -39,7 +40,7 @@ export class Auth1692522821716 implements MigrationInterface {
             isNullable: true,
           },
           {
-            name: 'expires_at',
+            name: 'token_expires_at',
             type: 'timestamp',
             isNullable: false,
           },
@@ -56,6 +57,7 @@ export class Auth1692522821716 implements MigrationInterface {
     await queryRunner.createForeignKey(
       'tokens',
       new TableForeignKey({
+        name: 'user',
         columnNames: ['user_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'users',
@@ -65,7 +67,7 @@ export class Auth1692522821716 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('tokens', 'user_id');
+    await queryRunner.dropForeignKey('tokens', 'user');
     await queryRunner.dropTable('tokens');
   }
 }

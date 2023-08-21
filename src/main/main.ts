@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import 'reflect-metadata';
-import path from 'path';
+import path, { join } from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -17,6 +17,11 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { SqliteDataSource } from './datasource';
 import runEvents from './events';
+import Provider from '@IOC:Provider';
+import requireAll from 'App/modules/require-all';
+import stores from './stores';
+
+const providers = requireAll(join(__dirname, '/app/providers'), true);
 
 class AppUpdater {
   constructor() {
@@ -140,7 +145,24 @@ app
       .then(() => {
         console.log('[DB]: Initialized Successfully');
 
-        runEvents();
+        if (providers) {
+          console.log('[PROVIDERS]: Initializing...');
+          Object.entries(providers).forEach(([name, AppProviderClass]) => {
+            const provider = new AppProviderClass(Provider);
+
+            try {
+              provider.run();
+              console.log(`[PROVIDERS]: Provider ${name} ran successfully`);
+            } catch (err) {
+              console.log(`[PROVIDERS]: Provider ${name} failed to run`);
+              console.log(err);
+              throw err;
+            }
+          });
+        }
+
+        // Initialize stores
+        stores(() => runEvents());
         createWindow();
 
         app.on('activate', () => {

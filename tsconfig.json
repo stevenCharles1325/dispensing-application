@@ -29,20 +29,29 @@
       "Main/*": [
         "main/*"
       ],
+      "App/*": [
+        "main/app/*"
+      ],
+      "Services/*": [
+        "main/app/services/*"
+      ],
       "Contracts/*": [
         "main/contracts/*"
       ],
       "Events/*": [
-        "main/events/*"
+        "main/app/events/*"
       ],
       "Models/*": [
         "main/database/models/*"
       ],
       "Modules/*": [
-        "main/modules/*"
+        "main/app/modules/*"
       ],
       "Repositories/*": [
-        "main/repositories/*"
+        "main/app/repositories/*"
+      ],
+      "@IOC:Provider": [
+        "main/provider"
       ]
     }
   },

@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-prototype-builtins */
-import UserRepository from 'Repositories/User-repository';
+import UserRepository from 'Main/app/repositories/User-repository';
 import bcrypt from 'bcrypt';
 import POSError from 'Main/contracts/pos-error-contract';
 import jwt from 'jsonwebtoken';
@@ -66,7 +66,7 @@ export default class AuthService {
     this.store.set('POS_AUTH_USER', payload);
   }
 
-  private get authUser(): AuthContract<User> {
+  public get authUser(): AuthContract<User> {
     return this.store.get('POS_AUTH_USER') as AuthContract<User>;
   }
 
@@ -105,7 +105,9 @@ export default class AuthService {
             token,
             refresh_token,
             user,
-            expires_at: this.parseTimeExpression(this.config.token_expires_at),
+            token_expires_at: this.parseTimeExpression(
+              this.config.token_expires_at
+            ),
             refresh_token_expires_at: this.parseTimeExpression(
               this.config.refresh_token_expires_at
             ),
