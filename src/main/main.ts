@@ -161,7 +161,8 @@ app
           });
         }
 
-        // Initialize stores
+        // Initialize Stores
+        // Each events now has access to the Store
         stores(() => runEvents());
         createWindow();
 

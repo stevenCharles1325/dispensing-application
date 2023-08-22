@@ -1,7 +1,7 @@
 import { join } from 'path';
 import requireAll from './app/modules/require-all';
 
-const events = requireAll(join(__dirname, 'events'), true);
+const events = requireAll(join(__dirname, 'app/events'), true);
 
 type SearchObject = object | Function[] | object[];
 
@@ -42,6 +42,7 @@ function findAndInvokeFunctions(so: SearchObject): null {
 }
 
 export default function () {
+  console.log("EVENTS: ", events);
   if (events) {
     findAndInvokeFunctions(events);
   }
