@@ -26,6 +26,12 @@ export class User1692175684026 implements MigrationInterface {
             foreignKeyConstraintName: 'lead',
           },
           {
+            name: 'role_id',
+            type: 'int',
+            isNullable: true,
+            foreignKeyConstraintName: 'role',
+          },
+          {
             name: 'first_name',
             type: 'varchar',
             isNullable: false,
@@ -89,12 +95,32 @@ export class User1692175684026 implements MigrationInterface {
       })
     );
 
+    await queryRunner.createIndex(
+      'users',
+      new TableIndex({
+        name: 'IDX_ROLE_USER',
+        columnNames: ['id', 'role_id'],
+      })
+    );
+
     await queryRunner.createForeignKey(
       'users',
       new TableForeignKey({
+        name: 'lead',
         columnNames: ['lead_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'users',
+        onDelete: 'SET NULL',
+      })
+    );
+
+    await queryRunner.createForeignKey(
+      'users',
+      new TableForeignKey({
+        name: 'role',
+        columnNames: ['role_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'roles',
         onDelete: 'SET NULL',
       })
     );
@@ -102,7 +128,9 @@ export class User1692175684026 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropForeignKey('users', 'lead');
+    await queryRunner.dropForeignKey('users', 'role');
     await queryRunner.dropIndex('users', 'IDX_LEAD_USER');
+    await queryRunner.dropIndex('users', 'IDX_ROLE_USER');
     await queryRunner.dropTable('users');
   }
 }

@@ -1,5 +1,18 @@
 /* eslint-disable import/prefer-default-export */
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToOne,
+  OneToMany,
+  ManyToOne,
+  AfterLoad,
+  JoinColumn,
+  BeforeInsert,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import bcrypt from 'bcrypt';
 import {
   IsMobilePhone,
@@ -10,6 +23,7 @@ import {
   IsStrongPassword,
   ValidationArguments,
 } from 'class-validator';
+import { Role } from './Role';
 
 const messages = {
   length: 'Length must be $constraint1',
@@ -36,6 +50,11 @@ const messages = {
 export class User {
   @PrimaryGeneratedColumn('increment')
   id: number;
+
+  @Column({
+    nullable: true,
+  })
+  lead_id: number;
 
   @Column()
   @Length(3, 20, {
@@ -70,9 +89,7 @@ export class User {
   )
   phone_number: string;
 
-  @Column({
-    unique: true,
-  })
+  @Column({ unique: true })
   @IsEmail(undefined, {
     message: messages.email,
   })
@@ -99,38 +116,37 @@ export class User {
   )
   password: string;
 
-  @Column({
-    default: new Date().toString(),
-  })
+  @CreateDateColumn()
   created_at: Date;
 
-  @Column({
-    default: new Date().toString(),
-  })
+  @UpdateDateColumn()
   updated_at: Date;
 
   @Column({ nullable: true })
+  @DeleteDateColumn()
   deleted_at: Date;
+
+  @OneToOne(() => Role)
+  @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
+  role: Role;
+
+  @OneToMany(() => User, (user) => user.lead)
+  @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
+  subordinates: this[];
+
+  @ManyToOne(() => User, (user) => user.subordinates)
+  @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
+  lead: this;
+
+  @AfterLoad()
+  fullName() {
+    return `${this.first_name} ${this.last_name}`;
+  }
 
   @BeforeInsert()
   hashPassword() {
     const saltRound = 10;
     const salt = bcrypt.genSaltSync(saltRound);
     this.password = bcrypt.hashSync(this.password, salt);
-  }
-
-  merge(payload: any) {
-    type UserKeys = keyof this;
-
-    const keys = Object.keys(payload) as UserKeys[];
-    keys.forEach((key) => {
-      if (this[key] !== undefined) {
-        this[key] = payload[key];
-      } else {
-        throw new Error(
-          `Trying to set unknown User class property ${key as string}`
-        );
-      }
-    });
   }
 }

@@ -12,9 +12,8 @@ const userUpdate = async (
 ): Promise<ResponseContract> => {
   try {
     const user = await UserRepository.findOneByOrFail({ id });
-    user.merge(payload);
-
-    const errors = await validator(user);
+    const updatedUser = UserRepository.merge(user, payload);
+    const errors = await validator(updatedUser);
 
     if (errors.length) {
       return {
@@ -23,7 +22,7 @@ const userUpdate = async (
       };
     }
 
-    const data = await UserRepository.save(user);
+    const data = await UserRepository.save(updatedUser);
     return {
       data,
       errors: [],

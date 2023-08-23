@@ -16,6 +16,7 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { SqliteDataSource } from './datasource';
+import { runSeeders } from 'typeorm-extension';
 import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all';
@@ -142,8 +143,15 @@ app
   .then(() => {
     // Initialize database
     SqliteDataSource.initialize()
-      .then(() => {
+      .then(async () => {
         console.log('[DB]: Initialized Successfully');
+
+        try {
+          await runSeeders(SqliteDataSource);
+          console.log('[DB]: Seeded Successfully');
+        } catch (err) {
+          console.log(err);
+        }
 
         if (providers) {
           console.log('[PROVIDERS]: Initializing...');

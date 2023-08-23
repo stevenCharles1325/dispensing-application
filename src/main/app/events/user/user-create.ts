@@ -11,15 +11,7 @@ const userCreate = async (
   payload: UserContract
 ): Promise<ResponseContract> => {
   try {
-    const user = new User();
-    user.first_name = payload.first_name;
-    user.last_name = payload.last_name;
-    user.email = payload.email;
-    user.password = payload.password;
-    user.phone_number = payload.phone_number;
-    user.address = payload.address;
-    user.birth_date = payload.birth_date;
-
+    const user = UserRepository.create(payload);
     const errors = await validator(user);
     if (errors && errors.length) {
       return {

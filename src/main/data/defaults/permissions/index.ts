@@ -1,4 +1,4 @@
-import PermissionContract from 'Contracts/permission';
+import PermissionContract from 'Contracts/permission-contract';
 
 const permissions: PermissionContract[] = [
   // Role management permissions
@@ -26,7 +26,7 @@ const permissions: PermissionContract[] = [
   // Permission management permissions
   {
     name: 'View Permission',
-    kebab: 'view-role',
+    kebab: 'view-permission',
   },
   {
     name: 'Create Permission',
@@ -136,7 +136,7 @@ const permissions: PermissionContract[] = [
   // Data/Graph management permissions
   {
     name: 'View Data',
-    kebab: 'view-attendance',
+    kebab: 'view-data',
   },
   {
     name: 'Download Data',

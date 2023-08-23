@@ -1,4 +1,4 @@
-import RoleContract from 'Contracts/role';
+import RoleContract from 'Contracts/role-contract';
 
 const storeManager: RoleContract = {
   name: 'Store Manager',

@@ -14,6 +14,8 @@ const electronHandler = {
     updateUser: async (id: number, payload: Partial<UserContract>) =>
       ipcRenderer.invoke('user:update', id, payload),
 
+    archiveUser: async (id: number) => ipcRenderer.invoke('user:archive', id),
+
     deleteUser: async (id: number) => ipcRenderer.invoke('user:delete', id),
 
     // MAIN FUNCTIONS
