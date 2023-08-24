@@ -38,14 +38,5 @@ export class Permission {
   updated_at: Date;
 
   @ManyToMany(() => Role, (role) => role.permissions)
-  @JoinTable({
-    name: 'role_permissions',
-    joinColumn: {
-      name: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'id',
-    },
-  })
   roles: Role[];
 }

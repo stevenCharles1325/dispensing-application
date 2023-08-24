@@ -24,6 +24,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { Role } from './Role';
+import RoleRepository from 'Main/app/repositories/Role-repository';
 
 const messages = {
   length: 'Length must be $constraint1',
@@ -55,6 +56,9 @@ export class User {
     nullable: true,
   })
   lead_id: number;
+
+  @Column()
+  role_id: number;
 
   @Column()
   @Length(3, 20, {
@@ -148,5 +152,16 @@ export class User {
     const saltRound = 10;
     const salt = bcrypt.genSaltSync(saltRound);
     this.password = bcrypt.hashSync(this.password, salt);
+  }
+
+  @BeforeInsert()
+  async assignBasicRole() {
+    if (!this.role_id) {
+      const cashierRole = await RoleRepository.findOneByOrFail({
+        kebab: 'cashier',
+      });
+
+      this.role_id = cashierRole.id;
+    }
   }
 }

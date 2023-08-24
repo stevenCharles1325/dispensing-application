@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
 import { Seeder } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
@@ -16,37 +18,41 @@ export default class MainSeeder implements Seeder {
     const RoleRepo = dataSource.getRepository(Role);
     const UserRepo = dataSource.getRepository(User);
 
-    console.log('Permissions: ', permissions);
-
-    const createdPermissions = await PermissionRepo.insert(permissions);
+    const createdPermissions = PermissionRepo.create(permissions);
+    await PermissionRepo.save(createdPermissions);
     console.log('[SEEDER]: Seeded Permissions successfully');
 
     if (roles) {
+      const _roles = RoleRepo.create(
+        Object.values(roles).map((role) => {
+          if (role?.permissions) {
+            console.log('ROLE PERMISSIONS: ', role.permissions);
+            const permissionNames = role.permissions.map(
+              (permission: PermissionContract) => permission.kebab
+            );
+
+            const perms = createdPermissions.filter(({ kebab }) =>
+              permissionNames.includes(kebab)
+            ) as Permission[];
+
+            console.log('PERMS: ', perms);
+            const _role: any = {
+              name: role!.name,
+              kebab: role!.kebab,
+            };
+
+            console.log(perms);
+
+            _role['permissions'] = perms;
+            return _role;
+          }
+
+          return role;
+        })
+      );
+
       console.log('ROLES: ', roles);
-
-      for await (const roleObj of Object.values(roles)) {
-        if (roleObj?.permissions) {
-          console.log('ROLE PERMISSIONS: ', roleObj.permissions);
-          const permissionNames = roleObj.permissions.map(
-            (permission: PermissionContract) => permission.kebab
-          );
-
-          const perms = (await createdPermissions.generatedMaps.filter(
-            ({ kebab }) => permissionNames.includes(kebab)
-          )) as Permission[];
-
-          console.log('PERMS: ', perms);
-          const role = RoleRepo.create({
-            name: roleObj!.name,
-            kebab: roleObj!.kebab,
-          });
-
-          role.permissions = perms;
-          await RoleRepo.save(role);
-        } else {
-          await RoleRepo.insert([roleObj]);
-        }
-      }
+      await RoleRepo.save(_roles);
 
       console.log('[SEEDER]: Seeded Roles successfully');
       const ownerRole = await RoleRepo.findOneByOrFail({ name: 'Owner' });
