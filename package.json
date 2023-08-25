@@ -266,7 +266,8 @@
   "electronmon": {
     "patterns": [
       "!**/**",
-      "src/main/**"
+      "src/main/**",
+      "!**/*.sqlite"
     ],
     "logLevel": "quiet"
   }

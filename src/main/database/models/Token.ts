@@ -34,13 +34,6 @@ export class Token {
   @CreateDateColumn()
   created_at: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
-
-  @Column({ nullable: true })
-  @DeleteDateColumn()
-  deleted_at: Date;
-
   @OneToOne(() => User)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: User;

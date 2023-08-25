@@ -12,15 +12,23 @@ function Home() {
     state.toggleNavBar,
   ]);
 
+  const signin = async () => {
+    const response = await window.electron.ipcRenderer.authSignIn({
+      email: 'johndoe123@gmail.com',
+      password: 'passWORD123@@@',
+    });
+    console.log(response);
+  };
+
   const createUser = async () => {
     const response = await window.electron.ipcRenderer.createUser({
-      first_name: 'pepe',
-      last_name: 'Doe',
+      first_name: 'jose',
+      last_name: 'manalo',
       birth_date: new Date(),
-      phone_number: '+639150726024',
-      address: 'tae makati',
-      email: 'john123457@gmail.com',
-      password: 'taeTAE@@@123',
+      address: 'saan',
+      email: 'johndoe123@gmail.com',
+      password: 'passWORD123@@@',
+      phone_number: '+639454610579',
     });
 
     console.log(response);
@@ -58,7 +66,8 @@ function Home() {
             </Typography>
           </Card>
         </Box>
-        <Button onClick={createUser}>Create User</Button>
+        <Button onClick={signin}>Sign In</Button>
+        <Button onClick={createUser}>Sample</Button>
       </div>
     </div>
   );

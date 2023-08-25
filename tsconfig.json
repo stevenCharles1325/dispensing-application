@@ -52,7 +52,7 @@
       ],
       "@IOC:Provider": [
         "main/provider"
-      ]
+      ],
     }
   },
   "exclude": [

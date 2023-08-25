@@ -1,13 +1,20 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import AuthSignInContract from './contracts/auth-sign-in-contract';
+// import AuthSignInContract from './contracts/auth-sign-in-contract';
 import UserContract from './contracts/user-contract';
 
 export type Channels = 'ipc-example';
 
 const electronHandler = {
   ipcRenderer: {
-    // POS FUNCTIONS
+    // -------------- POS FUNCTIONS --------------
+    // AUTH MODULE
+    authSignIn: async (payload: AuthSignInContract) =>
+      ipcRenderer.invoke('auth:sign-in', payload),
+
+    // USER MODULE
     createUser: async (payload: UserContract) =>
       ipcRenderer.invoke('user:create', payload),
 
@@ -17,6 +24,7 @@ const electronHandler = {
     archiveUser: async (id: number) => ipcRenderer.invoke('user:archive', id),
 
     deleteUser: async (id: number) => ipcRenderer.invoke('user:delete', id),
+    // -------------- END POS FUNCTIONS --------------
 
     // MAIN FUNCTIONS
     sendMessage(channel: Channels, ...args: unknown[]) {

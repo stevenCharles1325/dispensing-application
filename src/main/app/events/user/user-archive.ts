@@ -1,20 +1,30 @@
-import { ipcMain, IpcMainInvokeEvent } from 'electron';
+import handleError from 'Main/app/modules/error-handler';
+import EventContract, {
+  EventListenerPropertiesContract,
+} from 'Main/contracts/event-contract';
 import { SqliteDataSource } from 'Main/datasource';
 import { User } from 'Main/database/models/User';
-import ResponseContract from 'Contracts/response-contract';
 
-const userArchive = async (
-  event: IpcMainInvokeEvent,
-  id: number
-): Promise<ResponseContract> => {
-  const userRepo = SqliteDataSource.getRepository(User);
-  const data = await userRepo.softDelete(id);
+export default class UserArchiveEvent implements EventContract {
+  public channel: string = 'user:archive';
 
-  return {
-    data,
-    errors: [],
-    status: 'SUCCESS',
-  };
-};
+  public async listener({ eventArgs }: EventListenerPropertiesContract) {
+    try {
+      const userRepo = SqliteDataSource.getRepository(User);
+      const data = await userRepo.softDelete(eventArgs[0]);
 
-export default () => ipcMain.handle('user:archive', userArchive);
+      return {
+        data,
+        errors: [],
+        status: 'SUCCESS',
+      };
+    } catch (err) {
+      const error = handleError(err);
+      console.log('ERROR HANDLER OUTPUT: ', error);
+      return {
+        errors: [error],
+        status: 'ERROR',
+      };
+    }
+  }
+}

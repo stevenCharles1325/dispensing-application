@@ -1,29 +1,36 @@
 /* eslint-disable no-restricted-syntax */
-import { join } from 'path';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import requireAll from 'App/modules/require-all';
+import StorageContract from './contracts/storage-contract';
 
 type Callback = () => void;
 const asyncLocalStorage = new AsyncLocalStorage();
 
-const stores = requireAll(join(__dirname, 'app/stores'), true);
+class Storage implements StorageContract {
+  constructor(public storage: Record<string, any> = {}) {}
 
-export default function (callback: Callback) {
-  let obj = {};
-
-  if (stores) {
-    Object.values(stores).forEach((store) => {
-      const val = store();
-
-      if (val) {
-        const entries = Object.entries(val);
-
-        for (const [name, value] of entries) {
-          obj = { ...obj, [name]: value };
-        }
-      }
-    });
+  get(key: string): any {
+    return this.storage[key];
   }
 
-  asyncLocalStorage.run(obj, callback);
+  set(key: string, value: any): void {
+    this.storage[key] = value;
+  }
+
+  delete(key: string): void {
+    delete this.storage[key];
+  }
+
+  clear(): void {
+    this.storage = {};
+  }
+}
+
+export default function (callback: Callback) {
+  const storage = new Storage();
+  asyncLocalStorage.enterWith(storage);
+  callback();
+}
+
+export function ALSStorage(): StorageContract {
+  return asyncLocalStorage.getStore() as StorageContract;
 }

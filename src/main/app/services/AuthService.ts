@@ -8,13 +8,23 @@ import AuthContract from 'Main/contracts/auth-contract';
 import { User } from 'Main/database/models/User';
 import AuthConfig from 'Main/config/auth';
 import Store from 'electron-store';
+import ResponseContract from 'Main/contracts/response-contract';
+import TokenRepository from '../repositories/Token-repository';
+import StorageContract from 'Main/contracts/storage-contract';
+import { ALSStorage } from 'Main/stores';
+import { SqliteDataSource } from 'Main/datasource';
+import { Token } from 'Main/database/models/Token';
+import handleError from '../modules/error-handler';
 
 export default class AuthService {
+  private readonly AUTH_USER = 'POS_AUTH_USER';
+
   constructor(
     public readonly config: typeof AuthConfig,
     public readonly userRepo: typeof UserRepository,
     public readonly encryptor: typeof bcrypt,
-    private store: Store = new Store()
+    private store: Store = new Store(),
+    private store2: StorageContract = ALSStorage()
   ) {}
 
   private parseTimeExpression(expression: string): Date {
@@ -63,19 +73,25 @@ export default class AuthService {
   }
 
   private set authUser(payload: AuthContract<User>) {
-    this.store.set('POS_AUTH_USER', payload);
+    this.store.set(this.AUTH_USER, payload);
+    this.store2.set(this.AUTH_USER, payload);
   }
 
   public get authUser(): AuthContract<User> {
-    return this.store.get('POS_AUTH_USER') as AuthContract<User>;
+    return (
+      (this.store.get(this.AUTH_USER) as AuthContract<User>) ??
+      (this.store2.get(this.AUTH_USER) as AuthContract<User>)
+    );
   }
 
+  // Sign in
   public async authenticate(
     email: string,
     password: string
-  ): Promise<POSError | AuthContract<User> | null> {
+  ): Promise<ResponseContract> {
     const user = await this.userRepo.findOneBy({ email });
     let result: POSError | AuthContract<User> | null = null;
+    let status: 'SUCCESS' | 'ERROR' = 'ERROR';
 
     if (user) {
       try {
@@ -86,8 +102,8 @@ export default class AuthService {
 
         if (!isPasswordCorrect) {
           result = {
-            code: 'POS_INVALID_PASSWORD',
-            message: 'Password is incorrect',
+            code: 'POS_INVALID_CREDENTIALS',
+            message: 'Email or Password is incorrect',
             type: 'POS_ERROR',
           };
         } else {
@@ -100,7 +116,6 @@ export default class AuthService {
           };
 
           const [token, refresh_token] = this.generateToken(user_data);
-
           const payload: AuthContract<User> = {
             token,
             refresh_token,
@@ -113,8 +128,16 @@ export default class AuthService {
             ),
           };
 
+          await TokenRepository.save({
+            user_id: user.id,
+            token,
+            refresh_token,
+            token_expires_at: payload.token_expires_at,
+            refresh_token_expires_at: payload.refresh_token_expires_at,
+          });
+
           this.authUser = payload;
-          return payload;
+          status = 'SUCCESS';
         }
       } catch (err) {
         if (err) {
@@ -124,15 +147,65 @@ export default class AuthService {
             type: 'POS_ERROR',
           };
         }
-      }
 
-      return result;
+        status = 'ERROR';
+      }
+    } else {
+      result = {
+        code: 'POS_INVALID_CREDENTIALS',
+        message: 'Email or Password is incorrect',
+        type: 'POS_ERROR',
+      };
+
+      status = 'ERROR';
+    }
+
+    if (status === 'SUCCESS') {
+      return {
+        data: this.authUser,
+        status,
+      };
     }
 
     return {
-      code: 'POS_USER_NOT_FOUND',
-      message: 'User does not exist',
-      type: 'POS_ERROR',
+      errors: [result],
+      status,
+    };
+  }
+
+  // Log out
+  public async revoke() {
+    const data =
+      this.store.get(this.AUTH_USER) ?? this.store2.get(this.AUTH_USER);
+
+    if (data) {
+      try {
+        console.log(data);
+        const token = await SqliteDataSource.getRepository(Token);
+        await token.delete({ user_id: data.user.id });
+
+        this.store.delete(this.AUTH_USER);
+        this.store2.delete(this.AUTH_USER);
+        this.store.clear();
+        this.store2.clear();
+
+        return {
+          status: 'SUCCESS',
+        };
+      } catch (err) {
+        const errors = handleError(err);
+        console.log(errors);
+
+        return {
+          errors,
+          status: 'ERROR',
+        };
+      }
+    }
+
+    return {
+      errors: ['User is not authenticated'],
+      status: 'ERROR',
     };
   }
 }
