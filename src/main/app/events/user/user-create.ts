@@ -4,6 +4,7 @@ import validator from 'Main/app/modules/validator';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
+import { User } from 'Main/database/models/User';
 
 export default class UserCreateEvent implements EventContract {
   public channel: string = 'user:create';
@@ -13,19 +14,30 @@ export default class UserCreateEvent implements EventContract {
     storage,
   }: EventListenerPropertiesContract) {
     try {
-      const user = UserRepository.create(eventArgs[0]);
-      const errors = await validator(user);
-      if (errors && errors.length) {
+      // const authUser = Provider.ioc<AuthService>('AuthProvider').getAuthUser();
+      const authUser = storage.get('POS_AUTH_USER') as User;
+      const hasPermission = authUser.hasPermission('create-user');
+
+      if (hasPermission) {
+        const user = UserRepository.create(eventArgs[0]);
+        const errors = await validator(user);
+        if (errors && errors.length) {
+          return {
+            errors,
+            status: 'ERROR',
+          };
+        }
+
+        const data = await UserRepository.save(user);
         return {
-          errors,
-          status: 'ERROR',
+          data,
+          status: 'SUCCESS',
         };
       }
 
-      const data = await UserRepository.save(user);
       return {
-        data,
-        status: 'SUCCESS',
+        errors: ['You are not allowed to create a User'],
+        status: 'ERROR',
       };
     } catch (err) {
       const error = handleError(err);

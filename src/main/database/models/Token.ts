@@ -5,8 +5,6 @@ import {
   OneToOne,
   JoinColumn,
   CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './User';
@@ -34,7 +32,7 @@ export class Token {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { eager: true })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: User;
 }

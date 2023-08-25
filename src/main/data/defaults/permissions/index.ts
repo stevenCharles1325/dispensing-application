@@ -1,6 +1,6 @@
-import PermissionContract from 'Contracts/permission-contract';
+/* eslint-disable prettier/prettier */
 
-const permissions: PermissionContract[] = [
+const permissions = [
   // Role management permissions
   {
     name: 'View Role',
@@ -142,6 +142,7 @@ const permissions: PermissionContract[] = [
     name: 'Download Data',
     kebab: 'download-data',
   },
-];
+] as const;
 
+export type PermissionsKebabType = typeof permissions[number]['kebab'];
 export default permissions;

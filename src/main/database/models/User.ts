@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 /* eslint-disable import/prefer-default-export */
 import {
   Column,
@@ -25,6 +26,7 @@ import {
 } from 'class-validator';
 import { Role } from './Role';
 import RoleRepository from 'Main/app/repositories/Role-repository';
+import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 
 const messages = {
   length: 'Length must be $constraint1',
@@ -130,21 +132,28 @@ export class User {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @OneToOne(() => Role)
+  @OneToOne(() => Role, { eager: true })
   @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
   role: Role;
 
   @OneToMany(() => User, (user) => user.lead)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
-  subordinates: this[];
+  subordinates: User[];
 
   @ManyToOne(() => User, (user) => user.subordinates)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
-  lead: this;
+  lead: User;
 
   @AfterLoad()
   fullName() {
     return `${this.first_name} ${this.last_name}`;
+  }
+
+  @AfterLoad()
+  hasPermission(...permission: PermissionsKebabType[]) {
+    return this.role.permissions.some(({ kebab }) =>
+      permission.includes(kebab as PermissionsKebabType)
+    );
   }
 
   @BeforeInsert()

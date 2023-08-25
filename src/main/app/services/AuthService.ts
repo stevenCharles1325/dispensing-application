@@ -19,6 +19,8 @@ import handleError from '../modules/error-handler';
 export default class AuthService {
   private readonly AUTH_USER = 'POS_AUTH_USER';
 
+  private readonly AUTH_USER_TOKEN = 'POS_AUTH_USER_TOKEN';
+
   constructor(
     public readonly config: typeof AuthConfig,
     public readonly userRepo: typeof UserRepository,
@@ -73,15 +75,23 @@ export default class AuthService {
   }
 
   private set authUser(payload: AuthContract<User>) {
-    this.store.set(this.AUTH_USER, payload);
-    this.store2.set(this.AUTH_USER, payload);
+    this.store.set(this.AUTH_USER_TOKEN, payload);
+    this.store2.set(this.AUTH_USER_TOKEN, payload);
+
+    this.store.set(this.AUTH_USER, payload.user);
+    this.store2.set(this.AUTH_USER, payload.user);
   }
 
-  public get authUser(): AuthContract<User> {
-    return (
-      (this.store.get(this.AUTH_USER) as AuthContract<User>) ??
-      (this.store2.get(this.AUTH_USER) as AuthContract<User>)
-    );
+  public getAuthUser(): Partial<User> {
+    const authUser =
+      (this.store.get(this.AUTH_USER) as Partial<User>) ??
+      (this.store2.get(this.AUTH_USER) as Partial<User>);
+
+    if (!authUser) {
+      throw new Error('AuthUser is not available');
+    }
+
+    return authUser;
   }
 
   // Sign in
@@ -180,12 +190,9 @@ export default class AuthService {
 
     if (data) {
       try {
-        console.log(data);
         const token = await SqliteDataSource.getRepository(Token);
         await token.delete({ user_id: data.user.id });
 
-        this.store.delete(this.AUTH_USER);
-        this.store2.delete(this.AUTH_USER);
         this.store.clear();
         this.store2.clear();
 
