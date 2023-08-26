@@ -8,15 +8,28 @@ import { User } from 'Main/database/models/User';
 export default class UserDeleteEvent implements EventContract {
   public channel: string = 'user:delete';
 
-  public async listener({ eventArgs }: EventListenerPropertiesContract) {
+  public async listener({
+    eventArgs,
+    storage,
+  }: EventListenerPropertiesContract) {
     try {
-      const userRepo = SqliteDataSource.getRepository(User);
-      const data = await userRepo.delete(eventArgs[0]);
+      const authUser = storage.get('POS_AUTH_USER') as User;
+      const hasPermission = authUser.hasPermission('delete-user');
+
+      if (hasPermission) {
+        const userRepo = SqliteDataSource.getRepository(User);
+        const data = await userRepo.delete(eventArgs[0]);
+
+        return {
+          data,
+          errors: [],
+          status: 'SUCCESS',
+        };
+      }
 
       return {
-        data,
-        errors: [],
-        status: 'SUCCESS',
+        errors: ['You are not allowed to create a User'],
+        status: 'ERROR',
       };
     } catch (err) {
       const error = handleError(err);

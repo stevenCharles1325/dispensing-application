@@ -8,19 +8,33 @@ import { User } from 'Main/database/models/User';
 export default class UserArchiveEvent implements EventContract {
   public channel: string = 'user:archive';
 
-  public async listener({ eventArgs }: EventListenerPropertiesContract) {
+  public async listener({
+    eventArgs,
+    storage,
+  }: EventListenerPropertiesContract) {
     try {
-      const userRepo = SqliteDataSource.getRepository(User);
-      const data = await userRepo.softDelete(eventArgs[0]);
+      const authUser = storage.get('POS_AUTH_USER') as User;
+      const hasPermission = authUser.hasPermission('archive-user');
+
+      if (hasPermission) {
+        const userRepo = SqliteDataSource.getRepository(User);
+        const data = await userRepo.softDelete(eventArgs[0]);
+
+        return {
+          data,
+          errors: [],
+          status: 'SUCCESS',
+        };
+      }
 
       return {
-        data,
-        errors: [],
-        status: 'SUCCESS',
+        errors: ['You are not allowed to create a User'],
+        status: 'ERROR',
       };
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
+
       return {
         errors: [error],
         status: 'ERROR',

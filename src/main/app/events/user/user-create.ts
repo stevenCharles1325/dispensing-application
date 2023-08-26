@@ -14,7 +14,6 @@ export default class UserCreateEvent implements EventContract {
     storage,
   }: EventListenerPropertiesContract) {
     try {
-      // const authUser = Provider.ioc<AuthService>('AuthProvider').getAuthUser();
       const authUser = storage.get('POS_AUTH_USER') as User;
       const hasPermission = authUser.hasPermission('create-user');
 

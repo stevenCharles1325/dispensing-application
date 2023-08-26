@@ -24,6 +24,9 @@ const electronHandler = {
     archiveUser: async (id: number) => ipcRenderer.invoke('user:archive', id),
 
     deleteUser: async (id: number) => ipcRenderer.invoke('user:delete', id),
+
+    // Connection to TURN server to start P2P connection
+    online: async () => ipcRenderer.invoke('pos:connection'),
     // -------------- END POS FUNCTIONS --------------
 
     // MAIN FUNCTIONS
