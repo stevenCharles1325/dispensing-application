@@ -4,28 +4,35 @@ import EventContract, {
 } from 'Main/contracts/event-contract';
 
 export default class PosRequestEvent implements EventContract {
-  public channel: string = 'pos:request';
+  public channel: string = 'pos:link';
 
   public async listener({
     eventArgs,
     storage,
   }: EventListenerPropertiesContract) {
     try {
-      const requestedEventName = eventArgs[0];
+      const otherSignalData = eventArgs[0];
       const peer = storage.get('POS_PEER');
 
-      /*
-        Initialize listeners for other peer requests
-        DATA STRUCTURE:
-         {
-            userName: <User name from other peer DB>
-            eventName: <The event wanted to be emitted>
-         }
-      */
-      // peer.on('signal', (data) => {
-      // });
+      if (!peer) {
+        return {
+          errors: ['Peer has not been initialized yet.'],
+          status: 'ERROR',
+        };
+      }
 
-      peer.signal(requestedEventName);
+      if (!otherSignalData) {
+        return {
+          errors: ['Please provide the branch signal data'],
+          status: 'ERROR',
+        };
+      }
+
+      peer.signal(JSON.parse(otherSignalData));
+
+      return {
+        status: 'SUCCESS',
+      };
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);

@@ -14,16 +14,29 @@ export class System1693037662158 implements MigrationInterface {
             isGenerated: true,
           },
           {
-            name: 'branch_name',
+            name: 'is_branch',
+            type: 'boolean',
+            isNullable: true,
+            default: false,
+          },
+          {
+            name: 'main_branch_uuid',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
+            name: 'store_name',
+            comment: 'Store or Branch name',
             type: 'varchar',
             isNullable: false,
           },
           {
-            name: 'total_branch_quantity',
+            name: 'branch_quantity',
+            comment: 'This will be incremented if a new branch is added',
             type: 'int',
             unsigned: true,
             default: 0,
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: 'created_at',
