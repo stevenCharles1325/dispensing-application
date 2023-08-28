@@ -3,7 +3,7 @@ import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
 
-export default class PosRequestEvent implements EventContract {
+export default class PosLinkEvent implements EventContract {
   public channel: string = 'pos:link';
 
   public async listener({
@@ -28,7 +28,23 @@ export default class PosRequestEvent implements EventContract {
         };
       }
 
+      const otherPeersSignalData = storage.get('POS_PEER_OTHER_DATA');
+      storage.set('POS_PEER_OTHERS_DATA', [
+        ...(otherPeersSignalData ?? []),
+        otherSignalData,
+      ]);
       peer.signal(JSON.parse(otherSignalData));
+
+      peer.on('error', (err: any) => {
+        const error = handleError(err);
+
+        console.log(error);
+      });
+
+      peer.on('connection', () => {
+        // Sending all available connection to the other peer.
+        peer.send(JSON.stringify(otherPeersSignalData));
+      });
 
       return {
         status: 'SUCCESS',

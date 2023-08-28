@@ -3,6 +3,7 @@ import handleError from 'Main/app/modules/error-handler';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
+import axios from 'axios';
 
 const wrtc = require('wrtc');
 
@@ -13,32 +14,34 @@ const wrtc = require('wrtc');
       to exchange data directly.
 */
 
-export default class PosConnectionEvent implements EventContract {
+export default class PosInitializeEvent implements EventContract {
   public channel: string = 'pos:initialize';
 
   public async listener({ storage }: EventListenerPropertiesContract) {
     try {
-      // const TURN_URL = new URL(
-      //   `https://${process.env.TURN_SERVER_DOMAIN}/api/v1/turn/credentials`
-      // );
+      const TURN_URL = new URL(
+        `https://${process.env.TURN_SERVER_DOMAIN}/api/v1/turn/credentials`
+      );
 
-      // TURN_URL.searchParams.set(
-      //   'apiKey',
-      //   process.env.TURN_SERVER_SECRET_KEY ?? ''
-      // );
+      TURN_URL.searchParams.set(
+        'apiKey',
+        process.env.TURN_SERVER_SECRET_KEY ?? ''
+      );
 
-      // const data = await axios
-      //   .get(TURN_URL.toString())
-      //   .then((response: any) => {
-      //     return response.data;
-      //   })
-      //   .catch((error: any) => {
-      //     console.log(error);
-      //   });
+      const turnUrls = await axios
+        .get(TURN_URL.toString())
+        .then((response: any) => {
+          return response.data;
+        })
+        .catch((error: any) => {
+          console.log(error);
+        });
 
       const peer = new Peer({
         initiator: Boolean(process.env.PEER_INITIATOR ?? 0),
-        config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] },
+        config: {
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, ...turnUrls],
+        },
         trickle: false,
         wrtc,
       });

@@ -8,6 +8,8 @@
 /* eslint-disable no-restricted-syntax */
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import { join } from 'path';
+import objectToFlattenArray from './app/modules/object-to-flatten-array';
+import objectToFlattenObject from './app/modules/object-to-flatten-object';
 import requireAll from './app/modules/require-all';
 import EventContract from './contracts/event-contract';
 import StorageContract from './contracts/storage-contract';
@@ -15,40 +17,6 @@ import { ALSStorage } from './stores';
 
 const eventsObject = requireAll(join(__dirname, 'app/events'), true);
 const middlewareObject = requireAll(join(__dirname, 'app/middlewares'), true);
-
-function objectToFlattenArray(obj: any): Array<[string, any]> {
-  let result: Array<[string, any]> = [];
-
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
-        const nested = objectToFlattenArray(obj[key]);
-        result = result.concat(nested);
-      } else {
-        result.push([key, obj[key]]);
-      }
-    }
-  }
-
-  return result;
-}
-
-function objectToFlattenObject(obj: any): Record<string, any> {
-  let result: Record<string, any> = {};
-
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
-        const nested = objectToFlattenObject(obj[key]);
-        result = { ...result, ...nested };
-      } else {
-        result[key] = obj[key];
-      }
-    }
-  }
-
-  return result;
-}
 
 function applyMiddleware(
   _middlewares: any[],
@@ -60,13 +28,12 @@ function applyMiddleware(
 
     const next = async () => {
       if (nextIndex < _middlewares.length) {
-        console.log('HEREEE 1');
+        console.log('Middleware has been applied.');
         const currentMiddleware = _middlewares[nextIndex];
         nextIndex++;
         await currentMiddleware({ event: e, eventArgs: args, next });
       } else {
         // All middlewares executed, call the final event listener
-        console.log('HEREEE 2');
         return eventListener({ event: e, eventArgs: args, storage });
       }
     };
@@ -98,6 +65,7 @@ export default function () {
 
       const listener = applyMiddleware(middlewareList, event.listener, storage);
       console.log('Initializing event channel: ', event.channel);
+
       ipcMain.handle(event.channel, listener);
     });
   }

@@ -18,7 +18,9 @@ export default class MainSeeder implements Seeder {
     const RoleRepo = dataSource.getRepository(Role);
     const UserRepo = dataSource.getRepository(User);
 
-    const createdPermissions = PermissionRepo.create(permissions);
+    const createdPermissions = PermissionRepo.create(
+      permissions as unknown as Array<Partial<Permission>>
+    );
     await PermissionRepo.save(createdPermissions);
     console.log('[SEEDER]: Seeded Permissions successfully');
 
