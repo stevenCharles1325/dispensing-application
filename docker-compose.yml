@@ -1,7 +1,11 @@
 services:
-  app:
-    build: .
-    container_name: pos-client
-    command: bash
+  pos-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./src:/app/src
+    environment:
+      DISPLAY: unix$DISPLAY
+    tty: true
