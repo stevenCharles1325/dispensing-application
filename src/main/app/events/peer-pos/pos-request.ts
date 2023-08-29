@@ -75,7 +75,7 @@ export default class PosRequestEvent implements EventContract {
         }
       }
 
-      peer.on('data', (data: string) => );
+      // peer.on('data', (data: string) => );
 
       return {
         status: 'SUCCESS',
