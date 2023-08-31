@@ -13,6 +13,8 @@ export default class PeerRequestEvent implements EventContract {
     storage,
   }: EventListenerPropertiesContract) {
     try {
+      console.log('HEREE 1');
+
       // eslint-disable-next-line no-undef
       const data: PeerDataContract = eventArgs[0];
       const peer: any = eventArgs[1];
