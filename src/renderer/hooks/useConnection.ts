@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 const SimplePeerWrapper = require('simple-peer-wrapper');
 
 const options = {
-  serverUrl: process.env.SIGNALING_SERVER_URL,
+  serverUrl: 'https://zvss-a79c9fbd849e.herokuapp.com/',
   debug: true,
 };
 
