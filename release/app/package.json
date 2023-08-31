@@ -26,10 +26,8 @@
     "class-validator": "^0.14.0",
     "jsonwebtoken": "^9.0.1",
     "reflect-metadata": "^0.1.13",
-    "simple-peer": "^9.11.1",
     "sqlite3": "^5.1.6",
     "typeorm": "^0.3.17",
-    "typeorm-extension": "^3.0.1",
-    "wrtc": "^0.4.7"
+    "typeorm-extension": "^3.0.1"
   }
 }

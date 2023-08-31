@@ -25,6 +25,10 @@
     "allowJs": true,
     "outDir": ".erb/dll",
     "rootDir": ".",
+    "typeRoots": [
+      "/node_modules/@types",
+      "/src/contracts"
+    ],
     "paths": {
       "Main/*": [
         "main/*"

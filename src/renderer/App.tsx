@@ -10,15 +10,7 @@ export default function App() {
       - This checks if the connection is established
         to get the TURN server's credentials
   */
-  const connStatus = useConnection();
-
-  useEffect(() => {
-    if (connStatus === 'Online') {
-      console.log('You can now connect to other POS-systems under your branch');
-    } else {
-      console.log('You are offline');
-    }
-  }, [connStatus]);
+  const [data, peerRequest] = useConnection();
 
   return (
     <Router>

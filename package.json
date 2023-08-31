@@ -115,6 +115,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.15.0",
     "require-all": "^3.0.0",
+    "simple-peer-wrapper": "^0.0.5",
     "sort-by": "^1.2.0",
     "zustand": "^4.4.1"
   },

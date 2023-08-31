@@ -1,44 +1,47 @@
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable no-undef */
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const CHECK_INTERVAL = 2000;
+const SimplePeerWrapper = require('simple-peer-wrapper');
+
+const options = {
+  serverUrl: process.env.PEER_SIGNALING_SERVER,
+  debug: true,
+};
+
+const spw = new SimplePeerWrapper(options);
 
 const useConnection = () => {
-  const [isOnline, setIsOnline] = useState(false);
+  console.log('OPTIONS: ', options);
+  const [requestedData, setRequestedData] = useState<any | null>(null);
 
-  if (!navigator.onLine && isOnline) setIsOnline(false);
+  const requestPeerData = (data: Record<string, any>) => {
+    if (!data) return;
+
+    spw.send(data);
+  };
 
   useEffect(() => {
-    let networkChecker: NodeJS.Timeout | null = null;
+    spw.connect();
 
-    if (!isOnline) {
-      networkChecker = setInterval(() => {
-        if (navigator && navigator.onLine) {
-          window.electron.ipcRenderer
-            .online()
-            .then((res) => {
-              if (res.status === 'SUCCESS') {
-                console.log('[TURN server]: Connection succeeded');
-                setIsOnline(true);
-              } else {
-                console.log('[TURN server]: Connection failed');
-                console.log(res.errors);
-              }
-            })
-            .catch(console.log);
-        }
-      }, CHECK_INTERVAL);
-    } else if (isOnline && networkChecker) clearInterval(networkChecker);
+    spw.on('data', async (data: Record<string, any>) => {
+      if (spw.isConnectionStarted()) {
+        // eslint-disable-next-line no-undef
+        const parsed: PeerDataContract = JSON.parse(data.data);
+        const response = await window.electron.ipcRenderer.peerRequest(parsed, spw);
 
-    return () => {
-      if (networkChecker) {
-        clearInterval(networkChecker);
+        setRequestedData(response);
+      } else {
+        console.log('Connection has not started yet.');
       }
-    };
-  }, [isOnline]);
+    });
 
-  return isOnline ? 'Online' : 'Offline';
+    spw.on('error', (err: any) => {
+      console.log('Error: ', err);
+    });
+
+    return () => spw.close();
+  }, []);
+
+  return [requestedData, requestPeerData];
 };
 
 export default useConnection;
