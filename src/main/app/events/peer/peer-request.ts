@@ -45,13 +45,14 @@ export default class PeerRequestEvent implements EventContract {
         storage,
       });
 
+      console.log(response);
       const payload = {
         systemKey: data.systemKey,
         type: 'response',
         response,
         // eslint-disable-next-line no-undef
       } as PeerDataContract;
-      peer.send(payload);
+      peer.send(JSON.stringify(payload));
 
       return {
         data: payload,

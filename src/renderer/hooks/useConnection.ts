@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 const SimplePeerWrapper = require('simple-peer-wrapper');
 
 const options = {
-  serverUrl: 'https://zvss-a79c9fbd849e.herokuapp.com/',
+  serverUrl: process.env.SIGNALING_SERVER_URL,
   debug: true,
 };
 
@@ -24,6 +24,7 @@ const useConnection = () => {
 
     spw.on('data', async (data: Record<string, any>) => {
       if (spw.isConnectionStarted()) {
+        console.log(data);
         // eslint-disable-next-line no-undef
         const parsed: PeerDataContract = JSON.parse(data.data);
         const response = await window.electron.ipcRenderer.peerRequest(
