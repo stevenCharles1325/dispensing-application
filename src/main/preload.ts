@@ -26,7 +26,9 @@ const electronHandler = {
     deleteUser: async (id: number) => ipcRenderer.invoke('user:delete', id),
 
     // Connection to TURN server to start P2P connection
-    online: async () => ipcRenderer.invoke('pos:initialize'),
+    // eslint-disable-next-line no-undef
+    peerRequest: async (payload: PeerDataContract, spw?: any) =>
+      ipcRenderer.invoke('peer:request', payload, spw),
     // -------------- END POS FUNCTIONS --------------
 
     // MAIN FUNCTIONS

@@ -16,7 +16,10 @@ export default function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={<Home data={data} peerRequest={peerRequest} />}
+          />
         </Routes>
       </div>
     </Router>

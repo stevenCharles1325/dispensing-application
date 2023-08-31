@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 const SimplePeerWrapper = require('simple-peer-wrapper');
 
 const options = {
-  serverUrl: process.env.PEER_SIGNALING_SERVER,
+  serverUrl: process.env.SIGNALING_SERVER_URL,
   debug: true,
 };
 
@@ -26,7 +26,10 @@ const useConnection = () => {
       if (spw.isConnectionStarted()) {
         // eslint-disable-next-line no-undef
         const parsed: PeerDataContract = JSON.parse(data.data);
-        const response = await window.electron.ipcRenderer.peerRequest(parsed, spw);
+        const response = await window.electron.ipcRenderer.peerRequest(
+          parsed,
+          spw
+        );
 
         setRequestedData(response);
       } else {
@@ -34,9 +37,7 @@ const useConnection = () => {
       }
     });
 
-    spw.on('error', (err: any) => {
-      console.log('Error: ', err);
-    });
+    spw.on('error', (err: any) => console.log('Error: ', err));
 
     return () => spw.close();
   }, []);

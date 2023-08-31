@@ -26,8 +26,8 @@
     "outDir": ".erb/dll",
     "rootDir": ".",
     "typeRoots": [
-      "/node_modules/@types",
-      "/src/contracts"
+      "./node_modules/@types",
+      "./src/contracts"
     ],
     "paths": {
       "Main/*": [

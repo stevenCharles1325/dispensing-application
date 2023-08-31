@@ -1,12 +1,13 @@
 // import react from 'react';
 
 import { Box, Button, Card, Divider, Typography } from '@mui/material';
+import { useEffect } from 'react';
 import Header from 'renderer/components/Headers';
 import SideBar from 'renderer/components/Navigations/SideBar';
 import tabs from 'renderer/enums/SideBarTabs';
 import useAppNavigation from 'renderer/stores/navigation';
 
-function Home() {
+function Home({ data, peerRequest }) {
   const [navBarOpen, toggleNavBar] = useAppNavigation((state) => [
     state.navBarOpen,
     state.toggleNavBar,
@@ -33,6 +34,31 @@ function Home() {
 
     console.log(response);
   };
+
+  const requestCreateUser = async () => {
+    const response = await peerRequest({
+      systemKey: '123',
+      type: 'request',
+      request: {
+        name: 'user:create',
+        body: {
+          first_name: 'jose',
+          last_name: 'manalo',
+          birth_date: new Date(),
+          address: 'saan',
+          email: 'johndiwz@gmail.com',
+          password: 'passWORD123@@@',
+          phone_number: '+639454610579',
+        },
+      },
+    });
+
+    console.log('PEER-RESPONSE: ', response);
+  };
+
+  useEffect(() => {
+    console.log('PEER-DATA: ', data);
+  }, [data]);
 
   return (
     <div className="w-full h-full bg-transparent">
@@ -68,6 +94,7 @@ function Home() {
         </Box>
         <Button onClick={signin}>Sign In</Button>
         <Button onClick={createUser}>Sample</Button>
+        <Button onClick={requestCreateUser}>Sample Peer</Button>
       </div>
     </div>
   );

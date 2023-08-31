@@ -9,6 +9,7 @@ import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import { dependencies } from '../../package.json';
 import checkNodeEnv from '../scripts/check-node-env';
+import dotenv from 'dotenv';
 
 checkNodeEnv('development');
 
@@ -60,6 +61,7 @@ const configuration: webpack.Configuration = {
      */
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
+      ...dotenv.config().parsed,
     }),
 
     new webpack.LoaderOptionsPlugin({

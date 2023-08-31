@@ -11,7 +11,7 @@ import { join } from 'path';
 import objectToFlattenArray from './app/modules/object-to-flatten-array';
 import objectToFlattenObject from './app/modules/object-to-flatten-object';
 import requireAll from './app/modules/require-all';
-import EventContract from './contracts/event-contract';
+import EventContract, { Listener } from './contracts/event-contract';
 import StorageContract from './contracts/storage-contract';
 import { ALSStorage } from './stores';
 
@@ -20,10 +20,10 @@ const middlewareObject = requireAll(join(__dirname, 'app/middlewares'), true);
 
 function applyMiddleware(
   _middlewares: any[],
-  eventListener: any,
+  eventListener: Listener,
   storage: StorageContract
 ) {
-  return async (e: IpcMainInvokeEvent, ...args: any[]) => {
+  return async (event: IpcMainInvokeEvent, ...args: any[]) => {
     let nextIndex = 0;
 
     const next = async () => {
@@ -31,10 +31,10 @@ function applyMiddleware(
         console.log('Middleware has been applied.');
         const currentMiddleware = _middlewares[nextIndex];
         nextIndex++;
-        await currentMiddleware({ event: e, eventArgs: args, next });
+        await currentMiddleware({ event, eventArgs: args, next });
       } else {
         // All middlewares executed, call the final event listener
-        return eventListener({ event: e, eventArgs: args, storage });
+        return eventListener({ event, eventArgs: args, storage });
       }
     };
 
@@ -53,6 +53,8 @@ export default function () {
     const flattenEvents = objectToFlattenArray(eventsObject);
     const storage = ALSStorage();
 
+    const events: Record<string, Listener> = {};
+
     flattenEvents.forEach((eventInfo) => {
       const [_, EventClass] = eventInfo;
 
@@ -66,7 +68,10 @@ export default function () {
       const listener = applyMiddleware(middlewareList, event.listener, storage);
       console.log('Initializing event channel: ', event.channel);
 
+      events[event.channel] = listener as unknown as Listener;
       ipcMain.handle(event.channel, listener);
     });
+
+    storage.set('POS_EVENTS', events);
   }
 }

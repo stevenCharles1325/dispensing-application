@@ -8,7 +8,7 @@ export interface EventListenerPropertiesContract {
   storage: StorageContract;
 }
 
-type Listener = (
+export type Listener = (
   event: EventListenerPropertiesContract
 ) => Promise<ResponseContract | any>;
 

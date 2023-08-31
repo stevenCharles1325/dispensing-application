@@ -4,18 +4,17 @@ import ResponseContract from 'Main/contracts/response-contract';
 export {};
 
 declare global {
+  type DataActions = 'show' | 'create' | 'update' | 'delete' | 'archive';
+
   interface PeerDataContract {
     systemKey: string;
-    authToken: string;
-    type:
-      | 'handshake:request'
-      | 'handshake:response'
-      | 'data:request'
-      | 'data:response';
-    request?: {
-      type: `data:${ModelNames}`;
-      query: string;
-    };
-    response?: ResponseContract;
+    type: 'request' | 'response';
+    request?:
+      | {
+          name: `${ModelNames}:${DataActions}`;
+          body: any;
+        }
+      | undefined;
+    response?: ResponseContract | undefined;
   }
 }
