@@ -16,7 +16,7 @@ const useConnection = () => {
   const requestPeerData = (data: Record<string, any>) => {
     if (!data) return;
 
-    spw.send(JSON.stringify(data));
+    spw.send(data);
   };
 
   useEffect(() => {
@@ -27,9 +27,8 @@ const useConnection = () => {
         console.log(data);
         // eslint-disable-next-line no-undef
         const parsed: PeerDataContract = data.data;
-        console.log(parsed);
         window.electron.ipcRenderer
-          .peerRequest(parsed, spw)
+          .peerRequest(parsed)
           .then((response) => {
             console.log('RESPONSE: ', response);
             // setRequestedData(response);

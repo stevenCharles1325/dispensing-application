@@ -54,7 +54,7 @@ export default class PeerRequestEvent implements EventContract {
         response,
         // eslint-disable-next-line no-undef
       } as PeerDataContract;
-      peer.send(JSON.stringify(payload));
+      peer.send(payload);
 
       return {
         data: payload,

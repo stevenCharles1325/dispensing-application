@@ -27,8 +27,8 @@ const electronHandler = {
 
     // Connection to TURN server to start P2P connection
     // eslint-disable-next-line no-undef
-    peerRequest: async (payload: PeerDataContract, spw?: any) =>
-      ipcRenderer.invoke('peer:request', payload, spw),
+    peerRequest: async (payload: PeerDataContract) =>
+      ipcRenderer.invoke('peer:request', payload),
     // -------------- END POS FUNCTIONS --------------
 
     // MAIN FUNCTIONS
