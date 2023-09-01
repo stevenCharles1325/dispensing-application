@@ -5,12 +5,23 @@ import Home from './screens/authenticated/Home';
 import './styles/global.css';
 
 export default function App() {
-  /*
-    IMPORTANT NOTE:
-      - This checks if the connection is established
-        to get the TURN server's credentials
-  */
-  const [data, peerRequest] = useConnection();
+  // Peer data Connection
+  const { data, close, requestPeerData } = useConnection();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    requestPeerData({
+      systemKey: '',
+      type: 'request',
+      request: {
+        name: 'peer:link',
+      },
+    });
+
+    return () => {
+      close();
+    };
+  }, []);
 
   return (
     <Router>
@@ -18,7 +29,7 @@ export default function App() {
         <Routes>
           <Route
             path="/"
-            element={<Home data={data} peerRequest={peerRequest} />}
+            element={<Home data={data} peerRequest={requestPeerData} />}
           />
         </Routes>
       </div>

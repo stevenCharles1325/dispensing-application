@@ -1,3 +1,3 @@
-type ModelNames = 'permission' | 'role' | 'user';
+type ModelNames = 'permission' | 'role' | 'user' | 'peer';
 
 export default ModelNames;

@@ -15,7 +15,6 @@ export default class PeerRequestEvent implements EventContract {
     try {
       // eslint-disable-next-line no-undef
       const data: PeerDataContract = eventArgs[0];
-      const peer: any = eventArgs[1];
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
       const availableEvents = [
@@ -45,7 +44,6 @@ export default class PeerRequestEvent implements EventContract {
         storage,
       });
 
-      console.log(response);
       const payload = {
         systemKey: data.systemKey,
         type: 'response',

@@ -1,10 +1,14 @@
 import ModelNames from 'Main/contracts/open-data-contract';
 import ResponseContract from 'Main/contracts/response-contract';
 
-export {};
-
 declare global {
-  type DataActions = 'show' | 'create' | 'update' | 'delete' | 'archive';
+  type DataActions =
+    | 'show'
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'archive'
+    | 'link';
 
   interface PeerDataContract {
     systemKey: string;
@@ -12,9 +16,11 @@ declare global {
     request?:
       | {
           name: `${ModelNames}:${DataActions}`;
-          body: any;
+          body?: any;
         }
       | undefined;
     response?: ResponseContract | undefined;
   }
 }
+
+export {};

@@ -10,10 +10,11 @@ const options = {
 const spw = new SimplePeerWrapper(options);
 
 const useConnection = () => {
-  console.log('OPTIONS: ', options);
   const [requestedData, setRequestedData] = useState<any | null>(null);
+  const [error, setError] = useState<any | null>(null);
 
-  const requestPeerData = (data: Record<string, any>) => {
+  // eslint-disable-next-line no-undef
+  const requestPeerData = (data: PeerDataContract) => {
     if (!data) return;
 
     spw.send(data);
@@ -32,12 +33,10 @@ const useConnection = () => {
         } else {
           window.electron.ipcRenderer
             .peerRequest(payload)
-            .then((response) => {
-              console.log('RESPONSE: ', response);
-              spw.send(response.data);
-            })
-            .catch((error) => {
-              console.log(error);
+            .then((response) => requestPeerData(response.data))
+            .catch((err) => {
+              console.log('Error: ', err);
+              setError(err);
             });
         }
       } else {
@@ -45,12 +44,20 @@ const useConnection = () => {
       }
     });
 
-    spw.on('error', (err: any) => console.log('Error: ', err));
+    spw.on('error', (err: any) => {
+      console.log('Error: ', err);
+      setError(err);
+    });
 
     return () => spw.close();
   }, []);
 
-  return [requestedData, requestPeerData];
+  return {
+    data: requestedData,
+    error,
+    close: spw.close,
+    requestPeerData,
+  };
 };
 
 export default useConnection;
