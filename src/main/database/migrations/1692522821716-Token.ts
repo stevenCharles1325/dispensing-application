@@ -20,7 +20,7 @@ export class Token1692522821716 implements MigrationInterface {
           },
           {
             name: 'user_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'user',
           },

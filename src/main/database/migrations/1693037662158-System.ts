@@ -7,7 +7,7 @@ export class System1693037662158 implements MigrationInterface {
         name: 'systems',
         columns: [
           {
-            name: 'uuid',
+            name: 'id',
             type: 'varchar',
             generationStrategy: 'uuid',
             isPrimary: true,
@@ -20,7 +20,7 @@ export class System1693037662158 implements MigrationInterface {
             default: false,
           },
           {
-            name: 'main_branch_uuid',
+            name: 'main_branch_id',
             type: 'varchar',
             isNullable: true,
           },
