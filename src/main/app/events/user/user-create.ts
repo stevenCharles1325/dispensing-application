@@ -17,27 +17,41 @@ export default class UserCreateEvent implements EventContract {
       const authUser = storage.get('POS_AUTH_USER') as User;
       const hasPermission = authUser.hasPermission('create-user');
 
-      if (hasPermission) {
-        const user = UserRepository.create(eventArgs[0]);
-        const errors = await validator(user);
-        if (errors && errors.length) {
-          return {
-            errors,
-            status: 'ERROR',
-          };
-        }
-
-        const data = await UserRepository.save(user);
+      const user = UserRepository.create(eventArgs[0]);
+      const errors = await validator(user);
+      if (errors && errors.length) {
         return {
-          data,
-          status: 'SUCCESS',
+          errors,
+          status: 'ERROR',
         };
       }
 
+      const data = await UserRepository.save(user);
       return {
-        errors: ['You are not allowed to create a User'],
-        status: 'ERROR',
+        data,
+        status: 'SUCCESS',
       };
+      // if (hasPermission) {
+      //   const user = UserRepository.create(eventArgs[0]);
+      //   const errors = await validator(user);
+      //   if (errors && errors.length) {
+      //     return {
+      //       errors,
+      //       status: 'ERROR',
+      //     };
+      //   }
+
+      //   const data = await UserRepository.save(user);
+      //   return {
+      //     data,
+      //     status: 'SUCCESS',
+      //   };
+      // }
+
+      // return {
+      //   errors: ['You are not allowed to create a User'],
+      //   status: 'ERROR',
+      // };
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);

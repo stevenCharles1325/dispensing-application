@@ -24,18 +24,22 @@ const useConnection = () => {
 
     spw.on('data', (data: Record<string, any>) => {
       if (spw.isConnectionStarted()) {
-        console.log(data);
         // eslint-disable-next-line no-undef
-        const parsed: PeerDataContract = data.data;
-        window.electron.ipcRenderer
-          .peerRequest(parsed)
-          .then((response) => {
-            console.log('RESPONSE: ', response);
-            // setRequestedData(response);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        const payload: PeerDataContract = data.data;
+
+        if (payload.type === 'response') {
+          setRequestedData(data.data);
+        } else {
+          window.electron.ipcRenderer
+            .peerRequest(payload)
+            .then((response) => {
+              console.log('RESPONSE: ', response);
+              spw.send(response.data);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       } else {
         console.log('Connection has not started yet.');
       }
