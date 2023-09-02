@@ -9,6 +9,7 @@ import PermissionContract from 'Main/contracts/permission-contract';
 import { User } from '../models/User';
 import { Role } from '../models/Role';
 import { Permission } from '../models/Permission';
+import { System } from '../models/System';
 
 const roles = requireAll(`${__dirname}/../../data/defaults/roles`, true);
 
@@ -17,6 +18,12 @@ export default class MainSeeder implements Seeder {
     const PermissionRepo = dataSource.getRepository(Permission);
     const RoleRepo = dataSource.getRepository(Role);
     const UserRepo = dataSource.getRepository(User);
+    const SystemRepo = dataSource.getRepository(System);
+
+    await SystemRepo.save({
+      is_branch: false,
+      store_name: 'sari-sari store',
+    });
 
     const createdPermissions = PermissionRepo.create(
       permissions as unknown as Array<Partial<Permission>>
