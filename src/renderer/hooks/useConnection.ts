@@ -6,7 +6,7 @@ const options = {
   serverUrl: process.env.SIGNALING_SERVER_URL,
   debug: true,
   simplePeerOptions: {
-    channelName: process.env.PEER_CHANNEL_NAME,
+    initiator: true,
   },
 };
 
@@ -20,13 +20,20 @@ const useConnection = () => {
   >('PENDING');
 
   // eslint-disable-next-line no-undef
-  const requestPeerData = (data: Partial<PeerDataContract>) => {
+  const requestPeerData = async (data: Partial<PeerDataContract>) => {
     if (!data) return;
 
-    spw.send({
-      systemKey: process.env.SYSTEM_KEY,
-      ...data,
-    });
+    const response = await window.electron.ipcRenderer.authMe();
+
+    if (response.status === 'SUCCESS') {
+      spw.send({
+        systemKey: process.env.SYSTEM_KEY,
+        user: response.data,
+        ...data,
+      });
+    } else {
+      setError('Unauthenticated user. Please try to login');
+    }
   };
 
   useEffect(() => {
@@ -65,7 +72,7 @@ const useConnection = () => {
 
         if (payload.type === 'response') {
           if (payload!.response!.name === 'peer:sync') {
-            if (payload!.response?.body.status === 'SUCCESS') {
+            if (payload!.response?.body?.status === 'SUCCESS') {
               setSyncStatus('SUCCEEDED');
 
               // Save to database
@@ -98,6 +105,7 @@ const useConnection = () => {
     });
 
     return () => spw.close();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

@@ -15,7 +15,7 @@ export default function App() {
         systemKey: process.env.SYSTEM_KEY || null,
         type: 'request',
         request: {
-          name: 'peer:link',
+          name: 'peer:sync',
         },
       });
     }
