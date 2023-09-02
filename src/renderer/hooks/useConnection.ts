@@ -5,6 +5,9 @@ const SimplePeerWrapper = require('simple-peer-wrapper');
 const options = {
   serverUrl: process.env.SIGNALING_SERVER_URL,
   debug: true,
+  simplePeerOptions: {
+    channelName: process.env.PEER_CHANNEL_NAME,
+  },
 };
 
 const spw = new SimplePeerWrapper(options);
