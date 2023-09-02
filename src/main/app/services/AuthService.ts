@@ -15,6 +15,8 @@ import { ALSStorage } from 'Main/stores';
 import { SqliteDataSource } from 'Main/datasource';
 import { Token } from 'Main/database/models/Token';
 import handleError from '../modules/error-handler';
+import UserContract from 'Main/contracts/user-contract';
+import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 
 export default class AuthService {
   private readonly AUTH_USER = 'POS_AUTH_USER';
@@ -214,5 +216,14 @@ export default class AuthService {
       errors: ['User is not authenticated'],
       status: 'ERROR',
     };
+  }
+
+  public hasPermission(
+    user: UserContract,
+    ...permission: PermissionsKebabType[]
+  ) {
+    return user.role!.permissions!.some(({ kebab }) =>
+      permission.includes(kebab as PermissionsKebabType)
+    );
   }
 }

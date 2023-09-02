@@ -1,3 +1,5 @@
+import RoleContract from './role-contract';
+
 export default interface UserContract {
   first_name: string;
 
@@ -14,4 +16,8 @@ export default interface UserContract {
   password: string;
 
   lead_id?: number;
+
+  role_id?: number;
+
+  role?: RoleContract;
 }

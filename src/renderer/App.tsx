@@ -10,18 +10,20 @@ export default function App() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    requestPeerData({
-      systemKey: '',
-      type: 'request',
-      request: {
-        name: 'peer:link',
-      },
-    });
+    if (requestPeerData) {
+      requestPeerData({
+        systemKey: process.env.SYSTEM_KEY || null,
+        type: 'request',
+        request: {
+          name: 'peer:link',
+        },
+      });
+    }
 
     return () => {
-      close();
+      if (close) close();
     };
-  }, []);
+  }, [close, requestPeerData]);
 
   return (
     <Router>

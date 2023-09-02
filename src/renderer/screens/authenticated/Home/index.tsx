@@ -37,7 +37,6 @@ function Home({ data, peerRequest }) {
 
   const requestCreateUser = async () => {
     const response = await peerRequest({
-      systemKey: '123',
       type: 'request',
       request: {
         name: 'user:create',

@@ -18,13 +18,18 @@ export default class PeerRequestEvent implements EventContract {
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
       const availableEvents = [
-        'peer:request',
+        'peer:connect',
         'auth:sign-in',
         'auth:sign-up',
         'auth:sign-out',
       ];
 
       if (data.type === 'response') return null;
+      if (data.systemKey !== process.env.SYSTEM_KEY)
+        return {
+          errors: ['Invalid system-key'],
+          status: 'ERROR',
+        };
       if (!data.request?.name)
         return {
           errors: ['You must provide request name if this is a Request type'],
@@ -45,9 +50,12 @@ export default class PeerRequestEvent implements EventContract {
       });
 
       const payload = {
-        systemKey: data.systemKey,
+        systemKey: process.env.SYSTEM_KEY,
         type: 'response',
-        response,
+        response: {
+          name: data.request.name,
+          body: response,
+        },
         // eslint-disable-next-line no-undef
       } as PeerDataContract;
 

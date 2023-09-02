@@ -1,5 +1,6 @@
 import ModelNames from 'Main/contracts/open-data-contract';
 import ResponseContract from 'Main/contracts/response-contract';
+import UserContract from 'Main/contracts/user-contract';
 
 declare global {
   type DataActions =
@@ -8,18 +9,24 @@ declare global {
     | 'update'
     | 'delete'
     | 'archive'
-    | 'link';
+    | 'sync';
 
   interface PeerDataContract {
-    systemKey: string;
+    systemKey: string | null;
     type: 'request' | 'response';
+    user: UserContract;
     request?:
       | {
           name: `${ModelNames}:${DataActions}`;
           body?: any;
         }
       | undefined;
-    response?: ResponseContract | undefined;
+    response?:
+      | {
+          name: `${ModelNames}:${DataActions}`;
+          body?: any;
+        }
+      | undefined;
   }
 }
 
