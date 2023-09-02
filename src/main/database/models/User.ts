@@ -27,6 +27,7 @@ import {
 import { Role } from './Role';
 import RoleRepository from 'Main/app/repositories/Role-repository';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
+import SystemRepository from 'Main/app/repositories/System-repository';
 
 const messages = {
   length: 'Length must be $constraint1',
@@ -58,6 +59,11 @@ export class User {
     nullable: true,
   })
   lead_id: number;
+
+  @Column({
+    nullable: true,
+  })
+  system_id: string;
 
   @Column()
   role_id: number;
@@ -171,6 +177,17 @@ export class User {
       });
 
       this.role_id = cashierRole.id;
+    }
+  }
+
+  @BeforeInsert()
+  async setSystemId() {
+    if (!this.system_id) {
+      const thisSystem = await SystemRepository.createQueryBuilder()
+        .where('id = main_branch_id')
+        .getOneOrFail();
+
+      this.system_id = thisSystem.id;
     }
   }
 }

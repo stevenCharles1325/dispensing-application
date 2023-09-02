@@ -26,6 +26,12 @@ export class User1692175684026 implements MigrationInterface {
             foreignKeyConstraintName: 'lead',
           },
           {
+            name: 'system_id',
+            type: '',
+            isNullable: true,
+            foreignKeyConstraintName: 'lead',
+          },
+          {
             name: 'role_id',
             type: 'int',
             isNullable: true,

@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/prefer-default-export */
 import {
   Column,
   Entity,
@@ -7,33 +5,9 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import {
-  ValidationArguments,
-} from 'class-validator';
 
-const messages = {
-  length: 'Length must be $constraint1',
-  minLength: 'Length must be at least $constraint1',
-  lengthWithMax: 'Length must be between $constraint1 to $constraint2',
-  email: 'Email is invalid',
-  unique: 'Already taken',
-  date: 'Invalid date',
-  mobileNumber: 'Invalid PH mobile number',
-  password: (args: ValidationArguments) => {
-    const { minLength, minNumbers, minLowercase, minUppercase, minSymbols } =
-      args.constraints[0];
-
-    return (
-      `Password must be at least ${minLength} ` +
-      `characters containing ${minNumbers} numbers, ` +
-      `${minLowercase} lowercases, ${minUppercase} uppercases, ` +
-      `and ${minSymbols} symbols`
-    );
-  },
-};
-
-@Entity('users')
-export class User {
+@Entity('systems')
+export class System {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

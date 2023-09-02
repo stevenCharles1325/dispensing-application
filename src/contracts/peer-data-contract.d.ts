@@ -13,6 +13,7 @@ declare global {
 
   interface PeerDataContract {
     systemKey: string | null;
+    systemId: string;
     type: 'request' | 'response';
     user: UserContract;
     request?:
@@ -24,7 +25,7 @@ declare global {
     response?:
       | {
           name: `${ModelNames}:${DataActions}`;
-          body?: any;
+          body?: ResponseContract;
         }
       | undefined;
   }
