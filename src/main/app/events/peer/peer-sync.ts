@@ -1,6 +1,5 @@
 import Provider from '@IOC:Provider';
 import handleError from 'Main/app/modules/error-handler';
-import UserRepository from 'Main/app/repositories/User-repository';
 import AuthService from 'Main/app/services/AuthService';
 import EventContract, {
   EventListenerPropertiesContract,
