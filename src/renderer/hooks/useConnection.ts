@@ -50,9 +50,11 @@ const useConnection = () => {
     spw.on('data', (data: Record<string, any>) => {
       if (spw.isConnectionStarted()) {
         if (syncStatus === 'FAILED') {
-          return setError(
+          setError(
             'You cannot request for peer data as synchronization has failed. Try restarting the system.'
           );
+
+          return;
         }
 
         // eslint-disable-next-line no-undef
