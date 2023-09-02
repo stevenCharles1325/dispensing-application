@@ -70,6 +70,7 @@ const useConnection = () => {
             } else {
               setSyncStatus('FAILED');
               setError('Failed to sync with peer systems');
+              return;
             }
           }
 
