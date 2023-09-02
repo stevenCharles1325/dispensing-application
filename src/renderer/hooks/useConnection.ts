@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 const SimplePeerWrapper = require('simple-peer-wrapper');
 
@@ -15,25 +15,47 @@ const spw = new SimplePeerWrapper(options);
 const useConnection = () => {
   const [requestedData, setRequestedData] = useState<any | null>(null);
   const [error, setError] = useState<any | null>(null);
+  const [user, setUser] = useState<Record<string, any> | null>(null);
   const [syncStatus, setSyncStatus] = useState<
     'PENDING' | 'SUCCEEDED' | 'FAILED'
   >('PENDING');
+
+  const peerDataTemplate = useMemo(
+    () => ({
+      systemKey: process.env.SYSTEM_KEY,
+      user,
+    }),
+    [user]
+  );
 
   // eslint-disable-next-line no-undef
   const requestPeerData = async (data: Partial<PeerDataContract>) => {
     if (!data) return;
 
+    const payload = { ...peerDataTemplate, ...data };
+
+    if (payload.user) {
+      spw.send(payload);
+    }
+  };
+
+  const trySync = async () => {
+    console.log('[PEER-SYSTEM]: Synching data...');
     const response = await window.electron.ipcRenderer.authMe();
 
-    if (response.status === 'SUCCESS') {
-      spw.send({
-        systemKey: process.env.SYSTEM_KEY,
-        user: response.data,
-        ...data,
-      });
-    } else {
-      setError('Unauthenticated user. Please try to login');
+    if (response.status === 'ERROR') {
+      setError(response.errors[0]);
+      setSyncStatus('FAILED');
+      return;
     }
+
+    setUser(response.data);
+    requestPeerData({
+      type: 'request',
+      request: {
+        name: 'peer:sync',
+      },
+    });
   };
 
   useEffect(() => {
@@ -41,23 +63,12 @@ const useConnection = () => {
 
     // Sync data when connection is established
     spw.on('connect', async () => {
-      console.log('[PEER-SYSTEM]: Synching data...');
-      const response = await window.electron.ipcRenderer.authMe();
-
-      if (response.status === 'ERROR') {
-        setError(response.errors[0]);
-      }
-
-      requestPeerData({
-        type: 'request',
-        user: response.data,
-        request: {
-          name: 'peer:sync',
-        },
-      });
+      console.log('HERE AT CONNECT');
+      await trySync();
     });
 
     spw.on('data', (data: Record<string, any>) => {
+      console.log('HERE AT DATA');
       if (spw.isConnectionStarted()) {
         if (syncStatus === 'FAILED') {
           setError(
@@ -73,15 +84,25 @@ const useConnection = () => {
         if (payload.type === 'response') {
           if (payload!.response!.name === 'peer:sync') {
             if (payload!.response?.body?.status === 'SUCCESS') {
+              console.log('[PEER-SYSTEM]: Synching data succeeded');
               setSyncStatus('SUCCEEDED');
 
               // Save to database
-              // Each table must have a new column `system_id`
-            } else {
-              setSyncStatus('FAILED');
-              setError('Failed to sync with peer systems');
+              requestPeerData({
+                type: 'response',
+                response: {
+                  name: 'peer:sync',
+                  body: payload!.response?.body?.data,
+                },
+              });
+
               return;
             }
+
+            console.log('[PEER-SYSTEM]: Synching data failed');
+            setSyncStatus('FAILED');
+            setError('Failed to sync with peer systems');
+            return;
           }
 
           setRequestedData(data.data);
@@ -111,6 +132,7 @@ const useConnection = () => {
   return {
     data: requestedData,
     error,
+    trySync,
     close: spw.close,
     requestPeerData,
   };

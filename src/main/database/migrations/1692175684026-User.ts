@@ -14,8 +14,8 @@ export class User1692175684026 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'varchar',
-            generationStrategy: 'uuid',
+            type: 'integer',
+            generationStrategy: 'increment',
             isPrimary: true,
             isGenerated: true,
           },
@@ -27,9 +27,8 @@ export class User1692175684026 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: '',
+            type: 'varchar',
             isNullable: true,
-            foreignKeyConstraintName: 'lead',
           },
           {
             name: 'role_id',

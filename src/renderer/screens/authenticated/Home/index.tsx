@@ -7,7 +7,7 @@ import SideBar from 'renderer/components/Navigations/SideBar';
 import tabs from 'renderer/enums/SideBarTabs';
 import useAppNavigation from 'renderer/stores/navigation';
 
-function Home({ data, peerRequest }) {
+function Home({ data, trySync, peerRequest }) {
   const [navBarOpen, toggleNavBar] = useAppNavigation((state) => [
     state.navBarOpen,
     state.toggleNavBar,
@@ -18,6 +18,8 @@ function Home({ data, peerRequest }) {
       email: 'johndoe123@gmail.com',
       password: 'passWORD123@@@',
     });
+
+    trySync();
     console.log(response);
   };
 

@@ -185,9 +185,11 @@ export class User {
     if (!this.system_id) {
       const thisSystem = await SystemRepository.createQueryBuilder()
         .where('id = main_branch_id')
-        .getOneOrFail();
+        .getOne();
 
-      this.system_id = thisSystem.id;
+      if (thisSystem) {
+        this.system_id = thisSystem.id;
+      }
     }
   }
 }

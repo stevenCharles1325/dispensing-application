@@ -20,9 +20,15 @@ export default class MainSeeder implements Seeder {
     const UserRepo = dataSource.getRepository(User);
     const SystemRepo = dataSource.getRepository(System);
 
-    await SystemRepo.save({
+    const _system = SystemRepo.create({
       is_branch: false,
       store_name: 'sari-sari store',
+    });
+
+    const system = await SystemRepo.save(_system);
+    await SystemRepo.save({
+      ...system,
+      main_branch_id: system.id,
     });
 
     const createdPermissions = PermissionRepo.create(

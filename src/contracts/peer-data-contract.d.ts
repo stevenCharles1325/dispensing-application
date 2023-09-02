@@ -13,7 +13,6 @@ declare global {
 
   interface PeerDataContract {
     systemKey: string | null;
-    systemId: string;
     type: 'request' | 'response';
     user: UserContract;
     request?:

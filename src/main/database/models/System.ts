@@ -1,7 +1,7 @@
 import {
   Column,
   Entity,
-  AfterInsert,
+  BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
@@ -35,11 +35,4 @@ export class System {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @AfterInsert()
-  checkMainBranch() {
-    if (!this.is_branch) {
-      this.main_branch_id = this.id;
-    }
-  }
 }

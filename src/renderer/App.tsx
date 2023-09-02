@@ -6,7 +6,7 @@ import './styles/global.css';
 
 export default function App() {
   // Peer data Connection
-  const { data, close, requestPeerData } = useConnection();
+  const { data, close, error, trySync, requestPeerData } = useConnection();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -23,7 +23,12 @@ export default function App() {
     return () => {
       if (close) close();
     };
-  }, [close, requestPeerData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    console.log(error);
+  }, [error]);
 
   return (
     <Router>
@@ -31,7 +36,13 @@ export default function App() {
         <Routes>
           <Route
             path="/"
-            element={<Home data={data} peerRequest={requestPeerData} />}
+            element={
+              <Home
+                data={data}
+                trySync={trySync}
+                peerRequest={requestPeerData}
+              />
+            }
           />
         </Routes>
       </div>
