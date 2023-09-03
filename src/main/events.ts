@@ -23,7 +23,13 @@ function applyMiddleware(
   eventListener: Listener,
   storage: StorageContract
 ) {
-  return async (event: IpcMainInvokeEvent, ...args: any[]) => {
+  return async ({
+    event,
+    eventArgs,
+  }: {
+    event: IpcMainInvokeEvent;
+    eventArgs: any[];
+  }) => {
     let nextIndex = 0;
 
     const next = async () => {
@@ -31,10 +37,10 @@ function applyMiddleware(
         console.log('Middleware has been applied.');
         const currentMiddleware = _middlewares[nextIndex];
         nextIndex++;
-        await currentMiddleware({ event, eventArgs: args, next });
+        await currentMiddleware({ event, eventArgs, next });
       } else {
         // All middlewares executed, call the final event listener
-        return eventListener({ event, eventArgs: args, storage });
+        return eventListener({ event, eventArgs, storage });
       }
     };
 
@@ -69,7 +75,9 @@ export default function () {
       console.log('Initializing event channel: ', event.channel);
 
       events[event.channel] = listener as unknown as Listener;
-      ipcMain.handle(event.channel, listener);
+      ipcMain.handle(event.channel, (e, ...args) =>
+        listener({ event: e, eventArgs: args })
+      );
     });
 
     storage.set('POS_EVENTS', events);

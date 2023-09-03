@@ -10,6 +10,7 @@ export default class AuthSignIn implements EventContract {
 
   public async listener({ eventArgs }: EventListenerPropertiesContract) {
     try {
+      console.log(eventArgs);
       const { email, password } = eventArgs[0];
       const authService = Provider.ioc<AuthService>('AuthProvider');
 

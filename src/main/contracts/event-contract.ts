@@ -9,7 +9,7 @@ export interface EventListenerPropertiesContract {
 }
 
 export type Listener = (
-  event: EventListenerPropertiesContract
+  props: EventListenerPropertiesContract
 ) => Promise<ResponseContract | any>;
 
 export default interface EventContract {

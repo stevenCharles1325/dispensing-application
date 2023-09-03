@@ -33,7 +33,7 @@ function Home({ data, trySync, setUser, peerRequest }) {
         },
       });
 
-      if (peerResponse.status === 'SUCCESS') {
+      if (peerResponse.body.status === 'SUCCESS') {
         setUser(peerResponse.data);
       }
 

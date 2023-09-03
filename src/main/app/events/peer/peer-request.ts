@@ -17,6 +17,7 @@ export default class PeerRequestEvent implements EventContract {
       const data: PeerDataContract = eventArgs[0];
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
+      console.log(data);
       const unavailableEvents = [
         'peer:connect',
         'auth:sign-up',
