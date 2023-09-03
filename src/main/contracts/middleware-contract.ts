@@ -1,6 +1,6 @@
-import { IpcMainInvokeEvent } from "electron";
-import ResponseContract from "./response-contract";
-import StorageContract from "./storage-contract";
+import { IpcMainInvokeEvent } from 'electron';
+import ResponseContract from './response-contract';
+import StorageContract from './storage-contract';
 
 export interface MiddlewarePropertiesContract extends IpcMainInvokeEvent {
   event: IpcMainInvokeEvent;
@@ -9,4 +9,6 @@ export interface MiddlewarePropertiesContract extends IpcMainInvokeEvent {
   next: () => void;
 }
 
-export type MiddlewareContract = (props: MiddlewarePropertiesContract) => ResponseContract;
+export type MiddlewareContract = (
+  props: MiddlewarePropertiesContract
+) => ResponseContract | void;

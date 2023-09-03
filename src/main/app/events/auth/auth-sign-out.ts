@@ -3,8 +3,8 @@ import EventContract from 'Main/contracts/event-contract';
 import Provider from '@IOC:Provider';
 import AuthService from 'Main/app/services/AuthService';
 
-export default class AuthSignUpEvent implements EventContract {
-  public channel: string = 'auth:sign-up';
+export default class AuthSignOutEvent implements EventContract {
+  public channel: string = 'auth:sign-out';
 
   public middlewares = ['auth-middleware'];
 

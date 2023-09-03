@@ -8,6 +8,8 @@ import { User } from 'Main/database/models/User';
 export default class UserArchiveEvent implements EventContract {
   public channel: string = 'user:archive';
 
+  public middlewares = ['auth-middleware'];
+
   public async listener({
     eventArgs,
     storage,

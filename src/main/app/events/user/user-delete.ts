@@ -8,6 +8,8 @@ import { User } from 'Main/database/models/User';
 export default class UserDeleteEvent implements EventContract {
   public channel: string = 'user:delete';
 
+  public middlewares = ['auth-middleware'];
+
   public async listener({
     eventArgs,
     storage,

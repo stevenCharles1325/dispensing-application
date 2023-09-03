@@ -18,7 +18,7 @@ export default class PeerRequestEvent implements EventContract {
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
       const unavailableEvents = [
-        'peer:connect',
+        'peer:sync',
         'auth:sign-in',
         'auth:sign-up',
         'auth:sign-out',

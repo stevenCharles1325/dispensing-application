@@ -1,4 +1,5 @@
 import handleError from 'Main/app/modules/error-handler';
+import AuthContract from 'Main/contracts/auth-contract';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
@@ -9,7 +10,7 @@ export default class AuthMe implements EventContract {
 
   public async listener({ storage }: EventListenerPropertiesContract) {
     try {
-      const authUser = storage.get('POS_AUTH_USER_TOKEN') as User;
+      const authUser = storage.get('POS_AUTH_USER_TOKEN') as AuthContract<User>;
 
       if (authUser) {
         return {
