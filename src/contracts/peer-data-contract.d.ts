@@ -15,7 +15,7 @@ declare global {
   interface PeerDataContract {
     systemKey: string | null;
     type: 'request' | 'response';
-    user: UserContract;
+    token: string;
     request?:
       | {
           name: `${DataName}:${DataActions}`;

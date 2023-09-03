@@ -6,11 +6,17 @@ import Header from 'renderer/components/Headers';
 import SideBar from 'renderer/components/Navigations/SideBar';
 import tabs from 'renderer/enums/SideBarTabs';
 import useAppNavigation from 'renderer/stores/navigation';
+import useUser from 'renderer/stores/user';
 
-function Home({ data, trySync, setUser, peerRequest }) {
+function Home({ data, trySync, peerRequest }) {
   const [navBarOpen, toggleNavBar] = useAppNavigation((state) => [
     state.navBarOpen,
     state.toggleNavBar,
+  ]);
+
+  const [user, setUser] = useUser((state) => [
+    state,
+    state.setUser,
   ]);
 
   const signin = async () => {
@@ -18,27 +24,14 @@ function Home({ data, trySync, setUser, peerRequest }) {
       email: 'johndoe123@gmail.com',
       password: 'passWORD123@@@',
     });
-    console.log('THIS RESPONSE: ', response);
 
-    if (response.status === 'ERROR') {
-      // Fall back sign-in
-      const peerResponse = await peerRequest({
-        type: 'request',
-        request: {
-          name: 'auth:sign-in',
-          body: {
-            email: 'johndoe123@gmail.com',
-            password: 'passWORD123@@@',
-          },
-        },
-      });
-
-      if (peerResponse.body.status === 'SUCCESS') {
-        setUser(peerResponse.data);
-      }
-
-      console.log('PEER RESP: ', peerResponse);
-    }
+    setUser('first_name', response.data.user.first_name);
+    setUser('last_name', response.data.user.last_name);
+    setUser('full_name', response.data.user.first_name + ' ' + response.data.user.last_name);
+    setUser('email', response.data.user.email);
+    setUser('phone_number', response.data.user.phone_number);
+    setUser('token', response.data.token);
+    setUser('refresh_token', response.data.refresh_token);
 
     await trySync();
   };

@@ -22,28 +22,28 @@ export default class PeerSyncEvent implements EventContract {
     const authService = Provider.ioc<AuthService>('AuthProvider');
     const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
+    const authResponse = authService.verifyToken(data.token);
+
+    if (authResponse.status === 'ERROR') {
+      return {
+        errors: authResponse.errors,
+        status: 'ERROR',
+      }
+    }
+
+    const user = authResponse.data;
     const hasPermission = authService.hasPermission(
-      data.user,
+      user,
       'view-data',
       'download-data'
     );
-
-    const ungatedEvents = [
-      'auth:sign-in',
-      // add more events that is not requiring authentication
-    ];
 
     const syncList = [
       'User',
       // Add more model names in singular form here...
     ].map((tableName: string) => tableName.toLowerCase());
 
-    if (
-      hasPermission ||
-      ungatedEvents.includes(
-        data?.request?.name ?? data?.response?.name ?? 'none'
-      )
-    ) {
+    if (hasPermission) {
       try {
         if (data.type === 'request') {
           const syncItems: Record<string, any> = {};

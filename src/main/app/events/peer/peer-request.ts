@@ -17,9 +17,9 @@ export default class PeerRequestEvent implements EventContract {
       const data: PeerDataContract = eventArgs[0];
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
-      console.log(data);
       const unavailableEvents = [
         'peer:connect',
+        'auth:sign-in',
         'auth:sign-up',
         'auth:sign-out',
         // Add events that are not available
@@ -52,6 +52,7 @@ export default class PeerRequestEvent implements EventContract {
 
       const payload = {
         systemKey: process.env.SYSTEM_KEY,
+        token: data.token,
         type: 'response',
         response: {
           name: data.request.name,

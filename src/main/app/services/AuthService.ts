@@ -124,7 +124,9 @@ export default class AuthService {
             email: user.email,
             first_name: user.first_name,
             last_name: user.last_name,
+            full_name: user.fullName(),
             phone_number: user.phone_number,
+            role: user.role,
           };
 
           const [token, refresh_token] = this.generateToken(user_data);
@@ -174,7 +176,7 @@ export default class AuthService {
 
     if (status === 'SUCCESS') {
       return {
-        data: this.authUser,
+        data: this.store.get(this.AUTH_USER_TOKEN) ?? this.store2.get(this.AUTH_USER_TOKEN),
         status,
       };
     }
@@ -218,8 +220,25 @@ export default class AuthService {
     };
   }
 
+  public verifyToken(token: string): ResponseContract {
+    try {
+      const data = jwt.verify(token, this.config.key) as Partial<UserContract>;
+
+      return {
+        data,
+        status: 'SUCCESS',        
+      }
+    } catch (err) {
+      const error = handleError(err);
+      return {
+        errors: [error],
+        status: 'ERROR', 
+      }
+    }
+  }
+
   public hasPermission(
-    user: UserContract,
+    user: Partial<UserContract>,
     ...permission: PermissionsKebabType[]
   ) {
     return user.role!.permissions!.some(({ kebab }) =>

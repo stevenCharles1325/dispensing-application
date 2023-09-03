@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import useUser from 'renderer/stores/user';
 
 const SimplePeerWrapper = require('simple-peer-wrapper');
 
@@ -14,26 +15,23 @@ const options = {
 const spw = new SimplePeerWrapper(options);
 
 const useConnection = () => {
+  const [authUser, setUser] = useUser(state => [state, state.setUser]);
+
   const [requestedData, setRequestedData] = useState<any | null>(null);
   const [error, setError] = useState<any | null>(null);
-  const [user, setUser] = useState<Record<string, any> | null>(null);
   const [syncStatus, setSyncStatus] = useState<
     'PENDING' | 'SUCCEEDED' | 'FAILED'
   >('PENDING');
-
-  const peerDataTemplate = useMemo(
-    () => ({
-      systemKey: process.env.SYSTEM_KEY,
-      user,
-    }),
-    [user]
-  );
 
   // eslint-disable-next-line no-undef
   const requestPeerData = async (data: Partial<PeerDataContract>) => {
     if (!data) return;
 
-    const payload = { ...peerDataTemplate, ...data };
+    const payload = {
+      systemKey: process.env.SYSTEM_KEY,
+      token: authUser.token ?? '',
+      ...data
+    };
 
     spw.send(payload);
   };
@@ -58,10 +56,17 @@ const useConnection = () => {
       if (response.status === 'ERROR') {
         setError(response.errors[0]);
         setSyncStatus('FAILED');
+
         return;
       }
 
-      setUser(response.data);
+      setUser('first_name', response.data.user.first_name);
+      setUser('last_name', response.data.user.last_name);
+      setUser('full_name', response.data.user.first_name + ' ' + response.data.user.last_name);
+      setUser('email', response.data.user.email);
+      setUser('phone_number', response.data.user.phone_number);
+      setUser('token', response.data.token);
+      setUser('refresh_token', response.data.refresh_token);
 
       console.log('Sync First Attempt');
       await trySync();
@@ -132,7 +137,6 @@ const useConnection = () => {
     data: requestedData,
     error,
     trySync,
-    setUser,
     close: spw.close,
     requestPeerData,
   };

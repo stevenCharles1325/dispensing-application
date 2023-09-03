@@ -26,12 +26,12 @@ export class Token1692522821716 implements MigrationInterface {
           },
           {
             name: 'token',
-            type: 'varchar',
+            type: 'varchar(255)',
             isNullable: false,
           },
           {
             name: 'refresh_token',
-            type: 'varchar',
+            type: 'varchar(255)',
             isNullable: true,
           },
           {
