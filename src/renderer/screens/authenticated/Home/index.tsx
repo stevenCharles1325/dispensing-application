@@ -7,7 +7,7 @@ import SideBar from 'renderer/components/Navigations/SideBar';
 import tabs from 'renderer/enums/SideBarTabs';
 import useAppNavigation from 'renderer/stores/navigation';
 
-function Home({ data, trySync, peerRequest }) {
+function Home({ data, trySync, setUser, peerRequest }) {
   const [navBarOpen, toggleNavBar] = useAppNavigation((state) => [
     state.navBarOpen,
     state.toggleNavBar,
@@ -33,10 +33,14 @@ function Home({ data, trySync, peerRequest }) {
         },
       });
 
+      if (peerResponse.status === 'SUCCESS') {
+        setUser(peerResponse.data);
+      }
+
       console.log('PEER RESP: ', peerResponse);
     }
 
-    trySync();
+    await trySync();
   };
 
   const createUser = async () => {

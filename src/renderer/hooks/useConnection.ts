@@ -35,22 +35,12 @@ const useConnection = () => {
 
     const payload = { ...peerDataTemplate, ...data };
 
-    if (payload.user) {
-      spw.send(payload);
-    }
+    spw.send(payload);
   };
 
   const trySync = async () => {
     console.log('[PEER-SYSTEM]: Synching data...');
-    const response = await window.electron.ipcRenderer.authMe();
 
-    if (response.status === 'ERROR') {
-      setError(response.errors[0]);
-      setSyncStatus('FAILED');
-      return;
-    }
-
-    setUser(response.data);
     requestPeerData({
       type: 'request',
       request: {
@@ -64,12 +54,20 @@ const useConnection = () => {
 
     // Sync data when connection is established
     spw.on('connect', async () => {
-      console.log('HERE AT CONNECT');
+      const response = await window.electron.ipcRenderer.authMe();
+      if (response.status === 'ERROR') {
+        setError(response.errors[0]);
+        setSyncStatus('FAILED');
+        return;
+      }
+
+      setUser(response.data);
+
+      console.log('Sync First Attempt');
       await trySync();
     });
 
     spw.on('data', (data: Record<string, any>) => {
-      console.log('HERE AT DATA');
       if (spw.isConnectionStarted()) {
         if (syncStatus === 'FAILED') {
           setError(
@@ -134,6 +132,7 @@ const useConnection = () => {
     data: requestedData,
     error,
     trySync,
+    setUser,
     close: spw.close,
     requestPeerData,
   };
