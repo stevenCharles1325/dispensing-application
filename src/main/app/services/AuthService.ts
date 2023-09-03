@@ -176,7 +176,9 @@ export default class AuthService {
 
     if (status === 'SUCCESS') {
       return {
-        data: this.store.get(this.AUTH_USER_TOKEN) ?? this.store2.get(this.AUTH_USER_TOKEN),
+        data:
+          this.store.get(this.AUTH_USER_TOKEN) ??
+          this.store2.get(this.AUTH_USER_TOKEN),
         status,
       };
     }
@@ -225,15 +227,15 @@ export default class AuthService {
       const data = jwt.verify(token, this.config.key) as Partial<UserContract>;
 
       return {
-        data,
+        data: data as Partial<UserContract>,
         status: 'SUCCESS',
-      }
+      };
     } catch (err) {
       const error = handleError(err);
       return {
         errors: [error],
         status: 'ERROR',
-      }
+      };
     }
   }
 

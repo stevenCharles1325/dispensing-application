@@ -20,7 +20,7 @@ const authMiddleware: MiddlewareContract = ({ eventData, storage, next }) => {
   if (authResponse.status === 'SUCCESS') {
     const hasPermission = authService.hasPermission.bind(
       this,
-      authResponse.data
+      authResponse.data // user
     );
 
     eventData.user.hasPermission = hasPermission;
