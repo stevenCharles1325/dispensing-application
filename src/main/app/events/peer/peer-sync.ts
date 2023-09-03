@@ -28,12 +28,22 @@ export default class PeerSyncEvent implements EventContract {
       'download-data'
     );
 
+    const ungatedEvents = [
+      'auth:sign-in',
+      // add more events that is not requiring authentication
+    ];
+
     const syncList = [
       'User',
       // Add more model names in singular form here...
     ].map((tableName: string) => tableName.toLowerCase());
 
-    if (hasPermission) {
+    if (
+      hasPermission ||
+      ungatedEvents.includes(
+        data?.request?.name ?? data?.response?.name ?? 'none'
+      )
+    ) {
       try {
         if (data.type === 'request') {
           const syncItems: Record<string, any> = {};
