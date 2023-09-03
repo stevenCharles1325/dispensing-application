@@ -17,7 +17,15 @@ const authMiddleware: MiddlewareContract = ({ eventArgs, storage, next }) => {
 
   const authResponse = authService.verifyToken(token);
 
-  if (authResponse.status === 'SUCCESS') return next();
+  if (authResponse.status === 'SUCCESS') {
+    const hasPermission = authService.hasPermission.bind(
+      this,
+      authResponse.data
+    );
+
+    eventArgs.push(hasPermission);
+    return next();
+  }
 
   return {
     errors: authResponse.errors,

@@ -17,9 +17,10 @@ export default class UserCreateEvent implements EventContract {
   }: EventListenerPropertiesContract) {
     try {
       const authUser = storage.get('POS_AUTH_USER') as User;
-      const hasPermission = authUser.hasPermission('create-user');
+      const localHasPermission = authUser?.hasPermission('create-user');
+      const peerHasPermission = eventArgs?.[2]?.('create-user');
 
-      if (hasPermission) {
+      if (localHasPermission || peerHasPermission) {
         const user = UserRepository.create(eventArgs[0]);
         const errors = await validator(user);
 

@@ -226,13 +226,13 @@ export default class AuthService {
 
       return {
         data,
-        status: 'SUCCESS',        
+        status: 'SUCCESS',
       }
     } catch (err) {
       const error = handleError(err);
       return {
         errors: [error],
-        status: 'ERROR', 
+        status: 'ERROR',
       }
     }
   }
@@ -241,6 +241,7 @@ export default class AuthService {
     user: Partial<UserContract>,
     ...permission: PermissionsKebabType[]
   ) {
+    console.log(user);
     return user.role!.permissions!.some(({ kebab }) =>
       permission.includes(kebab as PermissionsKebabType)
     );
