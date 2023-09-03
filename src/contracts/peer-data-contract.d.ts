@@ -1,4 +1,4 @@
-import ModelNames from 'Main/contracts/open-data-contract';
+import DataName from 'Main/contracts/open-data-contract';
 import ResponseContract from 'Main/contracts/response-contract';
 import UserContract from 'Main/contracts/user-contract';
 
@@ -9,7 +9,8 @@ declare global {
     | 'update'
     | 'delete'
     | 'archive'
-    | 'sync';
+    | 'sync'
+    | 'sign-in';
 
   interface PeerDataContract {
     systemKey: string | null;
@@ -17,13 +18,13 @@ declare global {
     user: UserContract;
     request?:
       | {
-          name: `${ModelNames}:${DataActions}`;
+          name: `${DataName}:${DataActions}`;
           body?: any;
         }
       | undefined;
     response?:
       | {
-          name: `${ModelNames}:${DataActions}`;
+          name: `${DataName}:${DataActions}`;
           body?: ResponseContract;
         }
       | undefined;

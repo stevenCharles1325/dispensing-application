@@ -17,11 +17,11 @@ export default class PeerRequestEvent implements EventContract {
       const data: PeerDataContract = eventArgs[0];
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
-      const availableEvents = [
+      const unavailableEvents = [
         'peer:connect',
-        'auth:sign-in',
         'auth:sign-up',
         'auth:sign-out',
+        // Add events that are not available
       ];
 
       if (data.type === 'response') return null;
@@ -36,7 +36,7 @@ export default class PeerRequestEvent implements EventContract {
           status: 'ERROR',
         };
 
-      if (availableEvents.includes(data.request.name)) {
+      if (unavailableEvents.includes(data.request.name)) {
         return {
           errors: ['You are not allowed to perform this action'],
           status: 'ERROR',

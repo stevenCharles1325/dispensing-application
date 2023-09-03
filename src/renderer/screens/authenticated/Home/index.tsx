@@ -18,9 +18,25 @@ function Home({ data, trySync, peerRequest }) {
       email: 'johndoe123@gmail.com',
       password: 'passWORD123@@@',
     });
+    console.log('THIS RESPONSE: ', response);
+
+    if (response.status === 'ERROR') {
+      // Fall back sign-in
+      const peerResponse = await peerRequest({
+        type: 'request',
+        request: {
+          name: 'auth:sign-in',
+          body: {
+            email: 'johndoe123@gmail.com',
+            password: 'passWORD123@@@',
+          },
+        },
+      });
+
+      console.log('PEER RESP: ', peerResponse);
+    }
 
     trySync();
-    console.log(response);
   };
 
   const createUser = async () => {

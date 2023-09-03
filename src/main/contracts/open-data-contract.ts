@@ -1,3 +1,3 @@
-type ModelNames = 'permission' | 'role' | 'user' | 'peer';
+type DataName = 'permission' | 'role' | 'user' | 'peer' | 'auth';
 
-export default ModelNames;
+export default DataName;

@@ -7,6 +7,7 @@ const options = {
   debug: true,
   simplePeerOptions: {
     initiator: true,
+    channelName: process.env.PEER_CHANNEL_NAME,
   },
 };
 
