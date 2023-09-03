@@ -8,10 +8,9 @@ import Provider from 'Main/provider';
 export default class AuthSignIn implements EventContract {
   public channel: string = 'auth:sign-in';
 
-  public async listener({ eventArgs }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
-      console.log(eventArgs);
-      const { email, password } = eventArgs[0];
+      const { email, password } = eventData.payload;
       const authService = Provider.ioc<AuthService>('AuthProvider');
 
       try {

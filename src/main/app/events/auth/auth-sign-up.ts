@@ -10,9 +10,9 @@ import AuthService from 'Main/app/services/AuthService';
 export default class AuthSignUpEvent implements EventContract {
   public channel: string = 'auth:sign-up';
 
-  public async listener({ eventArgs }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
-      const user = UserRepository.create(eventArgs[0]);
+      const user = UserRepository.create(eventData.payload);
       const authService = Provider.ioc<AuthService>('AuthProvider');
 
       const errors = await validator(user);

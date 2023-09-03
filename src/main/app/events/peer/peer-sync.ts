@@ -14,11 +14,11 @@ export default class PeerSyncEvent implements EventContract {
 
   public async listener({
     event,
-    eventArgs,
+    eventData,
     storage,
   }: EventListenerPropertiesContract) {
     // eslint-disable-next-line no-undef
-    const data: PeerDataContract = eventArgs[0];
+    const data: PeerDataContract = eventData.payload;
     const authService = Provider.ioc<AuthService>('AuthProvider');
     const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
@@ -71,7 +71,12 @@ export default class PeerSyncEvent implements EventContract {
           for await (const syncItemName of syncList) {
             const response = await events[`${syncItemName}:create`]({
               event,
-              eventArgs: [data.response?.body?.data[syncItemName], data.token],
+              eventData: {
+                payload: data.response?.body?.data[syncItemName],
+                user: {
+                  token: data.token,
+                },
+              },
               storage,
             });
 

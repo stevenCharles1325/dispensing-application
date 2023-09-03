@@ -4,7 +4,7 @@ import StorageContract from './storage-contract';
 
 export interface MiddlewarePropertiesContract extends IpcMainInvokeEvent {
   event: IpcMainInvokeEvent;
-  eventArgs: any[];
+  eventData: Record<string, any>;
   storage: StorageContract;
   next: () => void;
 }

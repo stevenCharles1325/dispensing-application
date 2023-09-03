@@ -11,17 +11,16 @@ export default class UserDeleteEvent implements EventContract {
 
   public middlewares = ['auth-middleware'];
 
-  public async listener({
-    eventArgs,
-    storage,
-  }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
-      const authUser = storage.get('POS_AUTH_USER') as User;
-      const hasPermission = authUser.hasPermission('update-user');
+      const requesterHasPermission =
+        eventData.user.hasPermission?.('create-user');
 
-      if (hasPermission) {
-        const user = await UserRepository.findOneByOrFail({ id: eventArgs[0] });
-        const updatedUser = UserRepository.merge(user, eventArgs[1]);
+      if (requesterHasPermission) {
+        const user = await UserRepository.findOneByOrFail({
+          id: eventData.payload,
+        });
+        const updatedUser = UserRepository.merge(user, eventData.payload);
         const errors = await validator(updatedUser);
 
         if (errors.length) {
@@ -46,6 +45,7 @@ export default class UserDeleteEvent implements EventContract {
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
+
       return {
         errors: [error],
         status: 'ERROR',

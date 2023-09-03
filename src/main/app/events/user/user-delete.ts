@@ -10,17 +10,14 @@ export default class UserDeleteEvent implements EventContract {
 
   public middlewares = ['auth-middleware'];
 
-  public async listener({
-    eventArgs,
-    storage,
-  }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
-      const authUser = storage.get('POS_AUTH_USER') as User;
-      const hasPermission = authUser.hasPermission('delete-user');
+      const requesterHasPermission =
+        eventData.user.hasPermission?.('create-user');
 
-      if (hasPermission) {
+      if (requesterHasPermission) {
         const userRepo = SqliteDataSource.getRepository(User);
-        const data = await userRepo.delete(eventArgs[0]);
+        const data = await userRepo.delete(eventData.payload);
 
         return {
           data,

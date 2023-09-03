@@ -1,28 +1,19 @@
+import Provider from '@IOC:Provider';
 import handleError from 'Main/app/modules/error-handler';
-import AuthContract from 'Main/contracts/auth-contract';
+import AuthService from 'Main/app/services/AuthService';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
-import { User } from 'Main/database/models/User';
 
 export default class AuthMe implements EventContract {
   public channel: string = 'auth:me';
 
-  public async listener({ storage }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
-      const authUser = storage.get('POS_AUTH_USER_TOKEN') as AuthContract<User>;
+      const authService = Provider.ioc<AuthService>('AuthProvider');
+      const token = eventData.user?.token;
 
-      if (authUser) {
-        return {
-          data: authUser,
-          status: 'SUCCESS',
-        };
-      }
-
-      return {
-        errors: ['Unauthorized user. Please login first.'],
-        status: 'ERROR',
-      };
+      return authService.verifyToken(token);
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);

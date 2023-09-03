@@ -9,12 +9,12 @@ export default class PeerRequestEvent implements EventContract {
 
   public async listener({
     event,
-    eventArgs,
+    eventData,
     storage,
   }: EventListenerPropertiesContract) {
     try {
       // eslint-disable-next-line no-undef
-      const data: PeerDataContract = eventArgs[0];
+      const data: PeerDataContract = eventData.payload;
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
       const unavailableEvents = [
@@ -46,7 +46,12 @@ export default class PeerRequestEvent implements EventContract {
 
       const response = await events[data.request.name]({
         event,
-        eventArgs: [data.request.body, data.token],
+        eventData: {
+          payload: data.request.body,
+          user: {
+            token: data.token,
+          },
+        },
         storage,
       });
 

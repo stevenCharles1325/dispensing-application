@@ -4,7 +4,7 @@ import { MiddlewareContract } from 'Main/contracts/middleware-contract';
 import { User } from 'Main/database/models/User';
 import AuthService from '../services/AuthService';
 
-const authMiddleware: MiddlewareContract = ({ eventArgs, storage, next }) => {
+const authMiddleware: MiddlewareContract = ({ eventData, storage, next }) => {
   const authService = Provider.ioc<AuthService>('AuthProvider');
   const authUser = storage.get('POS_AUTH_USER_TOKEN') as AuthContract<User>;
 
@@ -13,7 +13,7 @@ const authMiddleware: MiddlewareContract = ({ eventArgs, storage, next }) => {
     if the request is sent by peers, while the storage
     is where the data user of this system is stored.
   */
-  const token = eventArgs[1] ?? authUser.token;
+  const token = eventData.user?.token ?? authUser.token;
 
   const authResponse = authService.verifyToken(token);
 
@@ -23,7 +23,7 @@ const authMiddleware: MiddlewareContract = ({ eventArgs, storage, next }) => {
       authResponse.data
     );
 
-    eventArgs.push(hasPermission);
+    eventData.user.hasPermission = hasPermission;
     return next();
   }
 

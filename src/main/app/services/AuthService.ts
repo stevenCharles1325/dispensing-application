@@ -220,7 +220,7 @@ export default class AuthService {
     };
   }
 
-  public verifyToken(token: string): ResponseContract {
+  public verifyToken(token: string = ''): ResponseContract {
     try {
       const data = jwt.verify(token, this.config.key) as Partial<UserContract>;
 

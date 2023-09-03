@@ -11,17 +11,13 @@ export default class UserCreateEvent implements EventContract {
 
   public middlewares = ['auth-middleware'];
 
-  public async listener({
-    eventArgs,
-    storage,
-  }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
-      const authUser = storage.get('POS_AUTH_USER') as User;
-      const localHasPermission = authUser?.hasPermission('create-user');
-      const peerHasPermission = eventArgs?.[2]?.('create-user');
+      const requesterHasPermission =
+        eventData.user.hasPermission?.('create-user');
 
-      if (localHasPermission || peerHasPermission) {
-        const user = UserRepository.create(eventArgs[0]);
+      if (requesterHasPermission) {
+        const user = UserRepository.create(eventData.payload);
         const errors = await validator(user);
 
         if (errors && errors.length) {
