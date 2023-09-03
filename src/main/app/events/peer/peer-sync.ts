@@ -70,7 +70,7 @@ export default class PeerSyncEvent implements EventContract {
           for await (const syncItemName of syncList) {
             const response = await events[`${syncItemName}:create`]({
               event,
-              eventArgs: [data.response?.body?.data[syncItemName]],
+              eventArgs: [data.response?.body?.data[syncItemName], data.token],
               storage,
             });
 

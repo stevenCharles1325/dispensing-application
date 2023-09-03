@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import useUser from 'renderer/stores/user';
 
 const SimplePeerWrapper = require('simple-peer-wrapper');

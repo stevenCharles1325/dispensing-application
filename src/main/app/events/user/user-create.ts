@@ -9,6 +9,8 @@ import { User } from 'Main/database/models/User';
 export default class UserCreateEvent implements EventContract {
   public channel: string = 'user:create';
 
+  public middlewares = ['auth-middleware'];
+
   public async listener({
     eventArgs,
     storage,

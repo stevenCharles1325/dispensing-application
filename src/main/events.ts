@@ -34,13 +34,13 @@ function applyMiddleware(
 
     const next = async () => {
       if (nextIndex < _middlewares.length) {
-        console.log('Middleware has been applied.');
         const currentMiddleware = _middlewares[nextIndex];
         nextIndex++;
-        await currentMiddleware({ event, eventArgs, next });
+
+        return await currentMiddleware({ event, eventArgs, storage, next });
       } else {
         // All middlewares executed, call the final event listener
-        return eventListener({ event, eventArgs, storage });
+        return await eventListener({ event, eventArgs, storage });
       }
     };
 

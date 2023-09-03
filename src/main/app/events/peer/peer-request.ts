@@ -46,7 +46,7 @@ export default class PeerRequestEvent implements EventContract {
 
       const response = await events[data.request.name]({
         event,
-        eventArgs: [data.request.body],
+        eventArgs: [data.request.body, data.token],
         storage,
       });
 
