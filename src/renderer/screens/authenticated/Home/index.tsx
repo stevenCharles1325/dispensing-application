@@ -25,16 +25,11 @@ function Home({ data, trySync, peerRequest }) {
 
     console.log('response: ', response);
 
-    setUser('first_name', response.data.user.first_name);
-    setUser('last_name', response.data.user.last_name);
+    setUser(response.data.user);
     setUser(
       'full_name',
       `${response.data.user.first_name} ${response.data.user.last_name}`
     );
-    setUser('email', response.data.user.email);
-    setUser('phone_number', response.data.user.phone_number);
-    setUser('token', response.data.token);
-    setUser('refresh_token', response.data.refresh_token);
 
     await trySync();
   };
