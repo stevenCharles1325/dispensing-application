@@ -12,7 +12,7 @@ export default class AuthSignUpEvent implements EventContract {
 
   public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
-      const user = UserRepository.create(eventData.payload);
+      const user = UserRepository.create(eventData.payload[0]);
       const authService = Provider.ioc<AuthService>('AuthProvider');
 
       const errors = await validator(user);

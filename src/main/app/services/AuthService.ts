@@ -243,7 +243,6 @@ export default class AuthService {
     user: Partial<UserContract>,
     ...permission: PermissionsKebabType[]
   ) {
-    console.log(user);
     return user.role!.permissions!.some(({ kebab }) =>
       permission.includes(kebab as PermissionsKebabType)
     );

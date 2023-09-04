@@ -9,9 +9,10 @@ const authMiddleware: MiddlewareContract = ({ eventData, storage, next }) => {
   const authUser = storage.get('POS_AUTH_USER_TOKEN') as AuthContract<User>;
 
   /*
-    Usually, we pass the token to the eventArgs index 1
-    if the request is sent by peers, while the storage
-    is where the data user of this system is stored.
+    Usually, we pass the token to the eventData, under
+    the "user" property if the request is sent by peers,
+    while the storage is where the data user of this
+    system is stored.
   */
   const token = eventData.user?.token ?? authUser.token;
 

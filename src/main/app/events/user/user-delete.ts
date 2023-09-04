@@ -17,7 +17,7 @@ export default class UserDeleteEvent implements EventContract {
 
       if (requesterHasPermission) {
         const userRepo = SqliteDataSource.getRepository(User);
-        const data = await userRepo.delete(eventData.payload);
+        const data = await userRepo.delete(eventData.payload[0]);
 
         return {
           data,

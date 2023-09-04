@@ -18,7 +18,7 @@ export default class PeerSyncEvent implements EventContract {
     storage,
   }: EventListenerPropertiesContract) {
     // eslint-disable-next-line no-undef
-    const data: PeerDataContract = eventData.payload;
+    const data: PeerDataContract = eventData.payload[0];
     const authService = Provider.ioc<AuthService>('AuthProvider');
     const events: Record<string, Listener> = storage.get('POS_EVENTS');
 

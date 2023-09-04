@@ -13,14 +13,17 @@ export default class UserDeleteEvent implements EventContract {
 
   public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
+      const id = eventData.payload[0];
+      const userUpdate = eventData.payload[1];
+
       const requesterHasPermission =
         eventData.user.hasPermission?.('create-user');
 
       if (requesterHasPermission) {
         const user = await UserRepository.findOneByOrFail({
-          id: eventData.payload,
+          id,
         });
-        const updatedUser = UserRepository.merge(user, eventData.payload);
+        const updatedUser = UserRepository.merge(user, userUpdate);
         const errors = await validator(updatedUser);
 
         if (errors.length) {

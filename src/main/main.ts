@@ -140,7 +140,7 @@ app.on('window-all-closed', async () => {
   // Log-outs the user first before closing
   const authService = Provider.ioc<AuthService>('AuthProvider');
   const res = await authService.revoke();
-  console.log(res);
+  console.log('Window-close auto log-out response: ', res);
 
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed

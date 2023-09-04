@@ -10,19 +10,10 @@ export default class AuthSignIn implements EventContract {
 
   public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
-      const { email, password } = eventData.payload;
+      const { email, password } = eventData.payload[0];
       const authService = Provider.ioc<AuthService>('AuthProvider');
 
-      try {
-        return authService.authenticate(email, password);
-      } catch (err) {
-        const error = handleError(err);
-
-        return {
-          errors: [error],
-          status: 'ERROR',
-        };
-      }
+      return authService.authenticate(email, password);
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);

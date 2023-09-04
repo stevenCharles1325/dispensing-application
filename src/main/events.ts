@@ -76,10 +76,10 @@ export default function () {
           payload: args,
           user: {
             token: '',
-          }
+          },
         };
 
-        listener({ event: e, eventData, storage });
+        return listener({ event: e, eventData, storage });
       });
     });
 

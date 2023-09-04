@@ -17,7 +17,7 @@ export default class UserArchiveEvent implements EventContract {
 
       if (requesterHasPermission) {
         const userRepo = SqliteDataSource.getRepository(User);
-        const data = await userRepo.softDelete(eventData.payload);
+        const data = await userRepo.softDelete(eventData.payload[0]);
 
         return {
           data,

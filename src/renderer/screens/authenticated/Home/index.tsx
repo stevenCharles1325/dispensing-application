@@ -14,20 +14,23 @@ function Home({ data, trySync, peerRequest }) {
     state.toggleNavBar,
   ]);
 
-  const [user, setUser] = useUser((state) => [
-    state,
-    state.setUser,
-  ]);
+  const [user, setUser] = useUser((state) => [state, state.setUser]);
 
+  // Sample sign-in
   const signin = async () => {
     const response = await window.electron.ipcRenderer.authSignIn({
       email: 'johndoe123@gmail.com',
       password: 'passWORD123@@@',
     });
 
+    console.log('response: ', response);
+
     setUser('first_name', response.data.user.first_name);
     setUser('last_name', response.data.user.last_name);
-    setUser('full_name', response.data.user.first_name + ' ' + response.data.user.last_name);
+    setUser(
+      'full_name',
+      `${response.data.user.first_name} ${response.data.user.last_name}`
+    );
     setUser('email', response.data.user.email);
     setUser('phone_number', response.data.user.phone_number);
     setUser('token', response.data.token);
@@ -36,6 +39,7 @@ function Home({ data, trySync, peerRequest }) {
     await trySync();
   };
 
+  // Sample create-user
   const createUser = async () => {
     const response = await window.electron.ipcRenderer.createUser({
       first_name: 'jose',
@@ -50,6 +54,7 @@ function Home({ data, trySync, peerRequest }) {
     console.log(response);
   };
 
+  // Sample peer-create-user
   const requestCreateUser = async () => {
     const response = await peerRequest({
       type: 'request',

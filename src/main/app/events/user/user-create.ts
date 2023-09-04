@@ -17,7 +17,7 @@ export default class UserCreateEvent implements EventContract {
         eventData.user.hasPermission?.('create-user');
 
       if (requesterHasPermission) {
-        const user = UserRepository.create(eventData.payload);
+        const user = UserRepository.create(eventData.payload[0]);
         const errors = await validator(user);
 
         if (errors && errors.length) {

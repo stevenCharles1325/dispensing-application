@@ -11,10 +11,10 @@ const electronHandler = {
   ipcRenderer: {
     // -------------- POS FUNCTIONS --------------
     // AUTH MODULE
+    authMe: async () => ipcRenderer.invoke('auth:me'),
+
     authSignIn: async (payload: AuthSignInContract) =>
       ipcRenderer.invoke('auth:sign-in', payload),
-
-    authMe: async () => ipcRenderer.invoke('auth:me'),
 
     // USER MODULE
     createUser: async (payload: UserContract) =>

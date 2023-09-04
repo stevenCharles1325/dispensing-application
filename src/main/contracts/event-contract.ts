@@ -1,11 +1,10 @@
 import { IpcMainInvokeEvent } from 'electron';
 import ResponseContract from './response-contract';
 import StorageContract from './storage-contract';
-import UserContract from './user-contract';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 
 interface EventDataPropertiesContract {
-  payload: any;
+  payload: any[];
   user: {
     token?: string;
     /*

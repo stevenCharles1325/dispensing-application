@@ -14,7 +14,7 @@ export default class PeerRequestEvent implements EventContract {
   }: EventListenerPropertiesContract) {
     try {
       // eslint-disable-next-line no-undef
-      const data: PeerDataContract = eventData.payload;
+      const data: PeerDataContract = eventData.payload[0];
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
       const unavailableEvents = [

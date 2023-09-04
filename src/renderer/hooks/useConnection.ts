@@ -15,7 +15,7 @@ const options = {
 const spw = new SimplePeerWrapper(options);
 
 const useConnection = () => {
-  const [authUser, setUser] = useUser(state => [state, state.setUser]);
+  const [authUser, setUser] = useUser((state) => [state, state.setUser]);
 
   const [requestedData, setRequestedData] = useState<any | null>(null);
   const [error, setError] = useState<any | null>(null);
@@ -30,7 +30,7 @@ const useConnection = () => {
     const payload = {
       systemKey: process.env.SYSTEM_KEY,
       token: authUser.token ?? '',
-      ...data
+      ...data,
     };
 
     spw.send(payload);
@@ -62,7 +62,10 @@ const useConnection = () => {
 
       setUser('first_name', response.data.user.first_name);
       setUser('last_name', response.data.user.last_name);
-      setUser('full_name', response.data.user.first_name + ' ' + response.data.user.last_name);
+      setUser(
+        'full_name',
+        `${response.data.user.first_name} ${response.data.user.last_name}`
+      );
       setUser('email', response.data.user.email);
       setUser('phone_number', response.data.user.phone_number);
       setUser('token', response.data.token);
