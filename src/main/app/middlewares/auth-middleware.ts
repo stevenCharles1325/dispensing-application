@@ -14,7 +14,9 @@ const authMiddleware: MiddlewareContract = ({ eventData, storage, next }) => {
     while the storage is where the data user of this
     system is stored.
   */
-  const token = eventData.user?.token ?? authUser.token;
+  const token = eventData.user?.token?.length
+    ? eventData.user?.token
+    : authUser?.token;
 
   const authResponse = authService.verifyToken(token);
 

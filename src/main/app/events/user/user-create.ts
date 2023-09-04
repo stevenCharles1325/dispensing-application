@@ -4,7 +4,6 @@ import validator from 'Main/app/modules/validator';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
-import { User } from 'Main/database/models/User';
 
 export default class UserCreateEvent implements EventContract {
   public channel: string = 'user:create';

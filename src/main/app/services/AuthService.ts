@@ -224,6 +224,13 @@ export default class AuthService {
 
   public verifyToken(token: string = ''): ResponseContract {
     try {
+      if (!token.length) {
+        return {
+          errors: ['User is not authenticated'],
+          status: 'ERROR',
+        };
+      }
+
       const data = jwt.verify(token, this.config.key) as Partial<UserContract>;
 
       return {
@@ -231,6 +238,7 @@ export default class AuthService {
         status: 'SUCCESS',
       };
     } catch (err) {
+      console.log(err);
       const error = handleError(err);
       return {
         errors: [error],

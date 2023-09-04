@@ -45,11 +45,23 @@ function Home({ data, trySync, peerRequest }) {
       first_name: 'jose',
       last_name: 'manalo',
       birth_date: new Date(),
-      address: 'saan',
-      email: 'johndoe123@gmail.com',
+      address: 'saansfsfsfsfsfsfssfsfsfs',
+      email: 'johndoe1234@gmail.com',
       password: 'passWORD123@@@',
       phone_number: '+639454610579',
     });
+
+    console.log(response);
+  };
+
+  const getUser = async () => {
+    const response = await window.electron.ipcRenderer.getUser(
+      {
+        first_name: ['jose'],
+      },
+      1,
+      10
+    );
 
     console.log(response);
   };
@@ -112,7 +124,8 @@ function Home({ data, trySync, peerRequest }) {
           </Card>
         </Box>
         <Button onClick={signin}>Sign In</Button>
-        <Button onClick={createUser}>Sample</Button>
+        <Button onClick={createUser}>Create user sample</Button>
+        <Button onClick={getUser}>Get user sample</Button>
         <Button onClick={requestCreateUser}>Sample Peer</Button>
       </div>
     </div>

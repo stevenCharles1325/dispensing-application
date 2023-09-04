@@ -48,6 +48,7 @@ const useConnection = () => {
   };
 
   useEffect(() => {
+    console.log('[PEER-SYSTEM-STATUS]: ', syncStatus);
     spw.connect();
 
     // Sync data when connection is established
@@ -79,7 +80,7 @@ const useConnection = () => {
       if (spw.isConnectionStarted()) {
         if (syncStatus === 'FAILED') {
           setError(
-            'You cannot request for peer data as synchronization has failed. Try restarting the system.'
+            '[PEER-SYSTEM]: You cannot request for peer data as synchronization has failed. Try restarting the system.'
           );
 
           return;
@@ -134,7 +135,7 @@ const useConnection = () => {
 
     return () => spw.close();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [syncStatus]);
 
   return {
     data: requestedData,

@@ -17,6 +17,12 @@ const electronHandler = {
       ipcRenderer.invoke('auth:sign-in', payload),
 
     // USER MODULE
+    getUser: async (
+      payload: Record<string, any[]>,
+      page: number,
+      total: number
+    ) => ipcRenderer.invoke('user:show', payload, page, total),
+
     createUser: async (payload: UserContract) =>
       ipcRenderer.invoke('user:create', payload),
 
