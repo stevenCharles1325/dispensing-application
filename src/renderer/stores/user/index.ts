@@ -15,7 +15,10 @@ export interface AppUserState {
   phone_number: string;
   token: string;
   refresh_token: string;
-  setUser: (keyOrUser: string | Partial<UserDTO>, value: string) => void;
+  setUser: (
+    keyOrUser: string | Partial<UserDTO>,
+    value?: string | undefined
+  ) => void;
 }
 
 const useUser = create<AppUserState>((set) => ({
@@ -26,8 +29,10 @@ const useUser = create<AppUserState>((set) => ({
   phone_number: '',
   token: '',
   refresh_token: '',
-  setUser(keyOrUser: string | Partial<UserDTO>, value: any) {
-    if (typeof keyOrUser === 'string') {
+  setUser(keyOrUser: string | Partial<UserDTO>, value?: any) {
+    if (!keyOrUser) return;
+
+    if (typeof keyOrUser === 'string' && value) {
       set((state: AppUserState) => ({ ...state, [keyOrUser]: value }));
     } else {
       // eslint-disable-next-line no-restricted-syntax
