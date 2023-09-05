@@ -24,12 +24,32 @@ export default class PeerRequestEvent implements EventContract {
         // Add events that are not available
       ];
 
-      if (data.type === 'response') return null;
+      if (data.type === 'response') {
+        const response = await events[data.response!.name]({
+          event,
+          eventData: {
+            payload: [
+              data.response!.name === 'peer:sync' ? data : data.response!.body,
+            ],
+            user: {
+              token: data.token,
+            },
+          },
+          storage,
+        });
+
+        return {
+          data: response,
+          status: 'SUCCESS',
+        };
+      }
+
       if (data.systemKey !== process.env.SYSTEM_KEY)
         return {
           errors: ['Invalid system-key'],
           status: 'ERROR',
         };
+
       if (!data.request?.name)
         return {
           errors: ['You must provide request name if this is a Request type'],
@@ -43,11 +63,12 @@ export default class PeerRequestEvent implements EventContract {
         };
       }
 
-      console.log('DATA: ', data)
       const response = await events[data.request.name]({
         event,
         eventData: {
-          payload: [data.request.body],
+          payload: [
+            data.request.name === 'peer:sync' ? data : data.request.body,
+          ],
           user: {
             token: data.token,
           },
@@ -68,7 +89,6 @@ export default class PeerRequestEvent implements EventContract {
 
       return {
         data: payload,
-        errors: response.errors,
         status: 'SUCCESS',
       };
     } catch (err) {
