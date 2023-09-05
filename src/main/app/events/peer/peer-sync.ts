@@ -56,7 +56,7 @@ export default class PeerSyncEvent implements EventContract {
             const item = await SqliteDataSource.getRepository(syncItemModel)
               .createQueryBuilder(syncItemName)
               .getMany();
-            syncItems[syncItemName] = item;
+            syncItems[syncItemName.toLowerCase()] = item;
           }
 
           return {
@@ -71,28 +71,35 @@ export default class PeerSyncEvent implements EventContract {
 
           // Saving response to the local database
           // eslint-disable-next-line no-restricted-syntax
+          console.log(data.response);
+
+          // eslint-disable-next-line no-restricted-syntax
           for await (const [syncItemName, syncItemModel] of Object.entries(
             syncList
           )) {
-            const response = await events[
-              `${syncItemName.toLowerCase()}:create`
-            ]({
-              event,
-              eventData: {
-                payload: [
-                  data.response?.body?.data[syncItemName.toLowerCase()],
-                ],
-                user: {
-                  token: data.token,
-                },
-              },
-              storage,
-            });
+            const synchingData =
+              data.response?.body?.data[syncItemName.toLowerCase()];
 
-            if (response.status === 'SUCCESS') {
-              responseData.push(response.data);
-            } else {
-              errors.push(...response.errors);
+            // eslint-disable-next-line no-restricted-syntax
+            for await (const synchingDatum of synchingData) {
+              const response = await events[
+                `${syncItemName.toLowerCase()}:create`
+              ]({
+                event,
+                eventData: {
+                  payload: [synchingDatum],
+                  user: {
+                    token: data.token,
+                  },
+                },
+                storage,
+              });
+
+              if (response.status === 'SUCCESS') {
+                responseData.push(response.data);
+              } else {
+                errors.push(...response.errors);
+              }
             }
           }
 
