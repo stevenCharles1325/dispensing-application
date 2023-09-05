@@ -6,29 +6,14 @@ import './styles/global.css';
 
 export default function App() {
   // Peer data Connection
-  const { data, close, error, trySync, requestPeerData } = useConnection();
+  const { data, close, trySync, requestPeerData } = useConnection();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (requestPeerData) {
-      requestPeerData({
-        systemKey: process.env.SYSTEM_KEY || null,
-        type: 'request',
-        request: {
-          name: 'peer:sync',
-        },
-      });
-    }
-
     return () => {
-      if (close) close();
+      console.log('App is closing connection...');
+      close();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    console.log(error);
-  }, [error]);
+  }, [close]);
 
   return (
     <Router>

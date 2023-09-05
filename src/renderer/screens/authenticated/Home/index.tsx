@@ -23,13 +23,17 @@ function Home({ data, trySync, peerRequest }) {
       password: 'passWORD123@@@',
     });
 
-    setUser(response.data.user);
-    setUser('token', response.data.token);
-    setUser('refresh_token', response.data.refresh_token);
-    setUser(
-      'full_name',
-      `${response.data.user.first_name} ${response.data.user.last_name}`
-    );
+    if (response.status === 'ERROR') {
+      console.log(response.errors![0]);
+    } else {
+      setUser(response.data.user);
+      setUser('token', response.data.token);
+      setUser('refresh_token', response.data.refresh_token);
+      setUser(
+        'full_name',
+        `${response.data.user.first_name} ${response.data.user.last_name}`
+      );
+    }
 
     await trySync();
   };

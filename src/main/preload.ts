@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import AuthSignInContract from './contracts/auth-sign-in-contract';
-// import AuthSignInContract from './contracts/auth-sign-in-contract';
+import ResponseContract from './contracts/response-contract';
 import UserContract from './contracts/user-contract';
 
 export type Channels = 'ipc-example';
@@ -11,27 +11,35 @@ const electronHandler = {
   ipcRenderer: {
     // -------------- POS FUNCTIONS --------------
     // AUTH MODULE
-    authMe: async () => ipcRenderer.invoke('auth:me'),
+    authMe: async (): Promise<ResponseContract> =>
+      ipcRenderer.invoke('auth:me'),
 
-    authSignIn: async (payload: AuthSignInContract) =>
-      ipcRenderer.invoke('auth:sign-in', payload),
+    authSignIn: async (
+      payload: AuthSignInContract
+    ): Promise<ResponseContract> => ipcRenderer.invoke('auth:sign-in', payload),
 
     // USER MODULE
     getUser: async (
       payload: Record<string, any[]>,
       page: number,
       total: number
-    ) => ipcRenderer.invoke('user:show', payload, page, total),
+    ): Promise<ResponseContract> =>
+      ipcRenderer.invoke('user:show', payload, page, total),
 
-    createUser: async (payload: UserContract) =>
+    createUser: async (payload: UserContract): Promise<ResponseContract> =>
       ipcRenderer.invoke('user:create', payload),
 
-    updateUser: async (id: number, payload: Partial<UserContract>) =>
+    updateUser: async (
+      id: number,
+      payload: Partial<UserContract>
+    ): Promise<ResponseContract> =>
       ipcRenderer.invoke('user:update', id, payload),
 
-    archiveUser: async (id: number) => ipcRenderer.invoke('user:archive', id),
+    archiveUser: async (id: number): Promise<ResponseContract> =>
+      ipcRenderer.invoke('user:archive', id),
 
-    deleteUser: async (id: number) => ipcRenderer.invoke('user:delete', id),
+    deleteUser: async (id: number): Promise<ResponseContract> =>
+      ipcRenderer.invoke('user:delete', id),
 
     // Connection to TURN server to start P2P connection
     // eslint-disable-next-line no-undef

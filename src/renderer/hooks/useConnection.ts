@@ -55,7 +55,7 @@ const useConnection = () => {
     spw.on('connect', async () => {
       const response = await window.electron.ipcRenderer.authMe();
       if (response.status === 'ERROR') {
-        setError(response.errors[0]);
+        setError(response.errors![0]);
         setSyncStatus('FAILED');
 
         return;
@@ -108,9 +108,11 @@ const useConnection = () => {
           setRequestedData(data.data);
         } else {
           if (syncStatus === 'FAILED') {
-            setError(
-              '[PEER-SYSTEM]: You cannot request for peer data as synchronization has failed. Try restarting the system.'
-            );
+            if (!error) {
+              setError(
+                '[PEER-SYSTEM]: You cannot request for peer data as synchronization has failed. Try restarting the system.'
+              );
+            }
 
             return;
           }
@@ -133,7 +135,7 @@ const useConnection = () => {
       setError(err);
     });
 
-    return () => spw.close();
+    // return () => spw.close();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncStatus]);
 
