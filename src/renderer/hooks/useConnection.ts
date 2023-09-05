@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useUser from 'renderer/stores/user';
 
 const SimplePeerWrapper = require('simple-peer-wrapper');
@@ -19,9 +19,8 @@ const useConnection = () => {
 
   const [requestedData, setRequestedData] = useState<any | null>(null);
   const [error, setError] = useState<any | null>(null);
-  const [syncStatus, setSyncStatus] = useState<
-    'PENDING' | 'SUCCEEDED' | 'FAILED'
-  >('PENDING');
+
+  const syncStatus = useRef<'PENDING' | 'SUCCEEDED' | 'FAILED'>('PENDING');
 
   // eslint-disable-next-line no-undef
   const requestPeerData = async (data: Partial<PeerDataContract>) => {
@@ -33,11 +32,14 @@ const useConnection = () => {
       ...data,
     };
 
+    console.log(authUser);
+
     spw.send(payload);
   };
 
   const trySync = async () => {
     console.log('[PEER-SYSTEM]: Synching data...');
+    syncStatus.current = 'PENDING';
 
     requestPeerData({
       type: 'request',
@@ -56,7 +58,7 @@ const useConnection = () => {
       const response = await window.electron.ipcRenderer.authMe();
       if (response.status === 'ERROR') {
         setError(response.errors![0]);
-        setSyncStatus('FAILED');
+        syncStatus.current = 'FAILED';
 
         return;
       }
@@ -85,7 +87,7 @@ const useConnection = () => {
           if (payload!.response!.name === 'peer:sync') {
             if (payload!.response?.body?.status === 'SUCCESS') {
               console.log('[PEER-SYSTEM]: Synching data succeeded');
-              setSyncStatus('SUCCEEDED');
+              syncStatus.current = 'SUCCEEDED';
 
               // Save to database
               requestPeerData({
@@ -100,14 +102,17 @@ const useConnection = () => {
             }
 
             console.log('[PEER-SYSTEM]: Synching data failed');
-            setSyncStatus('FAILED');
+            syncStatus.current = 'FAILED';
             setError('Failed to sync with peer systems');
             return;
           }
 
           setRequestedData(data.data);
         } else {
-          if (syncStatus === 'FAILED') {
+          if (
+            syncStatus.current === 'FAILED' &&
+            data.data.request.name !== 'peer:sync'
+          ) {
             if (!error) {
               setError(
                 '[PEER-SYSTEM]: You cannot request for peer data as synchronization has failed. Try restarting the system.'
@@ -135,11 +140,11 @@ const useConnection = () => {
       setError(err);
     });
 
-    // return () => spw.close();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [syncStatus]);
+  }, [error, syncStatus]);
 
   useEffect(() => {
+    // Display error messages in console
     console.log(error);
   }, [error]);
 
@@ -147,8 +152,9 @@ const useConnection = () => {
     data: requestedData,
     error,
     trySync,
-    close: spw.close,
+    syncStatus,
     requestPeerData,
+    close: spw.close,
   };
 };
 

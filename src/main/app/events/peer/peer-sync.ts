@@ -67,12 +67,13 @@ export default class PeerSyncEvent implements EventContract {
           const errors: POSError[] | POSValidationError[] = [];
           const responseData: any[] = [];
 
+          // Saving response to the local database
           // eslint-disable-next-line no-restricted-syntax
           for await (const syncItemName of syncList) {
             const response = await events[`${syncItemName}:create`]({
               event,
               eventData: {
-                payload: data.response?.body?.data[syncItemName],
+                payload: [data.response?.body?.data[syncItemName]],
                 user: {
                   token: data.token,
                 },

@@ -26,6 +26,8 @@ function Home({ data, trySync, peerRequest }) {
     if (response.status === 'ERROR') {
       console.log(response.errors![0]);
     } else {
+      console.log(response);
+
       setUser(response.data.user);
       setUser('token', response.data.token);
       setUser('refresh_token', response.data.refresh_token);
