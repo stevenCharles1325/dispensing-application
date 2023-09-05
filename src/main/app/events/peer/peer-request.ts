@@ -75,6 +75,7 @@ export default class PeerRequestEvent implements EventContract {
         },
         storage,
       });
+      console.log(response);
 
       const payload = {
         systemKey: process.env.SYSTEM_KEY,

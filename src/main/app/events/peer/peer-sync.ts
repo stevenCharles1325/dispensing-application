@@ -7,6 +7,7 @@ import EventContract, {
 } from 'Main/contracts/event-contract';
 import POSError from 'Main/contracts/pos-error-contract';
 import POSValidationError from 'Main/contracts/pos-validation-error-contract';
+import { User } from 'Main/database/models/User';
 import { SqliteDataSource } from 'Main/datasource';
 
 export default class PeerSyncEvent implements EventContract {
@@ -39,10 +40,9 @@ export default class PeerSyncEvent implements EventContract {
       'download-data'
     );
 
-    const syncList = [
-      'User',
-      // Add more model names in singular form here...
-    ].map((tableName: string) => tableName.toLowerCase());
+    const syncList = {
+      User,
+    };
 
     if (hasPermission) {
       try {
@@ -50,8 +50,10 @@ export default class PeerSyncEvent implements EventContract {
           const syncItems: Record<string, any> = {};
 
           // eslint-disable-next-line no-restricted-syntax
-          for await (const syncItemName of syncList) {
-            const item = await SqliteDataSource.getRepository(syncItemName)
+          for await (const [syncItemName, syncItemModel] of Object.entries(
+            syncList
+          )) {
+            const item = await SqliteDataSource.getRepository(syncItemModel)
               .createQueryBuilder(syncItemName)
               .getMany();
             syncItems[syncItemName] = item;
@@ -69,11 +71,17 @@ export default class PeerSyncEvent implements EventContract {
 
           // Saving response to the local database
           // eslint-disable-next-line no-restricted-syntax
-          for await (const syncItemName of syncList) {
-            const response = await events[`${syncItemName}:create`]({
+          for await (const [syncItemName, syncItemModel] of Object.entries(
+            syncList
+          )) {
+            const response = await events[
+              `${syncItemName.toLowerCase()}:create`
+            ]({
               event,
               eventData: {
-                payload: [data.response?.body?.data[syncItemName]],
+                payload: [
+                  data.response?.body?.data[syncItemName.toLowerCase()],
+                ],
                 user: {
                   token: data.token,
                 },

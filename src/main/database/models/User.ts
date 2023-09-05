@@ -157,7 +157,7 @@ export class User {
 
   @AfterLoad()
   hasPermission(...permission: PermissionsKebabType[]) {
-    return this.role.permissions.some(({ kebab }) =>
+    return this.role?.permissions?.some(({ kebab }) =>
       permission.includes(kebab as PermissionsKebabType)
     );
   }
