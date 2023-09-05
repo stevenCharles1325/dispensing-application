@@ -99,7 +99,10 @@ const useConnection = () => {
                 type: 'response',
                 response: {
                   name: 'peer:sync',
-                  body: payload!.response?.body?.data,
+                  body: {
+                    data: payload!.response?.body?.data,
+                    status: 'SUCCESS',
+                  },
                 },
                 // eslint-disable-next-line no-undef
               }) as PeerDataContract;
@@ -107,6 +110,7 @@ const useConnection = () => {
               // Save to database
               window.electron.ipcRenderer
                 .peerRequest(dataToBeSaved)
+                .then((res) => console.log(res.data))
                 .catch((err) => {
                   console.log('Error: ', err);
                   setError(err);

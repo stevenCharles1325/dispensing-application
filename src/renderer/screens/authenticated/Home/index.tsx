@@ -9,7 +9,7 @@ import useAppNavigation from 'renderer/stores/navigation';
 import useUser from 'renderer/stores/user';
 
 function Home({ connection }) {
-  const { data, trySync, peerRequest, syncStatus } = connection;
+  const { data, trySync, requestPeerData, syncStatus } = connection;
 
   const [navBarOpen, toggleNavBar] = useAppNavigation((state) => [
     state.navBarOpen,
@@ -69,7 +69,7 @@ function Home({ connection }) {
 
   // Sample peer-create-user
   const requestCreateUser = async () => {
-    const response = await peerRequest({
+    const response = await requestPeerData({
       type: 'request',
       request: {
         name: 'user:create',

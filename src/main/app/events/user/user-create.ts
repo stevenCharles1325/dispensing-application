@@ -15,10 +15,13 @@ export default class UserCreateEvent implements EventContract {
       const requesterHasPermission =
         eventData.user.hasPermission?.('create-user');
 
+      console.log('PEER HAS PERMISSION: ', requesterHasPermission);
+      console.log(eventData.payload[0]);
       if (requesterHasPermission) {
         const user = UserRepository.create(eventData.payload[0]);
         const errors = await validator(user);
 
+        console.log(errors);
         if (errors && errors.length) {
           return {
             errors,
@@ -27,6 +30,7 @@ export default class UserCreateEvent implements EventContract {
         }
 
         const data = await UserRepository.save(user);
+        console.log('CREATED A USER');
         return {
           data,
           status: 'SUCCESS',
