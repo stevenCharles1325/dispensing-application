@@ -8,7 +8,9 @@ import tabs from 'renderer/enums/SideBarTabs';
 import useAppNavigation from 'renderer/stores/navigation';
 import useUser from 'renderer/stores/user';
 
-function Home({ data, trySync, peerRequest }) {
+function Home({ connection }) {
+  const { data, trySync, peerRequest, syncStatus } = connection;
+
   const [navBarOpen, toggleNavBar] = useAppNavigation((state) => [
     state.navBarOpen,
     state.toggleNavBar,
@@ -36,8 +38,6 @@ function Home({ data, trySync, peerRequest }) {
         `${response.data.user.first_name} ${response.data.user.last_name}`
       );
     }
-
-    await trySync();
   };
 
   // Sample create-user
@@ -87,6 +87,13 @@ function Home({ data, trySync, peerRequest }) {
 
     console.log('PEER-RESPONSE: ', response);
   };
+
+  // Call try sync when user.token has value
+  useEffect(() => {
+    if (user.token) {
+      trySync();
+    }
+  }, [trySync, user, syncStatus]);
 
   useEffect(() => {
     console.log('PEER-DATA: ', data);

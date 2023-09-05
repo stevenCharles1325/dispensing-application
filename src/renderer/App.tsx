@@ -6,29 +6,21 @@ import './styles/global.css';
 
 export default function App() {
   // Peer data Connection
-  const { data, close, trySync, requestPeerData } = useConnection();
+  const connection = useConnection();
 
   useEffect(() => {
     return () => {
       console.log('App is closing connection...');
-      close();
+      connection.close();
     };
-  }, [close]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connection.close]);
 
   return (
     <Router>
       <div className="App">
         <Routes>
-          <Route
-            path="/"
-            element={
-              <Home
-                data={data}
-                trySync={trySync}
-                peerRequest={requestPeerData}
-              />
-            }
-          />
+          <Route path="/" element={<Home connection={connection} />} />
         </Routes>
       </div>
     </Router>

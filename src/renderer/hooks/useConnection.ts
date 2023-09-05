@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import useUser from 'renderer/stores/user';
 
 const SimplePeerWrapper = require('simple-peer-wrapper');
@@ -7,7 +7,7 @@ const options = {
   serverUrl: process.env.SIGNALING_SERVER_URL,
   debug: true,
   simplePeerOptions: {
-    initiator: true,
+    initiator: false,
     channelName: process.env.PEER_CHANNEL_NAME,
   },
 };
@@ -22,22 +22,24 @@ const useConnection = () => {
 
   const syncStatus = useRef<'PENDING' | 'SUCCEEDED' | 'FAILED'>('PENDING');
 
-  // eslint-disable-next-line no-undef
-  const requestPeerData = async (data: Partial<PeerDataContract>) => {
-    if (!data) return;
+  const requestPeerData = useCallback(
+    // eslint-disable-next-line no-undef
+    async (data: Partial<PeerDataContract>) => {
+      if (!data) return;
 
-    const payload = {
-      systemKey: process.env.SYSTEM_KEY,
-      token: authUser.token ?? '',
-      ...data,
-    };
+      const payload = {
+        ...data,
+        systemKey: process.env.SYSTEM_KEY,
+        token: authUser.token ?? '',
+      };
 
-    console.log(authUser);
+      console.log(payload);
+      spw.send(payload);
+    },
+    [authUser]
+  );
 
-    spw.send(payload);
-  };
-
-  const trySync = async () => {
+  const trySync = () => {
     console.log('[PEER-SYSTEM]: Synching data...');
     syncStatus.current = 'PENDING';
 
@@ -50,7 +52,7 @@ const useConnection = () => {
   };
 
   useEffect(() => {
-    console.log('[PEER-SYSTEM-STATUS]: ', syncStatus);
+    console.log('[PEER-SYSTEM-STATUS]: ', syncStatus.current);
     spw.connect();
 
     // Sync data when connection is established
@@ -75,7 +77,7 @@ const useConnection = () => {
       setUser('refresh_token', response.data.refresh_token);
 
       console.log('Sync First Attempt');
-      await trySync();
+      trySync();
     });
 
     spw.on('data', (data: Record<string, any>) => {
@@ -141,7 +143,7 @@ const useConnection = () => {
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error, syncStatus]);
+  }, [error, syncStatus.current, trySync, requestPeerData]);
 
   useEffect(() => {
     // Display error messages in console
@@ -149,12 +151,12 @@ const useConnection = () => {
   }, [error]);
 
   return {
-    data: requestedData,
     error,
     trySync,
-    syncStatus,
     requestPeerData,
     close: spw.close,
+    data: requestedData,
+    syncStatus: syncStatus.current,
   };
 };
 
