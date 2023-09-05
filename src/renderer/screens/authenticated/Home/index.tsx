@@ -23,9 +23,9 @@ function Home({ data, trySync, peerRequest }) {
       password: 'passWORD123@@@',
     });
 
-    console.log('response: ', response);
-
     setUser(response.data.user);
+    setUser('token', response.data.token);
+    setUser('refresh_token', response.data.refresh_token);
     setUser(
       'full_name',
       `${response.data.user.first_name} ${response.data.user.last_name}`

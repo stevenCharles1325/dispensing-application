@@ -1,6 +1,5 @@
 import UserRepository from 'Main/app/repositories/User-repository';
 import handleError from 'Main/app/modules/error-handler';
-import validator from 'Main/app/modules/validator';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
@@ -21,7 +20,6 @@ export default class UserShowEvent implements EventContract {
         const take = eventData.payload[2] ?? 15; // Total
         const skip = page * take;
 
-        console.log(payload);
         if (payload instanceof Object && !(payload instanceof Array)) {
           const userQuery = UserRepository.createQueryBuilder()
             .take(take)

@@ -78,14 +78,6 @@ const useConnection = () => {
 
     spw.on('data', (data: Record<string, any>) => {
       if (spw.isConnectionStarted()) {
-        if (syncStatus === 'FAILED') {
-          setError(
-            '[PEER-SYSTEM]: You cannot request for peer data as synchronization has failed. Try restarting the system.'
-          );
-
-          return;
-        }
-
         // eslint-disable-next-line no-undef
         const payload: PeerDataContract = data.data;
 
@@ -115,6 +107,14 @@ const useConnection = () => {
 
           setRequestedData(data.data);
         } else {
+          if (syncStatus === 'FAILED') {
+            setError(
+              '[PEER-SYSTEM]: You cannot request for peer data as synchronization has failed. Try restarting the system.'
+            );
+
+            return;
+          }
+
           window.electron.ipcRenderer
             .peerRequest(payload)
             .then((response) => requestPeerData(response.data))
@@ -136,6 +136,10 @@ const useConnection = () => {
     return () => spw.close();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncStatus]);
+
+  useEffect(() => {
+    console.log(error);
+  }, [error]);
 
   return {
     data: requestedData,
