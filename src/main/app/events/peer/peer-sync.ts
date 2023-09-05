@@ -23,7 +23,7 @@ export default class PeerSyncEvent implements EventContract {
     const events: Record<string, Listener> = storage.get('POS_EVENTS');
 
     // Mannually verifies the token
-    const authResponse = authService.verifyToken(data.token);
+    const authResponse = authService.verifyToken(eventData.user.token);
 
     if (authResponse.status === 'ERROR') {
       return {

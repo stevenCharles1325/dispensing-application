@@ -22,22 +22,26 @@ const useConnection = () => {
 
   const syncStatus = useRef<'PENDING' | 'SUCCEEDED' | 'FAILED'>('PENDING');
 
-  const requestPeerData = useCallback(
+  // eslint-disable-next-line no-undef
+  const completeData = useCallback(
     // eslint-disable-next-line no-undef
-    async (data: Partial<PeerDataContract>) => {
-      if (!data) return;
-
-      const payload = {
-        ...data,
+    (payload: Partial<PeerDataContract>) => {
+      return {
+        ...payload,
         systemKey: process.env.SYSTEM_KEY,
-        token: authUser.token ?? '',
+        token: authUser.token,
       };
-
-      console.log(payload);
-      spw.send(payload);
     },
     [authUser]
   );
+
+  // eslint-disable-next-line no-undef
+  const requestPeerData = async (data: Partial<PeerDataContract>) => {
+    if (!data) return;
+
+    const payload = completeData(data);
+    spw.send(payload);
+  };
 
   const trySync = () => {
     console.log('[PEER-SYSTEM]: Synching data...');
@@ -91,14 +95,22 @@ const useConnection = () => {
               console.log('[PEER-SYSTEM]: Synching data succeeded');
               syncStatus.current = 'SUCCEEDED';
 
-              // Save to database
-              requestPeerData({
+              const dataToBeSaved = completeData({
                 type: 'response',
                 response: {
                   name: 'peer:sync',
                   body: payload!.response?.body?.data,
                 },
-              });
+                // eslint-disable-next-line no-undef
+              }) as PeerDataContract;
+
+              // Save to database
+              window.electron.ipcRenderer
+                .peerRequest(dataToBeSaved)
+                .catch((err) => {
+                  console.log('Error: ', err);
+                  setError(err);
+                });
 
               return;
             }
@@ -143,7 +155,7 @@ const useConnection = () => {
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error, syncStatus.current, trySync, requestPeerData]);
+  }, [error, syncStatus.current, completeData]);
 
   useEffect(() => {
     // Display error messages in console

@@ -43,6 +43,7 @@ export default class PeerRequestEvent implements EventContract {
         };
       }
 
+      console.log('DATA: ', data)
       const response = await events[data.request.name]({
         event,
         eventData: {
