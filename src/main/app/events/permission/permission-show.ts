@@ -1,19 +1,19 @@
-import UserRepository from 'Main/app/repositories/User-repository';
 import handleError from 'Main/app/modules/error-handler';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
 import usePagination from 'Main/app/hooks/usePagination';
+import PermissionRepository from 'Main/app/repositories/Permission-repository';
 
-export default class UserShowEvent implements EventContract {
-  public channel: string = 'user:show';
+export default class PermissionShowEvent implements EventContract {
+  public channel: string = 'permission:show';
 
   public middlewares = ['auth-middleware'];
 
   public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('view-user');
+        eventData.user.hasPermission?.('view-permission');
 
       if (requesterHasPermission) {
         const payload = eventData.payload[0];
@@ -22,14 +22,14 @@ export default class UserShowEvent implements EventContract {
         const skip = (page - 1) * take;
 
         if (payload instanceof Object && !(payload instanceof Array)) {
-          const userQuery = UserRepository.createQueryBuilder()
+          const permissionQuery = PermissionRepository.createQueryBuilder()
             .take(take)
             .skip(skip);
 
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
             if (propertyFind instanceof Array) {
-              userQuery.where(`${propertyName} IN (:...args)`, {
+              permissionQuery.where(`${propertyName} IN (:...args)`, {
                 args: propertyFind,
               });
             } else {
@@ -43,7 +43,7 @@ export default class UserShowEvent implements EventContract {
           }
 
           // eslint-disable-next-line react-hooks/rules-of-hooks
-          return await usePagination(userQuery, page);
+          return await usePagination(permissionQuery, page);
         }
 
         return {
@@ -53,7 +53,7 @@ export default class UserShowEvent implements EventContract {
       }
 
       return {
-        errors: ['You are not allowed to view a User'],
+        errors: ['You are not allowed to view a Permission'],
         status: 'ERROR',
       };
     } catch (err) {

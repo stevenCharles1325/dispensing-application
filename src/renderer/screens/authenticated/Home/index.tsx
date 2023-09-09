@@ -42,7 +42,7 @@ function Home({ connection }) {
 
   // Sample create-user
   const createUser = async () => {
-    const response = await window.electron.ipcRenderer.createUser({
+    const userObj = {
       first_name: 'jose',
       last_name: 'manalo',
       birth_date: new Date(),
@@ -50,19 +50,18 @@ function Home({ connection }) {
       email: 'johndoe1234@gmail.com',
       password: 'passWORD123@@@',
       phone_number: '+639454610579',
-    });
+    };
+    console.log(userObj);
+
+    const response = await window.electron.ipcRenderer.createUser(userObj);
 
     console.log(response);
   };
 
   const getUser = async () => {
-    const response = await window.electron.ipcRenderer.getUser(
-      {
-        first_name: ['jose'],
-      },
-      1,
-      10
-    );
+    const response = await window.electron.ipcRenderer.getUser({
+      first_name: ['jose'],
+    });
 
     console.log(response);
   };
@@ -90,9 +89,7 @@ function Home({ connection }) {
 
   // Call try sync when user.token has value
   useEffect(() => {
-    if (user.token) {
-      trySync();
-    }
+    if (user.token) trySync();
   }, [trySync, user, syncStatus]);
 
   useEffect(() => {

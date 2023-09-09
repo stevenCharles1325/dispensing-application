@@ -21,8 +21,8 @@ const electronHandler = {
     // USER MODULE
     getUser: async (
       payload: Record<string, any[]>,
-      page: number,
-      total: number
+      page: number = 1,
+      total: number = 15
     ): Promise<ResponseContract> =>
       ipcRenderer.invoke('user:show', payload, page, total),
 

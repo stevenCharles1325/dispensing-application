@@ -3,21 +3,21 @@ import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
 import { SqliteDataSource } from 'Main/datasource';
-import { User } from 'Main/database/models/User';
+import { Permission } from 'Main/database/models/Permission';
 
-export default class UserDeleteEvent implements EventContract {
-  public channel: string = 'user:delete';
+export default class PermissionArchiveEvent implements EventContract {
+  public channel: string = 'permission:archive';
 
   public middlewares = ['auth-middleware'];
 
   public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('delete-user');
+        eventData.user.hasPermission?.('archive-permission');
 
       if (requesterHasPermission) {
-        const userRepo = SqliteDataSource.getRepository(User);
-        const data = await userRepo.delete(eventData.payload[0]);
+        const permissionRepo = SqliteDataSource.getRepository(Permission);
+        const data = await permissionRepo.softDelete(eventData.payload[0]);
 
         return {
           data,
@@ -27,12 +27,13 @@ export default class UserDeleteEvent implements EventContract {
       }
 
       return {
-        errors: ['You are not allowed to delete a User'],
+        errors: ['You are not allowed to archive a Permission'],
         status: 'ERROR',
       };
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
+
       return {
         errors: [error],
         status: 'ERROR',

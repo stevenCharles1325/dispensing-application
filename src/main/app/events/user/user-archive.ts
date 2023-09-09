@@ -13,7 +13,7 @@ export default class UserArchiveEvent implements EventContract {
   public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('create-user');
+        eventData.user.hasPermission?.('archive-user');
 
       if (requesterHasPermission) {
         const userRepo = SqliteDataSource.getRepository(User);
@@ -27,7 +27,7 @@ export default class UserArchiveEvent implements EventContract {
       }
 
       return {
-        errors: ['You are not allowed to create a User'],
+        errors: ['You are not allowed to archive a User'],
         status: 'ERROR',
       };
     } catch (err) {

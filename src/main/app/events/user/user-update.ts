@@ -4,7 +4,6 @@ import EventContract, {
 } from 'Main/contracts/event-contract';
 import UserRepository from 'Main/app/repositories/User-repository';
 import validator from 'Main/app/modules/validator';
-import { User } from 'Main/database/models/User';
 
 export default class UserDeleteEvent implements EventContract {
   public channel: string = 'user:update';
@@ -17,7 +16,7 @@ export default class UserDeleteEvent implements EventContract {
       const userUpdate = eventData.payload[1];
 
       const requesterHasPermission =
-        eventData.user.hasPermission?.('create-user');
+        eventData.user.hasPermission?.('update-user');
 
       if (requesterHasPermission) {
         const user = await UserRepository.findOneByOrFail({
@@ -42,7 +41,7 @@ export default class UserDeleteEvent implements EventContract {
       }
 
       return {
-        errors: ['You are not allowed to create a User'],
+        errors: ['You are not allowed to update a User'],
         status: 'ERROR',
       };
     } catch (err) {

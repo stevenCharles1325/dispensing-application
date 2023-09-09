@@ -1,23 +1,23 @@
-import UserRepository from 'Main/app/repositories/User-repository';
 import handleError from 'Main/app/modules/error-handler';
 import validator from 'Main/app/modules/validator';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
+import RoleRepository from 'Main/app/repositories/Role-repository';
 
-export default class UserCreateEvent implements EventContract {
-  public channel: string = 'user:create';
+export default class RoleCreateEvent implements EventContract {
+  public channel: string = 'role:create';
 
   public middlewares = ['auth-middleware'];
 
   public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('create-user');
+        eventData.user.hasPermission?.('create-role');
 
       if (requesterHasPermission) {
-        const user = UserRepository.create(eventData.payload[0]);
-        const errors = await validator(user);
+        const role = RoleRepository.create(eventData.payload[0]);
+        const errors = await validator(role);
 
         console.log(errors);
         if (errors && errors.length) {
@@ -27,8 +27,8 @@ export default class UserCreateEvent implements EventContract {
           };
         }
 
-        const data = await UserRepository.save(user);
-        console.log('CREATED A USER');
+        const data = await RoleRepository.save(role);
+        console.log('CREATED A ROLE');
         return {
           data,
           status: 'SUCCESS',
@@ -36,7 +36,7 @@ export default class UserCreateEvent implements EventContract {
       }
 
       return {
-        errors: ['You are not allowed to create a User'],
+        errors: ['You are not allowed to create a Role'],
         status: 'ERROR',
       };
     } catch (err) {

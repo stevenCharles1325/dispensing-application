@@ -3,8 +3,9 @@ import AuthConfig from 'Main/config/auth';
 import AuthService from 'Services/AuthService';
 import UserRepository from 'Repositories/User-repository';
 import bcrypt from 'bcrypt';
+import ProviderContract from 'Main/contracts/provider-contract';
 
-export default class AuthProvider {
+export default class AuthProvider implements ProviderContract {
   constructor(public provider: typeof Provider) {}
 
   public run() {

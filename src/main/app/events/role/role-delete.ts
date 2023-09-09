@@ -3,21 +3,21 @@ import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
 import { SqliteDataSource } from 'Main/datasource';
-import { User } from 'Main/database/models/User';
+import { Role } from 'Main/database/models/Role';
 
-export default class UserDeleteEvent implements EventContract {
-  public channel: string = 'user:delete';
+export default class RoleDeleteEvent implements EventContract {
+  public channel: string = 'role:delete';
 
   public middlewares = ['auth-middleware'];
 
   public async listener({ eventData }: EventListenerPropertiesContract) {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('delete-user');
+        eventData.user.hasPermission?.('delete-role');
 
       if (requesterHasPermission) {
-        const userRepo = SqliteDataSource.getRepository(User);
-        const data = await userRepo.delete(eventData.payload[0]);
+        const roleRepo = SqliteDataSource.getRepository(Role);
+        const data = await roleRepo.delete(eventData.payload[0]);
 
         return {
           data,
@@ -27,7 +27,7 @@ export default class UserDeleteEvent implements EventContract {
       }
 
       return {
-        errors: ['You are not allowed to delete a User'],
+        errors: ['You are not allowed to delete a Role'],
         status: 'ERROR',
       };
     } catch (err) {
