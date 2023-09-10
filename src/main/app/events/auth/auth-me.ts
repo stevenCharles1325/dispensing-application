@@ -4,6 +4,7 @@ import AuthService from 'Main/app/services/AuthService';
 import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
+import ResponseContract from 'Main/contracts/response-contract';
 
 export default class AuthMe implements EventContract {
   public channel: string = 'auth:me';
@@ -17,10 +18,12 @@ export default class AuthMe implements EventContract {
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
+
       return {
         errors: [error],
+        code: 'SYS_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 }

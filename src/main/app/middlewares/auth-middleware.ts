@@ -1,6 +1,7 @@
 import Provider from '@IOC:Provider';
 import AuthContract from 'Main/contracts/auth-contract';
 import { MiddlewareContract } from 'Main/contracts/middleware-contract';
+import ResponseContract from 'Main/contracts/response-contract';
 import { User } from 'Main/database/models/User';
 import AuthService from '../services/AuthService';
 
@@ -32,8 +33,9 @@ const authMiddleware: MiddlewareContract = ({ eventData, storage, next }) => {
 
   return {
     errors: authResponse.errors,
+    code: 'AUTH_ERR',
     status: 'ERROR',
-  };
+  } as ResponseContract;
 };
 
 export default authMiddleware;

@@ -6,6 +6,7 @@ import EventContract, {
 } from 'Main/contracts/event-contract';
 import Provider from '@IOC:Provider';
 import AuthService from 'Main/app/services/AuthService';
+import ResponseContract from 'Main/contracts/response-contract';
 
 export default class AuthSignUpEvent implements EventContract {
   public channel: string = 'auth:sign-up';
@@ -19,20 +20,25 @@ export default class AuthSignUpEvent implements EventContract {
       if (errors && errors.length) {
         return {
           errors,
+          code: 'VALIDATION_ERR',
           status: 'ERROR',
-        };
+        } as ResponseContract;
       }
 
       const data = (await UserRepository.save(user))[0];
-      return await authService.authenticate(data.email, data.password);
+      return (await authService.authenticate(
+        data.email,
+        data.password
+      )) as ResponseContract;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
       return {
         errors: [error],
+        code: 'SYS_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 }

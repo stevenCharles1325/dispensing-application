@@ -4,6 +4,7 @@ import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
 import usePagination from 'Main/app/hooks/usePagination';
+import ResponseContract from 'Main/contracts/response-contract';
 
 export default class UserShowEvent implements EventContract {
   public channel: string = 'user:show';
@@ -37,8 +38,9 @@ export default class UserShowEvent implements EventContract {
                 errors: [
                   'The look-up values for the property must be in array',
                 ],
+                code: 'REQ_INVALID',
                 status: 'ERROR',
-              };
+              } as ResponseContract;
             }
           }
 
@@ -48,22 +50,25 @@ export default class UserShowEvent implements EventContract {
 
         return {
           errors: ['The query argument must be an Object'],
+          code: 'REQ_INVALID',
           status: 'ERROR',
-        };
+        } as ResponseContract;
       }
 
       return {
         errors: ['You are not allowed to view a User'],
+        code: 'REQ_UNAUTH',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
       return {
         errors: [error],
+        code: 'REQ_UNAUTH',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 }

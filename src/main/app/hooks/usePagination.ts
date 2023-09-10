@@ -16,16 +16,18 @@ const usePagination = async (
 
     return {
       data: [entity, pagination],
+      code: 'REQ_OK',
       status: 'SUCCESS',
-    };
+    } as ResponseContract;
   } catch (err) {
     const error = handleError(err);
     console.log(err);
 
     return {
       errors: [error],
+      code: 'SYS_ERR',
       status: 'ERROR',
-    };
+    } as ResponseContract;
   }
 };
 

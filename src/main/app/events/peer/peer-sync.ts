@@ -7,6 +7,7 @@ import EventContract, {
 } from 'Main/contracts/event-contract';
 import POSError from 'Main/contracts/pos-error-contract';
 import POSValidationError from 'Main/contracts/pos-validation-error-contract';
+import ResponseContract from 'Main/contracts/response-contract';
 import { User } from 'Main/database/models/User';
 import { SqliteDataSource } from 'Main/datasource';
 
@@ -29,8 +30,9 @@ export default class PeerSyncEvent implements EventContract {
     if (authResponse.status === 'ERROR') {
       return {
         errors: authResponse.errors,
+        code: 'PEER_SYNC_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
 
     const user = authResponse.data;
@@ -61,8 +63,9 @@ export default class PeerSyncEvent implements EventContract {
 
           return {
             data: syncItems,
+            code: 'PEER_REQ_OK',
             status: 'SUCCESS',
-          };
+          } as ResponseContract;
         }
 
         if (data.type === 'response') {
@@ -97,8 +100,10 @@ export default class PeerSyncEvent implements EventContract {
 
               if (response.status === 'SUCCESS') {
                 responseData.push(response.data);
-              } else {
-                errors.push(...response.errors);
+              } else if (response.errors) {
+                errors.push(
+                  ...(response.errors as POSError[] & POSValidationError[])
+                );
               }
             }
           }
@@ -106,28 +111,32 @@ export default class PeerSyncEvent implements EventContract {
           return {
             data: responseData,
             errors,
+            code: errors.length ? 'PEER_SYNC_ERROR' : 'PEER_SYNC_OK',
             status: errors.length ? 'ERROR' : 'SUCCESS',
-          };
+          } as ResponseContract;
         }
 
         return {
           errors: ['Request is invalid'],
+          code: 'PEER_REQ_INVALID',
           status: 'ERROR',
-        };
+        } as ResponseContract;
       } catch (err) {
         const error = handleError(err);
         console.log('ERROR HANDLER OUTPUT: ', error);
 
         return {
           errors: [error],
+          code: 'SYS_ERR',
           status: 'ERROR',
-        };
+        } as ResponseContract;
       }
     } else {
       return {
         errors: ['Unauthorized user'],
+        code: 'PEER_SYNC_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 }

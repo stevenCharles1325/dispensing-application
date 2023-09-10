@@ -24,7 +24,7 @@ export interface EventListenerPropertiesContract {
 
 export type Listener = (
   props: EventListenerPropertiesContract
-) => Promise<ResponseContract | any>;
+) => Promise<ResponseContract>;
 
 export default interface EventContract {
   channel: string;

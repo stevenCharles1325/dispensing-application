@@ -133,7 +133,7 @@ export default class AuthService {
           const payload: AuthContract<User> = {
             token,
             refresh_token,
-            user,
+            user: user.serialize('password'),
             token_expires_at: this.parseTimeExpression(
               this.config.token_expires_at
             ),
@@ -179,14 +179,16 @@ export default class AuthService {
         data:
           this.store.get(this.AUTH_USER_TOKEN) ??
           this.store2.get(this.AUTH_USER_TOKEN),
+        code: 'AUTH_OK',
         status,
-      };
+      } as ResponseContract;
     }
 
     return {
       errors: [result],
+      code: 'AUTH_ERR',
       status,
-    };
+    } as ResponseContract;
   }
 
   // Log out
@@ -203,23 +205,26 @@ export default class AuthService {
         this.store2.clear();
 
         return {
+          code: 'AUTH_OK',
           status: 'SUCCESS',
-        };
+        } as ResponseContract;
       } catch (err) {
         const errors = handleError(err);
         console.log(errors);
 
         return {
           errors,
+          code: 'SYS_ERR',
           status: 'ERROR',
-        };
+        } as unknown as ResponseContract;
       }
     }
 
     return {
       errors: ['User is not authenticated'],
+      code: 'AUTH_ERR',
       status: 'ERROR',
-    };
+    } as ResponseContract;
   }
 
   public verifyToken(token: string = ''): ResponseContract {
@@ -227,23 +232,27 @@ export default class AuthService {
       if (!token.length) {
         return {
           errors: ['User is not authenticated'],
+          code: 'AUTH_ERR',
           status: 'ERROR',
-        };
+        } as ResponseContract;
       }
 
       const data = jwt.verify(token, this.config.key) as Partial<UserContract>;
 
       return {
         data: data as Partial<UserContract>,
+        code: 'AUTH_OK',
         status: 'SUCCESS',
-      };
+      } as ResponseContract;
     } catch (err) {
       console.log(err);
       const error = handleError(err);
+
       return {
         errors: [error],
+        code: 'SYS_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 

@@ -3,6 +3,7 @@ import EventContract, {
   EventListenerPropertiesContract,
   Listener,
 } from 'Main/contracts/event-contract';
+import ResponseContract from 'Main/contracts/response-contract';
 
 export default class PeerRequestEvent implements EventContract {
   public channel: string = 'peer:request';
@@ -16,6 +17,16 @@ export default class PeerRequestEvent implements EventContract {
       // eslint-disable-next-line no-undef
       const data: PeerDataContract = eventData.payload[0];
       const events: Record<string, Listener> = storage.get('POS_EVENTS');
+      const desiredEvent =
+        events?.[data.response?.name ?? data.request?.name ?? ''];
+
+      if (!desiredEvent) {
+        return {
+          errors: ['Event is not available'],
+          code: 'PEER_REQ_INVALID',
+          status: 'ERROR',
+        } as ResponseContract;
+      }
 
       const unavailableEvents = [
         'auth:sign-in',
@@ -25,7 +36,7 @@ export default class PeerRequestEvent implements EventContract {
       ];
 
       if (data.type === 'response') {
-        const response = await events[data.response!.name]({
+        const response = await desiredEvent({
           event,
           eventData: {
             payload: [
@@ -40,30 +51,34 @@ export default class PeerRequestEvent implements EventContract {
 
         return {
           data: response,
+          code: 'PEER_REQ_OK',
           status: 'SUCCESS',
-        };
+        } as ResponseContract;
       }
 
       if (data.systemKey !== process.env.SYSTEM_KEY)
         return {
           errors: ['Invalid system-key'],
+          code: 'PEER_REQ_ERR',
           status: 'ERROR',
-        };
+        } as ResponseContract;
 
       if (!data.request?.name)
         return {
-          errors: ['You must provide request name if this is a Request type'],
+          errors: ['Request name is required'],
+          code: 'PEER_REQ_ERR',
           status: 'ERROR',
-        };
+        } as ResponseContract;
 
       if (unavailableEvents.includes(data.request.name)) {
         return {
-          errors: ['You are not allowed to perform this action'],
+          errors: ['Invalid action'],
+          code: 'PEER_REQ_INVALID',
           status: 'ERROR',
-        };
+        } as ResponseContract;
       }
 
-      const response = await events[data.request.name]({
+      const response = await desiredEvent({
         event,
         eventData: {
           payload: [
@@ -75,7 +90,6 @@ export default class PeerRequestEvent implements EventContract {
         },
         storage,
       });
-      console.log(response);
 
       const payload = {
         systemKey: process.env.SYSTEM_KEY,
@@ -90,16 +104,18 @@ export default class PeerRequestEvent implements EventContract {
 
       return {
         data: payload,
+        code: 'PEER_REQ_OK',
         status: 'SUCCESS',
-      };
+      } as ResponseContract;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
       return {
         errors: [error],
+        code: 'PEER_REQ_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 }

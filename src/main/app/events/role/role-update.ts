@@ -4,6 +4,7 @@ import EventContract, {
 } from 'Main/contracts/event-contract';
 import validator from 'Main/app/modules/validator';
 import RoleRepository from 'Main/app/repositories/Role-repository';
+import ResponseContract from 'Main/contracts/response-contract';
 
 export default class UserDeleteEvent implements EventContract {
   public channel: string = 'role:update';
@@ -28,30 +29,33 @@ export default class UserDeleteEvent implements EventContract {
         if (errors.length) {
           return {
             errors,
+            code: 'VALIDATION_ERR',
             status: 'ERROR',
-          };
+          } as ResponseContract;
         }
 
         const data = await RoleRepository.save(updatedRole);
         return {
           data,
-          errors: [],
+          code: 'REQ_OK',
           status: 'SUCCESS',
-        };
+        } as ResponseContract;
       }
 
       return {
         errors: ['You are not allowed to update a Role'],
+        code: 'REQ_UNAUTH',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
       return {
         errors: [error],
+        code: 'SYS_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 }

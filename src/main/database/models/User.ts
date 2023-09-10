@@ -3,6 +3,7 @@
 import {
   Column,
   Entity,
+  Exclusion,
   OneToOne,
   OneToMany,
   ManyToOne,
@@ -191,5 +192,22 @@ export class User {
         this.system_id = thisSystem.id;
       }
     }
+  }
+
+  serialize(...except: string[]) {
+    const serialized: Record<string, any> = {};
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [key, value] of Object.entries(this)) {
+      // eslint-disable-next-line no-continue
+      if (typeof value === 'function') continue;
+
+      // eslint-disable-next-line no-continue
+      if (except.includes(key)) continue;
+
+      serialized[key] = value;
+    }
+
+    return serialized;
   }
 }

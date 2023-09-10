@@ -4,6 +4,7 @@ import EventContract, {
   EventListenerPropertiesContract,
 } from 'Main/contracts/event-contract';
 import RoleRepository from 'Main/app/repositories/Role-repository';
+import ResponseContract from 'Main/contracts/response-contract';
 
 export default class RoleCreateEvent implements EventContract {
   public channel: string = 'role:create';
@@ -23,29 +24,34 @@ export default class RoleCreateEvent implements EventContract {
         if (errors && errors.length) {
           return {
             errors,
+            code: 'VALIDATION_ERR',
             status: 'ERROR',
-          };
+          } as ResponseContract;
         }
 
         const data = await RoleRepository.save(role);
         console.log('CREATED A ROLE');
         return {
           data,
+          code: 'REQ_OK',
           status: 'SUCCESS',
-        };
+        } as ResponseContract;
       }
 
       return {
         errors: ['You are not allowed to create a Role'],
+        code: 'REQ_UNAUTH',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
+
       return {
         errors: [error],
+        code: 'SYS_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 }

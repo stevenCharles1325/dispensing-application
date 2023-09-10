@@ -4,6 +4,7 @@ import EventContract, {
 } from 'Main/contracts/event-contract';
 import { SqliteDataSource } from 'Main/datasource';
 import { Permission } from 'Main/database/models/Permission';
+import ResponseContract from 'Main/contracts/response-contract';
 
 export default class PermissionArchiveEvent implements EventContract {
   public channel: string = 'permission:archive';
@@ -22,22 +23,25 @@ export default class PermissionArchiveEvent implements EventContract {
         return {
           data,
           errors: [],
+          code: 'REQ_OK',
           status: 'SUCCESS',
-        };
+        } as ResponseContract;
       }
 
       return {
         errors: ['You are not allowed to archive a Permission'],
+        code: 'REQ_UNAUTH',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
       return {
         errors: [error],
+        code: 'SYS_ERR',
         status: 'ERROR',
-      };
+      } as ResponseContract;
     }
   }
 }
