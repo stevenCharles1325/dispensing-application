@@ -1,4 +1,4 @@
-import RoleContract from 'Contracts/role-contract';
+import RoleContract from 'Main/app/interfaces/role-contract';
 
 const cashier: RoleContract = {
   name: 'Cashier',

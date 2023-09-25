@@ -1,6 +1,6 @@
-import DataName from 'Main/contracts/open-data-contract';
-import ResponseContract from 'Main/contracts/response-contract';
-import UserContract from 'Main/contracts/user-contract';
+import DataName from 'Main/app/interfaces/open-data-contract';
+import ResponseContract from 'Main/app/interfaces/response-contract';
+import UserContract from 'Main/app/contracts/user-contract';
 
 declare global {
   type DataActions =

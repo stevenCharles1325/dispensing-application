@@ -24,7 +24,7 @@ import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all';
 import stores from './stores';
-import AuthService from './app/services/AuthService';
+import AuthService from './app/services/auth.service';
 
 // Initializing .ENV
 dotenv.config();

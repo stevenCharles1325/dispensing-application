@@ -1,9 +1,9 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import AuthSignInContract from './contracts/auth-sign-in-contract';
-import ResponseContract from './contracts/response-contract';
-import UserContract from './contracts/user-contract';
+import AuthSignInContract from './app/interfaces/auth/auth.sign-in.interface';
+import ResponseContract from './app/interfaces/pos/pos.response.interface';
+import UserContract from './app/data-transfer-objects/user.dto';
 
 export type Channels = 'ipc-example';
 

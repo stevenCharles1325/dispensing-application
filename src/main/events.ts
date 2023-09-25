@@ -8,13 +8,13 @@
 /* eslint-disable no-restricted-syntax */
 import { ipcMain } from 'electron';
 import { join } from 'path';
-import objectToFlattenArray from './app/modules/object-to-flatten-array';
-import objectToFlattenObject from './app/modules/object-to-flatten-object';
-import requireAll from './app/modules/require-all';
+import objectToFlattenArray from './app/modules/object-to-flatten-array.module';
+import objectToFlattenObject from './app/modules/object-to-flatten-object.module';
+import requireAll from './app/modules/require-all.module';
 import EventContract, {
   EventListenerPropertiesContract,
   Listener,
-} from './contracts/event-contract';
+} from './app/interfaces/event/event.interface';
 import { ALSStorage } from './stores';
 
 const eventsObject = requireAll(join(__dirname, 'app/events'), true);

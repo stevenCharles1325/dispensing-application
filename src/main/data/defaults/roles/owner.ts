@@ -1,4 +1,4 @@
-import RoleContract from 'Contracts/role-contract';
+import RoleContract from 'Main/app/interfaces/role-contract';
 import permissions from '../permissions';
 
 const owner: RoleContract = {

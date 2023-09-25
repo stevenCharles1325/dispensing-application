@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 import { AsyncLocalStorage } from 'node:async_hooks';
-import StorageContract from './contracts/storage-contract';
+import StorageContract from './app/interfaces/storage/storage.interface';
 
 type Callback = () => void;
 const asyncLocalStorage = new AsyncLocalStorage();
