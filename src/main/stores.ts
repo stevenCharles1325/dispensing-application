@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-syntax */
 import { AsyncLocalStorage } from 'node:async_hooks';
-import StorageContract from './app/interfaces/storage/storage.interface';
+import IStorage from './app/interfaces/storage/storage.interface';
 
 type Callback = () => void;
 const asyncLocalStorage = new AsyncLocalStorage();
 
-class Storage implements StorageContract {
+class Storage implements IStorage {
   constructor(public storage: Record<string, any> = {}) {}
 
   get(key: string): any {
@@ -31,6 +31,6 @@ export default function (callback: Callback) {
   callback();
 }
 
-export function ALSStorage(): StorageContract {
-  return asyncLocalStorage.getStore() as StorageContract;
+export function ALSStorage(): IStorage {
+  return asyncLocalStorage.getStore() as IStorage;
 }

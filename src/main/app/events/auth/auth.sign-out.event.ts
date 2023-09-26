@@ -1,10 +1,10 @@
-import handleError from 'Main/app/modules/error-handler';
-import EventContract from 'Main/app/interfaces/event.interface';
 import Provider from '@IOC:Provider';
-import AuthService from 'Main/app/services/auth.service';
-import ResponseContract from 'Main/app/interfaces/response-contract';
+import IEvent from 'Interfaces/event/event.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
+import handleError from 'Modules/error-handler.module';
+import AuthService from 'Services/auth.service';
 
-export default class AuthSignOutEvent implements EventContract {
+export default class AuthSignOutEvent implements IEvent {
   public channel: string = 'auth:sign-out';
 
   public middlewares = ['auth-middleware'];
@@ -13,7 +13,7 @@ export default class AuthSignOutEvent implements EventContract {
     try {
       const authService = Provider.ioc<AuthService>('AuthProvider');
 
-      return (await authService.revoke()) as ResponseContract;
+      return (await authService.revoke()) as IResponse;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -22,7 +22,7 @@ export default class AuthSignOutEvent implements EventContract {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 }

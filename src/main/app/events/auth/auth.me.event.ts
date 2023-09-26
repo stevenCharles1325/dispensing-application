@@ -1,15 +1,14 @@
 import Provider from '@IOC:Provider';
-import handleError from 'Main/app/modules/error-handler';
-import AuthService from 'Main/app/services/auth.service';
-import EventContract, {
-  EventListenerPropertiesContract,
-} from 'Main/app/interfaces/event.interface';
-import ResponseContract from 'Main/app/interfaces/response.interface';
+import IEvent from 'Interfaces/event/event.interface';
+import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
+import handleError from 'Modules/error-handler.module';
+import AuthService from 'Services/auth.service';
 
-export default class AuthMe implements EventContract {
+export default class AuthMe implements IEvent {
   public channel: string = 'auth:me';
 
-  public async listener({ eventData }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: IEventListenerProperties) {
     try {
       const authService = Provider.ioc<AuthService>('AuthProvider');
       const token = eventData.user?.token;
@@ -23,7 +22,7 @@ export default class AuthMe implements EventContract {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 }

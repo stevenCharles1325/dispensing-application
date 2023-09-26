@@ -1,4 +1,4 @@
-export default interface AuthSignInContract {
+export default interface IAuthSignIn {
   email: string;
   password: string;
 }

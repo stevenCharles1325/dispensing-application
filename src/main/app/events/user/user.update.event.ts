@@ -1,17 +1,16 @@
-import handleError from 'Main/app/modules/error-handler';
-import EventContract, {
-  EventListenerPropertiesContract,
-} from 'Main/app/interfaces/event.interface';
-import UserRepository from 'Main/app/repositories/User-repository';
-import validator from 'Main/app/modules/validator.module';
-import ResponseContract from 'Main/app/interfaces/response-contract';
+import IEvent from 'Interfaces/event/event.interface';
+import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
+import handleError from 'Modules/error-handler.module';
+import validator from 'Modules/validator.module';
+import UserRepository from 'Repositories/user.repository';
 
-export default class UserDeleteEvent implements EventContract {
+export default class UserDeleteEvent implements IEvent {
   public channel: string = 'user:update';
 
   public middlewares = ['auth-middleware'];
 
-  public async listener({ eventData }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: IEventListenerProperties) {
     try {
       const id = eventData.payload[0];
       const userUpdate = eventData.payload[1];
@@ -31,7 +30,7 @@ export default class UserDeleteEvent implements EventContract {
             errors,
             code: 'VALIDATION_ERR',
             status: 'ERROR',
-          } as ResponseContract;
+          } as IResponse;
         }
 
         const data = await UserRepository.save(updatedUser);
@@ -39,13 +38,13 @@ export default class UserDeleteEvent implements EventContract {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
-        } as ResponseContract;
+        } as IResponse;
       }
 
       return {
         errors: ['You are not allowed to update a User'],
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -54,7 +53,7 @@ export default class UserDeleteEvent implements EventContract {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 }

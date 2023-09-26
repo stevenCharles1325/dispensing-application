@@ -1,24 +1,27 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-prototype-builtins */
-import UserRepository from 'Main/app/repositories/User-repository';
 import bcrypt from 'bcrypt';
-import POSError from 'Main/app/interfaces/pos-error-contract';
 import jwt from 'jsonwebtoken';
-import AuthContract from 'Main/app/interfaces/auth-contract';
-import { User } from 'Main/database/models/User';
-import AuthConfig from 'Main/config/auth';
 import Store from 'electron-store';
-import ResponseContract from 'Main/app/interfaces/response-contract';
 import TokenRepository from '../repositories/token.repository';
-import StorageContract from 'Main/app/interfaces/storage-contract';
 import { ALSStorage } from 'Main/stores';
 import { SqliteDataSource } from 'Main/datasource';
-import { Token } from 'Main/database/models/Token';
 import handleError from '../modules/error-handler.module';
-import UserContract from 'Main/app/contracts/user-contract';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
+import IService from 'Interfaces/service/service.interface';
+import { Token } from '@mui/icons-material';
+import AuthConfig from 'Config/auth.config';
+import StorageContract from 'Interfaces/storage/storage.interface';
+import { User } from 'Models/user.model';
+import UserRepository from 'Repositories/user.repository';
+import UserContract from '../data-transfer-objects/user.dto';
+import IAuth from 'Interfaces/auth/auth.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
+import IPOSError from 'Interfaces/pos/pos.error.interface';
 
-export default class AuthService {
+export default class AuthService implements IService {
+  public readonly SERVICE_NAME: 'AUTH_SERVICE';
+
   private readonly AUTH_USER = 'POS_AUTH_USER';
 
   private readonly AUTH_USER_TOKEN = 'POS_AUTH_USER_TOKEN';
@@ -76,7 +79,7 @@ export default class AuthService {
     return [token, refresh_token];
   }
 
-  private set authUser(payload: AuthContract<User>) {
+  private set authUser(payload: IAuth<User>) {
     this.store.set(this.AUTH_USER_TOKEN, payload);
     this.store2.set(this.AUTH_USER_TOKEN, payload);
 
@@ -100,9 +103,9 @@ export default class AuthService {
   public async authenticate(
     email: string,
     password: string
-  ): Promise<ResponseContract> {
+  ): Promise<IResponse> {
     const user = await this.userRepo.findOneBy({ email });
-    let result: POSError | AuthContract<User> | null = null;
+    let result: IPOSError | IAuth<User> | null = null;
     let status: 'SUCCESS' | 'ERROR' = 'ERROR';
 
     if (user) {
@@ -130,7 +133,7 @@ export default class AuthService {
           };
 
           const [token, refresh_token] = this.generateToken(user_data);
-          const payload: AuthContract<User> = {
+          const payload: IAuth<User> = {
             token,
             refresh_token,
             user: user.serialize('password'),
@@ -181,14 +184,14 @@ export default class AuthService {
           this.store2.get(this.AUTH_USER_TOKEN),
         code: 'AUTH_OK',
         status,
-      } as ResponseContract;
+      } as IResponse;
     }
 
     return {
       errors: [result],
       code: 'AUTH_ERR',
       status,
-    } as ResponseContract;
+    } as IResponse;
   }
 
   // Log out
@@ -207,7 +210,7 @@ export default class AuthService {
         return {
           code: 'AUTH_OK',
           status: 'SUCCESS',
-        } as ResponseContract;
+        } as IResponse;
       } catch (err) {
         const errors = handleError(err);
         console.log(errors);
@@ -216,7 +219,7 @@ export default class AuthService {
           errors,
           code: 'SYS_ERR',
           status: 'ERROR',
-        } as unknown as ResponseContract;
+        } as unknown as IResponse;
       }
     }
 
@@ -224,17 +227,17 @@ export default class AuthService {
       errors: ['User is not authenticated'],
       code: 'AUTH_ERR',
       status: 'ERROR',
-    } as ResponseContract;
+    } as IResponse;
   }
 
-  public verifyToken(token: string = ''): ResponseContract {
+  public verifyToken(token: string = ''): IResponse {
     try {
       if (!token.length) {
         return {
           errors: ['User is not authenticated'],
           code: 'AUTH_ERR',
           status: 'ERROR',
-        } as ResponseContract;
+        } as IResponse;
       }
 
       const data = jwt.verify(token, this.config.key) as Partial<UserContract>;
@@ -243,7 +246,7 @@ export default class AuthService {
         data: data as Partial<UserContract>,
         code: 'AUTH_OK',
         status: 'SUCCESS',
-      } as ResponseContract;
+      } as IResponse;
     } catch (err) {
       console.log(err);
       const error = handleError(err);
@@ -252,7 +255,7 @@ export default class AuthService {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 

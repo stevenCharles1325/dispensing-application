@@ -1,6 +1,6 @@
-import RoleContract from 'Main/app/interfaces/role-contract';
+import RoleDTO from 'DTO/role.dto';
 
-const administrator: RoleContract = {
+const administrator: RoleDTO = {
   name: 'Administrator',
   kebab: 'administrator',
 };

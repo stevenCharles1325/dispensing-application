@@ -1,14 +1,6 @@
-import { IpcMainInvokeEvent } from 'electron';
-import ResponseContract from '../pos/pos.response.interface';
-import StorageContract from '../storage/storage.interface';
+import ResponseContract from 'Interfaces/pos/pos.response.interface';
+import IMiddlewareProperties from './middleware.props.interface';
 
-export interface MiddlewarePropertiesContract extends IpcMainInvokeEvent {
-  event: IpcMainInvokeEvent;
-  eventData: Record<string, any>;
-  storage: StorageContract;
-  next: () => void;
-}
+type IMiddleware = (props: IMiddlewareProperties) => ResponseContract | void;
 
-export type MiddlewareContract = (
-  props: MiddlewarePropertiesContract
-) => ResponseContract | void;
+export default IMiddleware;

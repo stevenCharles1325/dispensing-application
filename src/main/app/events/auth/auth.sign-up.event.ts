@@ -1,17 +1,16 @@
-import UserRepository from 'Main/app/repositories/User-repository';
-import handleError from 'Main/app/modules/error-handler';
-import validator from 'Main/app/modules/validator.module';
-import EventContract, {
-  EventListenerPropertiesContract,
-} from 'Main/app/interfaces/event.interface';
 import Provider from '@IOC:Provider';
-import AuthService from 'Main/app/services/auth.service';
-import ResponseContract from 'Main/app/interfaces/response-contract';
+import IEvent from 'Interfaces/event/event.interface';
+import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
+import handleError from 'Modules/error-handler.module';
+import UserRepository from 'Repositories/user.repository';
+import AuthService from 'Services/auth.service.service';
+import validator from 'Modules/validator.module';
 
-export default class AuthSignUpEvent implements EventContract {
+export default class AuthSignUpEvent implements IEvent {
   public channel: string = 'auth:sign-up';
 
-  public async listener({ eventData }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: IEventListenerProperties) {
     try {
       const user = UserRepository.create(eventData.payload[0]);
       const authService = Provider.ioc<AuthService>('AuthProvider');
@@ -22,14 +21,14 @@ export default class AuthSignUpEvent implements EventContract {
           errors,
           code: 'VALIDATION_ERR',
           status: 'ERROR',
-        } as ResponseContract;
+        } as IResponse;
       }
 
       const data = (await UserRepository.save(user))[0];
       return (await authService.authenticate(
         data.email,
         data.password
-      )) as ResponseContract;
+      )) as IResponse;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -38,7 +37,7 @@ export default class AuthSignUpEvent implements EventContract {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 }

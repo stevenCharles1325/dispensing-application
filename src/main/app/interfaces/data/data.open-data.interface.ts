@@ -1,3 +1,3 @@
-type DataName = 'permission' | 'role' | 'user' | 'peer' | 'auth';
+type IDataName = 'permission' | 'role' | 'user' | 'peer' | 'auth';
 
-export default DataName;
+export default IDataName;

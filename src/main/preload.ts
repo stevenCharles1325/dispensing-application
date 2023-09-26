@@ -1,9 +1,9 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import AuthSignInContract from './app/interfaces/auth/auth.sign-in.interface';
-import ResponseContract from './app/interfaces/pos/pos.response.interface';
-import UserContract from './app/data-transfer-objects/user.dto';
+import IAuthSignIn from './app/interfaces/auth/auth.sign-in.interface';
+import IResponse from './app/interfaces/pos/pos.response.interface';
+import UserDTO from './app/data-transfer-objects/user.dto';
 
 export type Channels = 'ipc-example';
 
@@ -11,34 +11,31 @@ const electronHandler = {
   ipcRenderer: {
     // -------------- POS FUNCTIONS --------------
     // AUTH MODULE
-    authMe: async (): Promise<ResponseContract> =>
-      ipcRenderer.invoke('auth:me'),
+    authMe: async (): Promise<IResponse> => ipcRenderer.invoke('auth:me'),
 
-    authSignIn: async (
-      payload: AuthSignInContract
-    ): Promise<ResponseContract> => ipcRenderer.invoke('auth:sign-in', payload),
+    authSignIn: async (payload: IAuthSignIn): Promise<IResponse> =>
+      ipcRenderer.invoke('auth:sign-in', payload),
 
     // USER MODULE
     getUser: async (
       payload: Record<string, any[]>,
       page: number = 1,
       total: number = 15
-    ): Promise<ResponseContract> =>
+    ): Promise<IResponse> =>
       ipcRenderer.invoke('user:show', payload, page, total),
 
-    createUser: async (payload: UserContract): Promise<ResponseContract> =>
+    createUser: async (payload: UserDTO): Promise<IResponse> =>
       ipcRenderer.invoke('user:create', payload),
 
     updateUser: async (
       id: number,
-      payload: Partial<UserContract>
-    ): Promise<ResponseContract> =>
-      ipcRenderer.invoke('user:update', id, payload),
+      payload: Partial<UserDTO>
+    ): Promise<IResponse> => ipcRenderer.invoke('user:update', id, payload),
 
-    archiveUser: async (id: number): Promise<ResponseContract> =>
+    archiveUser: async (id: number): Promise<IResponse> =>
       ipcRenderer.invoke('user:archive', id),
 
-    deleteUser: async (id: number): Promise<ResponseContract> =>
+    deleteUser: async (id: number): Promise<IResponse> =>
       ipcRenderer.invoke('user:delete', id),
 
     // Connection to TURN server to start P2P connection

@@ -1,13 +1,13 @@
 import Provider from '@IOC:Provider';
-import AuthContract from 'Main/app/interfaces/auth-contract';
-import { MiddlewareContract } from 'Main/app/interfaces/middleware-contract';
-import ResponseContract from 'Main/app/interfaces/response-contract';
-import { User } from 'Main/database/models/User';
-import AuthService from '../services/auth.service';
+import AuthService from 'Services/auth.service';
+import { User } from 'Models/user.model';
+import IAuth from 'Interfaces/auth/auth.interface';
+import IMiddleware from 'Interfaces/middleware/middleware.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
 
-const authMiddleware: MiddlewareContract = ({ eventData, storage, next }) => {
+const authMiddleware: IMiddleware = ({ eventData, storage, next }) => {
   const authService = Provider.ioc<AuthService>('AuthProvider');
-  const authUser = storage.get('POS_AUTH_USER_TOKEN') as AuthContract<User>;
+  const authUser = storage.get('POS_AUTH_USER_TOKEN') as IAuth<User>;
 
   /*
     Usually, we pass the token to the eventData, under
@@ -35,7 +35,7 @@ const authMiddleware: MiddlewareContract = ({ eventData, storage, next }) => {
     errors: authResponse.errors,
     code: 'AUTH_ERR',
     status: 'ERROR',
-  } as ResponseContract;
+  } as IResponse;
 };
 
 export default authMiddleware;

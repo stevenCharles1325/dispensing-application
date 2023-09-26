@@ -1,17 +1,16 @@
-import handleError from 'Main/app/modules/error-handler';
-import EventContract, {
-  EventListenerPropertiesContract,
-} from 'Main/app/interfaces/event.interface';
+import IEvent from 'Interfaces/event/event.interface';
+import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
 import { SqliteDataSource } from 'Main/datasource';
-import { Role } from 'Main/database/models/role.model';
-import ResponseContract from 'Main/app/interfaces/response-contract';
+import { Role } from 'Models/role.model';
+import handleError from 'Modules/error-handler.module';
 
-export default class RoleDeleteEvent implements EventContract {
+export default class RoleDeleteEvent implements IEvent {
   public channel: string = 'role:delete';
 
   public middlewares = ['auth-middleware'];
 
-  public async listener({ eventData }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: IEventListenerProperties) {
     try {
       const requesterHasPermission =
         eventData.user.hasPermission?.('delete-role');
@@ -24,14 +23,14 @@ export default class RoleDeleteEvent implements EventContract {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
-        } as ResponseContract;
+        } as IResponse;
       }
 
       return {
         errors: ['You are not allowed to delete a Role'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -40,7 +39,7 @@ export default class RoleDeleteEvent implements EventContract {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 }

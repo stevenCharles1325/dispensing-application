@@ -1,4 +1,3 @@
-export default interface IService {
+export default interface IService extends Record<string, any> {
   SERVICE_NAME: string;
-  [key: string]: any;
 }

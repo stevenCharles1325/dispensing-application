@@ -1,17 +1,16 @@
-import handleError from 'Main/app/modules/error-handler';
-import EventContract, {
-  EventListenerPropertiesContract,
-} from 'Main/app/interfaces/event.interface';
-import usePagination from 'Main/app/hooks/usePagination';
-import RoleRepository from 'Main/app/repositories/Role-repository';
-import ResponseContract from 'Main/app/interfaces/response-contract';
+import IResponse from 'Interfaces/pos/pos.response.interface';
+import IEvent from 'Interfaces/event/event.interface';
+import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
+import handleError from 'Modules/error-handler.module';
+import RoleRepository from 'Repositories/role.repository';
+import usePagination from 'Hooks/pagination.hook';
 
-export default class RoleShowEvent implements EventContract {
+export default class RoleShowEvent implements IEvent {
   public channel: string = 'role:show';
 
   public middlewares = ['auth-middleware'];
 
-  public async listener({ eventData }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: IEventListenerProperties) {
     try {
       const requesterHasPermission =
         eventData.user.hasPermission?.('view-role');
@@ -40,7 +39,7 @@ export default class RoleShowEvent implements EventContract {
                 ],
                 code: 'REQ_INVALID',
                 status: 'ERROR',
-              } as ResponseContract;
+              } as IResponse;
             }
           }
 
@@ -52,14 +51,14 @@ export default class RoleShowEvent implements EventContract {
           errors: ['The query argument must be an Object'],
           code: 'REQ_INVALID',
           status: 'ERROR',
-        } as ResponseContract;
+        } as IResponse;
       }
 
       return {
         errors: ['You are not allowed to view a Role'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -68,7 +67,7 @@ export default class RoleShowEvent implements EventContract {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 }

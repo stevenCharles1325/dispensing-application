@@ -1,10 +1,7 @@
-import ResponseContract from 'Main/app/interfaces/response-contract';
-import handleError from '../modules/error-handler.module';
+import IResponse from 'Interfaces/pos/pos.response.interface';
+import handleError from 'Modules/error-handler.module';
 
-const usePagination = async (
-  query: any,
-  page: number
-): Promise<ResponseContract> => {
+const usePagination = async (query: any, page: number): Promise<IResponse> => {
   try {
     const [entity, total] = await query.getManyAndCount();
 
@@ -18,7 +15,7 @@ const usePagination = async (
       data: [entity, pagination],
       code: 'REQ_OK',
       status: 'SUCCESS',
-    } as ResponseContract;
+    } as IResponse;
   } catch (err) {
     const error = handleError(err);
     console.log(err);
@@ -27,7 +24,7 @@ const usePagination = async (
       errors: [error],
       code: 'SYS_ERR',
       status: 'ERROR',
-    } as ResponseContract;
+    } as IResponse;
   }
 };
 

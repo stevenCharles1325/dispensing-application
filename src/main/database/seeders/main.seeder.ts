@@ -4,12 +4,12 @@
 import { Seeder } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
 import permissions from 'Main/data/defaults/permissions';
-import requireAll from 'Main/app/modules/require-all';
-import PermissionContract from 'Main/app/interfaces/permission-contract';
-import { User } from '../models/user.model';
-import { Role } from '../models/role.model';
-import { Permission } from '../models/permission.model';
-import { System } from '../models/system.model';
+import { User } from 'Models/user.model';
+import { Role } from 'Models/role.model';
+import { Permission } from 'Models/permission.model';
+import { System } from 'Models/system.model';
+import PermissionDTO from 'DTO/permission.dto';
+import requireAll from 'Modules/require-all.module';
 
 const roles = requireAll(`${__dirname}/../../data/defaults/roles`, true);
 
@@ -43,7 +43,7 @@ export default class MainSeeder implements Seeder {
           if (role?.permissions) {
             console.log('ROLE PERMISSIONS: ', role.permissions);
             const permissionNames = role.permissions.map(
-              (permission: PermissionContract) => permission.kebab
+              (permission: PermissionDTO) => permission.kebab
             );
 
             const perms = createdPermissions.filter(({ kebab }) =>

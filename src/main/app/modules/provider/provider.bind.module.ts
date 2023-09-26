@@ -1,10 +1,9 @@
-import IService from 'Main/app/interfaces/service/service.interface';
+import IProviderCallback from 'Interfaces/provider/provider.callback.interface';
 
-type ProviderCallback = () => IService;
 export default function bind(
   this: any,
   name: string,
-  provider: ProviderCallback
+  provider: IProviderCallback
 ) {
   this.container[name] = {
     type: 'bind',

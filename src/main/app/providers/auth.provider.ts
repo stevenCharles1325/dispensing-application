@@ -1,11 +1,11 @@
 import Provider from '@IOC:Provider';
-import AuthConfig from 'Main/config/auth';
+import AuthConfig from 'Config/auth.config';
+import IProvider from 'Interfaces/provider/provider.interface';
 import AuthService from 'Main/app/services/auth.service';
-import UserRepository from 'Repositories/User-repository';
+import UserRepository from 'Repositories/user.repository';
 import bcrypt from 'bcrypt';
-import ProviderContract from 'Main/app/interfaces/provider-contract';
 
-export default class AuthProvider implements ProviderContract {
+export default class AuthProvider implements IProvider {
   constructor(public provider: typeof Provider) {}
 
   public run() {

@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
-import POSError from 'Main/app/interfaces/pos-error-contract';
-import POSValidationError from 'Main/app/interfaces/pos-validation-error-contract';
+import IPOSError from 'Interfaces/pos/pos.error.interface';
+import IPOSValidationError from 'Interfaces/pos/pos.validation-error.interface';
 import { QueryFailedError, EntityNotFoundError } from 'typeorm';
 
 type ErrorWithMessage = {
@@ -39,7 +39,9 @@ export function getErrorMessage(error: any) {
   };
 }
 
-export default function handleError(error: any): POSError | POSValidationError {
+export default function handleError(
+  error: any
+): IPOSError | IPOSValidationError {
   if (error instanceof QueryFailedError) {
     const field = error.message.split(':')[2].split('.')[1];
     const code = (error as any).errno;

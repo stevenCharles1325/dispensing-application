@@ -1,7 +1,7 @@
-import RoleContract from 'Main/app/interfaces/role-contract';
+import RoleDTO from 'DTO/role.dto';
 import permissions from '../permissions';
 
-const owner: RoleContract = {
+const owner: RoleDTO = {
   name: 'Owner',
   kebab: 'owner',
   permissions, // By default, all permissions are added to this role

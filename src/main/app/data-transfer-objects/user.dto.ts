@@ -1,6 +1,6 @@
 import RoleContract from './role.dto';
 
-export default interface UserContract {
+export default interface UserDTO {
   first_name: string;
 
   last_name: string;

@@ -22,7 +22,7 @@ import { SqliteDataSource } from './datasource';
 import { runSeeders } from 'typeorm-extension';
 import runEvents from './events';
 import Provider from '@IOC:Provider';
-import requireAll from 'App/modules/require-all';
+import requireAll from 'App/modules/require-all.module';
 import stores from './stores';
 import AuthService from './app/services/auth.service';
 
@@ -151,54 +151,49 @@ app.on('window-all-closed', async () => {
 
 app
   .whenReady()
-  .then(() => {
+  .then(async () => {
     // Initialize database
-    SqliteDataSource.initialize()
-      .then(() => {
-        console.log('[DB]: Initialized Successfully');
+    try {
+      await SqliteDataSource.initialize();
+      console.log('[DB]: Initialized Successfully');
 
-        runSeeders(SqliteDataSource)
-          .then(() => console.log('[DB]: Seeded Successfully'))
-          .catch((err) => console.log(err))
-          .finally(() => {
-            // Initialize Stores
-            // Each events now has access to the Store
-            stores(() => {
-              if (providers) {
-                console.log('[PROVIDERS]: Initializing...');
-                Object.entries(providers).forEach(
-                  ([name, AppProviderClass]) => {
-                    const appProvider = new AppProviderClass(Provider);
+      try {
+        await runSeeders(SqliteDataSource);
+        console.log('[DB]: Seeded Successfully');
+      } finally {
+        // Initialize Stores
+        // Each events now has access to the Store
+        stores(() => {
+          if (providers) {
+            console.log('[PROVIDERS]: Initializing...');
+            Object.entries(providers).forEach(([name, AppProviderClass]) => {
+              const appProvider = new AppProviderClass(Provider);
 
-                    try {
-                      // Saving this provider inside main IOC provider
-                      appProvider.run();
-                      console.log(
-                        `[PROVIDERS]: Provider ${name} ran successfully`
-                      );
-                    } catch (err) {
-                      console.log(
-                        `[PROVIDERS]: Provider ${name} failed to run`
-                      );
-                      console.log(err);
-                      throw err;
-                    }
-                  }
-                );
+              try {
+                // Saving this provider inside main IOC provider
+                appProvider.run();
+                console.log(`[PROVIDERS]: Provider ${name} ran successfully`);
+              } catch (err) {
+                console.log(`[PROVIDERS]: Provider ${name} failed to run`);
+                console.log(err);
+                throw err;
               }
-
-              runEvents();
             });
+          }
 
-            createWindow();
+          runEvents();
+        });
 
-            app.on('activate', () => {
-              // On macOS it's common to re-create a window in the app when the
-              // dock icon is clicked and there are no other windows open.
-              if (mainWindow === null) createWindow();
-            });
-          });
-      })
-      .catch(console.log);
+        createWindow();
+
+        app.on('activate', () => {
+          // On macOS it's common to re-create a window in the app when the
+          // dock icon is clicked and there are no other windows open.
+          if (mainWindow === null) createWindow();
+        });
+      }
+    } catch (err) {
+      console.log('[SYSTEM-ERROR]: ', err);
+    }
   })
   .catch(console.log);

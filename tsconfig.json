@@ -30,29 +30,41 @@
       "./src/contracts"
     ],
     "paths": {
+      "DTO/*.dto": [
+        "main/app/data-transfer-objects/*.dto"
+      ],
+      "Config/*.config": [
+        "main/config/*.config"
+      ],
+      "Hooks/*.hook": [
+        "main/app/hooks/*.hook"
+      ],
+      "Services/*.service": [
+        "main/app/services/*.service"
+      ],
+      "Interfaces/*.interface": [
+        "main/app/interfaces/*.interface"
+      ],
+      "Contracts/*.contract": [
+        "main/contracts/*.contract"
+      ],
+      "Events/*.event": [
+        "main/app/events/*.event"
+      ],
+      "Models/*.model": [
+        "main/database/models/*.model"
+      ],
+      "Modules/*.module": [
+        "main/app/modules/*.module"
+      ],
+      "Repositories/*.repository": [
+        "main/app/repositories/*.repository"
+      ],
       "Main/*": [
         "main/*"
       ],
       "App/*": [
         "main/app/*"
-      ],
-      "Services/*": [
-        "main/app/services/*"
-      ],
-      "Contracts/*": [
-        "main/contracts/*"
-      ],
-      "Events/*": [
-        "main/app/events/*"
-      ],
-      "Models/*": [
-        "main/database/models/*"
-      ],
-      "Modules/*": [
-        "main/app/modules/*"
-      ],
-      "Repositories/*": [
-        "main/app/repositories/*"
       ],
       "@IOC:Provider": [
         "main/provider"

@@ -1,4 +1,4 @@
-export default interface POSError {
+export default interface IPOSError {
   code: number | string | null;
   message: string | null;
   verbose?: any | undefined;

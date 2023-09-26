@@ -1,10 +1,9 @@
-import IService from 'Main/app/interfaces/service/service.interface';
+import IProviderCallback from 'Interfaces/provider/provider.callback.interface';
 
-type ProviderCallback = () => IService;
 export default function singleton(
   this: any,
   name: string,
-  provider: ProviderCallback
+  provider: IProviderCallback
 ) {
   if (this.cache[name]) return;
 

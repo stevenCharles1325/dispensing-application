@@ -1,17 +1,16 @@
-import handleError from 'Main/app/modules/error-handler';
-import EventContract, {
-  EventListenerPropertiesContract,
-} from 'Main/app/interfaces/event.interface';
+import IEvent from 'Interfaces/event/event.interface';
+import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
 import { SqliteDataSource } from 'Main/datasource';
-import { Permission } from 'Main/database/models/permission.model';
-import ResponseContract from 'Main/app/interfaces/response-contract';
+import { Permission } from 'Models/permission.model';
+import handleError from 'Modules/error-handler.module';
 
-export default class PermissionArchiveEvent implements EventContract {
+export default class PermissionArchiveEvent implements IEvent {
   public channel: string = 'permission:archive';
 
   public middlewares = ['auth-middleware'];
 
-  public async listener({ eventData }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: IEventListenerProperties) {
     try {
       const requesterHasPermission =
         eventData.user.hasPermission?.('archive-permission');
@@ -25,14 +24,14 @@ export default class PermissionArchiveEvent implements EventContract {
           errors: [],
           code: 'REQ_OK',
           status: 'SUCCESS',
-        } as ResponseContract;
+        } as IResponse;
       }
 
       return {
         errors: ['You are not allowed to archive a Permission'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -41,7 +40,7 @@ export default class PermissionArchiveEvent implements EventContract {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 }

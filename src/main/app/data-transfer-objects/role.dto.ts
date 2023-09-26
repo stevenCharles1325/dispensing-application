@@ -1,8 +1,8 @@
-import PermissionContract from './permission.dto';
+import PermissionDTO from './permission.dto';
 
-export default interface RoleContract {
+export default interface RoleDTO {
   name: string;
   kebab: string;
-  permissions?: PermissionContract[] | undefined;
+  permissions?: PermissionDTO[] | undefined;
   description?: string | undefined;
 }

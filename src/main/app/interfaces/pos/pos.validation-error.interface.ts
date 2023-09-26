@@ -1,6 +1,6 @@
-import POSError from './pos.error.interface';
+import IPOSError from './pos.error.interface';
 
-export default interface POSValidationError extends POSError {
+export default interface IPOSValidationError extends IPOSError {
   field: string;
   type: 'POS_VALIDATION_ERROR';
 }

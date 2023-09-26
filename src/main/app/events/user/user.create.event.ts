@@ -1,17 +1,16 @@
-import UserRepository from 'Main/app/repositories/User-repository';
-import handleError from 'Main/app/modules/error-handler';
-import validator from 'Main/app/modules/validator.module';
-import EventContract, {
-  EventListenerPropertiesContract,
-} from 'Main/app/interfaces/event.interface';
-import ResponseContract from 'Main/app/interfaces/response-contract';
+import IEvent from 'Interfaces/event/event.interface';
+import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
+import IResponse from 'Interfaces/pos/pos.response.interface';
+import handleError from 'Modules/error-handler.module';
+import validator from 'Modules/validator.module';
+import UserRepository from 'Repositories/user.repository';
 
-export default class UserCreateEvent implements EventContract {
+export default class UserCreateEvent implements IEvent {
   public channel: string = 'user:create';
 
   public middlewares = ['auth-middleware'];
 
-  public async listener({ eventData }: EventListenerPropertiesContract) {
+  public async listener({ eventData }: IEventListenerProperties) {
     try {
       const requesterHasPermission =
         eventData.user.hasPermission?.('create-user');
@@ -26,7 +25,7 @@ export default class UserCreateEvent implements EventContract {
             errors,
             code: 'VALIDATION_ERR',
             status: 'ERROR',
-          } as ResponseContract;
+          } as IResponse;
         }
 
         const data = await UserRepository.save(user);
@@ -35,14 +34,14 @@ export default class UserCreateEvent implements EventContract {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
-        } as ResponseContract;
+        } as IResponse;
       }
 
       return {
         errors: ['You are not allowed to create a User'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -51,7 +50,7 @@ export default class UserCreateEvent implements EventContract {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as ResponseContract;
+      } as IResponse;
     }
   }
 }

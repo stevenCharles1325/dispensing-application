@@ -1,6 +1,6 @@
-import RoleContract from 'Main/app/interfaces/role-contract';
+import RoleDTO from 'DTO/role.dto';
 
-const storeManager: RoleContract = {
+const storeManager: RoleDTO = {
   name: 'Store Manager',
   kebab: 'store-manager',
 };

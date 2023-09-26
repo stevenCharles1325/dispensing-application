@@ -26,9 +26,9 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { Role } from './role.model';
-import RoleRepository from 'Main/app/repositories/Role-repository';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
-import SystemRepository from 'Main/app/repositories/System-repository';
+import RoleRepository from 'Repositories/role.repository';
+import SystemRepository from 'Repositories/system.repository';
 
 const messages = {
   length: 'Length must be $constraint1',
@@ -143,11 +143,11 @@ export class User {
   @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
   role: Role;
 
-  @OneToMany(() => User, (user) => user.lead)
+  @OneToMany(() => User, (user: User) => user.lead)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
   subordinates: User[];
 
-  @ManyToOne(() => User, (user) => user.subordinates)
+  @ManyToOne(() => User, (user: User) => user.subordinates)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
   lead: User;
 

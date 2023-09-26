@@ -1,48 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prefer-template */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-plusplus */
-/* eslint-disable consistent-return */
-/* eslint-disable no-inner-declarations */
-/* eslint-disable no-prototype-builtins */
-/* eslint-disable no-restricted-syntax */
-import { ipcMain } from 'electron';
 import { join } from 'path';
+import { ipcMain } from 'electron';
+import { ALSStorage } from './stores';
+
+import IEvent from './app/interfaces/event/event.interface';
+import IListener from './app/interfaces/event/event.listener.interface';
+
+import requireAll from './app/modules/require-all.module';
+import applyMiddleware from './app/modules/apply-middleware.module';
 import objectToFlattenArray from './app/modules/object-to-flatten-array.module';
 import objectToFlattenObject from './app/modules/object-to-flatten-object.module';
-import requireAll from './app/modules/require-all.module';
-import EventContract, {
-  EventListenerPropertiesContract,
-  Listener,
-} from './app/interfaces/event/event.interface';
-import { ALSStorage } from './stores';
 
 const eventsObject = requireAll(join(__dirname, 'app/events'), true);
 const middlewareObject = requireAll(join(__dirname, 'app/middlewares'), true);
-
-function applyMiddleware(_middlewares: any[], eventListener: Listener) {
-  return async ({
-    event,
-    eventData,
-    storage,
-  }: EventListenerPropertiesContract) => {
-    let nextIndex = 0;
-
-    const next = async () => {
-      if (nextIndex < _middlewares.length) {
-        const currentMiddleware = _middlewares[nextIndex];
-        nextIndex++;
-
-        return currentMiddleware({ event, eventData, storage, next });
-      }
-
-      // All middlewares executed, call the final event listener
-      return eventListener({ event, eventData, storage });
-    };
-
-    return next();
-  };
-}
 
 export default function () {
   let middlewares: Record<string, any> = {};
@@ -55,12 +24,12 @@ export default function () {
     const flattenEvents = objectToFlattenArray(eventsObject);
     const storage = ALSStorage();
 
-    const events: Record<string, Listener> = {};
+    const events: Record<string, IListener> = {};
 
     flattenEvents.forEach((eventInfo) => {
       const [_, EventClass] = eventInfo;
 
-      const event: EventContract = new EventClass();
+      const event: IEvent = new EventClass();
 
       const middlewareList =
         event.middlewares?.map(
@@ -70,7 +39,7 @@ export default function () {
       const listener = applyMiddleware(middlewareList, event.listener);
       console.log('Initializing event channel: ', event.channel);
 
-      events[event.channel] = listener as unknown as Listener;
+      events[event.channel] = listener as unknown as IListener;
       ipcMain.handle(event.channel, (e, ...args: any[]) => {
         const eventData = {
           payload: args,

@@ -1,9 +1,9 @@
+import IPOSValidationError from 'Interfaces/pos/pos.validation-error.interface';
 import { validate } from 'class-validator';
-import POSValidationError from 'Main/app/interfaces/pos-validation-error-contract';
 
 export default async function validator(model: object) {
   const validationErrors = await validate(model);
-  let errors: Array<POSValidationError | null> = [];
+  let errors: Array<IPOSValidationError | null> = [];
 
   if (validationErrors) {
     errors = validationErrors.flatMap((err: any) => {
@@ -18,7 +18,7 @@ export default async function validator(model: object) {
             message: constraint,
             verbose: null,
             type: 'POS_VALIDATION_ERROR',
-          } as POSValidationError)
+          } as IPOSValidationError)
       );
     });
   }
