@@ -1,4 +1,4 @@
-import RoleDTO from 'DTO/role.dto';
+import RoleDTO from 'App/data-transfer-objects/role.dto';
 
 const cashier: RoleDTO = {
   name: 'Cashier',

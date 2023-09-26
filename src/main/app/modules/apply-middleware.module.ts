@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
-import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
-import IListener from 'Interfaces/event/event.listener.interface';
+
+import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
+import IListener from 'App/interfaces/event/event.listener.interface';
 
 export default function applyMiddleware(
   _middlewares: any[],

@@ -1,6 +1,5 @@
-/* eslint-disable import/prefer-default-export */
-import IPOSError from 'Interfaces/pos/pos.error.interface';
-import IPOSValidationError from 'Interfaces/pos/pos.validation-error.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import { QueryFailedError, EntityNotFoundError } from 'typeorm';
 
 type ErrorWithMessage = {

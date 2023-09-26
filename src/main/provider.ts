@@ -1,10 +1,9 @@
-import ICache from './app/interfaces/provider/provider.cache.interface';
-import IContainer from './app/interfaces/provider/provider.container.interface';
-import IPOSProvider from './app/interfaces/provider/provider.pos.interface';
-
-import bind from './app/modules/provider/provider.bind.module';
-import ioc from './app/modules/provider/provider.ioc.module';
-import singleton from './app/modules/provider/provider.singleton.module';
+import ICache from 'App/interfaces/provider/provider.cache.interface';
+import IContainer from 'App/interfaces/provider/provider.container.interface';
+import IPOSProvider from 'App/interfaces/provider/provider.pos.interface';
+import ioc from 'App/modules/provider/provider.ioc.module';
+import singleton from 'App/modules/provider/provider.singleton.module';
+import bind from 'App/modules/provider/provider.bind.module';
 
 class Provider implements Partial<IPOSProvider> {
   constructor(
@@ -13,8 +12,6 @@ class Provider implements Partial<IPOSProvider> {
   ) {}
 }
 
-Object.assign(Provider.prototype, singleton);
-Object.assign(Provider.prototype, bind);
-Object.assign(Provider.prototype, ioc);
+Object.assign(Provider.prototype, { ioc, bind, singleton });
 
 export default new Provider() as IPOSProvider;

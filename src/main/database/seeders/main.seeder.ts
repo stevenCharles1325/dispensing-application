@@ -4,12 +4,12 @@
 import { Seeder } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
 import permissions from 'Main/data/defaults/permissions';
-import { User } from 'Models/user.model';
-import { Role } from 'Models/role.model';
-import { Permission } from 'Models/permission.model';
-import { System } from 'Models/system.model';
-import PermissionDTO from 'DTO/permission.dto';
-import requireAll from 'Modules/require-all.module';
+import PermissionDTO from 'App/data-transfer-objects/permission.dto';
+import { Permission } from '../models/permission.model';
+import { Role } from '../models/role.model';
+import { System } from '../models/system.model';
+import { User } from '../models/user.model';
+import requireAll from 'App/modules/require-all.module';
 
 const roles = requireAll(`${__dirname}/../../data/defaults/roles`, true);
 

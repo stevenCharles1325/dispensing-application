@@ -24,7 +24,7 @@ import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all.module';
 import stores from './stores';
-import AuthService from './app/services/auth.service';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 // Initializing .ENV
 dotenv.config();
@@ -138,7 +138,7 @@ const createWindow = async () => {
  */
 app.on('window-all-closed', async () => {
   // Log-outs the user first before closing
-  const authService = Provider.ioc<AuthService>('AuthProvider');
+  const authService = Provider.ioc<IAuthService>('AuthProvider');
   const res = await authService.revoke();
   console.log('Window-close auto log-out response: ', res);
 

@@ -1,16 +1,23 @@
 import Provider from '@IOC:Provider';
-import AuthConfig from 'Config/auth.config';
-import IProvider from 'Interfaces/provider/provider.interface';
-import AuthService from 'Main/app/services/auth.service';
-import UserRepository from 'Repositories/user.repository';
+import IProvider from 'App/interfaces/provider/provider.interface';
+import UserRepository from 'App/repositories/user.repository';
+import AuthService from 'App/services/auth.service';
+import AuthConfig from 'Main/config/auth.config';
+import { ALSStorage } from 'Main/stores';
 import bcrypt from 'bcrypt';
+import ElectronStore from 'electron-store';
 
 export default class AuthProvider implements IProvider {
   constructor(public provider: typeof Provider) {}
 
   public run() {
     this.provider.singleton('AuthProvider', () => {
-      return new AuthService(AuthConfig, UserRepository, bcrypt);
+      const primaryStorage = ALSStorage();
+      const backupStorage = new ElectronStore();
+
+      const stores = [primaryStorage, backupStorage];
+
+      return new AuthService(AuthConfig, UserRepository, bcrypt, stores);
     });
   }
 }

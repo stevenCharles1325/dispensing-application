@@ -1,4 +1,4 @@
-import IProviderCallback from 'Interfaces/provider/provider.callback.interface';
+import IProviderCallback from 'App/interfaces/provider/provider.callback.interface';
 
 export default function bind(
   this: any,

@@ -1,11 +1,11 @@
 import Provider from '@IOC:Provider';
-import IEvent from 'Interfaces/event/event.interface';
-import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
-import IResponse from 'Interfaces/pos/pos.response.interface';
-import handleError from 'Modules/error-handler.module';
-import UserRepository from 'Repositories/user.repository';
-import AuthService from 'Services/auth.service';
-import validator from 'Modules/validator.module';
+import IEvent from 'App/interfaces/event/event.interface';
+import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
+import handleError from 'App/modules/error-handler.module';
+import UserRepository from 'App/repositories/user.repository';
+import validator from 'App/modules/validator.module';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 export default class AuthSignUpEvent implements IEvent {
   public channel: string = 'auth:sign-up';
@@ -13,7 +13,7 @@ export default class AuthSignUpEvent implements IEvent {
   public async listener({ eventData }: IEventListenerProperties) {
     try {
       const user = UserRepository.create(eventData.payload[0]);
-      const authService = Provider.ioc<AuthService>('AuthProvider');
+      const authService = Provider.ioc<IAuthService>('AuthProvider');
 
       const errors = await validator(user);
       if (errors && errors.length) {

@@ -1,9 +1,9 @@
-import IEvent from 'Interfaces/event/event.interface';
-import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
-import IResponse from 'Interfaces/pos/pos.response.interface';
+import IEvent from 'App/interfaces/event/event.interface';
+import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
+import handleError from 'App/modules/error-handler.module';
+import { Role } from 'Main/database/models/role.model';
 import { SqliteDataSource } from 'Main/datasource';
-import { Role } from 'Models/role.model';
-import handleError from 'Modules/error-handler.module';
 
 export default class RoleDeleteEvent implements IEvent {
   public channel: string = 'role:delete';

@@ -1,12 +1,12 @@
 import Provider from '@IOC:Provider';
-import AuthService from 'Services/auth.service';
-import { User } from 'Models/user.model';
-import IAuth from 'Interfaces/auth/auth.interface';
-import IMiddleware from 'Interfaces/middleware/middleware.interface';
-import IResponse from 'Interfaces/pos/pos.response.interface';
+import IAuth from 'App/interfaces/auth/auth.interface';
+import IMiddleware from 'App/interfaces/middleware/middleware.interface';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import { User } from 'Main/database/models/user.model';
 
 const authMiddleware: IMiddleware = ({ eventData, storage, next }) => {
-  const authService = Provider.ioc<AuthService>('AuthProvider');
+  const authService = Provider.ioc<IAuthService>('AuthProvider');
   const authUser = storage.get('POS_AUTH_USER_TOKEN') as IAuth<User>;
 
   /*

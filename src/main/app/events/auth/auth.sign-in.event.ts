@@ -1,9 +1,9 @@
 import Provider from '@IOC:Provider';
-import IEvent from 'Interfaces/event/event.interface';
-import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
-import IResponse from 'Interfaces/pos/pos.response.interface';
-import handleError from 'Modules/error-handler.module';
-import AuthService from 'Services/auth.service';
+import IEvent from 'App/interfaces/event/event.interface';
+import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import handleError from 'App/modules/error-handler.module';
 
 export default class AuthSignIn implements IEvent {
   public channel: string = 'auth:sign-in';
@@ -11,7 +11,7 @@ export default class AuthSignIn implements IEvent {
   public async listener({ eventData }: IEventListenerProperties) {
     try {
       const { email, password } = eventData.payload[0];
-      const authService = Provider.ioc<AuthService>('AuthProvider');
+      const authService = Provider.ioc<IAuthService>('AuthProvider');
 
       return (await authService.authenticate(email, password)) as IResponse;
     } catch (err) {

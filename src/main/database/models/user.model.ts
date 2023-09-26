@@ -3,7 +3,6 @@
 import {
   Column,
   Entity,
-  Exclusion,
   OneToOne,
   OneToMany,
   ManyToOne,
@@ -27,8 +26,8 @@ import {
 } from 'class-validator';
 import { Role } from './role.model';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
-import RoleRepository from 'Repositories/role.repository';
-import SystemRepository from 'Repositories/system.repository';
+import RoleRepository from 'App/repositories/role.repository';
+import SystemRepository from 'App/repositories/system.repository';
 
 const messages = {
   length: 'Length must be $constraint1',

@@ -8,7 +8,7 @@ const options: DataSourceOptions & SeederOptions = {
   migrations: [`${__dirname}/database/migrations/*.ts`],
   seeds: [`${__dirname}/database/seeders/*.seeder.ts`],
   logging: true,
-  subscribers: [`${__dirname}/app/subscribers/*ts`],
+  subscribers: [`${__dirname}/app/subscribers/*.subscriber.ts`],
   synchronize: Boolean(process.env.SYNCHRONIZE) ?? true,
 };
 

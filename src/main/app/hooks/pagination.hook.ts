@@ -1,5 +1,5 @@
-import IResponse from 'Interfaces/pos/pos.response.interface';
-import handleError from 'Modules/error-handler.module';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
+import handleError from 'App/modules/error-handler.module';
 
 const usePagination = async (query: any, page: number): Promise<IResponse> => {
   try {

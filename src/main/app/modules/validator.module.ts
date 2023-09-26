@@ -1,4 +1,4 @@
-import IPOSValidationError from 'Interfaces/pos/pos.validation-error.interface';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import { validate } from 'class-validator';
 
 export default async function validator(model: object) {

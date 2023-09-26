@@ -1,9 +1,9 @@
-import usePagination from 'Hooks/pagination.hook';
-import IEvent from 'Interfaces/event/event.interface';
-import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
-import IResponse from 'Interfaces/pos/pos.response.interface';
-import handleError from 'Modules/error-handler.module';
-import UserRepository from 'Repositories/user.repository';
+import usePagination from 'App/hooks/pagination.hook';
+import IEvent from 'App/interfaces/event/event.interface';
+import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
+import handleError from 'App/modules/error-handler.module';
+import UserRepository from 'App/repositories/user.repository';
 
 export default class UserShowEvent implements IEvent {
   public channel: string = 'user:show';

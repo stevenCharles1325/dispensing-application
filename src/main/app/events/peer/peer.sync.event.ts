@@ -1,14 +1,14 @@
 import Provider from '@IOC:Provider';
-import IEvent from 'Interfaces/event/event.interface';
-import IEventListenerProperties from 'Interfaces/event/event.listener-props.interface';
-import IListener from 'Interfaces/event/event.listener.interface';
-import IPOSError from 'Interfaces/pos/pos.error.interface';
-import IResponse from 'Interfaces/pos/pos.response.interface';
-import IPOSValidationError from 'Interfaces/pos/pos.validation-error.interface';
+import IEvent from 'App/interfaces/event/event.interface';
+import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
+import IListener from 'App/interfaces/event/event.listener.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import handleError from 'App/modules/error-handler.module';
+import { User } from 'Main/database/models/user.model';
 import { SqliteDataSource } from 'Main/datasource';
-import { User } from 'Models/user.model';
-import handleError from 'Modules/error-handler.module';
-import AuthService from 'Services/auth.service';
 
 export default class PeerSyncEvent implements IEvent {
   public channel: string = 'peer:sync';
@@ -20,7 +20,7 @@ export default class PeerSyncEvent implements IEvent {
   }: IEventListenerProperties) {
     // eslint-disable-next-line no-undef
     const data: PeerDataContract = eventData.payload[0];
-    const authService = Provider.ioc<AuthService>('AuthProvider');
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
     const events: Record<string, IListener> = storage.get('POS_EVENTS');
 
     // Mannually verifies the token

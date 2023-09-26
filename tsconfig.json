@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
     "strict": true,
     "sourceMap": true,
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -30,44 +30,14 @@
       "./src/contracts"
     ],
     "paths": {
-      "DTO/*.dto": [
-        "main/app/data-transfer-objects/*.dto"
-      ],
-      "Config/*.config": [
-        "main/config/*.config"
-      ],
-      "Hooks/*.hook": [
-        "main/app/hooks/*.hook"
-      ],
-      "Services/*.service": [
-        "main/app/services/*.service"
-      ],
-      "Interfaces/*.interface": [
-        "main/app/interfaces/*.interface"
-      ],
-      "Contracts/*.contract": [
-        "main/contracts/*.contract"
-      ],
-      "Events/*.event": [
-        "main/app/events/*.event"
-      ],
-      "Models/*.model": [
-        "main/database/models/*.model"
-      ],
-      "Modules/*.module": [
-        "main/app/modules/*.module"
-      ],
-      "Repositories/*.repository": [
-        "main/app/repositories/*.repository"
-      ],
-      "Main/*": [
-        "main/*"
-      ],
       "App/*": [
         "main/app/*"
       ],
       "@IOC:Provider": [
         "main/provider"
+      ],
+      "Main/*": [
+        "main/*"
       ],
     }
   },
