@@ -8,7 +8,7 @@ import usePagination from 'Hooks/pagination.hook';
 export default class RoleShowEvent implements IEvent {
   public channel: string = 'role:show';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

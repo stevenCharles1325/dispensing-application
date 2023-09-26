@@ -7,7 +7,7 @@ import AuthService from 'Services/auth.service';
 export default class AuthSignOutEvent implements IEvent {
   public channel: string = 'auth:sign-out';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener() {
     try {

@@ -8,7 +8,7 @@ import PermissionRepository from 'Repositories/permission.repository';
 export default class PermissionShowEvent implements IEvent {
   public channel: string = 'permission:show';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

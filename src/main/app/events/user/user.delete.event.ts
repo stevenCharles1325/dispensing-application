@@ -8,7 +8,7 @@ import handleError from 'Modules/error-handler.module';
 export default class UserDeleteEvent implements IEvent {
   public channel: string = 'user:delete';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

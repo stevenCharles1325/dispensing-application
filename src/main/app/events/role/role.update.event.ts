@@ -8,7 +8,7 @@ import validator from 'Modules/validator.module';
 export default class UserDeleteEvent implements IEvent {
   public channel: string = 'role:update';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

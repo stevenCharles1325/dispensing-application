@@ -8,7 +8,7 @@ import UserRepository from 'Repositories/user.repository';
 export default class UserShowEvent implements IEvent {
   public channel: string = 'user:show';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

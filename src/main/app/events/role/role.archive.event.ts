@@ -8,7 +8,7 @@ import handleError from 'Modules/error-handler.module';
 export default class RoleArchiveEvent implements IEvent {
   public channel: string = 'role:archive';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

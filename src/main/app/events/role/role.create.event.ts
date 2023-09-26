@@ -8,7 +8,7 @@ import validator from 'Modules/validator.module';
 export default class RoleCreateEvent implements IEvent {
   public channel: string = 'role:create';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

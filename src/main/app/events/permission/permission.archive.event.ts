@@ -8,7 +8,7 @@ import handleError from 'Modules/error-handler.module';
 export default class PermissionArchiveEvent implements IEvent {
   public channel: string = 'permission:archive';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

@@ -4,7 +4,7 @@ import IEventListenerProperties from 'Interfaces/event/event.listener-props.inte
 import IResponse from 'Interfaces/pos/pos.response.interface';
 import handleError from 'Modules/error-handler.module';
 import UserRepository from 'Repositories/user.repository';
-import AuthService from 'Services/auth.service.service';
+import AuthService from 'Services/auth.service';
 import validator from 'Modules/validator.module';
 
 export default class AuthSignUpEvent implements IEvent {

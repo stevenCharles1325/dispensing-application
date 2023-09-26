@@ -8,7 +8,7 @@ import UserRepository from 'Repositories/user.repository';
 export default class UserDeleteEvent implements IEvent {
   public channel: string = 'user:update';
 
-  public middlewares = ['auth-middleware'];
+  public middlewares = ['auth.middleware'];
 
   public async listener({ eventData }: IEventListenerProperties) {
     try {

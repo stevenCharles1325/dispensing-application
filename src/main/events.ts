@@ -32,9 +32,13 @@ export default function () {
       const event: IEvent = new EventClass();
 
       const middlewareList =
-        event.middlewares?.map(
-          (middlewareFileName: string) => middlewares[middlewareFileName]
-        ) || [];
+        event.middlewares?.map((middlewareFileName: string) => {
+          if (middlewareFileName.includes('.middleware')) {
+            return middlewares[middlewareFileName];
+          }
+
+          return middlewares[`${middlewareFileName}.middleware`];
+        }) || [];
 
       const listener = applyMiddleware(middlewareList, event.listener);
       console.log('Initializing event channel: ', event.channel);
