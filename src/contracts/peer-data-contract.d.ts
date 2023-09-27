@@ -1,6 +1,4 @@
-import DataName from 'Main/app/interfaces/open-data-contract';
-import ResponseContract from 'Main/app/interfaces/response-contract';
-import UserContract from 'Main/app/contracts/user-contract';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
 
 declare global {
   type DataActions =
@@ -25,7 +23,7 @@ declare global {
     response?:
       | {
           name: `${DataName}:${DataActions}`;
-          body?: ResponseContract;
+          body?: IResponse;
         }
       | undefined;
   }
