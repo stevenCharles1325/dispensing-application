@@ -14,7 +14,7 @@
     "postinstall": "npm run rebuild && npm run link-modules",
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts",
     "typeorm:base": "npx typeorm-ts-node-commonjs",
-    "typeorm": "npm run typeorm:base --dataSource ../../src/main/datasource.ts",
+    "typeorm": "npx typeorm-ts-node-commonjs --dataSource ../../src/main/datasource.ts",
     "typeorm:version": "npm run typeorm version",
     "migration:run": "npm run typeorm migration:run",
     "migration:show": "npm run typeorm migration:show",

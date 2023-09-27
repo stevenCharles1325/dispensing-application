@@ -9,7 +9,7 @@ export default async function revoke(this: any) {
   if (data) {
     try {
       const token = await SqliteDataSource.getRepository(Token);
-      await token.delete({ user_id: data.user.id });
+      await token.delete({ user_id: data?.user?.id ?? data.id });
 
       this.clearStore();
 

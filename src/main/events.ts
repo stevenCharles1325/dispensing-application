@@ -13,6 +13,11 @@ import objectToFlattenObject from './app/modules/object-to-flatten-object.module
 const eventsObject = requireAll(join(__dirname, 'app/events'), true);
 const middlewareObject = requireAll(join(__dirname, 'app/middlewares'), true);
 
+/*
+  This is an event-reader. It reads all events from the App/Events folder
+  and run it on the same order as what you see when you open any folder inside.
+*/
+
 export default function () {
   let middlewares: Record<string, any> = {};
 
