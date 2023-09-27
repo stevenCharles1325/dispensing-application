@@ -13,11 +13,15 @@
     "rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
     "postinstall": "npm run rebuild && npm run link-modules",
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts",
-    "typeorm": "npx typeorm-ts-node-commonjs --dataSource ./datasource.ts",
-    "typeorm:migration:run": "npm run typeorm migration:run",
-    "typeorm:migration:show": "npm run typeorm migration:show",
-    "typeorm:migration:generate": "npm run typeorm migration:generate src/main/database/migrations/Migration --timestamp",
-    "typeorm:migration:revert": "npm run typeorm migration:revert"
+    "typeorm:base": "npx typeorm-ts-node-commonjs",
+    "typeorm": "npm run typeorm:base --dataSource ../../src/main/datasource.ts",
+    "typeorm:version": "npm run typeorm version",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:show": "npm run typeorm migration:show",
+    "migration:generate": "npm run typeorm migration:generate ../../src/main/database/migrations --timestamp",
+    "migration:create": "npm run typeorm:base migration:create ../../src/main/database/migrations/$npm_config_name",
+    "migration:revert": "npm run typeorm migration:revert",
+    "schema:drop": "npm run typeorm schema:drop"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.0",
