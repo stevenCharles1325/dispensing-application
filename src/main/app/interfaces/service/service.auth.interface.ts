@@ -23,7 +23,7 @@ export default interface IAuthService extends IService {
     password: string
   ): Promise<IResponse>;
   revoke(this: any): Promise<IResponse>;
-  verifyToken(this: any, token: string): IResponse;
+  verifyToken(this: any, token?: string): IResponse;
   generateToken(this: any): [string, string];
 
   setAuthUser(this: any, payload: IAuth<User>): void;
