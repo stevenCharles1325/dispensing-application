@@ -8,11 +8,15 @@ import IAuthService from 'App/interfaces/service/service.auth.interface';
 import authenticate from 'App/modules/service/auth/auth.authenticate.module';
 import generateToken from 'App/modules/service/auth/auth.generate-token.module';
 import revoke from 'App/modules/service/auth/auth.revoke.module';
-import { clearStore, getStore, setStore } from 'App/modules/service/auth/auth.store.module';
 import verifyToken from 'App/modules/service/auth/auth.verify-token.module';
 import getAuthUser from 'App/modules/service/auth/auth.get-auth-user.module';
 import setAuthUser from 'App/modules/service/auth/auth.set-auth-user.module';
 import hasPermission from 'App/modules/service/auth/auth.has-permission.module';
+import {
+  clearStore,
+  getStore,
+  setStore,
+} from 'App/modules/service/auth/auth.store.module';
 
 export default class AuthService implements Partial<IAuthService> {
   public readonly SERVICE_NAME: 'AUTH_SERVICE';

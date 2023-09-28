@@ -102,6 +102,7 @@ const useConnection = () => {
                   body: {
                     data: payload!.response?.body?.data,
                     status: 'SUCCESS',
+                    code: 'PEER_REQ_WAIT',
                   },
                 },
                 // eslint-disable-next-line no-undef

@@ -33,6 +33,9 @@
       "App/*": [
         "main/app/*"
       ],
+      "UI/*": [
+        "renderer/*"
+      ],
       "@IOC:Provider": [
         "main/provider"
       ],
