@@ -1,49 +1,35 @@
-import { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+/* eslint-disable react/no-unstable-nested-components */
+import { Suspense, useEffect, useState } from 'react';
+import {
+  Route,
+  defer,
+  createRoutesFromElements,
+  createHashRouter,
+} from 'react-router-dom';
 import useConnection from './hooks/useConnection';
 import Dashboard from './screens/protected/dashboard';
 
 import './styles/global.css';
 import ProtectedLayout from './components/Layouts/ProtectedLayout';
 import SignIn from './screens/gate/sign-in';
-import AuthProvider from './providers/AuthProvider';
+import AuthLayout from './components/Layouts/AuthLayout';
 
-export default function App() {
-  const [user, setUser] = useState(null);
+const router = createHashRouter(
+  createRoutesFromElements(
+    <Route
+      path="/"
+      element={<AuthLayout />}
+      loader={async () =>
+        defer({ userData: (await window.electron.ipcRenderer.authMe())?.data })
+      }
+    >
+      <Route exact={true} path="/gate/sign-in" element={<SignIn />} />
 
-  // Peer data Connection
-  // const connection = useConnection();
+      <Route exact={true} path="/protected" element={<ProtectedLayout />}>
+        <Route exact={true} path="dashboard" element={<Dashboard />} />
+      </Route>
+    </Route>
+  )
+);
 
-  useEffect(() => {
-    const getUser = async () => {
-      const res = await window.electron.ipcRenderer.authMe();
-
-      return res.data;
-    };
-
-    getUser();
-  }, []);
-
-  // useEffect(() => {
-  //   return () => {
-  //     console.log('App is closing connection...');
-  //     connection.close();
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [connection.close]);
-
-  console.log(window.location);
-  return (
-    <div className="App">
-      <AuthProvider userData={user}>
-        <Routes>
-          <Route path="/gate/sign-in" element={<SignIn />} />
-
-          <Route path="/" element={<ProtectedLayout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-          </Route>
-        </Routes>
-      </AuthProvider>
-    </div>
-  );
-}
+export default router;

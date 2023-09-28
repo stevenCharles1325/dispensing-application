@@ -1,8 +1,8 @@
-import React, { createContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface IAuthProvider extends React.PropsWithChildren {
-  userData: Record<string, any> | null;
+  user: Record<string, any> | null;
 }
 
 interface IAuthContext {
@@ -14,7 +14,7 @@ interface IAuthContext {
 
 export const AuthContext = createContext<Partial<IAuthContext>>({});
 
-export default function AuthProvider({ children, userData }: IAuthProvider) {
+export default function AuthProvider({ children, user }: IAuthProvider) {
   const navigate = useNavigate();
 
   const goToLogin = () => {
@@ -29,13 +29,13 @@ export default function AuthProvider({ children, userData }: IAuthProvider) {
 
   const value = useMemo(
     () => ({
-      user: userData,
+      user,
       goToLogin,
       goToIndex,
       goSignOut,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [userData]
+    [user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
