@@ -4,7 +4,7 @@ import {
   Route,
   defer,
   createRoutesFromElements,
-  createHashRouter,
+  createMemoryRouter,
 } from 'react-router-dom';
 import useConnection from './hooks/useConnection';
 import Dashboard from './screens/protected/dashboard';
@@ -13,21 +13,21 @@ import './styles/global.css';
 import ProtectedLayout from './components/Layouts/ProtectedLayout';
 import SignIn from './screens/gate/sign-in';
 import AuthLayout from './components/Layouts/AuthLayout';
+import AlertProvider from './providers/AlertProvider';
 
-const router = createHashRouter(
+const router = createMemoryRouter(
   createRoutesFromElements(
     <Route
-      path="/"
       element={<AuthLayout />}
       loader={async () =>
         defer({ userData: (await window.electron.ipcRenderer.authMe())?.data })
       }
     >
-      <Route exact={true} path="/gate/sign-in" element={<SignIn />} />
-
-      <Route exact={true} path="/protected" element={<ProtectedLayout />}>
-        <Route exact={true} path="dashboard" element={<Dashboard />} />
+      <Route path="/" element={<ProtectedLayout />}>
+        <Route path="dashboard" element={<Dashboard />} />
       </Route>
+
+      <Route path="/sign-in" element={<SignIn />} />
     </Route>
   )
 );

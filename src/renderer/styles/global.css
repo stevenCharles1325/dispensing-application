@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Rubik';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Rubik Regular'), local('Rubik-Regular'), url('/src/renderer/fonts/rubik/static/Rubik-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rubik Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Rubik Light'), local('Rubik-Light'), url('/src/renderer/fonts/rubik/static/Rubik-Light.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rubik ExtraBold';
+  font-style: normal;
+  font-weight: 800;
+  src: local('Rubik ExtraBold'), local('Rubik-ExtraBold'), url('/src/renderer/fonts/rubik/static/Rubik-ExtraBold.ttf') format('truetype');
+}
+
 :root {
     --bg-color: #8C81D0;
     --text-color: #363030;
@@ -15,5 +36,6 @@ body {
     width: 100vw;
     height: 100vh;
     background-color: var(--bg-color);
+    font-family: 'Rubik';
     color: var(--text-color);
 }

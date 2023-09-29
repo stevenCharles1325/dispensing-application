@@ -9,7 +9,7 @@ interface IAuthContext {
   user: Record<string, any> | null;
   goToLogin: () => void;
   goToIndex: () => void;
-  goSignOut: (cb: () => void) => void;
+  goSignOut: (cb?: () => void) => void;
 }
 
 export const AuthContext = createContext<Partial<IAuthContext>>({});
@@ -18,14 +18,17 @@ export default function AuthProvider({ children, user }: IAuthProvider) {
   const navigate = useNavigate();
 
   const goToLogin = () => {
-    navigate('/gate/sign-in', { replace: true });
+    navigate('/sign-in', { replace: true });
   };
 
   const goToIndex = () => {
-    navigate('/protected/dashboard', { replace: true });
+    navigate('/dashboard', { replace: true });
   };
 
-  const goSignOut = (cb: Function) => cb?.();
+  const goSignOut = (cb?: Function) => {
+    cb?.();
+    navigate('/sign-in', { replace: true });
+  };
 
   const value = useMemo(
     () => ({

@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
     "strict": true,
     "sourceMap": true,
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -31,16 +31,19 @@
     ],
     "paths": {
       "App/*": [
-        "main/app/*"
+        "src/main/app/*"
       ],
       "UI/*": [
-        "renderer/*"
+        "src/renderer/*"
+      ],
+      "Assets/*": [
+        "assets/*"
       ],
       "@IOC:Provider": [
-        "main/provider"
+        "src/main/provider"
       ],
       "Main/*": [
-        "main/*"
+        "src/main/*"
       ],
     }
   },
