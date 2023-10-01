@@ -1,4 +1,5 @@
 import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IListener from 'App/interfaces/event/event.listener.interface';
@@ -17,7 +18,9 @@ export default class PeerSyncEvent implements IEvent {
     event,
     eventData,
     storage,
-  }: IEventListenerProperties) {
+  }: IEventListenerProperties): Promise<
+    IResponse<Partial<UserDTO> | IPOSError[] | any>
+  > {
     // eslint-disable-next-line no-undef
     const data: PeerDataContract = eventData.payload[0];
     const authService = Provider.ioc<IAuthService>('AuthProvider');
@@ -31,10 +34,10 @@ export default class PeerSyncEvent implements IEvent {
         errors: authResponse.errors,
         code: 'PEER_SYNC_ERR',
         status: 'ERROR',
-      } as IResponse;
+      } as IResponse<IPOSError[]>;
     }
 
-    const user = authResponse.data;
+    const user = authResponse.data as Partial<UserDTO>;
     const hasPermission = authService.hasPermission(
       user,
       'view-data',
@@ -64,7 +67,7 @@ export default class PeerSyncEvent implements IEvent {
             data: syncItems,
             code: 'PEER_REQ_OK',
             status: 'SUCCESS',
-          } as IResponse;
+          } as IResponse<Record<string, any>>;
         }
 
         if (data.type === 'response') {
@@ -112,14 +115,14 @@ export default class PeerSyncEvent implements IEvent {
             errors,
             code: errors.length ? 'PEER_SYNC_ERROR' : 'PEER_SYNC_OK',
             status: errors.length ? 'ERROR' : 'SUCCESS',
-          } as IResponse;
+          } as unknown as IResponse<IPOSError[] | any[]>;
         }
 
         return {
           errors: ['Request is invalid'],
           code: 'PEER_REQ_INVALID',
           status: 'ERROR',
-        } as IResponse;
+        } as unknown as IResponse<string[]>;
       } catch (err) {
         const error = handleError(err);
         console.log('ERROR HANDLER OUTPUT: ', error);
@@ -128,14 +131,14 @@ export default class PeerSyncEvent implements IEvent {
           errors: [error],
           code: 'SYS_ERR',
           status: 'ERROR',
-        } as IResponse;
+        } as unknown as IResponse<string[]>;
       }
     } else {
       return {
         errors: ['Unauthorized user'],
         code: 'PEER_SYNC_ERR',
         status: 'ERROR',
-      } as IResponse;
+      } as unknown as IResponse<string[]>;
     }
   }
 }

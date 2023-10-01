@@ -1,4 +1,4 @@
-import RoleContract from './role.dto';
+import RoleDTO from './role.dto';
 
 export default interface UserDTO {
   first_name: string;
@@ -17,5 +17,5 @@ export default interface UserDTO {
 
   role_id?: number;
 
-  role?: RoleContract;
+  role?: RoleDTO;
 }

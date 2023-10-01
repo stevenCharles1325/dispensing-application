@@ -1,5 +1,6 @@
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import handleError from 'App/modules/error-handler.module';
 import { User } from 'Main/database/models/user.model';
@@ -10,7 +11,11 @@ export default class UserDeleteEvent implements IEvent {
 
   public middlewares = ['auth.middleware'];
 
-  public async listener({ eventData }: IEventListenerProperties) {
+  public async listener({
+    eventData,
+  }: IEventListenerProperties): Promise<
+    IResponse<string[] | IPOSError[] | any>
+  > {
     try {
       const requesterHasPermission =
         eventData.user.hasPermission?.('delete-user');
@@ -23,14 +28,14 @@ export default class UserDeleteEvent implements IEvent {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
-        } as IResponse;
+        } as IResponse<typeof data>;
       }
 
       return {
         errors: ['You are not allowed to delete a User'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
-      } as IResponse;
+      } as unknown as IResponse<string[]>;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -39,7 +44,7 @@ export default class UserDeleteEvent implements IEvent {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as IResponse;
+      } as unknown as IResponse<IPOSError[]>;
     }
   }
 }

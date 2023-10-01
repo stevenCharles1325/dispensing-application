@@ -5,7 +5,7 @@ export default function hasPermission(
   this: any,
   user: Partial<UserDTO>,
   ...permission: PermissionsKebabType[]
-) {
+): boolean {
   return user.role!.permissions!.some(({ kebab }) =>
     permission.includes(kebab as PermissionsKebabType)
   );

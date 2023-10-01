@@ -4,13 +4,20 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import handleError from 'App/modules/error-handler.module';
 import RoleRepository from 'App/repositories/role.repository';
 import validator from 'App/modules/validator.module';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
+import { Role } from 'Main/database/models/role.model';
 
 export default class RoleCreateEvent implements IEvent {
   public channel: string = 'role:create';
 
   public middlewares = ['auth.middleware'];
 
-  public async listener({ eventData }: IEventListenerProperties) {
+  public async listener({
+    eventData,
+  }: IEventListenerProperties): Promise<
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | Role[] | any>
+  > {
     try {
       const requesterHasPermission =
         eventData.user.hasPermission?.('create-role');
@@ -25,7 +32,7 @@ export default class RoleCreateEvent implements IEvent {
             errors,
             code: 'VALIDATION_ERR',
             status: 'ERROR',
-          } as IResponse;
+          } as unknown as IResponse<IPOSValidationError[]>;
         }
 
         const data = await RoleRepository.save(role);
@@ -34,14 +41,14 @@ export default class RoleCreateEvent implements IEvent {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
-        } as IResponse;
+        } as IResponse<typeof data>;
       }
 
       return {
         errors: ['You are not allowed to create a Role'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
-      } as IResponse;
+      } as unknown as IResponse<string[]>;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -50,7 +57,7 @@ export default class RoleCreateEvent implements IEvent {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as IResponse;
+      } as unknown as IResponse<IPOSError[]>;
     }
   }
 }

@@ -1,7 +1,9 @@
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IListener from 'App/interfaces/event/event.listener.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import handleError from 'App/modules/error-handler.module';
 
 export default class PeerRequestEvent implements IEvent {
@@ -11,7 +13,16 @@ export default class PeerRequestEvent implements IEvent {
     event,
     eventData,
     storage,
-  }: IEventListenerProperties) {
+  }: IEventListenerProperties): Promise<
+    IResponse<
+      | string[]
+      | IPOSError
+      | IPOSValidationError
+      // eslint-disable-next-line no-undef
+      | PeerDataContract
+      | any
+    >
+  > {
     try {
       // eslint-disable-next-line no-undef
       const data: PeerDataContract = eventData.payload[0];
@@ -24,7 +35,7 @@ export default class PeerRequestEvent implements IEvent {
           errors: ['Event is not available'],
           code: 'PEER_REQ_INVALID',
           status: 'ERROR',
-        } as IResponse;
+        } as unknown as IResponse<string[]>;
       }
 
       const unavailableEvents = [
@@ -52,7 +63,7 @@ export default class PeerRequestEvent implements IEvent {
           data: response,
           code: 'PEER_REQ_OK',
           status: 'SUCCESS',
-        } as IResponse;
+        } as IResponse<any>;
       }
 
       if (data.systemKey !== process.env.SYSTEM_KEY)
@@ -60,21 +71,21 @@ export default class PeerRequestEvent implements IEvent {
           errors: ['Invalid system-key'],
           code: 'PEER_REQ_ERR',
           status: 'ERROR',
-        } as IResponse;
+        } as unknown as IResponse<string[]>;
 
       if (!data.request?.name)
         return {
           errors: ['Request name is required'],
           code: 'PEER_REQ_ERR',
           status: 'ERROR',
-        } as IResponse;
+        } as unknown as IResponse<string[]>;
 
       if (unavailableEvents.includes(data.request.name)) {
         return {
           errors: ['Invalid action'],
           code: 'PEER_REQ_INVALID',
           status: 'ERROR',
-        } as IResponse;
+        } as unknown as IResponse<string[]>;
       }
 
       const response = await desiredEvent({
@@ -105,7 +116,8 @@ export default class PeerRequestEvent implements IEvent {
         data: payload,
         code: 'PEER_REQ_OK',
         status: 'SUCCESS',
-      } as IResponse;
+        // eslint-disable-next-line no-undef
+      } as IResponse<PeerDataContract>;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -114,7 +126,7 @@ export default class PeerRequestEvent implements IEvent {
         errors: [error],
         code: 'PEER_REQ_ERR',
         status: 'ERROR',
-      } as IResponse;
+      } as IResponse<typeof error>;
     }
   }
 }

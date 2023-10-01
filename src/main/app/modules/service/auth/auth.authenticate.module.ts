@@ -11,7 +11,7 @@ export default async function authenticate(
   this: any,
   email: string,
   password: string
-): Promise<IResponse> {
+): Promise<IResponse<IAuth<User> | IPOSError[]>> {
   const user = await this.userRepo.findOneBy({ email });
   let result: IPOSError | IAuth<User> | null = null;
   let status: 'SUCCESS' | 'ERROR' = 'ERROR';
@@ -88,12 +88,12 @@ export default async function authenticate(
       data: this.getStore(this.AUTH_USER_TOKEN),
       code: 'AUTH_OK',
       status,
-    } as IResponse;
+    } as IResponse<IAuth<User>>;
   }
 
   return {
     errors: [result],
     code: 'AUTH_ERR',
     status,
-  } as IResponse;
+  } as unknown as IResponse<IPOSError[]>;
 }

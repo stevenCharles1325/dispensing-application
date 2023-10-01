@@ -1,6 +1,8 @@
 import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 import IAuth from 'App/interfaces/auth/auth.interface';
 import IMiddleware from 'App/interfaces/middleware/middleware.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import { User } from 'Main/database/models/user.model';
@@ -24,7 +26,7 @@ const authMiddleware: IMiddleware = ({ eventData, storage, next }) => {
   if (authResponse.status === 'SUCCESS') {
     const hasPermission = authService.hasPermission.bind(
       this,
-      authResponse.data // user
+      authResponse.data as Partial<UserDTO> // user
     );
 
     eventData.user.hasPermission = hasPermission;
@@ -35,7 +37,7 @@ const authMiddleware: IMiddleware = ({ eventData, storage, next }) => {
     errors: authResponse.errors,
     code: 'AUTH_ERR',
     status: 'ERROR',
-  } as IResponse;
+  } as IResponse<IPOSError[]>;
 };
 
 export default authMiddleware;

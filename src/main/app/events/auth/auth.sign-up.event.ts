@@ -6,11 +6,17 @@ import handleError from 'App/modules/error-handler.module';
 import UserRepository from 'App/repositories/user.repository';
 import validator from 'App/modules/validator.module';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 
 export default class AuthSignUpEvent implements IEvent {
   public channel: string = 'auth:sign-up';
 
-  public async listener({ eventData }: IEventListenerProperties) {
+  public async listener({
+    eventData,
+  }: IEventListenerProperties): Promise<
+    IResponse<IPOSValidationError[] | IPOSError[] | any>
+  > {
     try {
       const user = UserRepository.create(eventData.payload[0]);
       const authService = Provider.ioc<IAuthService>('AuthProvider');
@@ -21,14 +27,11 @@ export default class AuthSignUpEvent implements IEvent {
           errors,
           code: 'VALIDATION_ERR',
           status: 'ERROR',
-        } as IResponse;
+        } as unknown as IResponse<IPOSValidationError[]>;
       }
 
       const data = (await UserRepository.save(user))[0];
-      return (await authService.authenticate(
-        data.email,
-        data.password
-      )) as IResponse;
+      return await authService.authenticate(data.email, data.password);
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
@@ -37,7 +40,7 @@ export default class AuthSignUpEvent implements IEvent {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as IResponse;
+      } as unknown as IResponse<IPOSError[]>;
     }
   }
 }

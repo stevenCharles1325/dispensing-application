@@ -4,6 +4,11 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import IAuthSignIn from './app/interfaces/auth/auth.sign-in.interface';
 import IResponse from './app/interfaces/pos/pos.response.interface';
 import UserDTO from './app/data-transfer-objects/user.dto';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
+import IAuth from 'App/interfaces/auth/auth.interface';
+import { User } from './database/models/user.model';
+import IPagination from 'App/interfaces/pagination/pagination.interface';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 
 export type Channels = 'ipc-example';
 
@@ -11,9 +16,12 @@ const electronHandler = {
   ipcRenderer: {
     // -------------- POS FUNCTIONS --------------
     // AUTH MODULE
-    authMe: async (): Promise<IResponse> => ipcRenderer.invoke('auth:me'),
+    authMe: async (): Promise<IResponse<Partial<UserDTO> | IPOSError[]>> =>
+      ipcRenderer.invoke('auth:me'),
 
-    authSignIn: async (payload: IAuthSignIn): Promise<IResponse> =>
+    authSignIn: async (
+      payload: IAuthSignIn
+    ): Promise<IResponse<IAuth<User> | IPOSError[]>> =>
       ipcRenderer.invoke('auth:sign-in', payload),
 
     // USER MODULE
@@ -21,21 +29,29 @@ const electronHandler = {
       payload: Record<string, any[]>,
       page: number = 1,
       total: number = 15
-    ): Promise<IResponse> =>
+    ): Promise<IResponse<string[] | IPOSError[] | IPagination>> =>
       ipcRenderer.invoke('user:show', payload, page, total),
 
-    createUser: async (payload: UserDTO): Promise<IResponse> =>
-      ipcRenderer.invoke('user:create', payload),
+    createUser: async (
+      payload: UserDTO
+    ): Promise<
+      IResponse<string[] | IPOSError[] | IPOSValidationError[] | User[]>
+    > => ipcRenderer.invoke('user:create', payload),
 
     updateUser: async (
       id: number,
       payload: Partial<UserDTO>
-    ): Promise<IResponse> => ipcRenderer.invoke('user:update', id, payload),
+    ): Promise<IResponse<string[] | IPOSError[] | User>> =>
+      ipcRenderer.invoke('user:update', id, payload),
 
-    archiveUser: async (id: number): Promise<IResponse> =>
+    archiveUser: async (
+      id: number
+    ): Promise<IResponse<string[] | IPOSError[]>> =>
       ipcRenderer.invoke('user:archive', id),
 
-    deleteUser: async (id: number): Promise<IResponse> =>
+    deleteUser: async (
+      id: number
+    ): Promise<IResponse<string[] | IPOSError[]>> =>
       ipcRenderer.invoke('user:delete', id),
 
     // Connection to TURN server to start P2P connection

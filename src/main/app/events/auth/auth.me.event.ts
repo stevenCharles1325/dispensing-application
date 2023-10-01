@@ -1,6 +1,8 @@
 import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import handleError from 'App/modules/error-handler.module';
@@ -8,7 +10,9 @@ import handleError from 'App/modules/error-handler.module';
 export default class AuthMe implements IEvent {
   public channel: string = 'auth:me';
 
-  public async listener({ eventData }: IEventListenerProperties) {
+  public async listener({
+    eventData,
+  }: IEventListenerProperties): Promise<Partial<UserDTO> | IPOSError[] | any> {
     try {
       const authService = Provider.ioc<IAuthService>('AuthProvider');
       const token = eventData.user?.token;
@@ -22,7 +26,7 @@ export default class AuthMe implements IEvent {
         errors: [error],
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as IResponse;
+      } as unknown as IResponse<IPOSError[]>;
     }
   }
 }

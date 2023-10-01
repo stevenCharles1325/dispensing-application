@@ -1,9 +1,13 @@
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import handleError from 'App/modules/error-handler.module';
 import { Token } from 'Main/database/models/token.model';
 import { SqliteDataSource } from 'Main/datasource';
 
-export default async function revoke(this: any) {
+export default async function revoke(
+  this: any
+): Promise<IResponse<IPOSError[] | IPOSValidationError[] | string[] | null>> {
   const data = this.getStore(this.AUTH_USER);
 
   if (data) {
@@ -16,7 +20,7 @@ export default async function revoke(this: any) {
       return {
         code: 'AUTH_OK',
         status: 'SUCCESS',
-      } as IResponse;
+      } as IResponse<null>;
     } catch (err) {
       const errors = handleError(err);
       console.log(errors);
@@ -25,7 +29,7 @@ export default async function revoke(this: any) {
         errors,
         code: 'SYS_ERR',
         status: 'ERROR',
-      } as unknown as IResponse;
+      } as unknown as IResponse<IPOSError[]>;
     }
   }
 
@@ -33,5 +37,5 @@ export default async function revoke(this: any) {
     errors: ['User is not authenticated'],
     code: 'AUTH_ERR',
     status: 'ERROR',
-  } as IResponse;
+  } as unknown as IResponse<string[]>;
 }

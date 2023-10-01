@@ -7,6 +7,8 @@ import IAuth from '../auth/auth.interface';
 import { User } from 'Main/database/models/user.model';
 import IResponse from '../pos/pos.response.interface';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
+import IPOSError from '../pos/pos.error.interface';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 export default interface IAuthService extends IService {
   readonly AUTH_USER: string;
@@ -21,9 +23,12 @@ export default interface IAuthService extends IService {
     this: any,
     email: string,
     password: string
-  ): Promise<IResponse>;
-  revoke(this: any): Promise<IResponse>;
-  verifyToken(this: any, token?: string): IResponse;
+  ): Promise<IResponse<IAuth<User> | IPOSError[]>>;
+  revoke(this: any): Promise<IResponse<IPOSError[] | string[] | null>>;
+  verifyToken(
+    this: any,
+    token?: string
+  ): IResponse<Partial<UserDTO> | string[] | IPOSError[]>;
   generateToken(this: any): [string, string];
 
   setAuthUser(this: any, payload: IAuth<User>): void;
@@ -34,7 +39,7 @@ export default interface IAuthService extends IService {
 
   hasPermission(
     this: any,
-    user: Partial<User>,
+    user: Partial<UserDTO>,
     ...permission: PermissionsKebabType[]
   ): boolean;
 }
