@@ -34,6 +34,8 @@ export default interface IAuthService extends IService {
   setAuthUser(this: any, payload: IAuth<User>): void;
   getAuthUser(this: any): Partial<User>;
 
+  getAuthToken(this: any): IAuth<User>;
+
   getStore(this: any, key: string): void;
   setStore(this: any, key: string, value: any): void;
 

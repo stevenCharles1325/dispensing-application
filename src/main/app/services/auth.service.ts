@@ -17,6 +17,7 @@ import {
   getStore,
   setStore,
 } from 'App/modules/service/auth/auth.store.module';
+import getAuthToken from 'App/modules/service/auth/auth.get-auth-token.module';
 
 export default class AuthService implements Partial<IAuthService> {
   public readonly SERVICE_NAME: 'AUTH_SERVICE';
@@ -40,6 +41,7 @@ Object.assign(AuthService.prototype, {
   clearStore,
   getAuthUser,
   setAuthUser,
+  getAuthToken,
   verifyToken,
   authenticate,
   hasPermission,

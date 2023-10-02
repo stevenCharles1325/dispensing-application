@@ -13,7 +13,6 @@ import './styles/global.css';
 import ProtectedLayout from './components/Layouts/ProtectedLayout';
 import SignIn from './screens/gate/sign-in';
 import AuthLayout from './components/Layouts/AuthLayout';
-import AlertProvider from './providers/AlertProvider';
 
 const router = createMemoryRouter(
   createRoutesFromElements(

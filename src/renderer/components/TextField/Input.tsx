@@ -5,6 +5,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { IconButton } from '@mui/material';
 
 interface InputProps {
+  value?: any;
   type?: React.HTMLInputTypeAttribute;
   width?: number | 'full';
   height?: number | 'full';
@@ -17,6 +18,7 @@ export default function Input(props: InputProps) {
     width = 100,
     height = 60,
     type = 'text',
+    value = null,
     placeholder,
     onChange,
   } = props;
@@ -35,6 +37,7 @@ export default function Input(props: InputProps) {
       className={`${inputWidth} ${inputHeight} rounded-full bg-[#D9D9D9] overflow-hidden flex flex-row`}
     >
       <input
+        value={value}
         placeholder={placeholder}
         className="grow outline-none bg-transparent p-3 pl-5 pr-1 shadow-md shadow-inner"
         type={priorityType}

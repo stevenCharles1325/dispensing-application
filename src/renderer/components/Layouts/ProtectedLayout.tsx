@@ -3,9 +3,10 @@ import AppNavigation from '../Navigation/AppNavigation';
 import { Navigate, Outlet } from 'react-router-dom';
 
 export default function ProtectedLayout() {
-  const { user } = useAuth();
+  const { userData } = useAuth();
 
-  return !user ? (
+  console.log(userData);
+  return !userData ? (
     <Navigate to="/sign-in" />
   ) : (
     <>

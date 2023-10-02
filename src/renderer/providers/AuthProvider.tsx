@@ -1,12 +1,16 @@
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuth from 'App/interfaces/auth/auth.interface';
 import React, { createContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface IAuthProvider extends React.PropsWithChildren {
-  user: Record<string, any> | null;
+  userData: Record<string, any> | null;
+  setUserData: React.Dispatch<React.SetStateAction<IAuth<UserDTO> | null>>;
 }
 
 interface IAuthContext {
-  user: Record<string, any> | null;
+  userData: Record<string, any> | null;
+  setUserData: React.Dispatch<React.SetStateAction<IAuth<UserDTO> | null>>;
   goToLogin: () => void;
   goToIndex: () => void;
   goSignOut: (cb?: () => void) => void;
@@ -14,7 +18,11 @@ interface IAuthContext {
 
 export const AuthContext = createContext<Partial<IAuthContext>>({});
 
-export default function AuthProvider({ children, user }: IAuthProvider) {
+export default function AuthProvider({
+  children,
+  userData,
+  setUserData,
+}: IAuthProvider) {
   const navigate = useNavigate();
 
   const goToLogin = () => {
@@ -32,14 +40,16 @@ export default function AuthProvider({ children, user }: IAuthProvider) {
 
   const value = useMemo(
     () => ({
-      user,
+      userData,
+      setUserData,
       goToLogin,
       goToIndex,
       goSignOut,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user]
+    [userData]
   );
 
+  console.log('VALUE: ', value);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

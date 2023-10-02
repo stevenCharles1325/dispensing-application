@@ -10,13 +10,12 @@ import handleError from 'App/modules/error-handler.module';
 export default class AuthMe implements IEvent {
   public channel: string = 'auth:me';
 
-  public async listener({
-    eventData,
-  }: IEventListenerProperties): Promise<Partial<UserDTO> | IPOSError[] | any> {
+  public async listener(): Promise<Partial<UserDTO> | IPOSError[] | any> {
     try {
       const authService = Provider.ioc<IAuthService>('AuthProvider');
-      const token = eventData.user?.token;
+      const { token } = authService.getAuthToken();
 
+      console.log(`token: ${token}`);
       return authService.verifyToken(token);
     } catch (err) {
       const error = handleError(err);

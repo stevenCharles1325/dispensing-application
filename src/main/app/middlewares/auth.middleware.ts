@@ -1,15 +1,12 @@
 import Provider from '@IOC:Provider';
 import UserDTO from 'App/data-transfer-objects/user.dto';
-import IAuth from 'App/interfaces/auth/auth.interface';
 import IMiddleware from 'App/interfaces/middleware/middleware.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
-import { User } from 'Main/database/models/user.model';
 
-const authMiddleware: IMiddleware = ({ eventData, storage, next }) => {
+const authMiddleware: IMiddleware = ({ eventData, next }) => {
   const authService = Provider.ioc<IAuthService>('AuthProvider');
-  const authUser = storage.get('POS_AUTH_USER_TOKEN') as IAuth<User>;
 
   /*
     Usually, we pass the token to the eventData, under
@@ -17,9 +14,9 @@ const authMiddleware: IMiddleware = ({ eventData, storage, next }) => {
     while the storage is where the data user of this
     system is stored.
   */
-  const token = eventData.user?.token?.length
-    ? eventData.user?.token
-    : authUser?.token;
+
+  eventData.user.token ??= authService.getAuthToken?.()?.token;
+  const { token } = eventData.user;
 
   const authResponse = authService.verifyToken(token);
 
