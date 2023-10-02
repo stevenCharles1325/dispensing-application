@@ -35,7 +35,7 @@ export default function SignIn() {
 
       displayAlert?.('Login success', 'success');
 
-      navigate('/');
+      navigate('/dashboard', { replace: true });
     }
   };
 
