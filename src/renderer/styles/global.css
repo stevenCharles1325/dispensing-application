@@ -66,3 +66,7 @@ body {
 
   border-top-right-radius: 100%;
 }
+
+.navigation-screen-container {
+  box-shadow: 15px 15px 15px rgba(0, 0, 0, 0.3);
+}
