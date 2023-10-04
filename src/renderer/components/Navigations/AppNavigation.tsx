@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
+import { IconButton } from '@mui/material';
 
 // Icons
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
@@ -12,6 +13,8 @@ import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -77,6 +80,18 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         ))}
       </div>
       <div className="navigation-screen-container grow my-5 mr-5 bg-white rounded-2xl p-5">
+        <div className="w-full h-[50px] flex justify-between px-5">
+          <div>{/* Search bar here */}</div>
+          <div className="w-[100px] flex justify-between items-center">
+            <IconButton>
+              <NotificationsNoneOutlinedIcon />
+            </IconButton>
+
+            <IconButton>
+              <PersonOutlinedIcon />
+            </IconButton>
+          </div>
+        </div>
         {children}
       </div>
     </div>

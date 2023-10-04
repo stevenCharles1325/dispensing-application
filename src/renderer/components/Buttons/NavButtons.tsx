@@ -21,6 +21,8 @@ export default function NavButton({
   onClick,
 }: INavButtonprops) {
   const navigate = useNavigate();
+  const color = active ? 'var(--text-color)' : 'white';
+  const fontWeight = active ? 'font-extrabold' : 'font-thin';
 
   const handleClick = () => {
     if (redirectPath) {
@@ -30,7 +32,10 @@ export default function NavButton({
   };
 
   return (
-    <div className="bg-transparent flex flex-col items-end py-2 pl-5">
+    <div
+      className={`bg-transparent flex flex-col items-end py-2 pl-5 ${fontWeight}`}
+      style={{ color }}
+    >
       {active ? (
         <>
           <div className="nav-btn-anch w-[30px] h-[30px]">
