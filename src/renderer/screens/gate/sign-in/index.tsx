@@ -48,11 +48,13 @@ export default function SignIn() {
         <div className="mb-[30px]">
           <Input
             placeholder="Email"
+            width="full"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <br />
           <Input
+            width="full"
             type="password"
             value={password}
             placeholder="Password"
