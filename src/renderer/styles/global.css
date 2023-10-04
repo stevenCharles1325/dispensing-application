@@ -24,18 +24,45 @@
 }
 
 :root {
-    --bg-color: #8C81D0;
-    --text-color: #363030;
-    --info-text-color: #8B8B8B;
-    --heading-color: #FFF;
+  --bg-color: #8C81D0;
+  --text-color: #363030;
+  --info-text-color: #8B8B8B;
+  --heading-color: #FFF;
 }
 
 body {
-    padding: 0;
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--bg-color);
-    font-family: 'Rubik';
-    color: var(--text-color);
+  padding: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-color);
+  font-family: 'Rubik';
+  color: var(--text-color);
+}
+
+.nav-btn-anch, .nav-btn-anch-rev {
+  position: relative;
+  background-color: white;
+}
+
+.nav-btn-anch:first-child::before {
+  content: " ";
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+
+  border-bottom-right-radius: 100%;
+}
+
+.nav-btn-anch-rev:last-child::before {
+  content: " ";
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+
+  border-top-right-radius: 100%;
 }

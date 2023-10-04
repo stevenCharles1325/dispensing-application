@@ -6,7 +6,6 @@ import useAlert from 'UI/hooks/useAlert';
 import { useState } from 'react';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { useNavigate } from 'react-router-dom';
-import useUser from 'UI/stores/user';
 import useAuth from 'UI/hooks/useAuth';
 
 export default function SignIn() {

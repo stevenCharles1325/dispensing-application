@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import useAuth from 'UI/hooks/useAuth';
-import AppNavigation from '../Navigation/AppNavigation';
+import AppNavigation from '../Navigations/AppNavigation';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 export default function ProtectedLayout({ children }: React.PropsWithChildren) {
