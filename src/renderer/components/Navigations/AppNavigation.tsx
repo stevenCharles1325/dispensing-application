@@ -4,6 +4,8 @@ import React, { useContext, useState } from 'react';
 import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
 import { IconButton } from '@mui/material';
+import Input from '../TextField/Input';
+import { SearchContext } from 'UI/providers/SearchProvider';
 
 // Icons
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
@@ -17,8 +19,6 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import Input from '../TextField/Input';
-import { SearchContext } from 'UI/providers/SearchProvider';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
