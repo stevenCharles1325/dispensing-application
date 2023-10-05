@@ -20,20 +20,9 @@ export class Item1695800617464 implements MigrationInterface {
             isGenerated: true,
           },
           {
-            name: 'sku',
-            type: 'varchar',
-            isNullable: false,
-            comment: 'Item ID or SKU (Stock Keeping Unit).',
-          },
-          {
-            name: 'name',
-            type: 'varchar',
-            isNullable: false,
-          },
-          {
-            name: 'description',
-            type: 'varchar',
-            isNullable: false,
+            name: 'image_id',
+            type: 'int',
+            isNullable: true,
           },
           {
             name: 'category_id',
@@ -52,6 +41,23 @@ export class Item1695800617464 implements MigrationInterface {
             type: 'int',
             isNullable: false,
             foreignKeyConstraintName: 'supplier',
+          },
+          {
+            name: 'sku',
+            type: 'varchar',
+            isUnique: true,
+            isNullable: false,
+            comment: 'Item ID or SKU (Stock Keeping Unit).',
+          },
+          {
+            name: 'name',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'description',
+            type: 'varchar',
+            isNullable: false,
           },
           {
             name: 'cost_price',
@@ -75,8 +81,47 @@ export class Item1695800617464 implements MigrationInterface {
           },
           {
             name: 'unit_of_measurement',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
+            enum: [
+              // Lenght/Dimension
+              'millimeters',
+              'centimeters',
+              'meters',
+              'feet',
+              'yards',
+
+              // Weight/Mass
+              'milligrams',
+              'grams',
+              'kilograms',
+              'ounces',
+              'pounds',
+
+              // Volume/Capacity
+              'milliliters',
+              'liters',
+              'cubic-centimeters',
+              'cubic-meters',
+              'fluid-ounces',
+              'gallons',
+
+              // Area
+              'square-millimeters',
+              'square-centimeters',
+              'square-meters',
+              'square-inches',
+              'square-feet',
+              'square-yards',
+
+              // Count/Quantity
+              'each',
+              'dozen',
+              'gross',
+              'pack',
+              'pair',
+            ],
+            default: "'each'",
             comment:
               'The unit in which the item is measured or sold (e.g., each, dozen, pound, liter).',
           },
@@ -90,10 +135,40 @@ export class Item1695800617464 implements MigrationInterface {
             type: 'int',
             isNullable: false,
           },
+          {
+            name: 'status',
+            type: 'varchar',
+            isNullable: false,
+            enum: [
+              'available', // Can be purchased
+              'on-hold', // Might be having quality control
+              'out-of-stock', // Not available for the meantime
+              'discontinued', // Will not be selling for any reason
+              'awaiting-shipment', // Has been ordered but is waiting to be delivered
+            ],
+            default: "'available'",
+          },
+          {
+            name: 'created_at',
+            type: 'timestamp',
+            default: 'now()',
+          },
+          {
+            name: 'updated_at',
+            type: 'timestamp',
+            default: 'now()',
+          },
+          {
+            name: 'deleted_at',
+            type: 'timestamp',
+            isNullable: true,
+          },
         ],
       })
     );
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropTable('items');
+  }
 }
