@@ -6,6 +6,7 @@ import AlertProvider from 'UI/providers/AlertProvider';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import IAuth from 'App/interfaces/auth/auth.interface';
 import useUser from 'UI/stores/user';
+import SearchProvider, { SearchContext } from 'UI/providers/SearchProvider';
 
 export default function AuthLayout() {
   const outlet = useOutlet();
@@ -31,7 +32,9 @@ export default function AuthLayout() {
         // eslint-disable-next-line react/no-children-prop
         children={() => (
           <AuthProvider userData={userData} setUserData={setUserData}>
-            <AlertProvider>{outlet}</AlertProvider>
+            <SearchProvider>
+              <AlertProvider>{outlet}</AlertProvider>
+            </SearchProvider>
           </AuthProvider>
         )}
       />

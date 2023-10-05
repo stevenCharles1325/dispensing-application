@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
 import { IconButton } from '@mui/material';
@@ -15,6 +15,10 @@ import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutline
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import Input from '../TextField/Input';
+import { SearchContext } from 'UI/providers/SearchProvider';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -63,6 +67,7 @@ export const navigationRoutes: INavButtonprops[] = [
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
   const [activeRouteId, setActiveRouteId] = useState(0);
+  const { searchText, setSearchText } = useContext(SearchContext);
 
   return (
     <div className="w-screen h-screen bg-transparent flex flex-row leading-normal">
@@ -81,7 +86,27 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
       </div>
       <div className="navigation-screen-container grow my-5 mr-5 bg-white rounded-2xl p-5">
         <div className="w-full h-[50px] flex justify-between px-5">
-          <div>{/* Search bar here */}</div>
+          <Input
+            opacity="clear"
+            leftIcon={
+              <IconButton disabled>
+                <SearchOutlinedIcon />
+              </IconButton>
+            }
+            rightIcon={
+              <IconButton
+                disabled={!searchText?.length}
+                onClick={() => setSearchText?.('')}
+              >
+                {searchText?.length ? <CloseOutlinedIcon /> : null}
+              </IconButton>
+            }
+            placeholder="Search"
+            width={300}
+            height="full"
+            value={searchText ?? ''}
+            onChange={(e) => setSearchText?.(e.target.value)}
+          />
           <div className="w-[100px] flex justify-between items-center">
             <IconButton>
               <NotificationsNoneOutlinedIcon />
