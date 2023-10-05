@@ -2,20 +2,17 @@
 import {
   Column,
   Entity,
-  ManyToMany,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Role } from './role.model';
-import { MinLength } from 'class-validator';
 
 const messages = {
   minLength: 'Length must be at least $constraint1',
 };
 
-@Entity('permissions')
-export class Permission {
+@Entity('items')
+export class Item {
   @PrimaryGeneratedColumn('uuid')
   id: number;
 
