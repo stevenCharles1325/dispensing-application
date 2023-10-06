@@ -33,7 +33,7 @@ declare global {
     response?:
       | {
           name: POSChannels;
-          body?: IResponse<unknown>;
+          body?: IResponse<any>;
         }
       | undefined;
   }

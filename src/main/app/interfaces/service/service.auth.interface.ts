@@ -4,7 +4,6 @@ import UserRepository from 'App/repositories/user.repository';
 import bcrypt from 'bcrypt';
 import IStorage from '../storage/storage.interface';
 import IAuth from '../auth/auth.interface';
-import { User } from 'Main/database/models/user.model';
 import IResponse from '../pos/pos.response.interface';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 import IPOSError from '../pos/pos.error.interface';
@@ -23,7 +22,7 @@ export default interface IAuthService extends IService {
     this: any,
     email: string,
     password: string
-  ): Promise<IResponse<IAuth<User> | IPOSError[]>>;
+  ): Promise<IResponse<IAuth<UserDTO> | IPOSError[]>>;
   revoke(this: any): Promise<IResponse<IPOSError[] | string[] | null>>;
   verifyToken(
     this: any,
@@ -31,10 +30,10 @@ export default interface IAuthService extends IService {
   ): IResponse<Partial<UserDTO> | string[] | IPOSError[]>;
   generateToken(this: any): [string, string];
 
-  setAuthUser(this: any, payload: IAuth<User>): void;
-  getAuthUser(this: any): Partial<User>;
+  setAuthUser(this: any, payload: IAuth<UserDTO>): void;
+  getAuthUser(this: any): Partial<UserDTO>;
 
-  getAuthToken(this: any): IAuth<User>;
+  getAuthToken(this: any): IAuth<UserDTO>;
 
   getStore(this: any, key: string): void;
   setStore(this: any, key: string, value: any): void;

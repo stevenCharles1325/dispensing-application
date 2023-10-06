@@ -84,7 +84,7 @@ export class Item1695800617464 implements MigrationInterface {
             type: 'varchar',
             isNullable: false,
             enum: [
-              // Lenght/Dimension
+              // Length/Dimension
               'millimeters',
               'centimeters',
               'meters',

@@ -1,5 +1,5 @@
-type IPagination = [
-  any,
+type IPagination<T> = [
+  Array<T>,
   {
     currentPage: number;
     previousPage: number | null;

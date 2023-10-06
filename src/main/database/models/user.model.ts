@@ -22,33 +22,12 @@ import {
   IsDate,
   MinLength,
   IsStrongPassword,
-  ValidationArguments,
 } from 'class-validator';
 import { Role } from './role.model';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 import RoleRepository from 'App/repositories/role.repository';
 import SystemRepository from 'App/repositories/system.repository';
-
-const messages = {
-  length: 'Length must be $constraint1',
-  minLength: 'Length must be at least $constraint1',
-  lengthWithMax: 'Length must be between $constraint1 to $constraint2',
-  email: 'Email is invalid',
-  unique: 'Already taken',
-  date: 'Invalid date',
-  mobileNumber: 'Invalid PH mobile number',
-  password: (args: ValidationArguments) => {
-    const { minLength, minNumbers, minLowercase, minUppercase, minSymbols } =
-      args.constraints[0];
-
-    return (
-      `Password must be at least ${minLength} ` +
-      `characters containing ${minNumbers} numbers, ` +
-      `${minLowercase} lowercases, ${minUppercase} uppercases, ` +
-      `and ${minSymbols} symbols`
-    );
-  },
-};
+import { ValidationMessage } from './validator/message';
 
 @Entity('users')
 export class User {
@@ -70,25 +49,25 @@ export class User {
 
   @Column()
   @Length(3, 20, {
-    message: messages.lengthWithMax,
+    message: ValidationMessage.maxLength,
   })
   first_name: string;
 
   @Column()
   @Length(3, 20, {
-    message: messages.lengthWithMax,
+    message: ValidationMessage.maxLength,
   })
   last_name: string;
 
   @Column()
   @IsDate({
-    message: messages.date,
+    message: ValidationMessage.date,
   })
   birth_date: Date;
 
   @Column()
   @Length(13, undefined, {
-    message: messages.length,
+    message: ValidationMessage.length,
   }) // 13 characters including "+" sign.
   @IsMobilePhone(
     'en-PH',
@@ -96,20 +75,20 @@ export class User {
       strictMode: true,
     },
     {
-      message: messages.mobileNumber,
+      message: ValidationMessage.mobileNumber,
     }
   )
   phone_number: string;
 
   @Column({ unique: true })
   @IsEmail(undefined, {
-    message: messages.email,
+    message: ValidationMessage.email,
   })
   email: string;
 
   @Column()
   @MinLength(10, {
-    message: messages.minLength,
+    message: ValidationMessage.minLength,
   })
   address: string;
 
@@ -123,7 +102,7 @@ export class User {
       minSymbols: 3,
     },
     {
-      message: messages.password,
+      message: ValidationMessage.password,
     }
   )
   password: string;

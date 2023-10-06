@@ -1,3 +1,4 @@
+import RoleDTO from 'App/data-transfer-objects/role.dto';
 import usePagination from 'App/hooks/pagination.hook';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
@@ -15,7 +16,7 @@ export default class RoleShowEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPagination | IPOSError[] | any>
+    IResponse<string[] | IPagination<RoleDTO> | IPOSError[] | any>
   > {
     try {
       const requesterHasPermission =
@@ -50,7 +51,7 @@ export default class RoleShowEvent implements IEvent {
           }
 
           // eslint-disable-next-line react-hooks/rules-of-hooks
-          return await usePagination(roleQuery, page);
+          return await usePagination<RoleDTO>(roleQuery, page);
         }
 
         return {

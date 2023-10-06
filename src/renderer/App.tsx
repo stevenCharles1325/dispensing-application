@@ -13,17 +13,19 @@ import './styles/global.css';
 import ProtectedLayout from './components/Layouts/ProtectedLayout';
 import SignIn from './screens/gate/sign-in';
 import AuthLayout from './components/Layouts/AuthLayout';
+import Inventory from './screens/protected/inventory';
 
 const router = createMemoryRouter(
   createRoutesFromElements(
     <Route
       element={<AuthLayout />}
       loader={async () =>
-        defer({ userData: (await window.electron.ipcRenderer.authMe())?.data })
+        defer({ userData: (await window.auth.authMe())?.data })
       }
     >
       <Route path="/" element={<ProtectedLayout />}>
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="inventory" element={<Inventory />} />
       </Route>
 
       <Route path="/sign-in" element={<SignIn />} />

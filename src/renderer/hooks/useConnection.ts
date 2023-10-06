@@ -61,7 +61,7 @@ const useConnection = () => {
 
     // Sync data when connection is established
     spw.on('connect', async () => {
-      const response = await window.electron.ipcRenderer.authMe();
+      const response = await window.auth.authMe();
       if (response.status === 'ERROR') {
         setError(response.errors![0]);
         syncStatus.current = 'FAILED';

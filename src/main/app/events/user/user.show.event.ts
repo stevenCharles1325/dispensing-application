@@ -1,3 +1,4 @@
+import UserDTO from 'App/data-transfer-objects/user.dto';
 import usePagination from 'App/hooks/pagination.hook';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
@@ -15,7 +16,7 @@ export default class UserShowEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPagination | any>
+    IResponse<string[] | IPOSError[] | IPagination<UserDTO> | any>
   > {
     try {
       const requesterHasPermission =
@@ -50,7 +51,7 @@ export default class UserShowEvent implements IEvent {
           }
 
           // eslint-disable-next-line react-hooks/rules-of-hooks
-          return await usePagination(userQuery, page);
+          return await usePagination<UserDTO>(userQuery, page);
         }
 
         return {

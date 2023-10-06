@@ -83,7 +83,7 @@ export default class PeerSyncEvent implements IEvent {
             syncList
           )) {
             const synchingData =
-              data.response?.body?.data[syncItemName.toLowerCase()];
+              data.response?.body?.data?.[syncItemName.toLowerCase()];
 
             // eslint-disable-next-line no-restricted-syntax
             for await (const synchingDatum of synchingData) {

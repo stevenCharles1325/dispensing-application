@@ -4,12 +4,14 @@ import {
   Entity,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-const messages = {
-  minLength: 'Length must be at least $constraint1',
-};
+import { Length, IsNegative, IsIn } from 'class-validator';
+import { ValidationMessage } from './validator/message';
+import measurements from 'Main/data/defaults/unit-of-measurements';
+import itemStatuses from 'Main/data/defaults/statuses/item';
 
 @Entity('items')
 export class Item {
@@ -36,75 +38,61 @@ export class Item {
   sku: string;
 
   @Column()
+  @Length(3, 50, {
+    message: ValidationMessage.maxLength,
+  })
   name: string;
 
   @Column()
+  @Length(5, 1000, {
+    message: ValidationMessage.maxLength,
+  })
   description: string;
 
   @Column()
+  @IsNegative({
+    message: ValidationMessage.negative,
+  })
   cost_price: number;
 
   @Column()
+  @IsNegative({
+    message: ValidationMessage.negative,
+  })
   selling_price: number;
 
   @Column()
+  @IsNegative({
+    message: ValidationMessage.negative,
+  })
   tax_rate: number;
 
   @Column()
-  unit_of_measurement:
-    | 'millimeters'
-    | 'centimeters'
-    | 'meters'
-    | 'feet'
-    | 'yards'
-
-    // Weight/Mass
-    | 'milligrams'
-    | 'grams'
-    | 'kilograms'
-    | 'ounces'
-    | 'pounds'
-
-    // Volume/Capacity
-    | 'milliliters'
-    | 'liters'
-    | 'cubic-centimeters'
-    | 'cubic-meters'
-    | 'fluid-ounces'
-    | 'gallons'
-
-    // Area
-    | 'square-millimeters'
-    | 'square-centimeters'
-    | 'square-meters'
-    | 'square-inches'
-    | 'square-feet'
-    | 'square-yards'
-
-    // Count/Quantity
-    | 'each'
-    | 'dozen'
-    | 'gross'
-    | 'pack'
-    | 'pair';
+  @IsIn(measurements, {
+    message: ValidationMessage.measurements,
+  })
+  unit_of_measurement: string;
 
   @Column()
   barcode: string;
 
   @Column()
+  @IsNegative()
   stock_quantity: number;
 
   @Column()
-  status:
-    | 'available'
-    | 'on-hold'
-    | 'out-of-stock'
-    | 'discontinued'
-    | 'awaiting-shipment';
+  @IsIn(itemStatuses, {
+    message: ValidationMessage.status,
+  })
+  status: string;
 
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({ nullable: true })
+  @DeleteDateColumn()
+  deleted_at: Date;
 }

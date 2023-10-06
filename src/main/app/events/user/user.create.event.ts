@@ -7,6 +7,7 @@ import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { User } from 'Main/database/models/user.model';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 export default class UserCreateEvent implements IEvent {
   public channel: string = 'user:create';
@@ -16,7 +17,7 @@ export default class UserCreateEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPOSValidationError[] | User[] | any>
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | UserDTO[] | any>
   > {
     try {
       const requesterHasPermission =
@@ -35,7 +36,7 @@ export default class UserCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = await UserRepository.save(user);
+        const data = (await UserRepository.save(user)) as UserDTO[];
         console.log('CREATED A USER');
         return {
           data,

@@ -7,6 +7,8 @@ import { useState } from 'react';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { useNavigate } from 'react-router-dom';
 import useAuth from 'UI/hooks/useAuth';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuth from 'App/interfaces/auth/auth.interface';
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -17,7 +19,7 @@ export default function SignIn() {
   const [password, setPassword] = useState('passWORD123@@@');
 
   const login = async () => {
-    const res = await window.electron.ipcRenderer.authSignIn({
+    const res = await window.auth.authSignIn({
       email,
       password,
     });
@@ -28,7 +30,7 @@ export default function SignIn() {
 
       displayAlert?.(message as string, type);
     } else {
-      const data = res.data as unknown as any;
+      const data = res.data as unknown as IAuth<UserDTO>;
 
       setUserData?.(data);
 

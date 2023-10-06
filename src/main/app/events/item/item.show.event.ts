@@ -1,3 +1,4 @@
+import ItemDTO from 'App/data-transfer-objects/item.dto';
 import usePagination from 'App/hooks/pagination.hook';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
@@ -15,7 +16,7 @@ export default class ItemShowEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPagination | any>
+    IResponse<string[] | IPOSError[] | IPagination<ItemDTO> | any>
   > {
     try {
       const requesterHasPermission =

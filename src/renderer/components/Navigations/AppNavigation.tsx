@@ -30,7 +30,7 @@ export const navigationRoutes: INavButtonprops[] = [
   {
     id: 1,
     label: 'Inventory',
-    redirectPath: '/dashboard',
+    redirectPath: '/inventory',
     icon: <Inventory2OutlinedIcon />,
   },
   {
@@ -78,13 +78,13 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         {navigationRoutes.map((data, index) => (
           <NavButton
             key={index}
-            {...data}
             active={data.id === activeRouteId}
             onClick={() => setActiveRouteId(data.id)}
+            {...data}
           />
         ))}
       </div>
-      <div className="navigation-screen-container grow my-5 mr-5 bg-white rounded-2xl p-5">
+      <div className="navigation-screen-container grow my-5 mr-5 bg-white rounded-2xl p-5 flex flex-col overflow-auto">
         <div className="w-full h-[50px] flex justify-between px-5">
           <Input
             opacity="clear"
@@ -117,7 +117,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
             </IconButton>
           </div>
         </div>
-        {children}
+        <div className="grow">{children}</div>
       </div>
     </div>
   );

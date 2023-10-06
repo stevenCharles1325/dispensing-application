@@ -1,9 +1,11 @@
-import { ElectronHandler } from 'src/main/preload';
+import { AuthHandler, PeerHandler, UserHandler } from 'Main/preload';
 
 declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
-    electron: ElectronHandler;
+    auth: AuthHandler;
+    peer: PeerHandler;
+    user: UserHandler;
   }
 }
 

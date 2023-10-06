@@ -23,7 +23,7 @@ const authMiddleware: IMiddleware = ({ eventData, next }) => {
   if (authResponse.status === 'SUCCESS') {
     const hasPermission = authService.hasPermission.bind(
       this,
-      authResponse.data as Partial<UserDTO> // user
+      authResponse.data as UserDTO // user
     );
 
     eventData.user.hasPermission = hasPermission;

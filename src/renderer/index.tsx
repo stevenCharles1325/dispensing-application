@@ -10,5 +10,3 @@ import router from './App';
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
 root.render(<RouterProvider router={router} />);
-
-// TO USE: https://github.com/daltonmenezes/electron-router-dom
