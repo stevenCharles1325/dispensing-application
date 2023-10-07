@@ -25,6 +25,12 @@ export class Item {
   @PrimaryGeneratedColumn('uuid')
   id: number;
 
+  @Column()
+  system_id: string;
+
+  @Column()
+  supplier_id: string;
+
   @Column({
     nullable: true,
   })
@@ -35,9 +41,6 @@ export class Item {
 
   @Column()
   brand_id: number;
-
-  @Column()
-  supplier_id: number;
 
   @Column({
     unique: true,

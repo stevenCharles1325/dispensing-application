@@ -21,7 +21,7 @@ export class Category1696656773487 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
+            isNullable: false,
           },
           {
             name: 'name',

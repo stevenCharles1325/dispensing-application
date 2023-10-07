@@ -22,7 +22,7 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
+            isNullable: false,
           },
           {
             name: 'image_id',

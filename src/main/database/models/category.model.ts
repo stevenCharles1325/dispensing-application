@@ -15,6 +15,9 @@ export class Category {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
+  @Column()
+  system_id: string;
+
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })
   name: string;

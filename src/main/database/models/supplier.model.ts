@@ -20,10 +20,8 @@ export class Supplier {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({
-    nullable: true,
-  })
-  system_id: number;
+  @Column()
+  system_id: string;
 
   @Column({
     nullable: true,

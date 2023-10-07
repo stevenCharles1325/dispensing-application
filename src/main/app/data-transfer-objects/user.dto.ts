@@ -3,6 +3,7 @@ import RoleDTO from './role.dto';
 export default interface UserDTO {
   id: number;
   lead_id: number | null;
+  system_id: string;
   role_id: number;
   first_name: string;
   last_name: string;

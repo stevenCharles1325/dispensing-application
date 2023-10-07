@@ -22,7 +22,7 @@ export class Supplier1696655002476 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
+            isNullable: false,
           },
           {
             name: 'image_id',

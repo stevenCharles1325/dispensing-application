@@ -39,9 +39,7 @@ export class User {
   })
   lead_id: number;
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   system_id: string;
 
   @Column()
