@@ -7,6 +7,8 @@ import { IconButton } from '@mui/material';
 
 interface InputProps {
   value?: any;
+  name?: string;
+  label?: string;
   type?: React.HTMLInputTypeAttribute;
   width?: number | 'full';
   height?: number | 'full';
@@ -27,6 +29,8 @@ export default function Input(props: InputProps) {
     leftIcon = null,
     rightIcon = null,
     placeholder,
+    name,
+    label,
     onChange,
   } = props;
 
@@ -47,36 +51,50 @@ export default function Input(props: InputProps) {
       : `rgba(217, 217, 217, ${opacity})`;
 
   return (
-    <div
-      className={`${inputWidth} ${inputHeight} px-1 rounded-full overflow-hidden flex flex-row justify-center`}
-      style={{ backgroundColor: bgColor }}
-    >
-      {leftIcon ? (
-        <div className="grow flex justify-center items-center">{leftIcon}</div>
-      ) : null}
-      <input
-        value={value}
-        placeholder={placeholder}
-        className={`grow-[2] outline-none bg-transparent p-3 pr-1 ${
-          !leftIcon ? 'pl-5' : 'pl-0'
-        }`}
-        type={priorityType}
-        onChange={onChange}
-      />
-      {rightIcon ? (
-        <div className="grow flex justify-center items-center">{rightIcon}</div>
-      ) : null}
-      {type === 'password' ? (
-        <div className="grow-0 w-14 flex justify-center items-center">
-          <IconButton
-            onClick={() =>
-              setIsTextVisible((textVisibility) => !textVisibility)
-            }
-          >
-            {icon}
-          </IconButton>
-        </div>
-      ) : null}
-    </div>
+    <>
+      <label
+        htmlFor={name}
+        className="px-5"
+        style={{ color: 'var(--info-text-color)' }}
+      >
+        {label}
+      </label>
+      <div
+        className={`${inputWidth} ${inputHeight} px-1 rounded-full overflow-hidden flex flex-row justify-center`}
+        style={{ backgroundColor: bgColor }}
+      >
+        {leftIcon ? (
+          <div className="grow flex justify-center items-center">
+            {leftIcon}
+          </div>
+        ) : null}
+        <input
+          value={value}
+          placeholder={placeholder}
+          className={`grow-[2] outline-none bg-transparent p-3 pr-1 ${
+            !leftIcon ? 'pl-5' : 'pl-0'
+          }`}
+          type={priorityType}
+          name={name}
+          onChange={onChange}
+        />
+        {rightIcon ? (
+          <div className="grow flex justify-center items-center">
+            {rightIcon}
+          </div>
+        ) : null}
+        {type === 'password' ? (
+          <div className="grow-0 w-14 flex justify-center items-center">
+            <IconButton
+              onClick={() =>
+                setIsTextVisible((textVisibility) => !textVisibility)
+              }
+            >
+              {icon}
+            </IconButton>
+          </div>
+        ) : null}
+      </div>
+    </>
   );
 }

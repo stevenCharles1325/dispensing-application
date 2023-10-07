@@ -1,8 +1,24 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Autocomplete, Chip, Dialog, Divider, Slide } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
-import CategoryIcon from '@mui/icons-material/Category';
+import formatCurrency from 'UI/helpers/formatCurrency';
+import { TransitionProps } from '@mui/material/transitions';
+import TextField from '@mui/material/TextField';
+import { NumericFormat, NumericFormatProps } from 'react-number-format';
+
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
+import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import measurements from 'UI/data/defaults/unit-of-measurements';
+import itemStatuses from 'UI/data/defaults/statuses/item';
+import InventoryForm from 'UI/components/Views/InventoryForm';
 
 const columns: Array<GridColDef> = [
   {
@@ -26,12 +42,12 @@ const columns: Array<GridColDef> = [
   },
   {
     field: 'cost_price',
-    headerName: 'Cost Price',
+    headerName: 'Cost Price (Peso)',
     width: 120,
   },
   {
     field: 'selling_price',
-    headerName: 'Selling Price',
+    headerName: 'Selling Price (Peso)',
     width: 120,
   },
   {
@@ -51,47 +67,94 @@ const columns: Array<GridColDef> = [
   },
 ];
 
-const rows = Array(100)
-  .fill(null)
-  .map((_, index) => ({
-    id: index,
-    sku: '12345',
-    name: 'Shees',
-    stock_quantity: 5,
-    cost_price: 4,
-    selling_price: 56,
-    tax_rate: 1,
-    unit_of_measurement: 'cm',
-    status: 'ready',
-  }));
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export default function Inventory() {
+  const [items, setItems] = useState([]);
+  const [modalAction, setModalAction] = useState<
+    'create' | 'update' | 'delete' | null
+  >(null);
+
+  const handleAddNewItem = () => {
+    console.log('Add new item');
+    setModalAction('create');
+  };
+
+  const handleEditSelectedItem = () => {
+    console.log('Edit item');
+    setModalAction('update');
+  };
+
+  const handleDeleteSelectedItem = () => {
+    console.log('Delete item');
+    setModalAction('delete');
+  };
+
   return (
-    <div className="w-full h-full flex flex-col justify-between gap-5">
-      <div className="grow gap-5 flex flex-row flex-wrap">
+    <div className="w-full h-full flex flex-col justify-around">
+      <div className="w-full h-fit gap-5 flex flex-row flex-wrap">
         <CounterWidget
-          icon={<CategoryIcon fontSize="large" />}
+          icon={<CategoryOutlinedIcon color="info" fontSize="large" />}
           count={0}
-          label="Total items"
+          label="total items"
         />
         <CounterWidget
-          icon={<CategoryIcon fontSize="large" />}
-          count={0}
-          label="total selling price including tax"
+          icon={<LocalOfferOutlinedIcon color="secondary" fontSize="large" />}
+          count={formatCurrency(0)}
+          label="total selling price"
         />
         <CounterWidget
-          icon={<CategoryIcon fontSize="large" />}
-          count={0}
-          label="Total shits"
+          icon={<MonetizationOnOutlinedIcon color="warning" fontSize="large" />}
+          count={formatCurrency(0)}
+          label="Total cost price"
         />
       </div>
       <div className="w-full h-[650px]">
+        <div className="w-full flex flex-row py-4 gap-3">
+          <Chip
+            className="shadow-lg"
+            color="primary"
+            icon={<AddCircleOutlineIcon />}
+            label="Add new item"
+            onClick={handleAddNewItem}
+          />
+          <Chip
+            className="shadow-lg"
+            color="secondary"
+            icon={<EditOutlinedIcon />}
+            label="Edit selected item"
+            onClick={handleEditSelectedItem}
+          />
+          <Chip
+            className="shadow-lg"
+            color="error"
+            icon={<DeleteOutlineOutlinedIcon />}
+            label="Delete selected item"
+            onClick={handleDeleteSelectedItem}
+          />
+        </div>
         <DataGrid
-          rows={rows}
+          className="shadow"
+          rows={items}
           columns={columns}
           checkboxSelection
           hideFooterPagination
         />
+        <Dialog
+          fullScreen
+          open={Boolean(modalAction)}
+          onClose={() => setModalAction(null)}
+          TransitionComponent={Transition}
+        >
+          <InventoryForm />
+        </Dialog>
       </div>
     </div>
   );

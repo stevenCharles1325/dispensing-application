@@ -117,7 +117,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
             </IconButton>
           </div>
         </div>
-        <div className="grow">{children}</div>
+        <div className="grow overflow-auto">{children}</div>
       </div>
     </div>
   );
