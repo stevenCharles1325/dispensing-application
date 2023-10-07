@@ -2,37 +2,29 @@
 import {
   Column,
   Entity,
-  ManyToMany,
   CreateDateColumn,
-  UpdateDateColumn,
+  DeleteDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Role } from './role.model';
 import { MinLength } from 'class-validator';
 import { ValidationMessage } from './validator/message';
 
-@Entity('permissions')
-export class Permission {
+@Entity('images')
+export class Image {
   @PrimaryGeneratedColumn('increment')
   id: number;
+
+  @Column({ unique: true })
+  url: string;
 
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })
   name: string;
 
-  @Column({ unique: true })
-  @MinLength(5, { message: ValidationMessage.minLength })
-  kebab: string;
-
-  @Column({ nullable: true })
-  description: string;
-
   @CreateDateColumn()
   created_at: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
-
-  @ManyToMany(() => Role, (role) => role.permissions)
-  roles: Role[];
+  @Column({ nullable: true })
+  @DeleteDateColumn()
+  deleted_at: Date;
 }

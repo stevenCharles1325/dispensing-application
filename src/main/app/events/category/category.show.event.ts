@@ -1,4 +1,4 @@
-import ItemDTO from 'App/data-transfer-objects/item.dto';
+import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import usePagination from 'App/hooks/pagination.hook';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
@@ -6,21 +6,21 @@ import IPagination from 'App/interfaces/pagination/pagination.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import handleError from 'App/modules/error-handler.module';
-import ItemRepository from 'App/repositories/item.repository';
+import CategoryRepository from 'App/repositories/category.repository';
 
-export default class ItemShowEvent implements IEvent {
-  public channel: string = 'item:show';
+export default class CategoryShowEvent implements IEvent {
+  public channel: string = 'category:show';
 
   public middlewares = ['auth.middleware'];
 
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPagination<ItemDTO> | any>
+    IResponse<string[] | IPOSError[] | IPagination<CategoryDTO> | any>
   > {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('view-item');
+        eventData.user.hasPermission?.('view-category');
 
       if (requesterHasPermission) {
         const payload = eventData.payload[0];
@@ -29,14 +29,14 @@ export default class ItemShowEvent implements IEvent {
         const skip = (page - 1) * take;
 
         if (payload instanceof Object && !(payload instanceof Array)) {
-          const itemQuery = ItemRepository.createQueryBuilder()
+          const categoryQuery = CategoryRepository.createQueryBuilder()
             .take(take)
             .skip(skip);
 
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
             if (propertyFind instanceof Array) {
-              itemQuery.where(`${propertyName} IN (:...args)`, {
+              categoryQuery.where(`${propertyName} IN (:...args)`, {
                 args: propertyFind,
               });
             } else {
@@ -51,7 +51,7 @@ export default class ItemShowEvent implements IEvent {
           }
 
           // eslint-disable-next-line react-hooks/rules-of-hooks
-          return await usePagination(itemQuery, page);
+          return await usePagination(categoryQuery, page);
         }
 
         return {
@@ -62,7 +62,7 @@ export default class ItemShowEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to view an Item'],
+        errors: ['You are not allowed to view a Category'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

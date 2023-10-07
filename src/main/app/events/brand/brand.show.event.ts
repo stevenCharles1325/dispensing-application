@@ -1,4 +1,4 @@
-import ItemDTO from 'App/data-transfer-objects/item.dto';
+import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import usePagination from 'App/hooks/pagination.hook';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
@@ -6,21 +6,21 @@ import IPagination from 'App/interfaces/pagination/pagination.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import handleError from 'App/modules/error-handler.module';
-import ItemRepository from 'App/repositories/item.repository';
+import BrandRepository from 'App/repositories/brand.repository';
 
-export default class ItemShowEvent implements IEvent {
-  public channel: string = 'item:show';
+export default class BrandShowEvent implements IEvent {
+  public channel: string = 'brand:show';
 
   public middlewares = ['auth.middleware'];
 
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPagination<ItemDTO> | any>
+    IResponse<string[] | IPOSError[] | IPagination<BrandDTO> | any>
   > {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('view-item');
+        eventData.user.hasPermission?.('view-brand');
 
       if (requesterHasPermission) {
         const payload = eventData.payload[0];
@@ -29,14 +29,14 @@ export default class ItemShowEvent implements IEvent {
         const skip = (page - 1) * take;
 
         if (payload instanceof Object && !(payload instanceof Array)) {
-          const itemQuery = ItemRepository.createQueryBuilder()
+          const brandQuery = BrandRepository.createQueryBuilder()
             .take(take)
             .skip(skip);
 
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
             if (propertyFind instanceof Array) {
-              itemQuery.where(`${propertyName} IN (:...args)`, {
+              brandQuery.where(`${propertyName} IN (:...args)`, {
                 args: propertyFind,
               });
             } else {
@@ -51,7 +51,7 @@ export default class ItemShowEvent implements IEvent {
           }
 
           // eslint-disable-next-line react-hooks/rules-of-hooks
-          return await usePagination(itemQuery, page);
+          return await usePagination(brandQuery, page);
         }
 
         return {
@@ -62,7 +62,7 @@ export default class ItemShowEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to view an Item'],
+        errors: ['You are not allowed to view a Brand'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

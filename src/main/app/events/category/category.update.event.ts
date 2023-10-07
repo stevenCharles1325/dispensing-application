@@ -5,32 +5,35 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
-import ItemRepository from 'App/repositories/item.repository';
-import { Item } from 'Main/database/models/item.model';
+import CategoryRepository from 'App/repositories/category.repository';
+import { Category } from 'Main/database/models/category.model';
 
-export default class ItemDeleteEvent implements IEvent {
-  public channel: string = 'item:update';
+export default class CategoryDeleteEvent implements IEvent {
+  public channel: string = 'category:update';
 
   public middlewares = ['auth.middleware'];
 
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | Item | any>
+    IResponse<string[] | IPOSError[] | Category | any>
   > {
     try {
       const id = eventData.payload[0];
-      const itemUpdate = eventData.payload[1];
+      const categoryUpdate = eventData.payload[1];
 
       const requesterHasPermission =
-        eventData.user.hasPermission?.('update-item');
+        eventData.user.hasPermission?.('update-category');
 
       if (requesterHasPermission) {
-        const item = await ItemRepository.findOneByOrFail({
+        const category = await CategoryRepository.findOneByOrFail({
           id,
         });
-        const updatedItem = ItemRepository.merge(item, itemUpdate);
-        const errors = await validator(updatedItem);
+        const updatedCategory = CategoryRepository.merge(
+          category,
+          categoryUpdate
+        );
+        const errors = await validator(updatedCategory);
 
         if (errors.length) {
           return {
@@ -40,7 +43,7 @@ export default class ItemDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = await ItemRepository.save(updatedItem);
+        const data = await CategoryRepository.save(updatedCategory);
         return {
           data,
           code: 'REQ_OK',
@@ -49,7 +52,7 @@ export default class ItemDeleteEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to update an Item'],
+        errors: ['You are not allowed to update a Category'],
         status: 'ERROR',
       } as unknown as IResponse<string[]>;
     } catch (err) {

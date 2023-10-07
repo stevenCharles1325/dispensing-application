@@ -3,11 +3,11 @@ import IEventListenerProperties from 'App/interfaces/event/event.listener-props.
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import handleError from 'App/modules/error-handler.module';
-import { Item } from 'Main/database/models/item.model';
+import { Brand } from 'Main/database/models/brand.model';
 import { SqliteDataSource } from 'Main/datasource';
 
-export default class ItemDeleteEvent implements IEvent {
-  public channel: string = 'item:delete';
+export default class BrandArchiveEvent implements IEvent {
+  public channel: string = 'brand:archive';
 
   public middlewares = ['auth.middleware'];
 
@@ -18,11 +18,11 @@ export default class ItemDeleteEvent implements IEvent {
   > {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('delete-item');
+        eventData.user.hasPermission?.('archive-brand');
 
       if (requesterHasPermission) {
-        const itemRepo = SqliteDataSource.getRepository(Item);
-        const data = await itemRepo.delete(eventData.payload[0]);
+        const brandRepo = SqliteDataSource.getRepository(Brand);
+        const data = await brandRepo.softDelete(eventData.payload[0]);
 
         return {
           data,
@@ -32,7 +32,7 @@ export default class ItemDeleteEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to delete an Item'],
+        errors: ['You are not allowed to archive a Brand'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

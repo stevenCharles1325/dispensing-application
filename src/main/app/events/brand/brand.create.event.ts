@@ -1,38 +1,33 @@
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
-import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
-import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import handleError from 'App/modules/error-handler.module';
+import BrandRepository from 'App/repositories/brand.repository';
 import validator from 'App/modules/validator.module';
-import ItemRepository from 'App/repositories/item.repository';
-import { Item } from 'Main/database/models/item.model';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
+import BrandDTO from 'App/data-transfer-objects/brand.dto';
 
-export default class ItemDeleteEvent implements IEvent {
-  public channel: string = 'item:update';
+export default class BrandCreateEvent implements IEvent {
+  public channel: string = 'brand:create';
 
   public middlewares = ['auth.middleware'];
 
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | Item | any>
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | BrandDTO[] | any>
   > {
     try {
-      const id = eventData.payload[0];
-      const itemUpdate = eventData.payload[1];
-
       const requesterHasPermission =
-        eventData.user.hasPermission?.('update-item');
+        eventData.user.hasPermission?.('create-brand');
 
       if (requesterHasPermission) {
-        const item = await ItemRepository.findOneByOrFail({
-          id,
-        });
-        const updatedItem = ItemRepository.merge(item, itemUpdate);
-        const errors = await validator(updatedItem);
+        const brand = BrandRepository.create(eventData.payload[0]);
+        const errors = await validator(brand);
 
-        if (errors.length) {
+        console.log(errors);
+        if (errors && errors.length) {
           return {
             errors,
             code: 'VALIDATION_ERR',
@@ -40,7 +35,8 @@ export default class ItemDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = await ItemRepository.save(updatedItem);
+        const data = (await BrandRepository.save(brand)) as BrandDTO[];
+        console.log('CREATED A CATEGORY');
         return {
           data,
           code: 'REQ_OK',
@@ -49,7 +45,8 @@ export default class ItemDeleteEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to update an Item'],
+        errors: ['You are not allowed to create a Brand'],
+        code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;
     } catch (err) {

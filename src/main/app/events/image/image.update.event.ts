@@ -5,32 +5,32 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
-import ItemRepository from 'App/repositories/item.repository';
-import { Item } from 'Main/database/models/item.model';
+import ImageRepository from 'App/repositories/image.repository';
+import { Image } from 'Main/database/models/image.model';
 
-export default class ItemDeleteEvent implements IEvent {
-  public channel: string = 'item:update';
+export default class ImageDeleteEvent implements IEvent {
+  public channel: string = 'image:update';
 
   public middlewares = ['auth.middleware'];
 
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | Item | any>
+    IResponse<string[] | IPOSError[] | Image | any>
   > {
     try {
       const id = eventData.payload[0];
-      const itemUpdate = eventData.payload[1];
+      const imageUpdate = eventData.payload[1];
 
       const requesterHasPermission =
-        eventData.user.hasPermission?.('update-item');
+        eventData.user.hasPermission?.('update-image');
 
       if (requesterHasPermission) {
-        const item = await ItemRepository.findOneByOrFail({
+        const image = await ImageRepository.findOneByOrFail({
           id,
         });
-        const updatedItem = ItemRepository.merge(item, itemUpdate);
-        const errors = await validator(updatedItem);
+        const updatedImage = ImageRepository.merge(image, imageUpdate);
+        const errors = await validator(updatedImage);
 
         if (errors.length) {
           return {
@@ -40,7 +40,7 @@ export default class ItemDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = await ItemRepository.save(updatedItem);
+        const data = await ImageRepository.save(updatedImage);
         return {
           data,
           code: 'REQ_OK',
@@ -49,7 +49,7 @@ export default class ItemDeleteEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to update an Item'],
+        errors: ['You are not allowed to update a Image'],
         status: 'ERROR',
       } as unknown as IResponse<string[]>;
     } catch (err) {

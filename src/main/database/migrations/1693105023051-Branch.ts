@@ -8,7 +8,7 @@ import {
 
 export class Branch1693105023051 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // This will only be tracked on the Main branch
+    // This will only be tracked on the Main branch and does not need system_id
     await queryRunner.createTable(
       new Table({
         name: 'branches',

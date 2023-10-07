@@ -41,7 +41,11 @@ export default class PeerSyncEvent implements IEvent {
     const hasPermission = authService.hasPermission(
       user,
       'view-data',
-      'download-data'
+      'create-data',
+      'update-data',
+      'delete-data',
+      'download-data',
+      'request-data'
     );
 
     const syncList = {

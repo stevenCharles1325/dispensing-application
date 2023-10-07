@@ -1,15 +1,15 @@
 import {
   MigrationInterface,
-  QueryRunner,
   Table,
+  QueryRunner,
   TableForeignKey,
 } from 'typeorm';
 
-export class Permission1692778618800 implements MigrationInterface {
+export class Brand1696656902853 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'permissions',
+        name: 'brands',
         columns: [
           {
             name: 'id',
@@ -26,13 +26,8 @@ export class Permission1692778618800 implements MigrationInterface {
           {
             name: 'name',
             type: 'varchar',
+            isNullable: false,
             isUnique: true,
-          },
-          {
-            name: 'kebab',
-            type: 'varchar',
-            isUnique: true,
-            comment: 'The kebab-case version of the name',
           },
           {
             name: 'description',
@@ -49,13 +44,18 @@ export class Permission1692778618800 implements MigrationInterface {
             type: 'timestamp',
             default: 'now()',
           },
+          {
+            name: 'deleted_at',
+            type: 'timestamp',
+            isNullable: true,
+          },
         ],
       }),
       true
     );
 
     await queryRunner.createForeignKey(
-      'permissions',
+      'brands',
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
@@ -67,7 +67,7 @@ export class Permission1692778618800 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('permissions', 'system');
-    await queryRunner.dropTable('permissions');
+    await queryRunner.dropForeignKey('brands', 'system');
+    await queryRunner.dropTable('brands');
   }
 }

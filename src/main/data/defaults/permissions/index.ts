@@ -89,6 +89,94 @@ const permissions = [
     kebab: 'delete-item',
   },
 
+  // Category management permissions
+  {
+    name: 'View Category',
+    kebab: 'view-category',
+  },
+  {
+    name: 'Create Category',
+    kebab: 'create-category',
+  },
+  {
+    name: 'Update Category',
+    kebab: 'update-category',
+  },
+  {
+    name: 'Archive Category',
+    kebab: 'archive-category',
+  },
+  {
+    name: 'Delete Category',
+    kebab: 'delete-category',
+  },
+
+  // Brand management permissions
+  {
+    name: 'View Brand',
+    kebab: 'view-brand',
+  },
+  {
+    name: 'Create Brand',
+    kebab: 'create-brand',
+  },
+  {
+    name: 'Update Brand',
+    kebab: 'update-brand',
+  },
+  {
+    name: 'Archive Brand',
+    kebab: 'archive-brand',
+  },
+  {
+    name: 'Delete Brand',
+    kebab: 'delete-brand',
+  },
+
+  // Supplier management permissions
+  {
+    name: 'View Supplier',
+    kebab: 'view-supplier',
+  },
+  {
+    name: 'Create Supplier',
+    kebab: 'create-supplier',
+  },
+  {
+    name: 'Update Supplier',
+    kebab: 'update-supplier',
+  },
+  {
+    name: 'Archive Supplier',
+    kebab: 'archive-supplier',
+  },
+  {
+    name: 'Delete Supplier',
+    kebab: 'delete-supplier',
+  },
+
+  // Image management permissions
+  {
+    name: 'View Image',
+    kebab: 'view-image',
+  },
+  {
+    name: 'Create Image',
+    kebab: 'create-image',
+  },
+  {
+    name: 'Update Image',
+    kebab: 'update-image',
+  },
+  {
+    name: 'Archive Image',
+    kebab: 'archive-image',
+  },
+  {
+    name: 'Delete Image',
+    kebab: 'delete-image',
+  },
+
   // Transaction management permissions
   {
     name: 'View Transaction',
@@ -133,14 +221,34 @@ const permissions = [
     kebab: 'delete-attendance',
   },
 
-  // Data/Graph management permissions
+  // Data/Peer/Graph management permissions
   {
     name: 'View Data',
     kebab: 'view-data',
   },
   {
+    name: 'Create Data',
+    kebab: 'create-data',
+  },
+  {
+    name: 'Update Data',
+    kebab: 'update-data',
+  },
+  {
+    name: 'Archive Data',
+    kebab: 'archive-data',
+  },
+  {
+    name: 'Delete Data',
+    kebab: 'delete-data',
+  },
+  {
     name: 'Download Data',
     kebab: 'download-data',
+  },
+  {
+    name: 'Request Data', // Main peer request permission
+    kebab: 'request-data',
   },
 ] as const;
 

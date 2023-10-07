@@ -20,9 +20,15 @@ export class Item1695800617464 implements MigrationInterface {
             isGenerated: true,
           },
           {
+            name: 'system_id',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
             name: 'image_id',
             type: 'int',
             isNullable: true,
+            foreignKeyConstraintName: 'image',
           },
           {
             name: 'category_id',
@@ -38,7 +44,7 @@ export class Item1695800617464 implements MigrationInterface {
           },
           {
             name: 'supplier_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'supplier',
           },
@@ -166,9 +172,78 @@ export class Item1695800617464 implements MigrationInterface {
         ],
       })
     );
+
+    await queryRunner.createIndex(
+      'items',
+      new TableIndex({
+        name: 'IDX_ITEM',
+        columnNames: ['id', 'supplier_id', 'category_id', 'brand_id'],
+      })
+    );
+
+    await queryRunner.createForeignKey(
+      'items',
+      new TableForeignKey({
+        name: 'image',
+        columnNames: ['image_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'images',
+        onDelete: 'SET NULL',
+      })
+    );
+
+    await queryRunner.createForeignKey(
+      'items',
+      new TableForeignKey({
+        name: 'brand',
+        columnNames: ['brand_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'brands',
+        onDelete: 'SET NULL',
+      })
+    );
+
+    await queryRunner.createForeignKey(
+      'items',
+      new TableForeignKey({
+        name: 'category',
+        columnNames: ['category_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'categories',
+        onDelete: 'SET NULL',
+      })
+    );
+
+    await queryRunner.createForeignKey(
+      'items',
+      new TableForeignKey({
+        name: 'supplier',
+        columnNames: ['supplier_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'suppliers',
+        onDelete: 'SET NULL',
+      })
+    );
+
+    await queryRunner.createForeignKey(
+      'items',
+      new TableForeignKey({
+        name: 'system',
+        columnNames: ['system_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'systems',
+        onDelete: 'CASCADE',
+      })
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropForeignKey('items', 'system');
+    await queryRunner.dropForeignKey('items', 'image');
+    await queryRunner.dropForeignKey('items', 'brand');
+    await queryRunner.dropForeignKey('items', 'category');
+    await queryRunner.dropForeignKey('items', 'supplier');
+    await queryRunner.dropIndex('items', 'IDX_ITEM');
     await queryRunner.dropTable('items');
   }
 }

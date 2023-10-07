@@ -2,28 +2,22 @@
 import {
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Permission } from './permission.model';
 import { MinLength } from 'class-validator';
 import { ValidationMessage } from './validator/message';
 
-@Entity('roles')
-export class Role {
+@Entity('categories')
+export class Category {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })
   name: string;
-
-  @Column({ unique: true })
-  @MinLength(5, { message: ValidationMessage.minLength })
-  kebab: string;
 
   @Column({ nullable: true })
   description: string;
@@ -34,17 +28,7 @@ export class Role {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToMany(() => Permission, (permission) => permission.roles, {
-    eager: true,
-  })
-  @JoinTable({
-    name: 'role_permissions',
-    joinColumn: {
-      name: 'role_id',
-    },
-    inverseJoinColumn: {
-      name: 'permission_id',
-    },
-  })
-  permissions: Permission[];
+  @Column({ nullable: true })
+  @DeleteDateColumn()
+  deleted_at: Date;
 }

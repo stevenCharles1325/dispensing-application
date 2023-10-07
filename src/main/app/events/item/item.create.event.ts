@@ -45,7 +45,7 @@ export default class ItemCreateEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to create a Item'],
+        errors: ['You are not allowed to create an Item'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

@@ -6,7 +6,6 @@ import UserRepository from 'App/repositories/user.repository';
 import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
-import { User } from 'Main/database/models/user.model';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 
 export default class UserCreateEvent implements IEvent {

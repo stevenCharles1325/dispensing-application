@@ -6,24 +6,18 @@ import {
   TableIndex,
 } from 'typeorm';
 
-export class User1692175684026 implements MigrationInterface {
+export class Supplier1696655002476 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'users',
+        name: 'suppliers',
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
-          },
-          {
-            name: 'lead_id',
-            type: 'int',
-            isNullable: true,
-            foreignKeyConstraintName: 'lead',
           },
           {
             name: 'system_id',
@@ -31,46 +25,66 @@ export class User1692175684026 implements MigrationInterface {
             isNullable: true,
           },
           {
-            name: 'role_id',
+            name: 'image_id',
             type: 'int',
             isNullable: true,
-            foreignKeyConstraintName: 'role',
+            comment: 'Logo',
+            foreignKeyConstraintName: 'image',
           },
           {
-            name: 'first_name',
-            type: 'varchar',
-            isNullable: false,
-          },
-          {
-            name: 'last_name',
+            name: 'name',
             type: 'varchar',
             isNullable: false,
           },
           {
             name: 'email',
             type: 'varchar',
+            isNullable: false,
             isUnique: true,
-            isNullable: false,
-          },
-          {
-            name: 'birth_date',
-            type: 'datetime',
-            isNullable: false,
-          },
-          {
-            name: 'address',
-            type: 'varchar',
-            isNullable: false,
           },
           {
             name: 'phone_number',
             type: 'varchar',
             isNullable: false,
+            isUnique: true,
           },
           {
-            name: 'password',
+            name: 'contact_name',
             type: 'varchar',
             isNullable: false,
+            comment: `The name of a specific contact person at the supplier's organization.`,
+          },
+          {
+            name: 'contact_email',
+            type: 'varchar',
+            isNullable: false,
+            comment: 'The email address of the contact person.',
+          },
+          {
+            name: 'contact_phone_number',
+            type: 'varchar',
+            isNullable: false,
+            comment: 'The phone number of the contact person.',
+          },
+          {
+            name: 'address',
+            type: 'varchar',
+            isNullable: false,
+            comment: 'The phone number of the contact person.',
+          },
+          {
+            name: 'tax_id',
+            type: 'varchar',
+            isNullable: false,
+            comment:
+              'The tax identification number or VAT (Value Added Tax) number for the supplier, which may be necessary for tax reporting purposes.',
+          },
+          {
+            name: 'status',
+            type: 'varchar',
+            isNullable: false,
+            enum: ['active', 'inactive', 'deactivated'],
+            default: "'active'",
           },
           {
             name: 'created_at',
@@ -93,45 +107,26 @@ export class User1692175684026 implements MigrationInterface {
     );
 
     await queryRunner.createIndex(
-      'users',
+      'suppliers',
       new TableIndex({
-        name: 'IDX_LEAD_USER',
-        columnNames: ['id', 'lead_id'],
-      })
-    );
-
-    await queryRunner.createIndex(
-      'users',
-      new TableIndex({
-        name: 'IDX_ROLE_USER',
-        columnNames: ['id', 'role_id'],
+        name: 'IDX_SUPPLIER_IMAGE',
+        columnNames: ['id', 'image_id', 'supplier_id'],
       })
     );
 
     await queryRunner.createForeignKey(
-      'users',
+      'suppliers',
       new TableForeignKey({
-        name: 'lead',
-        columnNames: ['lead_id'],
+        name: 'image',
+        columnNames: ['image_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'users',
+        referencedTableName: 'images',
         onDelete: 'SET NULL',
       })
     );
 
     await queryRunner.createForeignKey(
-      'users',
-      new TableForeignKey({
-        name: 'role',
-        columnNames: ['role_id'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'roles',
-        onDelete: 'SET NULL',
-      })
-    );
-
-    await queryRunner.createForeignKey(
-      'users',
+      'suppliers',
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
@@ -143,11 +138,9 @@ export class User1692175684026 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('users', 'system');
-    await queryRunner.dropForeignKey('users', 'lead');
-    await queryRunner.dropForeignKey('users', 'role');
-    await queryRunner.dropIndex('users', 'IDX_LEAD_USER');
-    await queryRunner.dropIndex('users', 'IDX_ROLE_USER');
-    await queryRunner.dropTable('users');
+    await queryRunner.dropForeignKey('suppliers', 'system');
+    await queryRunner.dropForeignKey('suppliers', 'image');
+    await queryRunner.dropIndex('suppliers', 'IDX_SUPPLIER_IMAGE');
+    await queryRunner.dropTable('suppliers');
   }
 }
