@@ -18,7 +18,7 @@ const usePagination: IPaginationHook = async <T>(
     };
 
     return {
-      data: [entity, pagination],
+      data: [entity as T[], pagination],
       code: 'REQ_OK',
       status: 'SUCCESS',
     } as IResponse<IPagination<T>>;

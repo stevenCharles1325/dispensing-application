@@ -12,6 +12,7 @@ import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -81,22 +82,22 @@ const userHandler = {
 + ================================ */
 const itemHandler = {
   getItems: async (
-    payload: Record<string, any[]>,
+    payload: Record<string, any[]> | string = 'all',
     page: number = 1,
     total: number = 15
-  ): Promise<IResponse<string[] | IPOSError[] | IPagination<UserDTO>>> =>
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<ItemDTO>>> =>
     ipcRenderer.invoke('item:show', payload, page, total),
 
   createItem: async (
-    payload: UserDTO
+    payload: ItemDTO
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | ItemDTO[]>
   > => ipcRenderer.invoke('item:create', payload),
 
   updateItem: async (
     id: number,
-    payload: Partial<UserDTO>
-  ): Promise<IResponse<string[] | IPOSError[] | UserDTO>> =>
+    payload: Partial<ItemDTO>
+  ): Promise<IResponse<string[] | IPOSError[] | ItemDTO>> =>
     ipcRenderer.invoke('item:update', id, payload),
 
   archiveItem: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import usePagination from 'App/hooks/pagination.hook';
 import IEvent from 'App/interfaces/event/event.interface';
@@ -23,16 +24,20 @@ export default class ImageShowEvent implements IEvent {
         eventData.user.hasPermission?.('view-image');
 
       if (requesterHasPermission) {
-        const payload = eventData.payload[0];
+        const payload = eventData.payload[0] ?? 'all';
         const page = eventData.payload[1] || 1; // Page
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        if (payload instanceof Object && !(payload instanceof Array)) {
-          const imageQuery = ImageRepository.createQueryBuilder()
-            .take(take)
-            .skip(skip);
+        const imageQuery = ImageRepository.createQueryBuilder()
+          .take(take)
+          .skip(skip);
 
+        if (payload === 'all') {
+          return await usePagination(imageQuery, page);
+        }
+
+        if (payload instanceof Object && !(payload instanceof Array)) {
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
             if (propertyFind instanceof Array) {
@@ -50,7 +55,6 @@ export default class ImageShowEvent implements IEvent {
             }
           }
 
-          // eslint-disable-next-line react-hooks/rules-of-hooks
           return await usePagination(imageQuery, page);
         }
 

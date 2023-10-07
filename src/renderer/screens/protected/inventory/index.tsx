@@ -1,14 +1,13 @@
+/* eslint-disable consistent-return */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Autocomplete, Chip, Dialog, Divider, Slide } from '@mui/material';
+import { Chip, Dialog, Slide } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
 import formatCurrency from 'UI/helpers/formatCurrency';
 import { TransitionProps } from '@mui/material/transitions';
-import TextField from '@mui/material/TextField';
-import { NumericFormat, NumericFormatProps } from 'react-number-format';
 
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
@@ -16,9 +15,9 @@ import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import measurements from 'UI/data/defaults/unit-of-measurements';
-import itemStatuses from 'UI/data/defaults/statuses/item';
 import InventoryForm from 'UI/components/Views/InventoryForm';
+import useAlert from 'UI/hooks/useAlert';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
 
 const columns: Array<GridColDef> = [
   {
@@ -77,10 +76,27 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Inventory() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<Array<ItemDTO>>([]);
   const [modalAction, setModalAction] = useState<
     'create' | 'update' | 'delete' | null
   >(null);
+  const { displayAlert } = useAlert();
+
+  const getItems = async () => {
+    const res = await window.item.getItems();
+
+    console.log(res);
+    if (res.status === 'ERROR') {
+      return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+    }
+
+    setItems(res.data?.[0] as ItemDTO[]);
+  };
+
+  useEffect(() => {
+    getItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAddNewItem = () => {
     console.log('Add new item');
@@ -102,7 +118,7 @@ export default function Inventory() {
       <div className="w-full h-fit gap-5 flex flex-row flex-wrap">
         <CounterWidget
           icon={<CategoryOutlinedIcon color="info" fontSize="large" />}
-          count={0}
+          count={items.length}
           label="total items"
         />
         <CounterWidget
