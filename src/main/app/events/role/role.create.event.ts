@@ -7,6 +7,7 @@ import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { Role } from 'Main/database/models/role.model';
+import RoleDTO from 'App/data-transfer-objects/role.dto';
 
 export default class RoleCreateEvent implements IEvent {
   public channel: string = 'role:create';
@@ -16,7 +17,7 @@ export default class RoleCreateEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPOSValidationError[] | Role[] | any>
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | RoleDTO | any>
   > {
     try {
       const requesterHasPermission =
@@ -35,7 +36,7 @@ export default class RoleCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = await RoleRepository.save(role);
+        const data = (await RoleRepository.save(role)) as unknown as RoleDTO;
         console.log('CREATED A ROLE');
         return {
           data,

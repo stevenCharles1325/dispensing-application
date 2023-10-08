@@ -1,3 +1,4 @@
+import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
@@ -16,7 +17,7 @@ export default class ItemDeleteEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | Item | any>
+    IResponse<string[] | IPOSError[] | ItemDTO | any>
   > {
     try {
       const id = eventData.payload[0];

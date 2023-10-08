@@ -17,7 +17,7 @@ export default class SupplierCreateEvent implements IEvent {
     eventData,
   }: IEventListenerProperties): Promise<
     IResponse<
-      string[] | IPOSError[] | IPOSValidationError[] | SupplierDTO[] | any
+      string[] | IPOSError[] | IPOSValidationError[] | SupplierDTO | any
     >
   > {
     try {
@@ -39,7 +39,7 @@ export default class SupplierCreateEvent implements IEvent {
 
         const data = (await SupplierRepository.save(
           supplier
-        )) as unknown as SupplierDTO[];
+        )) as unknown as SupplierDTO;
         console.log('CREATED A CATEGORY');
         return {
           data,

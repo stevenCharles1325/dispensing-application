@@ -16,7 +16,7 @@ export default class BrandCreateEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPOSValidationError[] | BrandDTO[] | any>
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | BrandDTO | any>
   > {
     try {
       const requesterHasPermission =
@@ -35,7 +35,7 @@ export default class BrandCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await BrandRepository.save(brand)) as BrandDTO[];
+        const data = (await BrandRepository.save(brand)) as unknown as BrandDTO;
         console.log('CREATED A CATEGORY');
         return {
           data,

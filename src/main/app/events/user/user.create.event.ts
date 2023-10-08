@@ -16,7 +16,7 @@ export default class UserCreateEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPOSValidationError[] | UserDTO[] | any>
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | UserDTO | any>
   > {
     try {
       const requesterHasPermission =
@@ -35,7 +35,7 @@ export default class UserCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await UserRepository.save(user)) as UserDTO[];
+        const data = (await UserRepository.save(user)) as unknown as UserDTO;
         console.log('CREATED A USER');
         return {
           data,

@@ -16,7 +16,7 @@ export default class ImageCreateEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPOSValidationError[] | ImageDTO[] | any>
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | ImageDTO | any>
   > {
     try {
       const requesterHasPermission =
@@ -35,7 +35,7 @@ export default class ImageCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await ImageRepository.save(image)) as ImageDTO[];
+        const data = (await ImageRepository.save(image)) as unknown as ImageDTO;
         console.log('CREATED A CATEGORY');
         return {
           data,

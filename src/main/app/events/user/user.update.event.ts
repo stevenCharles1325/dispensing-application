@@ -1,3 +1,4 @@
+import UserDTO from 'App/data-transfer-objects/user.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
@@ -16,7 +17,7 @@ export default class UserDeleteEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | User | any>
+    IResponse<string[] | IPOSError[] | UserDTO | any>
   > {
     try {
       const id = eventData.payload[0];
@@ -40,7 +41,9 @@ export default class UserDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = await UserRepository.save(updatedUser);
+        const data = (await UserRepository.save(
+          updatedUser
+        )) as unknown as UserDTO;
         return {
           data,
           code: 'REQ_OK',

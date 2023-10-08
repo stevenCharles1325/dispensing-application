@@ -1,3 +1,4 @@
+import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
@@ -16,7 +17,7 @@ export default class SupplierDeleteEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | Supplier | any>
+    IResponse<string[] | IPOSError[] | SupplierDTO | any>
   > {
     try {
       const id = eventData.payload[0];
@@ -43,7 +44,9 @@ export default class SupplierDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = await SupplierRepository.save(updatedSupplier);
+        const data = (await SupplierRepository.save(
+          updatedSupplier
+        )) as unknown as SupplierDTO;
         return {
           data,
           code: 'REQ_OK',

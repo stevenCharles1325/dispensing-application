@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable consistent-return */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/jsx-props-no-spreading */
@@ -18,6 +19,10 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import InventoryForm from 'UI/components/Views/InventoryForm';
 import useAlert from 'UI/hooks/useAlert';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
+import BrandDTO from 'App/data-transfer-objects/brand.dto';
+import CategoryDTO from 'App/data-transfer-objects/category.dto';
+import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
+import ImageDTO from 'App/data-transfer-objects/image.dto';
 
 const columns: Array<GridColDef> = [
   {
@@ -77,6 +82,11 @@ const Transition = React.forwardRef(function Transition(
 
 export default function Inventory() {
   const [items, setItems] = useState<Array<ItemDTO>>([]);
+  const [brands, setBrands] = useState<Array<BrandDTO>>([]);
+  const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
+  const [images, setImages] = useState<Array<ImageDTO>>([]);
+
+  const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
   const [modalAction, setModalAction] = useState<
     'create' | 'update' | 'delete' | null
   >(null);
@@ -93,8 +103,52 @@ export default function Inventory() {
     setItems(res.data?.[0] as ItemDTO[]);
   };
 
+  const getCategories = async () => {
+    const res = await window.category.getCategories();
+
+    if (res.status === 'ERROR') {
+      return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+    }
+
+    setCategories(() => [...(res.data?.[0] as CategoryDTO[])]);
+  };
+
+  const getBrands = async () => {
+    const res = await window.brand.getBrands();
+
+    if (res.status === 'ERROR') {
+      return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+    }
+
+    setBrands(res.data?.[0] as BrandDTO[]);
+  };
+
+  const getSuppliers = async () => {
+    const res = await window.supplier.getSuppliers();
+
+    if (res.status === 'ERROR') {
+      return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+    }
+
+    setSuppliers(res.data?.[0] as SupplierDTO[]);
+  };
+
+  const getImages = async () => {
+    const res = await window.image.getImages();
+
+    if (res.status === 'ERROR') {
+      return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+    }
+
+    setImages(res.data?.[0] as ImageDTO[]);
+  };
+
   useEffect(() => {
     getItems();
+    getBrands();
+    getImages();
+    getCategories();
+    getSuppliers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -169,7 +223,16 @@ export default function Inventory() {
           onClose={() => setModalAction(null)}
           TransitionComponent={Transition}
         >
-          <InventoryForm />
+          <InventoryForm
+            images={images}
+            brands={brands}
+            categories={categories}
+            suppliers={suppliers}
+            getImages={getImages}
+            getBrands={getBrands}
+            getCategories={getCategories}
+            getSuppliers={getSuppliers}
+          />
         </Dialog>
       </div>
     </div>

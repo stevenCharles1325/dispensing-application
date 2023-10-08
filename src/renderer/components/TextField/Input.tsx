@@ -52,13 +52,15 @@ export default function Input(props: InputProps) {
 
   return (
     <>
-      <label
-        htmlFor={name}
-        className="px-5"
-        style={{ color: 'var(--info-text-color)' }}
-      >
-        {label}
-      </label>
+      {label ? (
+        <label
+          htmlFor={name}
+          className="px-5"
+          style={{ color: 'var(--info-text-color)' }}
+        >
+          {label}
+        </label>
+      ) : null}
       <div
         className={`${inputWidth} ${inputHeight} px-1 rounded-full overflow-hidden flex flex-row justify-center`}
         style={{ backgroundColor: bgColor }}

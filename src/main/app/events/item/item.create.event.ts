@@ -7,6 +7,7 @@ import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interfa
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import ItemRepository from 'App/repositories/item.repository';
 import { Item } from 'Main/database/models/item.model';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
 
 export default class ItemCreateEvent implements IEvent {
   public channel: string = 'item:create';
@@ -16,7 +17,7 @@ export default class ItemCreateEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IPOSValidationError[] | Item[] | any>
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | ItemDTO | any>
   > {
     try {
       const requesterHasPermission =
@@ -35,7 +36,7 @@ export default class ItemCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = await ItemRepository.save(item);
+        const data = (await ItemRepository.save(item)) as unknown as ItemDTO;
         console.log('CREATED A ITEM');
         return {
           data,

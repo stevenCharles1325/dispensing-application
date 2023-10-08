@@ -1,3 +1,4 @@
+import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
@@ -16,7 +17,7 @@ export default class BrandDeleteEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | Brand | any>
+    IResponse<string[] | IPOSError[] | BrandDTO | any>
   > {
     try {
       const id = eventData.payload[0];

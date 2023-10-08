@@ -1,3 +1,4 @@
+import ImageDTO from 'App/data-transfer-objects/image.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
@@ -16,7 +17,7 @@ export default class ImageDeleteEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | Image | any>
+    IResponse<string[] | IPOSError[] | ImageDTO | any>
   > {
     try {
       const id = eventData.payload[0];

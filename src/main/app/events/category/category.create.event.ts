@@ -17,7 +17,7 @@ export default class CategoryCreateEvent implements IEvent {
     eventData,
   }: IEventListenerProperties): Promise<
     IResponse<
-      string[] | IPOSError[] | IPOSValidationError[] | CategoryDTO[] | any
+      string[] | IPOSError[] | IPOSValidationError[] | CategoryDTO | any
     >
   > {
     try {
@@ -25,6 +25,7 @@ export default class CategoryCreateEvent implements IEvent {
         eventData.user.hasPermission?.('create-category');
 
       if (requesterHasPermission) {
+        console.log(eventData.payload);
         const category = CategoryRepository.create(eventData.payload[0]);
         const errors = await validator(category);
 
@@ -37,7 +38,10 @@ export default class CategoryCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await CategoryRepository.save(category)) as CategoryDTO[];
+        const data = (await CategoryRepository.save(
+          category
+        )) as unknown as CategoryDTO;
+
         console.log('CREATED A CATEGORY');
         return {
           data,

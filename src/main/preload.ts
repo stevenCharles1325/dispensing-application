@@ -50,7 +50,7 @@ const peerHandler = {
 + ================================ */
 const userHandler = {
   getUsers: async (
-    payload: Record<string, any[]>,
+    payload: Record<string, any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<UserDTO>>> =>
@@ -114,14 +114,14 @@ const itemHandler = {
 + ================================ */
 const brandHandler = {
   getBrands: async (
-    payload: Record<string, any[]>,
+    payload: Record<string, any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<BrandDTO>>> =>
     ipcRenderer.invoke('brand:show', payload, page, total),
 
   createBrand: async (
-    payload: BrandDTO
+    payload: Pick<BrandDTO, 'name' | 'description'>
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | BrandDTO[]>
   > => ipcRenderer.invoke('brand:create', payload),
@@ -148,14 +148,14 @@ const brandHandler = {
 + ================================ */
 const categoryHandler = {
   getCategories: async (
-    payload: Record<string, any[]>,
+    payload: Record<string, any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<CategoryDTO>>> =>
     ipcRenderer.invoke('category:show', payload, page, total),
 
   createCategory: async (
-    payload: CategoryDTO
+    payload: Pick<CategoryDTO, 'name' | 'description'>
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | CategoryDTO[]>
   > => ipcRenderer.invoke('category:create', payload),
@@ -184,7 +184,7 @@ const categoryHandler = {
 + ================================ */
 const imageHandler = {
   getImages: async (
-    payload: Record<string, any[]>,
+    payload: Record<string, any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<ImageDTO>>> =>
@@ -218,7 +218,7 @@ const imageHandler = {
 + ================================ */
 const supplierHandler = {
   getSuppliers: async (
-    payload: Record<string, any[]>,
+    payload: Record<string, any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<SupplierDTO>>> =>
