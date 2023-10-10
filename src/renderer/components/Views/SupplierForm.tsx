@@ -1,12 +1,22 @@
-import { useReducer } from 'react';
-import { TextField, Autocomplete } from '@mui/material';
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable consistent-return */
+import { useReducer, useState } from 'react';
+import { TextField, Button } from '@mui/material';
 import useAlert from 'UI/hooks/useAlert';
+import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 
-export default function SupplierForm() {
+interface SupplierFormProps {
+  getSuppliers: () => Promise<void>;
+}
+
+export default function SupplierForm({ getSuppliers }: SupplierFormProps) {
   const { displayAlert } = useAlert();
+  const [errors, setErrors] = useState<Record<string, any>>({});
 
   const initialForm = {
-    system_id: '123', // Sample System-ID
+    system_id: null, // Sample System-ID
     image_id: null,
     tax_id: '',
     name: '',
@@ -84,6 +94,31 @@ export default function SupplierForm() {
 
   const [form, dispatch] = useReducer(formReducer, initialForm);
 
+  const handleAddNewSupplier = async () => {
+    const res = await window.supplier.createSupplier(
+      form as unknown as SupplierDTO
+    );
+
+    if (res.status === 'ERROR') {
+      if (typeof res.errors?.[0] === 'string') {
+        return displayAlert?.(
+          (res.errors?.[0] as string) ?? 'Please try again',
+          'error'
+        );
+      }
+
+      const errors: Record<string, any> = {};
+      const resErrors = res.errors as unknown as IPOSValidationError[];
+      for (const error of resErrors) {
+        errors[error.field] = error.message;
+      }
+
+      return setErrors(errors);
+    }
+
+    await getSuppliers();
+  };
+
   return (
     <div className="w-full h-fit">
       <h3>Supplier Information</h3>
@@ -100,6 +135,8 @@ export default function SupplierForm() {
           sx={{
             width: 300,
           }}
+          helperText={errors.tax_id}
+          error={Boolean(errors.tax_id)}
         />
         <TextField
           label="Name"
@@ -112,6 +149,8 @@ export default function SupplierForm() {
           sx={{
             width: 300,
           }}
+          helperText={errors.name}
+          error={Boolean(errors.name)}
         />
         <TextField
           label="Email"
@@ -124,10 +163,14 @@ export default function SupplierForm() {
           sx={{
             width: 300,
           }}
+          helperText={errors.email}
+          error={Boolean(errors.email)}
         />
         <TextField
           label="Phone Number"
+          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           value={form.phone_number}
+          placeholder="+63912345689"
           onChange={(event) => {
             dispatch({ type: 'phone_number', payload: event.target.value });
           }}
@@ -136,6 +179,8 @@ export default function SupplierForm() {
           sx={{
             width: 300,
           }}
+          helperText={errors.phone_number}
+          error={Boolean(errors.phone_number)}
         />
         <TextField
           label="Contact Name"
@@ -148,6 +193,8 @@ export default function SupplierForm() {
           sx={{
             width: 300,
           }}
+          helperText={errors.contact_name}
+          error={Boolean(errors.contact_name)}
         />
         <TextField
           label="Contact Email"
@@ -160,10 +207,14 @@ export default function SupplierForm() {
           sx={{
             width: 300,
           }}
+          helperText={errors.contact_email}
+          error={Boolean(errors.contact_email)}
         />
         <TextField
           label="Contact Phone Number"
+          placeholder="+63912345689"
           value={form.contact_phone_number}
+          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           onChange={(event) => {
             dispatch({
               type: 'contact_phone_number',
@@ -175,6 +226,8 @@ export default function SupplierForm() {
           sx={{
             width: 300,
           }}
+          helperText={errors.contact_phone_number}
+          error={Boolean(errors.contact_phone_number)}
         />
         <TextField
           label="Address"
@@ -187,8 +240,14 @@ export default function SupplierForm() {
           sx={{
             width: 300,
           }}
+          helperText={errors.address}
+          error={Boolean(errors.address)}
         />
       </div>
+      <br />
+      <Button variant="outlined" size="small" onClick={handleAddNewSupplier}>
+        Add
+      </Button>
     </div>
   );
 }

@@ -17,6 +17,11 @@ export class Role {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
+  @Column({
+    nullable: true,
+  })
+  system_id: string;
+
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })
   name: string;

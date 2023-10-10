@@ -54,6 +54,7 @@ export default class SupplierCreateEvent implements IEvent {
         status: 'ERROR',
       } as unknown as IResponse<string[]>;
     } catch (err) {
+      console.log(err);
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 

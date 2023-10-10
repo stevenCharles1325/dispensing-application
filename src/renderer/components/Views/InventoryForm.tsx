@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable consistent-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-props-no-spreading */
@@ -9,6 +10,7 @@ import {
   Divider,
   ToggleButton,
   ToggleButtonGroup,
+  Button,
 } from '@mui/material';
 import itemStatuses from 'UI/data/defaults/statuses/item';
 import measurements from 'UI/data/defaults/unit-of-measurements';
@@ -21,6 +23,10 @@ import ImageDTO from 'App/data-transfer-objects/image.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import SupplierForm from './SupplierForm';
 
+import LandscapeIcon from '@mui/icons-material/Landscape';
+import convertToBase64 from 'UI/helpers/convertToBase64';
+import bytesToMegabytes from 'UI/helpers/bytesToMegabytes';
+
 interface InventoryFormProps {
   images: ImageDTO[];
   brands: BrandDTO[];
@@ -30,6 +36,7 @@ interface InventoryFormProps {
   getBrands: () => Promise<void>;
   getCategories: () => Promise<void>;
   getSuppliers: () => Promise<void>;
+  onClose: () => void;
 }
 
 interface CustomProps {
@@ -70,11 +77,12 @@ export default function InventoryForm({
   getBrands,
   getCategories,
   getSuppliers,
+  onClose,
 }: InventoryFormProps) {
   const { displayAlert } = useAlert();
 
   const initialForm = {
-    system_id: '123', // Sample System-ID
+    system_id: null, // Sample System-ID
     supplier_id: null,
     image_id: null,
     category_id: null,
@@ -88,7 +96,7 @@ export default function InventoryForm({
     unit_of_measurement: 'each',
     barcode: '',
     stock_quantity: 0,
-    status: 'active',
+    status: 'available',
   } as const;
 
   const formReducer = (
@@ -174,10 +182,21 @@ export default function InventoryForm({
     }
   };
 
+  const [imagePreview, setImagePreview] = useState<ArrayBuffer | string | null>(
+    ''
+  );
+  const [imageFile, setImageFile] = useState<File | null>();
   const [form, dispatch] = useReducer(formReducer, initialForm);
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
   >('add-new');
+
+  useEffect(() => {
+    dispatch({
+      type: 'supplier_id',
+      payload: null,
+    });
+  }, [supplierToggle]);
 
   useEffect(() => {
     console.log(form);
@@ -242,9 +261,29 @@ export default function InventoryForm({
   //   await getBrands();
   // };
 
+  const handleSelectImage = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    setImageFile(file);
+
+    if (file) {
+      convertToBase64(
+        file,
+        (base64) => setImagePreview(base64 as ArrayBuffer),
+        console.log
+      );
+    }
+  };
+
+  const handleRemoveSelectedImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
   return (
     <div className="w-full h-full flex p-5">
-      <div className="grow max-w-[670px] p-5 h-full flex flex-col gap-14 overflow-auto">
+      <div className="grow w-[50%] p-5 h-full flex flex-col gap-14 overflow-auto">
         {/* PRODUCT INFORMATION */}
         <div className="w-full h-fit">
           <h3>Product Information</h3>
@@ -297,6 +336,7 @@ export default function InventoryForm({
                       ?.id ?? null,
                 });
               }}
+              sx={{ width: 300 }}
               label="Brands"
             />
             <CustomAutoComplete
@@ -310,6 +350,7 @@ export default function InventoryForm({
                       ?.id ?? null,
                 });
               }}
+              sx={{ width: 300 }}
               label="Categories"
             />
             <Autocomplete
@@ -340,7 +381,9 @@ export default function InventoryForm({
               size="small"
               rows={5}
               multiline
-              fullWidth
+              sx={{
+                width: 630,
+              }}
             />
           </div>
         </div>
@@ -447,59 +490,126 @@ export default function InventoryForm({
         </div>
       </div>
       <Divider orientation="vertical" variant="middle" flexItem />
-      <div className="grow min-w-[700px] p-5">
-        <div className="flex gap-10 flex-col">
-          {/* SUPPLIER INFORMATION */}
-          <ToggleButtonGroup
-            size="small"
-            color="secondary"
-            value={supplierToggle}
-            exclusive
-            onChange={(_, supplierAction) => {
-              if (supplierAction === 'add-existing' && !suppliers.length) {
-                return displayAlert?.(
-                  'No existing supplier is available',
-                  'error'
-                );
-              }
-
-              setSupplierToggle((selected) => supplierAction ?? selected);
-            }}
-            aria-label="Supplier-action-toggle"
-          >
-            <ToggleButton className="shadow-md" value="add-existing">
-              Add Existing
-            </ToggleButton>
-            <ToggleButton className="shadow-md" value="add-new">
-              Add New
-            </ToggleButton>
-          </ToggleButtonGroup>
-          {supplierToggle === 'add-existing' ? (
-            <div className="flex flex-col gap-5">
-              <h5>Select Existing Supplier</h5>
-              <Autocomplete
-                size="small"
-                options={suppliers}
-                value={
-                  suppliers.find(({ id }) => id === form.supplier_id) ?? null
-                }
-                onChange={(_, value) => {
-                  dispatch({
-                    type: 'supplier_id',
-                    payload: suppliers.find(({ id }) => id === value?.id)?.id,
-                  });
-                }}
-                sx={{
-                  width: 300,
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Supplier" />
-                )}
-              />
+      <div className="grow w-[50%] p-5 overflow-auto flex flex-col justify-between">
+        <div className="grow">
+          <div className="flex gap-14 flex-col">
+            <div>
+              <h3>Item Image</h3>
+              <br />
+              <div className="flex flex-row gap-4">
+                <div className="border border-gray-300 hover:border-gray-950 rounded h-[170px] w-[170px] relative">
+                  <input
+                    type="file"
+                    className="relative border rounded opacity-0 w-full h-full"
+                    onChange={handleSelectImage}
+                    accept="image/*, png, jpeg, jpg"
+                  />
+                  <div
+                    className="absolute inset-0 flex flex-col justify-center items-center select-none pointer-events-none"
+                    style={{ color: 'var(--info-text-color) ' }}
+                  >
+                    {imagePreview && imageFile ? (
+                      <img
+                        className="w-full h-full"
+                        src={imagePreview as unknown as string}
+                        alt={imageFile.name}
+                      />
+                    ) : (
+                      <>
+                        <LandscapeIcon fontSize="large" />
+                        <p className="text-center">170 x 170</p>
+                        <p className="text-center">Click to upload</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col justify-between">
+                  <div style={{ color: 'var(--info-text-color)' }}>
+                    <p>
+                      File name: <b>{imageFile?.name}</b>
+                    </p>
+                    <p>
+                      File size:
+                      <b>{` ${bytesToMegabytes(imageFile?.size ?? 0)} MB`}</b>
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
+                    <Button variant="outlined">Save</Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={handleRemoveSelectedImage}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <SupplierForm />
-          )}
+
+            {/* SUPPLIER INFORMATION */}
+            <div className="flex flex-col gap-5">
+              <ToggleButtonGroup
+                size="small"
+                color="secondary"
+                value={supplierToggle}
+                exclusive
+                onChange={(_, supplierAction) => {
+                  if (supplierAction === 'add-existing' && !suppliers.length) {
+                    return displayAlert?.(
+                      'No existing supplier is available',
+                      'error'
+                    );
+                  }
+
+                  setSupplierToggle((selected) => supplierAction ?? selected);
+                }}
+                aria-label="Supplier-action-toggle"
+              >
+                <ToggleButton className="shadow-md" value="add-existing">
+                  Add Existing Supplier
+                </ToggleButton>
+                <ToggleButton className="shadow-md" value="add-new">
+                  Add New Supplier
+                </ToggleButton>
+              </ToggleButtonGroup>
+              {supplierToggle === 'add-existing' ? (
+                <div className="flex flex-col gap-5">
+                  <h5>Select Existing Supplier</h5>
+                  <Autocomplete
+                    size="small"
+                    options={suppliers}
+                    getOptionLabel={(option) => option.email}
+                    value={
+                      suppliers.find(({ id }) => id === form.supplier_id) ??
+                      null
+                    }
+                    onChange={(_, value) => {
+                      dispatch({
+                        type: 'supplier_id',
+                        payload: suppliers.find(({ id }) => id === value?.id)
+                          ?.id,
+                      });
+                    }}
+                    sx={{
+                      width: 300,
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Supplier" />
+                    )}
+                  />
+                </div>
+              ) : (
+                <SupplierForm getSuppliers={getSuppliers} />
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="grow h-[50px] flex items-end justify-end gap-5">
+          <Button variant="outlined" onClick={onClose}>
+            Close
+          </Button>
+          <Button variant="contained">Create</Button>
         </div>
       </div>
     </div>

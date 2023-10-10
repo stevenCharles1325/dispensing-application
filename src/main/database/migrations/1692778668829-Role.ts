@@ -21,7 +21,7 @@ export class Role1692778668829 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: 'name',
@@ -59,7 +59,7 @@ export class Role1692778668829 implements MigrationInterface {
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
-        referencedColumnNames: ['id'],
+        referencedColumnNames: ['uuid'],
         referencedTableName: 'systems',
         onDelete: 'CASCADE',
       })

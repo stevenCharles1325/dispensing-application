@@ -22,7 +22,7 @@ export class Supplier1696655002476 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: false,
+            isNullable: true, // temporarily
           },
           {
             name: 'image_id',
@@ -106,14 +106,6 @@ export class Supplier1696655002476 implements MigrationInterface {
       true
     );
 
-    await queryRunner.createIndex(
-      'suppliers',
-      new TableIndex({
-        name: 'IDX_SUPPLIER_IMAGE',
-        columnNames: ['id', 'image_id', 'supplier_id'],
-      })
-    );
-
     await queryRunner.createForeignKey(
       'suppliers',
       new TableForeignKey({
@@ -130,7 +122,7 @@ export class Supplier1696655002476 implements MigrationInterface {
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
-        referencedColumnNames: ['id'],
+        referencedColumnNames: ['uuid'],
         referencedTableName: 'systems',
         onDelete: 'CASCADE',
       })

@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import useAppNavigation from 'renderer/stores/navigation';
+import useAppNavigation from 'UI/stores/navigation';
 
 function Header() {
   const toggleNavBar = useAppNavigation((state) => state.toggleNavBar);

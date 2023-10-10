@@ -20,13 +20,17 @@ export class Supplier {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  system_id: string;
-
   @Column({
     nullable: true,
   })
-  image_id: number;
+  system_id: string | null;
+
+  @Column({
+    type: Number,
+    nullable: true,
+    default: null,
+  })
+  image_id: number | null;
 
   @Column({
     nullable: true,
@@ -111,6 +115,6 @@ export class Supplier {
   image: Image;
 
   @OneToOne(() => System, { eager: true })
-  @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'system_id', referencedColumnName: 'uuid' })
   system: System;
 }

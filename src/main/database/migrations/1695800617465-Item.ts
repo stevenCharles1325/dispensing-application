@@ -22,7 +22,7 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: 'image_id',
@@ -230,7 +230,7 @@ export class Item1695800617464 implements MigrationInterface {
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
-        referencedColumnNames: ['id'],
+        referencedColumnNames: ['uuid'],
         referencedTableName: 'systems',
         onDelete: 'CASCADE',
       })

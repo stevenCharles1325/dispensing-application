@@ -59,7 +59,7 @@ export class Permission1692778618800 implements MigrationInterface {
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
-        referencedColumnNames: ['id'],
+        referencedColumnNames: ['uuid'],
         referencedTableName: 'systems',
         onDelete: 'CASCADE',
       })

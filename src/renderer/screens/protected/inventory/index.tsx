@@ -106,6 +106,7 @@ export default function Inventory() {
   const getCategories = async () => {
     const res = await window.category.getCategories();
 
+    console.log(res);
     if (res.status === 'ERROR') {
       return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
     }
@@ -218,10 +219,10 @@ export default function Inventory() {
           hideFooterPagination
         />
         <Dialog
-          fullScreen
           open={Boolean(modalAction)}
           onClose={() => setModalAction(null)}
           TransitionComponent={Transition}
+          maxWidth="xl"
         >
           <InventoryForm
             images={images}
@@ -232,6 +233,7 @@ export default function Inventory() {
             getBrands={getBrands}
             getCategories={getCategories}
             getSuppliers={getSuppliers}
+            onClose={() => setModalAction(null)}
           />
         </Dialog>
       </div>

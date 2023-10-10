@@ -135,7 +135,7 @@ export class User1692175684026 implements MigrationInterface {
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
-        referencedColumnNames: ['id'],
+        referencedColumnNames: ['uuid'],
         referencedTableName: 'systems',
         onDelete: 'CASCADE',
       })
