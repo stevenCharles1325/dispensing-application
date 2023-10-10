@@ -25,6 +25,7 @@ import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all.module';
 import stores from './stores';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
+import executeBinaries from './binaries';
 
 // Initializing .ENV
 dotenv.config();
@@ -161,6 +162,8 @@ app
         await runSeeders(SqliteDataSource);
         console.log('[DB]: Seeded Successfully');
       } finally {
+        executeBinaries();
+
         // Initialize Stores
         // Each events now has access to the Store
         stores(() => {

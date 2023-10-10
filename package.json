@@ -34,6 +34,10 @@
   ],
   "main": "./src/main/main.ts",
   "scripts": {
+    "dep:binaries:minio:linux": "mkdir -p resources/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:mac": "mkdir -p resources/mac/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:win": "mkdir -p resources/win/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio": "concurrently \"npm run dep:binaries:minio:linux\" \"npm run dep:binaries:minio:mac\" \"npm run dep:binaries:minio:win\"",
     "migration:run": "cd release/app && npm run migration:run",
     "migration:show": "cd release/app && npm run migration:show",
     "migration:generate": "cd release/app && npm run migration:generate",
@@ -108,6 +112,7 @@
     "@mui/material": "^5.14.12",
     "@mui/x-data-grid": "^6.16.0",
     "@types/bcrypt": "^5.0.0",
+    "app-root-dir": "^1.0.2",
     "dotenv": "^16.3.1",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
@@ -136,6 +141,7 @@
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
+    "@types/app-root-dir": "^0.1.2",
     "@types/jest": "^29.5.2",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.5.7",
@@ -261,6 +267,29 @@
     },
     "extraResources": [
       "./assets/**"
+    ],
+    "extraFiles": [
+      {
+        "from": "resources/win/bin",
+        "to": "Resources/bin",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/linux/bin",
+        "to": "Resources/bin",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/mac/bin",
+        "to": "Resources/bin",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "publish": {
       "provider": "github",

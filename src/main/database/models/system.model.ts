@@ -11,6 +11,9 @@ export class System {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ generated: true })
+  uuid: string;
+
   @Column({
     nullable: true,
     default: false,
