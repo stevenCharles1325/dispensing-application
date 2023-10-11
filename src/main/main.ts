@@ -26,9 +26,11 @@ import requireAll from 'App/modules/require-all.module';
 import stores from './stores';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import executeBinaries from './binaries';
+import dotenvExpand from 'dotenv-expand';
 
 // Initializing .ENV
-dotenv.config();
+const myEnv = dotenv.config();
+dotenvExpand(myEnv);
 
 const providers = requireAll(join(__dirname, '/app/providers'), true);
 

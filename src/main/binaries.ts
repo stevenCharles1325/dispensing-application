@@ -1,8 +1,9 @@
+/* eslint-disable consistent-return */
 import { platform } from 'os';
 import dotenv from 'dotenv';
 import AppRootDir from 'app-root-dir';
 import { app } from 'electron';
-import { exec } from 'child_process';
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 
 dotenv.config();
 
@@ -37,20 +38,35 @@ const EXEC_PATH =
 const executeBinaries = () => {
   const os = getPlatform();
   let cmd = '';
+  let minioProcess: ChildProcessWithoutNullStreams | null = null;
 
   if (os === 'linux' || os === 'mac') {
     cmd = `chmod +x ${EXEC_PATH}/minio && sudo -S MINIO_ROOT_USER=${MINIO_USER} MINIO_ROOT_PASSWORD=${MINIO_PASSWORD} minio server /mnt/data --console-address ":${MINIO_PORT}"`;
+
+    minioProcess = spawn('bash', ['-c', cmd]);
   }
 
   if (os === 'win') {
     cmd = `cd ${EXEC_PATH} && move ${EXEC_PATH}/minio C:\\minio && setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && C:\\minio.exe server F:\\Data --console-address ":${MINIO_PORT}"`;
+
+    minioProcess = spawn('cmd', ['/C', cmd]);
   }
 
-  return exec(cmd, (err, stdout, stderr) => {
-    if (err) console.log('[EXEC ERROR]: ', err);
-    if (stdout) console.log('[STDOUT]: ', stdout);
-    if (stderr) console.log('[STDERR]: ', stderr);
-  });
+  if (minioProcess) {
+    minioProcess.stdout.on('data', (data) => {
+      console.log('[STDOUT]: ----------------------');
+      console.log(data);
+    });
+
+    minioProcess.stderr.on('data', (data) => {
+      console.log('[STDERR]: ----------------------');
+      console.error(data);
+    });
+
+    minioProcess.on('close', (code) => {
+      console.log(`Minio process exited with code ${code}`);
+    });
+  }
 };
 
 export default executeBinaries;
