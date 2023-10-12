@@ -3,6 +3,7 @@ import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 export default interface IEventDataProperties {
   payload: any[];
   user: {
+    id?: number | null;
     token?: string | null;
     /*
       'hasPermission' is a method from AuthService that takes

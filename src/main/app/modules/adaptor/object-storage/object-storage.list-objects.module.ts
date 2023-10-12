@@ -6,5 +6,9 @@ export default function listObjects(
   params: ListObjectsParams
 ): Stream {
   const { bucketName, prefix, recursive } = params;
-  return this.objectStorageAdaptor.listObjects(bucketName, prefix, recursive);
+  return this.objectStorageAdaptor.listObjects({
+    bucketName,
+    prefix,
+    recursive,
+  });
 }

@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
@@ -7,6 +8,8 @@ import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
+import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
+import Provider from '@IOC:Provider';
 
 export default class ImageCreateEvent implements IEvent {
   public channel: string = 'image:create';
@@ -23,7 +26,43 @@ export default class ImageCreateEvent implements IEvent {
         eventData.user.hasPermission?.('create-image');
 
       if (requesterHasPermission) {
-        const image = ImageRepository.create(eventData.payload[0]);
+        const BUCKET_NAME = 'inventory';
+
+        const imageObj = eventData.payload[0] as Omit<
+          ImageDTO,
+          'id' | 'created_at' | 'deleted_at'
+        >;
+
+        const objectStorageService = Provider.ioc<IObjectStorageService>(
+          'ObjectStorageProvider'
+        );
+
+        const metaData = {
+          'Content-Type': imageObj.type,
+          uploader_id: eventData.user.id,
+        };
+
+        objectStorageService.fPutObject({
+          bucketName: BUCKET_NAME,
+          objectName: imageObj.name,
+          filePath: imageObj.url,
+          metaData,
+          callback: (err, objInfo) => {
+            if (err) return console.log(err);
+
+            console.log(objInfo);
+          },
+        });
+
+        const imagePath = objectStorageService.getFilePath({
+          bucketName: BUCKET_NAME,
+          fileName: imageObj.name,
+        });
+
+        const image = ImageRepository.create({
+          ...imageObj,
+          url: imagePath,
+        });
         const errors = await validator(image);
 
         console.log(errors);

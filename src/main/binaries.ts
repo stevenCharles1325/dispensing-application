@@ -55,12 +55,12 @@ const executeBinaries = () => {
   if (minioProcess) {
     minioProcess.stdout.on('data', (data) => {
       console.log('[STDOUT]: ----------------------');
-      console.log(data);
+      console.log(data.toString());
     });
 
     minioProcess.stderr.on('data', (data) => {
       console.log('[STDERR]: ----------------------');
-      console.error(data);
+      console.log(data.toString());
     });
 
     minioProcess.on('close', (code) => {

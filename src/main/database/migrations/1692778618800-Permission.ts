@@ -20,7 +20,7 @@ export class Permission1692778618800 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'varchar',
+            type: 'int',
             isNullable: true,
           },
           {
@@ -59,7 +59,7 @@ export class Permission1692778618800 implements MigrationInterface {
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
-        referencedColumnNames: ['uuid'],
+        referencedColumnNames: ['id'],
         referencedTableName: 'systems',
         onDelete: 'CASCADE',
       })

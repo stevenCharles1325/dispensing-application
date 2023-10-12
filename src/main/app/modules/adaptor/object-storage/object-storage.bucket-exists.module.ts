@@ -11,10 +11,10 @@ export default function bucketExists(
   if ('callback' in params) {
     const { bucketName, callback } = params;
 
-    this.objectStorageAdaptor.bucketExists(bucketName, callback);
+    this.objectStorageAdaptor.bucketExists({ bucketName, callback });
   } else {
     const { bucketName } = params;
 
-    return this.objectStorageAdaptor.bucketExists(bucketName);
+    return this.objectStorageAdaptor.bucketExists({ bucketName });
   }
 }

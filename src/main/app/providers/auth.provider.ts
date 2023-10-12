@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 import Provider from '@IOC:Provider';
 import IProvider from 'App/interfaces/provider/provider.interface';
 import UserRepository from 'App/repositories/user.repository';
@@ -12,12 +13,17 @@ export default class AuthProvider implements IProvider {
 
   public run() {
     this.provider.singleton('AuthProvider', () => {
-      const primaryStorage = ALSStorage();
-      const backupStorage = new ElectronStore();
+      try {
+        const primaryStorage = ALSStorage();
+        const backupStorage = new ElectronStore();
 
-      const stores = [primaryStorage, backupStorage];
+        const stores = [primaryStorage, backupStorage];
 
-      return new AuthService(AuthConfig, UserRepository, bcrypt, stores);
+        return new AuthService(AuthConfig, UserRepository, bcrypt, stores);
+      } catch (err) {
+        console.log(err);
+        throw err;
+      }
     });
   }
 }

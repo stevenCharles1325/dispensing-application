@@ -5,7 +5,10 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 
-const authMiddleware: IMiddleware = ({ eventData, next }) => {
+const authMiddleware: IMiddleware<IPOSError[] | void> = ({
+  eventData,
+  next,
+}) => {
   const authService = Provider.ioc<IAuthService>('AuthProvider');
 
   /*
@@ -21,11 +24,10 @@ const authMiddleware: IMiddleware = ({ eventData, next }) => {
   const authResponse = authService.verifyToken(token);
 
   if (authResponse.status === 'SUCCESS') {
-    const hasPermission = authService.hasPermission.bind(
-      this,
-      authResponse.data as UserDTO // user
-    );
+    const user = authResponse.data as UserDTO;
+    const hasPermission = authService.hasPermission.bind(this, user);
 
+    eventData.user.id = user.id;
     eventData.user.hasPermission = hasPermission;
     return next();
   }

@@ -26,7 +26,7 @@ export class Item {
   id: number;
 
   @Column()
-  system_id: string;
+  system_id: number;
 
   @Column()
   supplier_id: string;
@@ -123,6 +123,6 @@ export class Item {
   supplier: Image;
 
   @OneToOne(() => System, { eager: true })
-  @JoinColumn({ name: 'system_id', referencedColumnName: 'uuid' })
+  @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })
   system: System;
 }

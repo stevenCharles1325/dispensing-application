@@ -27,7 +27,7 @@ export class User1692175684026 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'varchar',
+            type: 'integer',
             isNullable: true,
           },
           {
@@ -135,7 +135,7 @@ export class User1692175684026 implements MigrationInterface {
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
-        referencedColumnNames: ['uuid'],
+        referencedColumnNames: ['id'],
         referencedTableName: 'systems',
         onDelete: 'CASCADE',
       })

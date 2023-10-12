@@ -9,9 +9,14 @@ export default class ObjectStorageProvider implements IProvider {
 
   public run() {
     this.provider.singleton('ObjectStorageProvider', () => {
-      const objectStorage = new MinioAdaptor(MinioConfig);
+      try {
+        const objectStorage = new MinioAdaptor(MinioConfig);
 
-      return new ObjectStorageService(objectStorage);
+        return new ObjectStorageService(objectStorage);
+      } catch (err) {
+        console.log('[OBJECT-STORAGE-ERROR]: ', err);
+        throw err;
+      }
     });
   }
 }

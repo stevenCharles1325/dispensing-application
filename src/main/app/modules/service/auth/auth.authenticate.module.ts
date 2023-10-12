@@ -32,6 +32,7 @@ export default async function authenticate(
       } else {
         // Generate token
         const user_data = {
+          id: user.id,
           email: user.email,
           first_name: user.first_name,
           last_name: user.last_name,

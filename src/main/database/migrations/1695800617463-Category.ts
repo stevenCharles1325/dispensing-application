@@ -20,7 +20,7 @@ export class Category1696656773487 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'varchar',
+            type: 'int',
             isNullable: true,
           },
           {
@@ -59,7 +59,7 @@ export class Category1696656773487 implements MigrationInterface {
       new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
-        referencedColumnNames: ['uuid'],
+        referencedColumnNames: ['id'],
         referencedTableName: 'systems',
         onDelete: 'CASCADE',
       })

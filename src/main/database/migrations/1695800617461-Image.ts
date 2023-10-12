@@ -20,6 +20,11 @@ export class Image1696656747120 implements MigrationInterface {
             isUnique: true,
           },
           {
+            name: 'type',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
             name: 'name',
             type: 'varchar',
             isNullable: false,

@@ -3,7 +3,6 @@ import {
   MakeBucketParamsWithCB,
   MakeBucketParamsWithNoCB,
 } from 'App/interfaces/pos/pos.base-object-storage.interface';
-import { MakeBucketOpt, NoResultCallback } from 'minio';
 
 export default function makeBucket(
   this: any,
@@ -12,15 +11,19 @@ export default function makeBucket(
   if ('callback' in params) {
     const { bucketName, region = 'us-east-1', makeOpts, callback } = params;
 
-    this.objectStorageAdaptor.makeBucket(
+    this.objectStorageAdaptor.makeBucket({
       bucketName,
       region,
       makeOpts,
-      callback
-    );
+      callback,
+    });
   } else {
     const { bucketName, region = 'us-east-1', makeOpts } = params;
 
-    return this.objectStorageAdaptor.makeBucket(bucketName, region, makeOpts);
+    return this.objectStorageAdaptor.makeBucket({
+      bucketName,
+      region,
+      makeOpts,
+    });
   }
 }

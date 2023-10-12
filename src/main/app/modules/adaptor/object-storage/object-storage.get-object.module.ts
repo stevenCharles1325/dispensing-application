@@ -11,9 +11,9 @@ export default function getObject(
 ): Promise<Stream> | void | any {
   if ('callback' in params) {
     const { bucketName, objectName, callback } = params;
-    this.objectStorageAdaptor.getObject(bucketName, objectName, callback);
+    this.objectStorageAdaptor.getObject({ bucketName, objectName, callback });
   } else {
     const { bucketName, objectName } = params;
-    return this.objectStorageAdaptor.getObject(bucketName, objectName);
+    return this.objectStorageAdaptor.getObject({ bucketName, objectName });
   }
 }

@@ -8,19 +8,19 @@ export default function fGetObject(
   if ('callback' in params) {
     const { bucketName, objectName, filePath, callback } = params;
 
-    this.objectStorageAdaptor.fGetObject(
+    this.objectStorageAdaptor.fGetObject({
       bucketName,
       objectName,
       filePath,
-      callback
-    );
+      callback,
+    });
   } else {
     const { bucketName, objectName, filePath } = params;
 
-    return this.objectStorageAdaptor.fGetObject(
+    return this.objectStorageAdaptor.fGetObject({
       bucketName,
       objectName,
-      filePath
-    );
+      filePath,
+    });
   }
 }

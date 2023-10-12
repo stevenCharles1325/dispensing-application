@@ -52,6 +52,7 @@ export default function () {
         const eventData = {
           payload: args,
           user: {
+            id: null,
             token: null,
           },
         };

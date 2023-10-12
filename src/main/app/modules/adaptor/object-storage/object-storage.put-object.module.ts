@@ -10,22 +10,22 @@ export default function putObject(
 ): void | Promise<void> | any {
   if ('callback' in params) {
     const { bucketName, objectName, stream, size, metaData, callback } = params;
-    this.objectStorageAdaptor.putObject(
+    this.objectStorageAdaptor.putObject({
       bucketName,
       objectName,
       stream,
       size,
       metaData,
-      callback
-    );
+      callback,
+    });
   } else {
     const { bucketName, objectName, stream, size, metaData } = params;
-    return this.objectStorageAdaptor.putObject(
+    return this.objectStorageAdaptor.putObject({
       bucketName,
       objectName,
       stream,
       size,
-      metaData
-    );
+      metaData,
+    });
   }
 }

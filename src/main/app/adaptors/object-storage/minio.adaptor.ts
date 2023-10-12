@@ -6,6 +6,7 @@ import {
   FGetObjectParamsWithCB,
   FPutObjectParamsWithCB,
   FPutObjectParamsWithoutCB,
+  GetFilePathParams,
   GetObjectParamsWithCB,
   GetObjectParamsWithoutCB,
   ListObjectV2Params,
@@ -35,32 +36,46 @@ export class MinioAdaptor implements Partial<IObjectStorageAdaptor> {
   public readonly client: typeof Client;
 
   constructor(public readonly config: typeof MinioConfig) {
-    this.client = new Minio.Client({
-      endPoint: config.object_storage_endpoint,
-      port: config.object_storage_port,
-      accessKey: config.object_storage_access_key,
-      secretKey: config.object_storage_secret_key,
-    });
+    console.log('[INITIALIZING MINIO ADAPTOR]');
+
+    try {
+      this.client = new Minio.Client({
+        endPoint: config.object_storage_client_endpoint,
+        port: config.object_storage_client_port,
+        accessKey: config.object_storage_client_access_key,
+        secretKey: config.object_storage_client_secret_key,
+        useSSL: false,
+      });
+
+      console.log('[MINIO ADAPTOR INITIALIZED SUCCESS]');
+    } catch (err) {
+      console.log('[MINIO ADAPTOR ERROR]: ', err);
+      throw err;
+    }
+  }
+
+  getFilePath(params: GetFilePathParams): string {
+    return `http://${this.config.object_storage_client_endpoint}:${this.config.object_storage_client_port}/${params.bucketName}/${params.fileName}`;
   }
 
   makeBucket(
     params: MakeBucketParamsWithCB | MakeBucketParamsWithNoCB
   ): Promise<void> | void | any {
     if ('callback' in params) {
-      const { bucketName, region = 'us-east-1', makeOpts, callback } = params;
+      const { bucketName, region, makeOpts, callback } = params;
 
       this.client.makeBucket(
         bucketName,
-        region,
+        region ?? 'us-east-1',
         makeOpts as typeof MakeBucketOpt,
         callback as typeof NoResultCallback
       );
     } else {
-      const { bucketName, region = 'us-east-1', makeOpts } = params;
+      const { bucketName, region, makeOpts } = params;
 
       return this.client.makeBucket(
         bucketName,
-        region,
+        region ?? 'us-east-1',
         makeOpts as typeof MakeBucketOpt
       );
     }

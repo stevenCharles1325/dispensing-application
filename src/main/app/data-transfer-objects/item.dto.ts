@@ -4,7 +4,7 @@ import { IItemStatus } from 'App/interfaces/item/item.status.interface';
 export default interface ItemDTO {
   id: number;
   image_id: number | null;
-  system_id: string;
+  system_id: number;
   category_id: number;
   brand_id: number;
   supplier_id: number;

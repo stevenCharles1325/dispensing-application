@@ -10,18 +10,18 @@ export default function removeObject(
 ): Promise<void> | void | any {
   if ('callback' in params) {
     const { bucketName, objectName, removeOpts, callback } = params;
-    this.objectStorageAdaptor.removeObject(
+    this.objectStorageAdaptor.removeObject({
       bucketName,
       objectName,
       removeOpts,
-      callback
-    );
+      callback,
+    });
   } else {
     const { bucketName, objectName, removeOpts } = params;
-    return this.objectStorageAdaptor.removeObject(
+    return this.objectStorageAdaptor.removeObject({
       bucketName,
       objectName,
-      removeOpts
-    );
+      removeOpts,
+    });
   }
 }

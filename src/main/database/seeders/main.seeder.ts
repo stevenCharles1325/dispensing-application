@@ -28,7 +28,7 @@ export default class MainSeeder implements Seeder {
     const system = await SystemRepo.save(_system);
     await SystemRepo.save({
       ...system,
-      main_branch_id: system.id,
+      main_branch_id: system.uuid,
     });
 
     const createdPermissions = PermissionRepo.create(

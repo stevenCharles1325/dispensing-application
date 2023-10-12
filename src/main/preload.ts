@@ -191,7 +191,7 @@ const imageHandler = {
     ipcRenderer.invoke('image:show', payload, page, total),
 
   createImage: async (
-    payload: ImageDTO
+    payload: Omit<ImageDTO, 'id' | 'created_at' | 'deleted_at'>
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | ImageDTO[]>
   > => ipcRenderer.invoke('image:create', payload),

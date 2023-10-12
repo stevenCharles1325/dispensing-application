@@ -186,6 +186,7 @@ export default function InventoryForm({
     ''
   );
   const [imageFile, setImageFile] = useState<File | null>();
+  const [sampleRes, setSampleRes] = useState<ImageDTO>();
   const [form, dispatch] = useReducer(formReducer, initialForm);
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
@@ -279,6 +280,18 @@ export default function InventoryForm({
   const handleRemoveSelectedImage = () => {
     setImageFile(null);
     setImagePreview(null);
+  };
+
+  const handleSaveImage = async () => {
+    if (imageFile) {
+      console.log(imageFile);
+      const res = await window.image.createImage({
+        name: imageFile.name,
+        url: imageFile.path,
+        type: imageFile.type,
+      });
+      setSampleRes(res);
+    }
   };
 
   return (
@@ -522,6 +535,13 @@ export default function InventoryForm({
                       </>
                     )}
                   </div>
+                  {/* {sampleRes && (
+                    <img
+                      className="w-full h-full"
+                      src={sampleRes?.url}
+                      alt={sampleRes?.name}
+                    />
+                  )} */}
                 </div>
                 <div className="flex flex-col justify-between">
                   <div style={{ color: 'var(--info-text-color)' }}>
@@ -534,7 +554,9 @@ export default function InventoryForm({
                     </p>
                   </div>
                   <div className="flex gap-4">
-                    <Button variant="outlined">Save</Button>
+                    <Button variant="outlined" onClick={handleSaveImage}>
+                      Save
+                    </Button>
                     <Button
                       variant="outlined"
                       color="error"

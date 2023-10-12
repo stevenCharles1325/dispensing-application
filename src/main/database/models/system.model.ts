@@ -8,10 +8,10 @@ import {
 
 @Entity('systems')
 export class System {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment')
+  id: number;
 
-  @Column({ generated: true })
+  @Column({ generated: 'uuid' })
   uuid: string;
 
   @Column({

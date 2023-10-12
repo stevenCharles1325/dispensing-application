@@ -1,6 +1,6 @@
 export default interface CategoryDTO {
   id: number;
-  system_id: string;
+  system_id: number;
   name: string;
   description: string;
   created_at: Date;

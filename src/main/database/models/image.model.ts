@@ -17,6 +17,9 @@ export class Image {
   @Column({ unique: true })
   url: string;
 
+  @Column()
+  type: string;
+
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })
   name: string;

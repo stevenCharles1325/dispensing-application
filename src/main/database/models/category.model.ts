@@ -16,7 +16,7 @@ export class Category {
   id: number;
 
   @Column()
-  system_id: string;
+  system_id: number;
 
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })

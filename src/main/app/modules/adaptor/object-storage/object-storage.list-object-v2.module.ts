@@ -6,10 +6,10 @@ export default function listObjectsV2(
   params: ListObjectV2Params
 ): Stream {
   const { bucketName, prefix, recursive, startAfter } = params;
-  return this.objectStorageAdaptor.listObjectsV2(
+  return this.objectStorageAdaptor.listObjectsV2({
     bucketName,
     prefix,
     recursive,
-    startAfter
-  );
+    startAfter,
+  });
 }

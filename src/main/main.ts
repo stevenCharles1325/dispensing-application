@@ -27,6 +27,7 @@ import stores from './stores';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
+import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -188,6 +189,29 @@ app
 
           runEvents();
         });
+
+        const objectStorageService = Provider.ioc<IObjectStorageService>(
+          'ObjectStorageProvider'
+        );
+
+        // Creating all buckets after 5 seconds as early service call will throw connection error.
+        setTimeout(() => {
+          // All inventory related objects
+          objectStorageService.makeBucket({
+            bucketName: 'inventory',
+            callback: (err) => {
+              if (err) console.log('[ERROR CREATING INVENTORY BUCKET]: ', err);
+            },
+          });
+
+          // All user related objects
+          objectStorageService.makeBucket({
+            bucketName: 'users',
+            callback: (err) => {
+              if (err) console.log('[ERROR CREATING USERS BUCKET]: ', err);
+            },
+          });
+        }, 5000);
 
         createWindow();
 

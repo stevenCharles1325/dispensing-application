@@ -2,7 +2,7 @@ import { ISupplierStatus } from 'App/interfaces/supplier/supplier.status.interfa
 
 export default interface SupplierDTO {
   id: number;
-  system_id: string;
+  system_id: number;
   image_id: number | null; // Logo
   tax_id: number;
   name: string;

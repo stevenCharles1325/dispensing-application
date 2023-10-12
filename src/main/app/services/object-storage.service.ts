@@ -4,6 +4,7 @@ import IObjectStorageAdaptor from 'App/interfaces/adaptor/object-storage/adaptor
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
 import fGetObject from 'App/modules/adaptor/object-storage/object-storage.f-get-object.module';
 import fPutObject from 'App/modules/adaptor/object-storage/object-storage.f-put-object.module';
+import getFilePath from 'App/modules/adaptor/object-storage/object-storage.get-file-path.module';
 import getObject from 'App/modules/adaptor/object-storage/object-storage.get-object.module';
 import listBuckets from 'App/modules/adaptor/object-storage/object-storage.list-buckets.module';
 import listObjectsV2 from 'App/modules/adaptor/object-storage/object-storage.list-object-v2.module';
@@ -21,6 +22,7 @@ export default class ObjectStorageService
 }
 
 Object.assign(ObjectStorageService.prototype, {
+  getFilePath,
   makeBucket,
   fGetObject,
   fPutObject,

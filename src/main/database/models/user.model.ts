@@ -40,7 +40,7 @@ export class User {
   lead_id: number;
 
   @Column()
-  system_id: string;
+  system_id: number;
 
   @Column()
   role_id: number;
@@ -161,7 +161,7 @@ export class User {
   async setSystemId() {
     if (!this.system_id) {
       const thisSystem = await SystemRepository.createQueryBuilder()
-        .where('id = main_branch_id')
+        .where('uuid = main_branch_id')
         .getOne();
 
       if (thisSystem) {

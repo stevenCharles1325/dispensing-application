@@ -97,7 +97,14 @@ export type RemoveObjectParamsWithoutCB = Omit<
   'callback'
 >;
 
+export type GetFilePathParams = {
+  bucketName: string;
+  fileName: string;
+};
+
 export default interface IBaseObjectStorage {
+  getFilePath(this: any, params: GetFilePathParams): string;
+
   makeBucket(this: any, params: MakeBucketParamsWithCB): void;
 
   makeBucket(this: any, params: MakeBucketParamsWithNoCB): Promise<void>;
