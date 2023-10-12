@@ -102,8 +102,46 @@ export type GetFilePathParams = {
   fileName: string;
 };
 
+export type PreSignedGetObjectParamsWithoutCB = {
+  bucketName: string;
+  objectName: string;
+  expiry?: number;
+};
+
+export type PreSignedGetObjectParamsWithCB = {
+  bucketName: string;
+  objectName: string;
+  expiry?: number;
+  callback?: (err: any, presignedUrl: string) => void;
+};
+
+export type SetBucketPolicyParamsWithoutCB = {
+  bucketName: string;
+  bucketPolicy: string;
+};
+
+export type SetBucketPolicyParamsWithCB = {
+  bucketName: string;
+  bucketPolicy: string;
+  callback?: (err: any) => void;
+};
+
 export default interface IBaseObjectStorage {
   getFilePath(this: any, params: GetFilePathParams): string;
+
+  presignedGetObject(this: any, params: PreSignedGetObjectParamsWithCB): string;
+
+  presignedGetObject(
+    this: any,
+    params: PreSignedGetObjectParamsWithoutCB
+  ): Promise<string>;
+
+  setBucketPolicy(
+    this: any,
+    params: SetBucketPolicyParamsWithoutCB
+  ): Promise<void>;
+
+  setBucketPolicy(this: any, params: SetBucketPolicyParamsWithCB): void;
 
   makeBucket(this: any, params: MakeBucketParamsWithCB): void;
 

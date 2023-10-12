@@ -13,10 +13,16 @@ import {
   ListObjectsParams,
   MakeBucketParamsWithCB,
   MakeBucketParamsWithNoCB,
+  PreSignedGetObjectParams,
+  PreSignedGetObjectParamsWithCB,
+  PreSignedGetObjectParamsWithoutCB,
   PutObjectParamsWithCB,
   PutObjectParamsWithoutCB,
   RemoveObjectParamsWithCB,
   RemoveObjectParamsWithoutCB,
+  SetBucketPolicyParams,
+  SetBucketPolicyParamsWithCB,
+  SetBucketPolicyParamsWithoutCB,
 } from 'App/interfaces/pos/pos.base-object-storage.interface';
 import MinioConfig from 'Main/config/minio.config';
 import { ResultCallback } from 'minio/dist/main/internal/type';
@@ -56,6 +62,43 @@ export class MinioAdaptor implements Partial<IObjectStorageAdaptor> {
 
   getFilePath(params: GetFilePathParams): string {
     return `http://${this.config.object_storage_client_endpoint}:${this.config.object_storage_client_port}/${params.bucketName}/${params.fileName}`;
+  }
+
+  presignedGetObject(
+    params: PreSignedGetObjectParamsWithCB | PreSignedGetObjectParamsWithoutCB
+  ): Promise<string> | void | any {
+    if ('callback' in params) {
+      const { bucketName, objectName, expiry, callback } = params;
+
+      this.client.presignedGetObject(
+        bucketName,
+        objectName,
+        expiry ?? 604800000,
+        callback
+      );
+    } else {
+      const { bucketName, objectName, expiry } = params;
+
+      return this.client.presignedGetObject(
+        bucketName,
+        objectName,
+        expiry ?? 604800000
+      );
+    }
+  }
+
+  setBucketPolicy(
+    params: SetBucketPolicyParamsWithCB | SetBucketPolicyParamsWithoutCB
+  ): Promise<void> | void | any {
+    if ('callback' in params) {
+      const { bucketName, bucketPolicy, callback } = params;
+
+      this.client.setBucketPolicy(bucketName, bucketPolicy, callback);
+    } else {
+      const { bucketName, bucketPolicy } = params;
+
+      return this.client.setBucketPolicy(bucketName, bucketPolicy);
+    }
   }
 
   makeBucket(

@@ -10,8 +10,10 @@ import listBuckets from 'App/modules/adaptor/object-storage/object-storage.list-
 import listObjectsV2 from 'App/modules/adaptor/object-storage/object-storage.list-object-v2.module';
 import listObjects from 'App/modules/adaptor/object-storage/object-storage.list-objects.module';
 import makeBucket from 'App/modules/adaptor/object-storage/object-storage.make-bucket.module';
+import presignedGetObject from 'App/modules/adaptor/object-storage/object-storage.presigned-get-object.module';
 import putObject from 'App/modules/adaptor/object-storage/object-storage.put-object.module';
 import removeObject from 'App/modules/adaptor/object-storage/object-storage.remove-object.module';
+import setBucketPolicy from 'App/modules/adaptor/object-storage/object-storage.set-bucket-policy.module';
 
 export default class ObjectStorageService
   implements Partial<IObjectStorageService>
@@ -23,6 +25,8 @@ export default class ObjectStorageService
 
 Object.assign(ObjectStorageService.prototype, {
   getFilePath,
+  setBucketPolicy,
+  presignedGetObject,
   makeBucket,
   fGetObject,
   fPutObject,

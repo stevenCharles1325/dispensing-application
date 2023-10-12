@@ -186,7 +186,6 @@ export default function InventoryForm({
     ''
   );
   const [imageFile, setImageFile] = useState<File | null>();
-  const [sampleRes, setSampleRes] = useState<ImageDTO>();
   const [form, dispatch] = useReducer(formReducer, initialForm);
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
@@ -284,13 +283,21 @@ export default function InventoryForm({
 
   const handleSaveImage = async () => {
     if (imageFile) {
-      console.log(imageFile);
       const res = await window.image.createImage({
         name: imageFile.name,
         url: imageFile.path,
         type: imageFile.type,
       });
-      setSampleRes(res);
+
+      if (res.status === 'ERROR') {
+        const errorMessage =
+          typeof res.errors?.[0] === 'string'
+            ? res.errors?.[0]
+            : (res.errors?.[0] as unknown as IPOSError).message;
+
+        console.log('ERROR: ', res.errors);
+        return displayAlert?.(errorMessage ?? 'Please try again', 'error');
+      }
     }
   };
 
@@ -535,13 +542,6 @@ export default function InventoryForm({
                       </>
                     )}
                   </div>
-                  {/* {sampleRes && (
-                    <img
-                      className="w-full h-full"
-                      src={sampleRes?.url}
-                      alt={sampleRes?.name}
-                    />
-                  )} */}
                 </div>
                 <div className="flex flex-col justify-between">
                   <div style={{ color: 'var(--info-text-color)' }}>
