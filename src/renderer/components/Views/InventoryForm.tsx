@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable no-console */
@@ -88,6 +90,8 @@ export default function InventoryForm({
 }: InventoryFormProps) {
   const { displayAlert } = useAlert();
   const drive = useAppDrive();
+
+  const selectedImage = drive.selected?.[0];
 
   const initialForm = {
     system_id: null, // Sample System-ID
@@ -196,14 +200,15 @@ export default function InventoryForm({
   };
 
   const [errors, setErrors] = useState<Record<string, any>>({});
-  const [imagePreview, setImagePreview] = useState<ArrayBuffer | string | null>(
-    ''
-  );
-  const [imageFile, setImageFile] = useState<File | null>();
+  const [imageFile, setImageFile] = useState<ImageDTO | null>();
   const [form, dispatch] = useReducer(formReducer, initialForm);
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
   >('add-new');
+
+  useEffect(() => {
+    if (drive.selected?.length) setImageFile(drive.selected?.[0]);
+  }, [drive.selected]);
 
   const handleSupplierToggle = (value: typeof supplierToggle) => {
     dispatch({
@@ -255,46 +260,8 @@ export default function InventoryForm({
     await getBrands();
   };
 
-  const handleSelectImage = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    setImageFile(file);
-
-    if (file) {
-      convertToBase64(
-        file,
-        (base64) => setImagePreview(base64 as ArrayBuffer),
-        console.log
-      );
-    }
-  };
-
   const handleRemoveSelectedImage = () => {
     setImageFile(null);
-    setImagePreview(null);
-  };
-
-  const handleSaveImage = async () => {
-    if (imageFile) {
-      const res = await window.image.createImage({
-        name: imageFile.name,
-        url: imageFile.path,
-        type: imageFile.type,
-      });
-
-      if (res.status === 'ERROR') {
-        const errorMessage =
-          typeof res.errors?.[0] === 'string'
-            ? res.errors?.[0]
-            : (res.errors?.[0] as unknown as IPOSError).message;
-
-        console.log('ERROR: ', res.errors);
-        return displayAlert?.(errorMessage ?? 'Please try again', 'error');
-      }
-
-      return displayAlert?.('Successfully uploaded image', 'success');
-    }
   };
 
   const handleCreateItem = async () => {
@@ -569,21 +536,28 @@ export default function InventoryForm({
               <br />
               <div className="flex flex-row gap-4">
                 <div className="border border-gray-300 hover:border-gray-950 rounded h-[170px] w-[170px] relative">
-                  <input
+                  {/* <input
                     type="file"
                     className="relative border rounded opacity-0 w-full h-full"
                     onChange={handleSelectImage}
                     accept="image/*, png, jpeg, jpg"
+                  /> */}
+                  <div
+                    className="relative border rounded opacity-0 w-full h-full"
+                    onClick={() => {
+                      drive.setMultiple?.(false);
+                      drive.open?.();
+                    }}
                   />
                   <div
                     className="absolute inset-0 flex flex-col justify-center items-center select-none pointer-events-none"
                     style={{ color: 'var(--info-text-color) ' }}
                   >
-                    {imagePreview && imageFile ? (
+                    {imageFile ? (
                       <img
                         className="w-full h-full"
-                        src={imagePreview as unknown as string}
-                        alt={imageFile.name}
+                        src={imageFile?.url}
+                        alt={imageFile?.name}
                       />
                     ) : (
                       <>
@@ -599,19 +573,8 @@ export default function InventoryForm({
                     <p>
                       File name: <b>{imageFile?.name}</b>
                     </p>
-                    <p>
-                      File size:
-                      <b>{` ${bytesToMegabytes(imageFile?.size ?? 0)} MB`}</b>
-                    </p>
                   </div>
                   <div className="flex gap-4">
-                    <Button
-                      disabled={Boolean(!imageFile)}
-                      variant="outlined"
-                      onClick={handleSaveImage}
-                    >
-                      Save
-                    </Button>
                     <Button
                       disabled={Boolean(!imageFile)}
                       variant="outlined"

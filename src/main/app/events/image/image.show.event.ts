@@ -29,7 +29,8 @@ export default class ImageShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const imageQuery = ImageRepository.createQueryBuilder()
+        const imageQuery = ImageRepository.createQueryBuilder('image')
+          .leftJoinAndSelect('image.uploader', 'user')
           .take(take)
           .skip(skip);
 

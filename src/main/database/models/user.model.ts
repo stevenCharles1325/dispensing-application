@@ -28,6 +28,7 @@ import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 import RoleRepository from 'App/repositories/role.repository';
 import SystemRepository from 'App/repositories/system.repository';
 import { ValidationMessage } from './validator/message/message';
+import { Image } from './image.model';
 
 @Entity('users')
 export class User {
@@ -126,6 +127,10 @@ export class User {
   @ManyToOne(() => User, (user: User) => user.subordinates)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
   lead: User;
+
+  @OneToMany(() => Image, (image: Image) => image.uploader)
+  @JoinColumn({ name: 'uploader_id', referencedColumnName: 'id' })
+  images: Image[];
 
   @AfterLoad()
   fullName() {

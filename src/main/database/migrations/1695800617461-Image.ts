@@ -61,7 +61,7 @@ export class Image1696656747120 implements MigrationInterface {
         name: 'uploader',
         columnNames: ['uploader_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'user',
+        referencedTableName: 'users',
         onDelete: 'CASCADE',
       })
     );

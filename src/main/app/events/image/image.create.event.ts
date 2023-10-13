@@ -33,7 +33,6 @@ export default class ImageCreateEvent implements IEvent {
           'id' | 'created_at' | 'deleted_at' | 'uploader'
         >;
 
-        console.log(imageObj);
         const objectStorageService = Provider.ioc<IObjectStorageService>(
           'ObjectStorageProvider'
         );
@@ -43,28 +42,27 @@ export default class ImageCreateEvent implements IEvent {
           uploader_id: eventData.user.id,
         };
 
-        // objectStorageService.fPutObject({
-        //   bucketName: BUCKET_NAME,
-        //   objectName: imageObj.name,
-        //   filePath: imageObj.url,
-        //   metaData,
-        //   callback: (err, objInfo) => {
-        //     if (err) return console.log(err);
+        objectStorageService.fPutObject({
+          bucketName: BUCKET_NAME,
+          objectName: imageObj.name,
+          filePath: imageObj.url,
+          metaData,
+          callback: (err, objInfo) => {
+            if (err) return console.log(err);
 
-        //     console.log(objInfo);
-        //   },
-        // });
+            console.log(objInfo);
+          },
+        });
 
-        // const imagePath = objectStorageService.getFilePath({
-        //   bucketName: BUCKET_NAME,
-        //   fileName: imageObj.name,
-        // });
+        const imagePath = objectStorageService.getFilePath({
+          bucketName: BUCKET_NAME,
+          fileName: imageObj.name,
+        });
 
-        console.log(eventData.user.id);
         const image = ImageRepository.create({
           ...imageObj,
           uploader_id: eventData.user.id as number,
-          url: '/',
+          url: imagePath,
         });
         const errors = await validator(image);
 

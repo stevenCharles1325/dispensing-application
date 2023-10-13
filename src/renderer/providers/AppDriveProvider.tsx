@@ -8,6 +8,7 @@ interface IAppDriveContext {
   selected: any;
   open: () => void;
   close: () => void;
+  setMultiple: (value: boolean) => void;
   setOpen: (value: boolean) => void;
 }
 
@@ -17,16 +18,20 @@ export default function AppDriveProvider({
   children,
 }: React.PropsWithChildren) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<any>(null);
+  const [selected, setSelected] = useState<Array<Record<any, string>>>();
+  const [multiple, setMultiple] = useState<boolean>(true);
 
   const open = () => setIsOpen(true);
   const close = () => setIsOpen(false);
+  const clearSelected = () => setIsOpen(false);
 
   const value = useMemo(
     () => ({
-      selected,
       open,
       close,
+      selected,
+      setMultiple,
+      clearSelected,
     }),
     [selected]
   );
@@ -35,6 +40,7 @@ export default function AppDriveProvider({
     <AppDriveContext.Provider value={value}>
       {children}
       <AppDrive
+        multiple={multiple}
         open={isOpen}
         onClose={close}
         onSelect={(object) => setSelected(object)}
