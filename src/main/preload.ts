@@ -95,15 +95,19 @@ const itemHandler = {
   > => ipcRenderer.invoke('item:create', payload),
 
   updateItem: async (
-    id: number,
+    id: string,
     payload: Partial<ItemDTO>
   ): Promise<IResponse<string[] | IPOSError[] | ItemDTO>> =>
     ipcRenderer.invoke('item:update', id, payload),
 
-  archiveItem: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  archiveItem: async (
+    id: string | string[]
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('item:archive', id),
 
-  deleteItem: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteItem: async (
+    id: string | string[]
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('item:delete', id),
 };
 

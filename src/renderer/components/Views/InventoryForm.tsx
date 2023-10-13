@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable no-console */
 /* eslint-disable consistent-return */
 /* eslint-disable react/destructuring-assignment */
@@ -26,12 +28,15 @@ import SupplierForm from './SupplierForm';
 import LandscapeIcon from '@mui/icons-material/Landscape';
 import convertToBase64 from 'UI/helpers/convertToBase64';
 import bytesToMegabytes from 'UI/helpers/bytesToMegabytes';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 
 interface InventoryFormProps {
   images: ImageDTO[];
   brands: BrandDTO[];
   categories: CategoryDTO[];
   suppliers: SupplierDTO[];
+  getItems: () => Promise<void>;
   getImages: () => Promise<void>;
   getBrands: () => Promise<void>;
   getCategories: () => Promise<void>;
@@ -74,6 +79,7 @@ export default function InventoryForm({
   categories,
   suppliers,
   getImages,
+  getItems,
   getBrands,
   getCategories,
   getSuppliers,
@@ -107,6 +113,11 @@ export default function InventoryForm({
     }
   ) => {
     switch (action.type) {
+      case 'name':
+        return {
+          ...state,
+          name: action.payload,
+        };
       case 'system_id':
         return {
           ...state,
@@ -182,6 +193,7 @@ export default function InventoryForm({
     }
   };
 
+  const [errors, setErrors] = useState<Record<string, any>>({});
   const [imagePreview, setImagePreview] = useState<ArrayBuffer | string | null>(
     ''
   );
@@ -191,16 +203,13 @@ export default function InventoryForm({
     'add-new' | 'add-existing'
   >('add-new');
 
-  useEffect(() => {
+  const handleSupplierToggle = (value: typeof supplierToggle) => {
     dispatch({
       type: 'supplier_id',
       payload: null,
     });
-  }, [supplierToggle]);
-
-  useEffect(() => {
-    console.log(form);
-  }, [form]);
+    setSupplierToggle(value);
+  };
 
   const handleAddNewCategory = async (name: string) => {
     const res = await window.category.createCategory({
@@ -244,23 +253,6 @@ export default function InventoryForm({
     await getBrands();
   };
 
-  // const handleAddNewSupplier = async (name: string) => {
-  //   const res = await window.supplier.createSupplier({
-  //     name,
-  //   });
-
-  //   if (res.status === 'ERROR') {
-  //     return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
-  //   }
-
-  //   dispatch({
-  //     type: 'brand_id',
-  //     payload: (res.data as unknown as BrandDTO).id,
-  //   });
-
-  //   await getBrands();
-  // };
-
   const handleSelectImage = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -298,7 +290,32 @@ export default function InventoryForm({
         console.log('ERROR: ', res.errors);
         return displayAlert?.(errorMessage ?? 'Please try again', 'error');
       }
+
+      return displayAlert?.('Successfully uploaded image', 'success');
     }
+  };
+
+  const handleCreateItem = async () => {
+    const res = await window.item.createItem(form as unknown as ItemDTO);
+
+    if (res.status === 'ERROR') {
+      if (typeof res.errors?.[0] === 'string') {
+        return displayAlert?.(
+          (res.errors?.[0] as string) ?? 'Please try again',
+          'error'
+        );
+      }
+
+      const errors: Record<string, any> = {};
+      const resErrors = res.errors as unknown as IPOSValidationError[];
+      for (const error of resErrors) {
+        errors[error.field] = error.message;
+      }
+
+      return setErrors(errors);
+    }
+
+    await getItems();
   };
 
   return (
@@ -320,6 +337,8 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
+              helperText={errors.name}
+              error={Boolean(errors.name)}
             />
             <TextField
               label="Stock Keeping Unit (SKU)"
@@ -332,6 +351,8 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
+              helperText={errors.sku}
+              error={Boolean(errors.sku)}
             />
             <TextField
               label="Barcode"
@@ -344,6 +365,8 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
+              helperText={errors.barcode}
+              error={Boolean(errors.barcode)}
             />
             <CustomAutoComplete
               options={brands}
@@ -358,6 +381,8 @@ export default function InventoryForm({
               }}
               sx={{ width: 300 }}
               label="Brands"
+              helperText={errors.brand_id}
+              error={Boolean(errors.brand_id)}
             />
             <CustomAutoComplete
               options={categories}
@@ -372,6 +397,8 @@ export default function InventoryForm({
               }}
               sx={{ width: 300 }}
               label="Categories"
+              helperText={errors.category_id}
+              error={Boolean(errors.category_id)}
             />
             <Autocomplete
               size="small"
@@ -386,7 +413,14 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
-              renderInput={(params) => <TextField {...params} label="Status" />}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Status"
+                  helperText={errors.status}
+                  error={Boolean(errors.status)}
+                />
+              )}
             />
             <TextField
               label="Description"
@@ -404,6 +438,8 @@ export default function InventoryForm({
               sx={{
                 width: 630,
               }}
+              helperText={errors.description}
+              error={Boolean(errors.description)}
             />
           </div>
         </div>
@@ -419,7 +455,7 @@ export default function InventoryForm({
               onChange={(event) => {
                 dispatch({
                   type: 'cost_price',
-                  payload: event.target.value,
+                  payload: Number(event.target.value),
                 });
               }}
               variant="outlined"
@@ -430,6 +466,8 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
+              helperText={errors.cost_price}
+              error={Boolean(errors.cost_price)}
             />
             <TextField
               label="Selling Price (Peso)"
@@ -437,7 +475,7 @@ export default function InventoryForm({
               onChange={(event) => {
                 dispatch({
                   type: 'selling_price',
-                  payload: event.target.value,
+                  payload: Number(event.target.value),
                 });
               }}
               variant="outlined"
@@ -448,6 +486,8 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
+              helperText={errors.selling_price}
+              error={Boolean(errors.selling_price)}
             />
             <TextField
               label="Tax Rate"
@@ -456,7 +496,7 @@ export default function InventoryForm({
               onChange={(event) => {
                 dispatch({
                   type: 'tax_rate',
-                  payload: event.target.value,
+                  payload: Number(event.target.value),
                 });
               }}
               variant="outlined"
@@ -464,6 +504,8 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
+              helperText={errors.tax_rate}
+              error={Boolean(errors.tax_rate)}
             />
           </div>
         </div>
@@ -488,6 +530,8 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
+              helperText={errors.stock_quantity}
+              error={Boolean(errors.stock_quantity)}
             />
             <Autocomplete
               size="small"
@@ -503,7 +547,12 @@ export default function InventoryForm({
                 width: 300,
               }}
               renderInput={(params) => (
-                <TextField {...params} label="Unit of measurement" />
+                <TextField
+                  {...params}
+                  label="Unit of measurement"
+                  helperText={errors.unit_of_measurement}
+                  error={Boolean(errors.unit_of_measurement)}
+                />
               )}
             />
           </div>
@@ -554,10 +603,15 @@ export default function InventoryForm({
                     </p>
                   </div>
                   <div className="flex gap-4">
-                    <Button variant="outlined" onClick={handleSaveImage}>
+                    <Button
+                      disabled={Boolean(!imageFile)}
+                      variant="outlined"
+                      onClick={handleSaveImage}
+                    >
                       Save
                     </Button>
                     <Button
+                      disabled={Boolean(!imageFile)}
                       variant="outlined"
                       color="error"
                       onClick={handleRemoveSelectedImage}
@@ -584,7 +638,7 @@ export default function InventoryForm({
                     );
                   }
 
-                  setSupplierToggle((selected) => supplierAction ?? selected);
+                  handleSupplierToggle(supplierAction ?? supplierToggle);
                 }}
                 aria-label="Supplier-action-toggle"
               >
@@ -617,12 +671,26 @@ export default function InventoryForm({
                       width: 300,
                     }}
                     renderInput={(params) => (
-                      <TextField {...params} label="Supplier" />
+                      <TextField
+                        {...params}
+                        label="Supplier"
+                        helperText={errors.supplier_id}
+                        error={Boolean(errors.supplier_id)}
+                      />
                     )}
                   />
                 </div>
               ) : (
-                <SupplierForm getSuppliers={getSuppliers} />
+                <SupplierForm
+                  getSuppliers={getSuppliers}
+                  onAdd={(supplierId) => {
+                    handleSupplierToggle('add-existing');
+                    dispatch({
+                      type: 'supplier_id',
+                      payload: supplierId,
+                    });
+                  }}
+                />
               )}
             </div>
           </div>
@@ -631,7 +699,9 @@ export default function InventoryForm({
           <Button variant="outlined" onClick={onClose}>
             Close
           </Button>
-          <Button variant="contained">Create</Button>
+          <Button variant="contained" onClick={handleCreateItem}>
+            Create
+          </Button>
         </div>
       </div>
     </div>

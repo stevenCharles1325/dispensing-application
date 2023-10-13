@@ -2,7 +2,7 @@ import { IItemMeasurement } from 'App/interfaces/item/item.measurements.interfac
 import { IItemStatus } from 'App/interfaces/item/item.status.interface';
 
 export default interface ItemDTO {
-  id: number;
+  id: string;
   image_id: number | null;
   system_id: number;
   category_id: number;

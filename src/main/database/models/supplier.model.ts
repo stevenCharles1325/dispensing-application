@@ -11,7 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IsMobilePhone, Length, IsEmail, MinLength } from 'class-validator';
-import { ValidationMessage } from './validator/message';
+import { ValidationMessage } from './validator/message/message';
 import { Image } from './image.model';
 import { System } from './system.model';
 

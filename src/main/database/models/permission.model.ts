@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Role } from './role.model';
 import { MinLength } from 'class-validator';
-import { ValidationMessage } from './validator/message';
+import { ValidationMessage } from './validator/message/message';
 
 @Entity('permissions')
 export class Permission {

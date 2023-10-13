@@ -23,6 +23,7 @@ import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
+import IPOSError from 'App/interfaces/pos/pos.error.interface';
 
 const columns: Array<GridColDef> = [
   {
@@ -86,11 +87,14 @@ export default function Inventory() {
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
   const [images, setImages] = useState<Array<ImageDTO>>([]);
 
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
-  const [modalAction, setModalAction] = useState<
-    'create' | 'update' | 'delete' | null
-  >(null);
+  const [modalAction, setModalAction] = useState<'create' | 'update' | null>(
+    null
+  );
   const { displayAlert } = useAlert();
+
+  const selectedItem = items.find(({ id }) => id === selectedIds?.[0]);
 
   const getItems = async () => {
     const res = await window.item.getItems();
@@ -163,9 +167,24 @@ export default function Inventory() {
     setModalAction('update');
   };
 
-  const handleDeleteSelectedItem = () => {
+  const handleDeleteSelectedItem = async () => {
     console.log('Delete item');
-    setModalAction('delete');
+    const res = await window.item.deleteItem(selectedIds);
+
+    if (res.status === 'ERROR') {
+      if (typeof res.errors?.[0] === 'string') {
+        return displayAlert?.(
+          (res.errors?.[0] as string) ?? 'Please try again',
+          'error'
+        );
+      }
+
+      const resErrors = res.errors as unknown as IPOSError[];
+      return displayAlert?.(resErrors[0] as unknown as string, 'error');
+    }
+
+    await getItems();
+    displayAlert?.('Successfully deleted selected item(s)', 'success');
   };
 
   return (
@@ -178,12 +197,20 @@ export default function Inventory() {
         />
         <CounterWidget
           icon={<LocalOfferOutlinedIcon color="secondary" fontSize="large" />}
-          count={formatCurrency(0)}
+          count={
+            formatCurrency(
+              items.reduce((prev, curr) => prev + curr.selling_price, 0)
+            ) ?? 0
+          }
           label="total selling price"
         />
         <CounterWidget
           icon={<MonetizationOnOutlinedIcon color="warning" fontSize="large" />}
-          count={formatCurrency(0)}
+          count={
+            formatCurrency(
+              items.reduce((prev, curr) => prev + curr.cost_price, 0)
+            ) ?? 0
+          }
           label="Total cost price"
         />
       </div>
@@ -202,6 +229,7 @@ export default function Inventory() {
             icon={<EditOutlinedIcon />}
             label="Edit selected item"
             onClick={handleEditSelectedItem}
+            disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
           <Chip
             className="shadow-lg"
@@ -209,6 +237,7 @@ export default function Inventory() {
             icon={<DeleteOutlineOutlinedIcon />}
             label="Delete selected item"
             onClick={handleDeleteSelectedItem}
+            disabled={selectedIds.length === 0}
           />
         </div>
         <DataGrid
@@ -216,6 +245,10 @@ export default function Inventory() {
           rows={items}
           columns={columns}
           checkboxSelection
+          onRowClick={(row) => console.log(row)}
+          onRowSelectionModelChange={(itemIds) =>
+            setSelectedIds(itemIds as string[])
+          }
           hideFooterPagination
         />
         <Dialog
@@ -229,6 +262,7 @@ export default function Inventory() {
             brands={brands}
             categories={categories}
             suppliers={suppliers}
+            getItems={getItems}
             getImages={getImages}
             getBrands={getBrands}
             getCategories={getCategories}

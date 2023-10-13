@@ -27,7 +27,7 @@ import { Role } from './role.model';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 import RoleRepository from 'App/repositories/role.repository';
 import SystemRepository from 'App/repositories/system.repository';
-import { ValidationMessage } from './validator/message';
+import { ValidationMessage } from './validator/message/message';
 
 @Entity('users')
 export class User {

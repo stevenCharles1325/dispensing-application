@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable consistent-return */
@@ -8,10 +9,14 @@ import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 
 interface SupplierFormProps {
+  onAdd?: (supplierId: string) => void;
   getSuppliers: () => Promise<void>;
 }
 
-export default function SupplierForm({ getSuppliers }: SupplierFormProps) {
+export default function SupplierForm({
+  onAdd,
+  getSuppliers,
+}: SupplierFormProps) {
   const { displayAlert } = useAlert();
   const [errors, setErrors] = useState<Record<string, any>>({});
 
@@ -117,6 +122,9 @@ export default function SupplierForm({ getSuppliers }: SupplierFormProps) {
     }
 
     await getSuppliers();
+
+    const supplier = res.data as unknown as SupplierDTO;
+    onAdd?.(supplier.id);
   };
 
   return (
@@ -246,7 +254,7 @@ export default function SupplierForm({ getSuppliers }: SupplierFormProps) {
       </div>
       <br />
       <Button variant="outlined" size="small" onClick={handleAddNewSupplier}>
-        Add
+        Add Supplier
       </Button>
     </div>
   );

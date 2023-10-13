@@ -8,6 +8,8 @@ interface CustomAutoCompleteProps {
   label: string;
   onChange?: (value: any) => void;
   onAdd?: (value: any) => void;
+  helperText?: string;
+  error?: boolean;
   sx?: Record<string, any>;
 }
 
@@ -23,6 +25,8 @@ export default function CustomAutoComplete({
   options,
   onChange,
   onAdd,
+  helperText,
+  error = false,
   sx,
 }: CustomAutoCompleteProps) {
   const [value, setValue] = useState<OptionType | null>(null);
@@ -86,7 +90,13 @@ export default function CustomAutoComplete({
       sx={{ width: 300, ...sx }}
       freeSolo
       renderInput={(params) => (
-        <TextField {...params} size="small" label={label} />
+        <TextField
+          {...params}
+          size="small"
+          label={label}
+          helperText={helperText}
+          error={error}
+        />
       )}
     />
   );

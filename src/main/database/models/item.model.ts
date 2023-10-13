@@ -10,8 +10,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Length, IsNegative, IsIn } from 'class-validator';
-import { ValidationMessage } from './validator/message';
+import { Length, IsPositive, IsNotEmpty, IsIn } from 'class-validator';
+import { ValidationMessage } from './validator/message/message';
 import measurements from 'Main/data/defaults/unit-of-measurements';
 import itemStatuses from 'Main/data/defaults/statuses/item';
 import { System } from './system.model';
@@ -19,16 +19,20 @@ import { Image } from './image.model';
 import { Supplier } from './supplier.model';
 import { Brand } from './brand.model';
 import { Category } from './category.model';
+import { IsBarcode } from './validator/IsBarcode';
 
 @Entity('items')
 export class Item {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column()
   system_id: number;
 
   @Column()
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty,
+  })
   supplier_id: string;
 
   @Column({
@@ -37,13 +41,22 @@ export class Item {
   image_id: number;
 
   @Column()
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty,
+  })
   category_id: number;
 
   @Column()
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty,
+  })
   brand_id: number;
 
   @Column({
     unique: true,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty,
   })
   sku: string;
 
@@ -60,20 +73,20 @@ export class Item {
   description: string;
 
   @Column()
-  @IsNegative({
-    message: ValidationMessage.negative,
+  @IsPositive({
+    message: ValidationMessage.positive,
   })
   cost_price: number;
 
   @Column()
-  @IsNegative({
-    message: ValidationMessage.negative,
+  @IsPositive({
+    message: ValidationMessage.positive,
   })
   selling_price: number;
 
   @Column()
-  @IsNegative({
-    message: ValidationMessage.negative,
+  @IsPositive({
+    message: ValidationMessage.positive,
   })
   tax_rate: number;
 
@@ -84,10 +97,15 @@ export class Item {
   unit_of_measurement: string;
 
   @Column()
+  @IsBarcode({
+    message: ValidationMessage.invalid,
+  })
   barcode: string;
 
   @Column()
-  @IsNegative()
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty,
+  })
   stock_quantity: number;
 
   @Column()

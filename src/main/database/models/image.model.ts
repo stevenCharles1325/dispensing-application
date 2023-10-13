@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MinLength } from 'class-validator';
-import { ValidationMessage } from './validator/message';
+import { ValidationMessage } from './validator/message/message';
 
 @Entity('images')
 export class Image {
