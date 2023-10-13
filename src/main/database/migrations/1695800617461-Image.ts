@@ -1,4 +1,9 @@
-import { MigrationInterface, Table, QueryRunner } from 'typeorm';
+import {
+  MigrationInterface,
+  Table,
+  QueryRunner,
+  TableForeignKey,
+} from 'typeorm';
 
 export class Image1696656747120 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -12,6 +17,11 @@ export class Image1696656747120 implements MigrationInterface {
             generationStrategy: 'increment',
             isPrimary: true,
             isGenerated: true,
+          },
+          {
+            name: 'uploader_id',
+            type: 'int',
+            foreignKeyConstraintName: 'uploader',
           },
           {
             name: 'url',
@@ -44,9 +54,21 @@ export class Image1696656747120 implements MigrationInterface {
       }),
       true
     );
+
+    await queryRunner.createForeignKey(
+      'images',
+      new TableForeignKey({
+        name: 'uploader',
+        columnNames: ['uploader_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'user',
+        onDelete: 'CASCADE',
+      })
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropForeignKey('images', 'uploader');
     await queryRunner.dropTable('images');
   }
 }

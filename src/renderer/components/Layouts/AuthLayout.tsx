@@ -6,7 +6,8 @@ import AlertProvider from 'UI/providers/AlertProvider';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import IAuth from 'App/interfaces/auth/auth.interface';
 import useUser from 'UI/stores/user';
-import SearchProvider, { SearchContext } from 'UI/providers/SearchProvider';
+import SearchProvider from 'UI/providers/SearchProvider';
+import AppDriveProvider from 'UI/providers/AppDriveProvider';
 
 export default function AuthLayout() {
   const outlet = useOutlet();
@@ -33,7 +34,9 @@ export default function AuthLayout() {
         children={() => (
           <AuthProvider userData={userData} setUserData={setUserData}>
             <SearchProvider>
-              <AlertProvider>{outlet}</AlertProvider>
+              <AppDriveProvider>
+                <AlertProvider>{outlet}</AlertProvider>
+              </AppDriveProvider>
             </SearchProvider>
           </AuthProvider>
         )}

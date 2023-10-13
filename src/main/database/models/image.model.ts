@@ -1,5 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import {
+  OneToOne,
+  JoinColumn,
   Column,
   Entity,
   CreateDateColumn,
@@ -8,11 +10,15 @@ import {
 } from 'typeorm';
 import { MinLength } from 'class-validator';
 import { ValidationMessage } from './validator/message/message';
+import { User } from './user.model';
 
 @Entity('images')
 export class Image {
   @PrimaryGeneratedColumn('increment')
   id: number;
+
+  @Column()
+  uploader_id: number;
 
   @Column({ unique: true })
   url: string;
@@ -30,4 +36,8 @@ export class Image {
   @Column({ nullable: true })
   @DeleteDateColumn()
   deleted_at: Date;
+
+  @OneToOne(() => User, { eager: true })
+  @JoinColumn({ name: 'uploader_id', referencedColumnName: 'id' })
+  uploader: User;
 }

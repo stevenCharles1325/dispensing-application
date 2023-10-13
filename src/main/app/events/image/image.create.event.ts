@@ -30,9 +30,10 @@ export default class ImageCreateEvent implements IEvent {
 
         const imageObj = eventData.payload[0] as Omit<
           ImageDTO,
-          'id' | 'created_at' | 'deleted_at'
+          'id' | 'created_at' | 'deleted_at' | 'uploader'
         >;
 
+        console.log(imageObj);
         const objectStorageService = Provider.ioc<IObjectStorageService>(
           'ObjectStorageProvider'
         );
@@ -42,26 +43,28 @@ export default class ImageCreateEvent implements IEvent {
           uploader_id: eventData.user.id,
         };
 
-        objectStorageService.fPutObject({
-          bucketName: BUCKET_NAME,
-          objectName: imageObj.name,
-          filePath: imageObj.url,
-          metaData,
-          callback: (err, objInfo) => {
-            if (err) return console.log(err);
+        // objectStorageService.fPutObject({
+        //   bucketName: BUCKET_NAME,
+        //   objectName: imageObj.name,
+        //   filePath: imageObj.url,
+        //   metaData,
+        //   callback: (err, objInfo) => {
+        //     if (err) return console.log(err);
 
-            console.log(objInfo);
-          },
-        });
+        //     console.log(objInfo);
+        //   },
+        // });
 
-        const imagePath = objectStorageService.getFilePath({
-          bucketName: BUCKET_NAME,
-          fileName: imageObj.name,
-        });
+        // const imagePath = objectStorageService.getFilePath({
+        //   bucketName: BUCKET_NAME,
+        //   fileName: imageObj.name,
+        // });
 
+        console.log(eventData.user.id);
         const image = ImageRepository.create({
           ...imageObj,
-          url: imagePath,
+          uploader_id: eventData.user.id as number,
+          url: '/',
         });
         const errors = await validator(image);
 
@@ -89,8 +92,8 @@ export default class ImageCreateEvent implements IEvent {
         status: 'ERROR',
       } as unknown as IResponse<string[]>;
     } catch (err) {
+      console.log('ERROR HANDLER OUTPUT: ', err);
       const error = handleError(err);
-      console.log('ERROR HANDLER OUTPUT: ', error);
 
       return {
         errors: [error],

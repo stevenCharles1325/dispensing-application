@@ -30,6 +30,7 @@ import convertToBase64 from 'UI/helpers/convertToBase64';
 import bytesToMegabytes from 'UI/helpers/bytesToMegabytes';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
+import useAppDrive from 'UI/hooks/useAppDrive';
 
 interface InventoryFormProps {
   images: ImageDTO[];
@@ -86,6 +87,7 @@ export default function InventoryForm({
   onClose,
 }: InventoryFormProps) {
   const { displayAlert } = useAlert();
+  const drive = useAppDrive();
 
   const initialForm = {
     system_id: null, // Sample System-ID
