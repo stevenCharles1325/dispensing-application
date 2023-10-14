@@ -6,7 +6,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
 import {
   TextField,
@@ -28,19 +28,18 @@ import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import SupplierForm from './SupplierForm';
 
 import LandscapeIcon from '@mui/icons-material/Landscape';
-import convertToBase64 from 'UI/helpers/convertToBase64';
-import bytesToMegabytes from 'UI/helpers/bytesToMegabytes';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import useAppDrive from 'UI/hooks/useAppDrive';
+import useFieldRequired from 'UI/hooks/useFieldRequired';
 
 interface InventoryFormProps {
-  images: ImageDTO[];
+  action: 'create' | 'update' | null;
+  selectedItem: ItemDTO | null;
   brands: BrandDTO[];
   categories: CategoryDTO[];
   suppliers: SupplierDTO[];
   getItems: () => Promise<void>;
-  getImages: () => Promise<void>;
   getBrands: () => Promise<void>;
   getCategories: () => Promise<void>;
   getSuppliers: () => Promise<void>;
@@ -77,11 +76,11 @@ const NumericFormatCustom = React.forwardRef<NumericFormatProps, CustomProps>(
 );
 
 export default function InventoryForm({
-  images,
+  action,
+  selectedItem,
   brands,
   categories,
   suppliers,
-  getImages,
   getItems,
   getBrands,
   getCategories,
@@ -90,8 +89,6 @@ export default function InventoryForm({
 }: InventoryFormProps) {
   const { displayAlert } = useAlert();
   const drive = useAppDrive();
-
-  const selectedImage = drive.selected?.[0];
 
   const initialForm = {
     system_id: null, // Sample System-ID
@@ -202,13 +199,10 @@ export default function InventoryForm({
   const [errors, setErrors] = useState<Record<string, any>>({});
   const [imageFile, setImageFile] = useState<ImageDTO | null>();
   const [form, dispatch] = useReducer(formReducer, initialForm);
+  const [isReady] = useFieldRequired(form, ['image_id', 'system_id']);
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
   >('add-new');
-
-  useEffect(() => {
-    if (drive.selected?.length) setImageFile(drive.selected?.[0]);
-  }, [drive.selected]);
 
   const handleSupplierToggle = (value: typeof supplierToggle) => {
     dispatch({
@@ -284,8 +278,89 @@ export default function InventoryForm({
       return setErrors(errors);
     }
 
+    displayAlert?.('Succesfully created an item', 'success');
     await getItems();
+    onClose();
   };
+
+  const handleUpdateItem = useCallback(async () => {
+    if (!selectedItem) return;
+
+    console.log(form);
+    const res = await window.item.updateItem(
+      selectedItem.id,
+      form as unknown as ItemDTO
+    );
+
+    if (res.status === 'ERROR') {
+      if (typeof res.errors?.[0] === 'string') {
+        return displayAlert?.(
+          (res.errors?.[0] as string) ?? 'Please try again',
+          'error'
+        );
+      }
+
+      const errors: Record<string, any> = {};
+      const resErrors = res.errors as unknown as IPOSValidationError[];
+      for (const error of resErrors) {
+        errors[error.field] = error.message;
+      }
+
+      return setErrors(errors);
+    }
+
+    displayAlert?.('Succesfully updated an item', 'success');
+    await getItems();
+    onClose();
+  }, [displayAlert, form, getItems, onClose, selectedItem]);
+
+  useEffect(() => {
+    if (drive.selected?.length) {
+      setImageFile(drive.selected?.[0]);
+      dispatch({
+        type: 'image_id',
+        payload: drive.selected[0].id,
+      });
+    }
+  }, [drive.selected]);
+
+  useEffect(() => {
+    if (action === 'update' && selectedItem) {
+      console.log('SELECTED ITEM: ', selectedItem);
+      const item = selectedItem as Record<string, any>;
+      for (const [key, value] of Object.entries(item)) {
+        dispatch({
+          type: key as any,
+          payload: value,
+        });
+      }
+
+      if (item.image_id) {
+        window.image
+          .getImages({ id: [item.image_id] })
+          .then((res) => {
+            if (res.status === 'ERROR') {
+              return displayAlert?.(
+                (res.errors?.[0] as unknown as string) ?? 'Please try again',
+                'error'
+              );
+            }
+
+            const images = res.data?.[0] as ImageDTO[];
+
+            if (images && images.length) {
+              setImageFile(images?.[0] as unknown as ImageDTO);
+            }
+          })
+          .catch((err) =>
+            displayAlert?.(err?.message ?? 'Please try again', 'error')
+          );
+      }
+
+      setSupplierToggle('add-existing');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action, selectedItem]);
 
   return (
     <div className="w-full h-full flex p-5">
@@ -338,6 +413,7 @@ export default function InventoryForm({
               error={Boolean(errors.barcode)}
             />
             <CustomAutoComplete
+              value={brands.find(({ id }) => id === form.brand_id)?.name}
               options={brands}
               onAdd={handleAddNewBrand}
               onChange={({ name }) => {
@@ -355,6 +431,7 @@ export default function InventoryForm({
             />
             <CustomAutoComplete
               options={categories}
+              value={categories.find(({ id }) => id === form.category_id)?.name}
               onAdd={handleAddNewCategory}
               onChange={({ name }) => {
                 dispatch({
@@ -664,8 +741,12 @@ export default function InventoryForm({
           <Button variant="outlined" onClick={onClose}>
             Close
           </Button>
-          <Button variant="contained" onClick={handleCreateItem}>
-            Create
+          <Button
+            disabled={!isReady}
+            variant="contained"
+            onClick={action === 'create' ? handleCreateItem : handleUpdateItem}
+          >
+            {action}
           </Button>
         </div>
       </div>

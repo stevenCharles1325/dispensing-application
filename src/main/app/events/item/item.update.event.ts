@@ -41,6 +41,7 @@ export default class ItemDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
+        console.log(updatedItem);
         const data = await ItemRepository.save(updatedItem);
         return {
           data,

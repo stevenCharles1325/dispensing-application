@@ -124,19 +124,19 @@ export class Item {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @OneToOne(() => Image, { eager: true })
+  @OneToOne(() => Image, { eager: true, cascade: true })
   @JoinColumn({ name: 'image_id', referencedColumnName: 'id' })
   image: Image;
 
-  @OneToOne(() => Brand, { eager: true })
+  @OneToOne(() => Brand, { eager: true, cascade: true })
   @JoinColumn({ name: 'brand_id', referencedColumnName: 'id' })
   brand: Brand;
 
-  @OneToOne(() => Category, { eager: true })
+  @OneToOne(() => Category, { eager: true, cascade: true })
   @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
   category: Category;
 
-  @OneToOne(() => Supplier, { eager: true })
+  @OneToOne(() => Supplier, { eager: true, cascade: true })
   @JoinColumn({ name: 'supplier_id', referencedColumnName: 'id' })
   supplier: Image;
 

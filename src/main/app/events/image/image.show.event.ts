@@ -26,11 +26,11 @@ export default class ImageShowEvent implements IEvent {
       if (requesterHasPermission) {
         const payload = eventData.payload[0] ?? 'all';
         const page = eventData.payload[1] || 1; // Page
-        const take = eventData.payload[2] || 15; // Total
+        const take = eventData.payload[2] || 10; // Total
         const skip = (page - 1) * take;
 
         const imageQuery = ImageRepository.createQueryBuilder('image')
-          .leftJoinAndSelect('image.uploader', 'user')
+          .leftJoinAndSelect('image.uploader', 'uploader')
           .take(take)
           .skip(skip);
 
@@ -42,7 +42,7 @@ export default class ImageShowEvent implements IEvent {
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
             if (propertyFind instanceof Array) {
-              imageQuery.where(`${propertyName} IN (:...args)`, {
+              imageQuery.where(`image.${propertyName} IN (:...args)`, {
                 args: propertyFind,
               });
             } else {

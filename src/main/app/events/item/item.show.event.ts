@@ -30,7 +30,7 @@ export default class ItemShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const itemQuery = ItemRepository.createQueryBuilder()
+        const itemQuery = ItemRepository.createQueryBuilder('item')
           .take(take)
           .skip(skip);
 
@@ -42,8 +42,8 @@ export default class ItemShowEvent implements IEvent {
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
             if (propertyFind instanceof Array) {
-              itemQuery.where(`${propertyName} IN (:...args)`, {
-                args: propertyFind,
+              itemQuery.where(`${propertyName} IN (:...${propertyName})`, {
+                propertyName: propertyFind,
               });
             } else {
               return {

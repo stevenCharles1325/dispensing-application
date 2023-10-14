@@ -2,14 +2,17 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable consistent-return */
-import React, { createRef, useCallback, useEffect, useState } from 'react';
+import React, {
+  createRef,
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import ListSubheader from '@mui/material/ListSubheader';
 import IconButton from '@mui/material/IconButton';
-import InfoIcon from '@mui/icons-material/Info';
-import ImageDTO from 'App/data-transfer-objects/image.dto';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   Dialog,
@@ -17,16 +20,18 @@ import {
   Button,
   Tab,
   Tabs,
-  DialogContent,
   useTheme,
 } from '@mui/material';
 
+import CloseIcon from '@mui/icons-material/Close';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import useAlert from 'UI/hooks/useAlert';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import driveTabs from 'UI/data/defaults/tabs/driveTabs';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
+import ImageDTO from 'App/data-transfer-objects/image.dto';
+import Loading from '../Loading';
 
 interface AppDriveProps {
   multiple: boolean;
@@ -59,6 +64,7 @@ export default function AppDrive({
 
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isPending, startTransition] = useTransition();
 
   const selectedImages = images.filter(({ id }) => selectedIds.includes(id));
 
@@ -87,7 +93,12 @@ export default function AppDrive({
     console.log('IMAGES: ', data[0]);
 
     setImagesPage(data?.[1].currentPage);
-    setImages(data?.[0]);
+
+    startTransition(() => {
+      setTimeout(() => {
+        setImages(data?.[0]);
+      }, 1000);
+    });
   }, [displayAlert, imagesPage]);
 
   const handleSaveImage = async (
@@ -117,6 +128,15 @@ export default function AppDrive({
     }
   };
 
+  const handleOnClose = () => {
+    setSelectedIds([]);
+    onClose();
+
+    setTimeout(() => {
+      onSelect([]);
+    }, 1000);
+  };
+
   useEffect(() => {
     getAllImages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -128,7 +148,7 @@ export default function AppDrive({
         open={open && Boolean(driveTabs && driveTabs?.length)}
         fullScreen={fullScreen}
         maxWidth="xl"
-        onClose={onClose}
+        onClose={handleOnClose}
       >
         <div className="h-full w-full p-5">
           <Tabs
@@ -140,44 +160,50 @@ export default function AppDrive({
               <Tab key={label} label={label} {...a11yProps} />
             ))}
           </Tabs>
-          <ImageList sx={{ width: 800, height: 600 }}>
-            {images.map((image) => (
-              <ImageListItem key={image.id}>
-                <img
-                  src={image.url}
-                  alt={image.name}
-                  loading="lazy"
-                  width={248}
-                  className="cursor-pointer"
-                  onClick={() => setPreviewImage(image)}
-                />
-                <ImageListItemBar
-                  title={image.name}
-                  subtitle={`Uploaded By: ${
-                    `${image.uploader?.first_name} ${image.uploader?.last_name}` ??
-                    'Please try again'
-                  }`}
-                  actionIcon={
-                    <IconButton
-                      sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
-                      aria-label={`info about ${image.name}`}
-                      onClick={() => handleSelectImage(image.id)}
-                      disabled={Boolean(
-                        !multiple &&
-                          selectedIds.length >= 1 &&
-                          selectedIds[0] !== image.id
-                      )}
-                    >
-                      {selectedIds.includes(image.id) ? (
-                        <CheckBoxIcon />
-                      ) : (
-                        <CheckBoxOutlineBlankIcon />
-                      )}
-                    </IconButton>
-                  }
-                />
-              </ImageListItem>
-            ))}
+          <ImageList sx={{ width: 800, height: 600 }} cols={2}>
+            {isPending ? (
+              <Loading />
+            ) : (
+              <>
+                {images.map((image) => (
+                  <ImageListItem key={image.id}>
+                    <img
+                      src={image.url}
+                      alt={image.name}
+                      loading="lazy"
+                      width={248}
+                      className="cursor-pointer"
+                      onClick={() => setPreviewImage(image)}
+                    />
+                    <ImageListItemBar
+                      title={image.name}
+                      subtitle={`Uploaded By: ${
+                        `${image.uploader?.first_name} ${image.uploader?.last_name}` ??
+                        'Please try again'
+                      }`}
+                      actionIcon={
+                        <IconButton
+                          sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
+                          aria-label={`info about ${image.name}`}
+                          onClick={() => handleSelectImage(image.id)}
+                          disabled={Boolean(
+                            !multiple &&
+                              selectedIds.length >= 1 &&
+                              selectedIds[0] !== image.id
+                          )}
+                        >
+                          {selectedIds.includes(image.id) ? (
+                            <CheckBoxIcon />
+                          ) : (
+                            <CheckBoxOutlineBlankIcon />
+                          )}
+                        </IconButton>
+                      }
+                    />
+                  </ImageListItem>
+                ))}
+              </>
+            )}
           </ImageList>
         </div>
         <DialogActions>
@@ -192,7 +218,7 @@ export default function AppDrive({
             disabled={!selectedImages.length}
             onClick={() => {
               onSelect(selectedImages);
-              onClose();
+              handleOnClose();
             }}
             color="primary"
           >
@@ -213,6 +239,11 @@ export default function AppDrive({
         maxWidth="md"
         onClose={() => setPreviewImage(null)}
       >
+        <div className="absolute top-0 right-0">
+          <IconButton onClick={() => setPreviewImage(null)}>
+            <CloseIcon color="primary" />
+          </IconButton>
+        </div>
         {previewImage && (
           <img
             src={previewImage.url}

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/jsx-props-no-spreading */
 import { useEffect, useState } from 'react';
@@ -6,6 +7,7 @@ import { Autocomplete, TextField, createFilterOptions } from '@mui/material';
 interface CustomAutoCompleteProps {
   options: any[];
   label: string;
+  value?: any;
   onChange?: (value: any) => void;
   onAdd?: (value: any) => void;
   helperText?: string;
@@ -22,6 +24,7 @@ const filter = createFilterOptions<OptionType>();
 
 export default function CustomAutoComplete({
   label,
+  value: providedValue = null,
   options,
   onChange,
   onAdd,
@@ -29,7 +32,13 @@ export default function CustomAutoComplete({
   error = false,
   sx,
 }: CustomAutoCompleteProps) {
-  const [value, setValue] = useState<OptionType | null>(null);
+  const [value, setValue] = useState<OptionType | null>(providedValue);
+
+  useEffect(() => {
+    setValue({
+      name: providedValue ?? '',
+    });
+  }, [providedValue]);
 
   return (
     <Autocomplete

@@ -22,13 +22,13 @@ import ItemDTO from 'App/data-transfer-objects/item.dto';
 import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
-import ImageDTO from 'App/data-transfer-objects/image.dto';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 
 const columns: Array<GridColDef> = [
   {
     field: 'id',
     headerName: 'ID',
+    width: 270,
   },
   {
     field: 'sku',
@@ -63,7 +63,7 @@ const columns: Array<GridColDef> = [
   {
     field: 'unit_of_measurement',
     headerName: 'Unit of Measurement',
-    width: 270,
+    width: 120,
   },
   {
     field: 'status',
@@ -85,7 +85,6 @@ export default function Inventory() {
   const [items, setItems] = useState<Array<ItemDTO>>([]);
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
-  const [images, setImages] = useState<Array<ImageDTO>>([]);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
@@ -94,7 +93,7 @@ export default function Inventory() {
   );
   const { displayAlert } = useAlert();
 
-  const selectedItem = items.find(({ id }) => id === selectedIds?.[0]);
+  const selectedItem = items.find(({ id }) => id === selectedIds?.[0]) ?? null;
 
   const getItems = async () => {
     const res = await window.item.getItems();
@@ -138,20 +137,9 @@ export default function Inventory() {
     setSuppliers(res.data?.[0] as SupplierDTO[]);
   };
 
-  const getImages = async () => {
-    const res = await window.image.getImages();
-
-    if (res.status === 'ERROR') {
-      return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
-    }
-
-    setImages(res.data?.[0] as ImageDTO[]);
-  };
-
   useEffect(() => {
     getItems();
     getBrands();
-    getImages();
     getCategories();
     getSuppliers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -258,12 +246,12 @@ export default function Inventory() {
           maxWidth="xl"
         >
           <InventoryForm
-            images={images}
+            action={modalAction}
+            selectedItem={selectedItem}
             brands={brands}
             categories={categories}
             suppliers={suppliers}
             getItems={getItems}
-            getImages={getImages}
             getBrands={getBrands}
             getCategories={getCategories}
             getSuppliers={getSuppliers}
