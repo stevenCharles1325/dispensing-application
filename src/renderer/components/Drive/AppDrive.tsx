@@ -1,3 +1,7 @@
+/* eslint-disable promise/catch-or-return */
+/* eslint-disable camelcase */
+/* eslint-disable react/jsx-no-useless-fragment */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/jsx-props-no-spreading */
@@ -9,9 +13,6 @@ import React, {
   useState,
   useTransition,
 } from 'react';
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
-import ImageListItemBar from '@mui/material/ImageListItemBar';
 import IconButton from '@mui/material/IconButton';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import {
@@ -21,17 +22,26 @@ import {
   Tab,
   Tabs,
   useTheme,
+  ListItemButton,
+  ListItemText,
+  styled,
+  ListItemIcon,
 } from '@mui/material';
 
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import CloseIcon from '@mui/icons-material/Close';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
+
 import useAlert from 'UI/hooks/useAlert';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import driveTabs from 'UI/data/defaults/tabs/driveTabs';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import Loading from '../Loading';
+import bucketNames from 'src/globals/object-storage/bucket-names';
+import { CloudCircleOutlined, CloudUpload, Folder } from '@mui/icons-material';
+import AppImageList from './ImagesList';
+import useSWR from 'swr';
+import { BareFetcher, Fetcher, PublicConfiguration } from 'swr/_internal';
 
 interface AppDriveProps {
   multiple: boolean;
@@ -47,6 +57,45 @@ function a11yProps(index: number) {
   };
 }
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
+const getAllItems = async (bucket_name: any, page: number) => {
+  const res = await window.image.getImages(
+    { bucket_name: [bucket_name] },
+    page
+  );
+
+  if (res.status === 'ERROR') {
+    const errorMessage =
+      typeof res.errors?.[0] === 'string'
+        ? res.errors?.[0]
+        : (res.errors?.[0] as unknown as IPOSError).message;
+
+    console.log('ERROR: ', res.errors);
+    throw new Error(errorMessage ?? 'Error');
+  }
+
+  const data = res.data as unknown as IPagination<ImageDTO>;
+
+  return data;
+};
+
+const fetcher: Fetcher<
+  ImageDTO,
+  [(typeof bucketNames)[number] | null, number]
+> = (bucket_name: (typeof bucketNames)[number] | null, page: number = 1) =>
+  getAllItems(bucket_name, page).then((res) => res);
+
 export default function AppDrive({
   multiple = true,
   open,
@@ -56,16 +105,22 @@ export default function AppDrive({
   const { displayAlert } = useAlert();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const inputEl = createRef<HTMLInputElement>();
 
-  const [images, setImages] = useState<ImageDTO[]>([]);
+  const [bucketName, setBucketName] = useState<
+    (typeof bucketNames)[number] | null
+  >(null);
   const [previewImage, setPreviewImage] = useState<ImageDTO | null>();
-  const [imagesPage, setImagesPage] = useState<number>(0);
+  const [imagesPage, setImagesPage] = useState<number>(1);
+  const [isNextPageAviable, setIsNextPageAviable] = useState<boolean>(true);
 
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isPending, startTransition] = useTransition();
 
+  const { data, error, isLoading } = useSWR([bucketName, imagesPage], fetcher);
+  const { images, pagination } = data;
+
+  console.log(images, error, isLoading);
   const selectedImages = images.filter(({ id }) => selectedIds.includes(id));
 
   const handleSelectImage = (id: number) => {
@@ -76,42 +131,12 @@ export default function AppDrive({
     }
   };
 
-  const getAllImages = useCallback(async () => {
-    const res = await window.image.getImages('all', imagesPage);
-
-    if (res.status === 'ERROR') {
-      const errorMessage =
-        typeof res.errors?.[0] === 'string'
-          ? res.errors?.[0]
-          : (res.errors?.[0] as unknown as IPOSError).message;
-
-      console.log('ERROR: ', res.errors);
-      return displayAlert?.(errorMessage ?? 'Please try again', 'error');
-    }
-
-    const data = res.data as unknown as IPagination<ImageDTO>;
-    console.log('IMAGES: ', data[0]);
-
-    setImagesPage(data?.[1].currentPage);
-
-    startTransition(() => {
-      setTimeout(() => {
-        setImages(data?.[0]);
-      }, 1000);
-    });
-  }, [displayAlert, imagesPage]);
-
-  const handleSaveImage = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const newImage = event.target.files?.[0];
-
-    if (newImage) {
-      const res = await window.image.createImage({
-        name: newImage.name,
-        url: newImage.path,
-        type: newImage.type,
-      });
+  const getAllImages = useCallback(
+    async (providedBucketName?: string, page?: number) => {
+      const res = await window.image.getImages(
+        { bucket_name: [providedBucketName ?? bucketName] },
+        page ?? imagesPage
+      );
 
       if (res.status === 'ERROR') {
         const errorMessage =
@@ -123,24 +148,85 @@ export default function AppDrive({
         return displayAlert?.(errorMessage ?? 'Please try again', 'error');
       }
 
-      await getAllImages();
-      return displayAlert?.('Successfully uploaded image', 'success');
-    }
-  };
+      const data = res.data as unknown as IPagination<ImageDTO>;
+      const imageList = data![0] as ImageDTO[];
+
+      if (data?.[1].nextPage) {
+        setImagesPage(data?.[1].currentPage);
+      } else {
+        setIsNextPageAviable(false);
+      }
+
+      startTransition(() => {
+        setTimeout(() => {
+          setImages((imgs) => [...imgs, ...imageList]);
+        }, 1000);
+      });
+    },
+    [bucketName, displayAlert, imagesPage]
+  );
+
+  const handleSaveImage = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newImage = event.target.files?.[0];
+
+      if (newImage && bucketName && displayAlert) {
+        const res = await window.image.createImage(bucketName, {
+          name: newImage.name,
+          url: newImage.path,
+          type: newImage.type,
+        });
+
+        if (res.status === 'ERROR') {
+          const errorMessage =
+            typeof res.errors?.[0] === 'string'
+              ? res.errors?.[0]
+              : (res.errors?.[0] as unknown as IPOSError).message;
+
+          console.log('ERROR: ', res.errors);
+          return displayAlert?.(errorMessage ?? 'Please try again', 'error');
+        }
+
+        await getAllImages();
+
+        setTimeout(() => {
+          setCurrentTab(0);
+        }, 500);
+        return displayAlert?.('Successfully uploaded image', 'success');
+      }
+    },
+    [bucketName, displayAlert, getAllImages]
+  );
 
   const handleOnClose = () => {
+    setImages([]);
+    setImagesPage(1);
+    setIsNextPageAviable(true);
     setSelectedIds([]);
+    setBucketName(null);
     onClose();
 
+    console.log('HEREE TAEE');
     setTimeout(() => {
       onSelect([]);
     }, 1000);
   };
 
-  useEffect(() => {
-    getAllImages();
+  const handleScroll = useCallback(
+    async (event: any) => {
+      const bottom =
+        event.target.scrollHeight - event.target.scrollTop ===
+        event.target.clientHeight;
+
+      console.log(isNextPageAviable);
+      if (bottom && isNextPageAviable && bucketName) {
+        await getAllImages(bucketName, imagesPage + 1);
+        setImagesPage((page) => page + 1);
+      }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    [imagesPage, bucketName, isNextPageAviable]
+  );
 
   return (
     <>
@@ -153,67 +239,87 @@ export default function AppDrive({
         <div className="h-full w-full p-5">
           <Tabs
             value={currentTab}
-            onChange={(_, value) => setCurrentTab(value)}
+            onChange={(_, value) => {
+              setCurrentTab(value);
+              setImages([]);
+              getAllImages();
+            }}
             aria-label="Drive tabs"
           >
             {driveTabs.map((label) => (
-              <Tab key={label} label={label} {...a11yProps} />
+              <Tab
+                key={label}
+                disabled={!bucketName}
+                label={label}
+                {...a11yProps}
+              />
             ))}
           </Tabs>
-          <ImageList sx={{ width: 800, height: 600 }} cols={2}>
-            {isPending ? (
-              <Loading />
-            ) : (
+          {bucketName ? (
+            <div className="my-3">
+              <Button
+                startIcon={<ChevronLeftIcon />}
+                onClick={() => {
+                  setImagesPage(1);
+                  setBucketName(null);
+                }}
+              >
+                Back
+              </Button>
+            </div>
+          ) : null}
+          {bucketName ? (
+            currentTab === 0 ? (
               <>
-                {images.map((image) => (
-                  <ImageListItem key={image.id}>
-                    <img
-                      src={image.url}
-                      alt={image.name}
-                      loading="lazy"
-                      width={248}
-                      className="cursor-pointer"
-                      onClick={() => setPreviewImage(image)}
-                    />
-                    <ImageListItemBar
-                      title={image.name}
-                      subtitle={`Uploaded By: ${
-                        `${image.uploader?.first_name} ${image.uploader?.last_name}` ??
-                        'Please try again'
-                      }`}
-                      actionIcon={
-                        <IconButton
-                          sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
-                          aria-label={`info about ${image.name}`}
-                          onClick={() => handleSelectImage(image.id)}
-                          disabled={Boolean(
-                            !multiple &&
-                              selectedIds.length >= 1 &&
-                              selectedIds[0] !== image.id
-                          )}
-                        >
-                          {selectedIds.includes(image.id) ? (
-                            <CheckBoxIcon />
-                          ) : (
-                            <CheckBoxOutlineBlankIcon />
-                          )}
-                        </IconButton>
-                      }
-                    />
-                  </ImageListItem>
-                ))}
+                <AppImageList
+                  loading={isPending}
+                  images={images}
+                  multiple={multiple}
+                  selectedIds={selectedIds}
+                  onScroll={handleScroll}
+                  onSelectImage={handleSelectImage}
+                  onPreviewImage={(image) => setPreviewImage(image)}
+                />
               </>
-            )}
-          </ImageList>
+            ) : (
+              <div className="w-[800px] h-[600px] p-5 flex justify-center items-center">
+                <Button
+                  component="label"
+                  variant="outlined"
+                  startIcon={<CloudUpload />}
+                >
+                  Upload file
+                  <VisuallyHiddenInput
+                    type="file"
+                    onChange={handleSaveImage}
+                    accept="image/png, image/gif, image/jpeg"
+                  />
+                </Button>
+              </div>
+            )
+          ) : (
+            <div className="w-[800px] h-[600px] p-5">
+              <p>Please select a folder</p>
+              <br />
+              {bucketNames?.map((name) => (
+                <ListItemButton
+                  key={name}
+                  onClick={async () => {
+                    await getAllImages(name);
+                    setBucketName(() => name);
+                    setImages([]);
+                  }}
+                >
+                  <ListItemIcon>
+                    <Folder />
+                  </ListItemIcon>
+                  <ListItemText primary={name} />
+                </ListItemButton>
+              ))}
+            </div>
+          )}
         </div>
         <DialogActions>
-          <input
-            ref={inputEl}
-            className="hidden"
-            accept="image/*, png, jpeg, jpg"
-            type="file"
-            onChange={handleSaveImage}
-          />
           <Button
             disabled={!selectedImages.length}
             onClick={() => {
@@ -224,10 +330,7 @@ export default function AppDrive({
           >
             Select
           </Button>
-          <Button onClick={() => inputEl.current?.click()} color="primary">
-            Upload New Image
-          </Button>
-          <Button onClick={onClose} color="error">
+          <Button onClick={handleOnClose} color="error">
             Close
           </Button>
         </DialogActions>

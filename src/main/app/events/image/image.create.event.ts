@@ -26,9 +26,8 @@ export default class ImageCreateEvent implements IEvent {
         eventData.user.hasPermission?.('create-image');
 
       if (requesterHasPermission) {
-        const BUCKET_NAME = 'inventory';
-
-        const imageObj = eventData.payload[0] as Omit<
+        const bucketName = eventData.payload[0] as string;
+        const imageObj = eventData.payload[1] as Omit<
           ImageDTO,
           'id' | 'created_at' | 'deleted_at' | 'uploader'
         >;
@@ -43,7 +42,7 @@ export default class ImageCreateEvent implements IEvent {
         };
 
         objectStorageService.fPutObject({
-          bucketName: BUCKET_NAME,
+          bucketName,
           objectName: imageObj.name,
           filePath: imageObj.url,
           metaData,
@@ -55,13 +54,14 @@ export default class ImageCreateEvent implements IEvent {
         });
 
         const imagePath = objectStorageService.getFilePath({
-          bucketName: BUCKET_NAME,
+          bucketName,
           fileName: imageObj.name,
         });
 
         const image = ImageRepository.create({
           ...imageObj,
           uploader_id: eventData.user.id as number,
+          bucket_name: bucketName,
           url: imagePath,
         });
         const errors = await validator(image);

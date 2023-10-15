@@ -59,7 +59,7 @@ export default function CustomAutoComplete({
             name: newValue.inputValue,
           });
         } else {
-          onChange?.(newValue);
+          if (newValue) onChange?.(newValue);
           setValue(newValue);
         }
       }}

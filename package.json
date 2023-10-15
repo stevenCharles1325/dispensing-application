@@ -133,6 +133,7 @@
     "require-all": "^3.0.0",
     "simple-peer-wrapper": "^0.0.5",
     "sort-by": "^1.2.0",
+    "swr": "^2.2.4",
     "zustand": "^4.4.1"
   },
   "devDependencies": {

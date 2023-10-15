@@ -6,7 +6,11 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
+import BrandRepository from 'App/repositories/brand.repository';
+import CategoryRepository from 'App/repositories/category.repository';
+import ImageRepository from 'App/repositories/image.repository';
 import ItemRepository from 'App/repositories/item.repository';
+import SupplierRepository from 'App/repositories/supplier.repository';
 import { Item } from 'Main/database/models/item.model';
 
 export default class ItemDeleteEvent implements IEvent {
@@ -30,6 +34,7 @@ export default class ItemDeleteEvent implements IEvent {
         const item = await ItemRepository.findOneByOrFail({
           id,
         });
+
         const updatedItem = ItemRepository.merge(item, itemUpdate);
         const errors = await validator(updatedItem);
 
@@ -41,7 +46,19 @@ export default class ItemDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        console.log(updatedItem);
+        updatedItem.image = await ImageRepository.findOneByOrFail({
+          id: itemUpdate.image_id,
+        });
+        updatedItem.brand = await BrandRepository.findOneByOrFail({
+          id: itemUpdate.brand_id,
+        });
+        updatedItem.category = await CategoryRepository.findOneByOrFail({
+          id: itemUpdate.category_id,
+        });
+        updatedItem.supplier = await SupplierRepository.findOneByOrFail({
+          id: itemUpdate.supplier_id,
+        });
+
         const data = await ItemRepository.save(updatedItem);
         return {
           data,

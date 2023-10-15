@@ -24,6 +24,11 @@ export class Image1696656747120 implements MigrationInterface {
             foreignKeyConstraintName: 'uploader',
           },
           {
+            name: 'bucket_name',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
             name: 'url',
             type: 'varchar',
             isNullable: false,

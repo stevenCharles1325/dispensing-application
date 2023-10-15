@@ -13,6 +13,7 @@ import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
+import bucketNames from 'src/globals/object-storage/bucket-names';
 
 export type Channels = 'ipc-pos';
 
@@ -190,18 +191,19 @@ const imageHandler = {
   getImages: async (
     payload: Record<string, any[]> | string = 'all',
     page: number = 1,
-    total: number = 15
+    total: number = 10
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<ImageDTO>>> =>
     ipcRenderer.invoke('image:show', payload, page, total),
 
   createImage: async (
+    bucketName: (typeof bucketNames)[number],
     payload: Omit<
       ImageDTO,
       'id' | 'uploader' | 'uploader_id' | 'created_at' | 'deleted_at'
     >
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | ImageDTO>
-  > => ipcRenderer.invoke('image:create', payload),
+  > => ipcRenderer.invoke('image:create', bucketName, payload),
 
   updateImage: async (
     id: number,

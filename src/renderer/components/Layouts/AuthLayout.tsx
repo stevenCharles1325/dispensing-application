@@ -34,9 +34,9 @@ export default function AuthLayout() {
         children={() => (
           <AuthProvider userData={userData} setUserData={setUserData}>
             <SearchProvider>
-              <AppDriveProvider>
-                <AlertProvider>{outlet}</AlertProvider>
-              </AppDriveProvider>
+              <AlertProvider>
+                <AppDriveProvider>{outlet}</AppDriveProvider>
+              </AlertProvider>
             </SearchProvider>
           </AuthProvider>
         )}

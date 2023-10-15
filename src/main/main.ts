@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable promise/no-nesting */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
@@ -29,6 +30,7 @@ import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
 import policies from './data/defaults/object-storage/policies';
+import bucketNames from 'src/globals/object-storage/bucket-names';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -197,29 +199,18 @@ app
 
         // Creating all buckets after 5 seconds as early service call will throw connection error.
         setTimeout(() => {
-          // All inventory related objects
-          objectStorageService.makeBucket({
-            bucketName: 'inventory',
-            callback: (err) => {
-              if (err) console.log('[ERROR CREATING INVENTORY BUCKET]: ', err);
-            },
-          });
-
-          // All user related objects
-          objectStorageService.makeBucket({
-            bucketName: 'users',
-            callback: (err) => {
-              if (err) console.log('[ERROR CREATING USERS BUCKET]: ', err);
-            },
-          });
-
-          objectStorageService.setBucketPolicy({
-            bucketName: 'inventory',
-            bucketPolicy: JSON.stringify(policies),
-            callback: (err: any) => {
-              if (err) console.log('[ERROR SETTING INVENTORY POLICY]: ', err);
-            },
-          });
+          for (const bucketName of bucketNames) {
+            objectStorageService.makeBucket({
+              bucketName,
+              callback: (err) => {
+                if (err)
+                  console.log(
+                    `[ERROR CREATING ${bucketName.toUpperCase()} BUCKET]: `,
+                    err
+                  );
+              },
+            });
+          }
         }, 5000);
 
         createWindow();

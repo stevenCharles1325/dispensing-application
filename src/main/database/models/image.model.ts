@@ -26,6 +26,9 @@ export class Image {
   @Column()
   type: string;
 
+  @Column()
+  bucket_name: string;
+
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })
   name: string;

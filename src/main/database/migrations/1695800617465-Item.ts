@@ -189,6 +189,7 @@ export class Item1695800617464 implements MigrationInterface {
         referencedColumnNames: ['id'],
         referencedTableName: 'images',
         onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
       })
     );
 
