@@ -8,6 +8,9 @@ import IAuth from 'App/interfaces/auth/auth.interface';
 import useUser from 'UI/stores/user';
 import SearchProvider from 'UI/providers/SearchProvider';
 import AppDriveProvider from 'UI/providers/AppDriveProvider';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 export default function AuthLayout() {
   const outlet = useOutlet();
@@ -32,13 +35,15 @@ export default function AuthLayout() {
         errorElement={<Navigate to="/sign-in" />}
         // eslint-disable-next-line react/no-children-prop
         children={() => (
-          <AuthProvider userData={userData} setUserData={setUserData}>
-            <SearchProvider>
-              <AlertProvider>
-                <AppDriveProvider>{outlet}</AppDriveProvider>
-              </AlertProvider>
-            </SearchProvider>
-          </AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider userData={userData} setUserData={setUserData}>
+              <SearchProvider>
+                <AlertProvider>
+                  <AppDriveProvider>{outlet}</AppDriveProvider>
+                </AlertProvider>
+              </SearchProvider>
+            </AuthProvider>
+          </QueryClientProvider>
         )}
       />
     </Suspense>

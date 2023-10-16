@@ -6,13 +6,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable consistent-return */
-import React, {
-  createRef,
-  useCallback,
-  useEffect,
-  useState,
-  useTransition,
-} from 'react';
+import React, { useCallback, useMemo, useState, useTransition } from 'react';
 import IconButton from '@mui/material/IconButton';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import {
@@ -36,12 +30,11 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import driveTabs from 'UI/data/defaults/tabs/driveTabs';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
-import Loading from '../Loading';
 import bucketNames from 'src/globals/object-storage/bucket-names';
-import { CloudCircleOutlined, CloudUpload, Folder } from '@mui/icons-material';
+import { CloudUpload, Folder } from '@mui/icons-material';
 import AppImageList from './ImagesList';
-import useSWR from 'swr';
-import { BareFetcher, Fetcher, PublicConfiguration } from 'swr/_internal';
+import { useQuery } from '@tanstack/react-query';
+import IResponse from 'App/interfaces/pos/pos.response.interface';
 
 interface AppDriveProps {
   multiple: boolean;
@@ -69,7 +62,10 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-const getAllItems = async (bucket_name: any, page: number) => {
+const getAllImages = async (
+  bucket_name: any,
+  page: number
+): Promise<IResponse<IPagination<ImageDTO>>> => {
   const res = await window.image.getImages(
     { bucket_name: [bucket_name] },
     page
@@ -81,20 +77,11 @@ const getAllItems = async (bucket_name: any, page: number) => {
         ? res.errors?.[0]
         : (res.errors?.[0] as unknown as IPOSError).message;
 
-    console.log('ERROR: ', res.errors);
-    throw new Error(errorMessage ?? 'Error');
+    return Promise.reject(errorMessage);
   }
 
-  const data = res.data as unknown as IPagination<ImageDTO>;
-
-  return data;
+  return Promise.resolve(res as unknown as IResponse<IPagination<ImageDTO>>);
 };
-
-const fetcher: Fetcher<
-  ImageDTO,
-  [(typeof bucketNames)[number] | null, number]
-> = (bucket_name: (typeof bucketNames)[number] | null, page: number = 1) =>
-  getAllItems(bucket_name, page).then((res) => res);
 
 export default function AppDrive({
   multiple = true,
@@ -111,16 +98,41 @@ export default function AppDrive({
   >(null);
   const [previewImage, setPreviewImage] = useState<ImageDTO | null>();
   const [imagesPage, setImagesPage] = useState<number>(1);
-  const [isNextPageAviable, setIsNextPageAviable] = useState<boolean>(true);
 
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [isPending, startTransition] = useTransition();
 
-  const { data, error, isLoading } = useSWR([bucketName, imagesPage], fetcher);
-  const { images, pagination } = data;
+  const { data, error, isLoading, isPreviousData } = useQuery({
+    queryKey: ['images', bucketName, imagesPage],
+    initialData: undefined,
+    queryFn: () => getAllImages(bucketName, imagesPage),
+    keepPreviousData: true,
+    staleTime: Infinity,
+    onSuccess: (res) => {
+      if (res.status === 'ERROR') {
+        console.log('ERROR FETCHING PAGE: ', imagesPage);
+        throw new Error(res?.errors?.[0] as unknown as string);
+      }
 
-  console.log(images, error, isLoading);
+      console.log('SUCCESS FETCHING PAGE: ', imagesPage);
+      return res;
+    },
+  });
+
+  const images = data?.data?.[0] ?? [];
+  const pagination = data?.data?.[1];
+
+  const isNextPageAvaible = useMemo(() => {
+    if (!pagination?.nextPage) return false;
+    if (!pagination?.totalPage) return false;
+    if (pagination.nextPage > pagination.totalPage) return false;
+
+    return true;
+  }, [pagination]);
+
+  console.log(error);
+  console.log(isPreviousData, pagination, isNextPageAvaible);
+
   const selectedImages = images.filter(({ id }) => selectedIds.includes(id));
 
   const handleSelectImage = (id: number) => {
@@ -130,41 +142,6 @@ export default function AppDrive({
       setSelectedIds((ids) => [id, ...ids]);
     }
   };
-
-  const getAllImages = useCallback(
-    async (providedBucketName?: string, page?: number) => {
-      const res = await window.image.getImages(
-        { bucket_name: [providedBucketName ?? bucketName] },
-        page ?? imagesPage
-      );
-
-      if (res.status === 'ERROR') {
-        const errorMessage =
-          typeof res.errors?.[0] === 'string'
-            ? res.errors?.[0]
-            : (res.errors?.[0] as unknown as IPOSError).message;
-
-        console.log('ERROR: ', res.errors);
-        return displayAlert?.(errorMessage ?? 'Please try again', 'error');
-      }
-
-      const data = res.data as unknown as IPagination<ImageDTO>;
-      const imageList = data![0] as ImageDTO[];
-
-      if (data?.[1].nextPage) {
-        setImagesPage(data?.[1].currentPage);
-      } else {
-        setIsNextPageAviable(false);
-      }
-
-      startTransition(() => {
-        setTimeout(() => {
-          setImages((imgs) => [...imgs, ...imageList]);
-        }, 1000);
-      });
-    },
-    [bucketName, displayAlert, imagesPage]
-  );
 
   const handleSaveImage = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,26 +164,21 @@ export default function AppDrive({
           return displayAlert?.(errorMessage ?? 'Please try again', 'error');
         }
 
-        await getAllImages();
-
         setTimeout(() => {
           setCurrentTab(0);
         }, 500);
         return displayAlert?.('Successfully uploaded image', 'success');
       }
     },
-    [bucketName, displayAlert, getAllImages]
+    [bucketName, displayAlert]
   );
 
   const handleOnClose = () => {
-    setImages([]);
     setImagesPage(1);
-    setIsNextPageAviable(true);
     setSelectedIds([]);
     setBucketName(null);
     onClose();
 
-    console.log('HEREE TAEE');
     setTimeout(() => {
       onSelect([]);
     }, 1000);
@@ -218,14 +190,18 @@ export default function AppDrive({
         event.target.scrollHeight - event.target.scrollTop ===
         event.target.clientHeight;
 
-      console.log(isNextPageAviable);
-      if (bottom && isNextPageAviable && bucketName) {
-        await getAllImages(bucketName, imagesPage + 1);
+      const up = event.target.scrollTop === 0;
+
+      if (bottom && isNextPageAvaible && bucketName) {
         setImagesPage((page) => page + 1);
+      }
+
+      if (up && bucketName) {
+        setImagesPage((page) => (page <= 0 ? page : page - 1));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [imagesPage, bucketName, isNextPageAviable]
+    [imagesPage, bucketName, isNextPageAvaible]
   );
 
   return (
@@ -241,8 +217,6 @@ export default function AppDrive({
             value={currentTab}
             onChange={(_, value) => {
               setCurrentTab(value);
-              setImages([]);
-              getAllImages();
             }}
             aria-label="Drive tabs"
           >
@@ -272,7 +246,7 @@ export default function AppDrive({
             currentTab === 0 ? (
               <>
                 <AppImageList
-                  loading={isPending}
+                  loading={isLoading}
                   images={images}
                   multiple={multiple}
                   selectedIds={selectedIds}
@@ -305,9 +279,7 @@ export default function AppDrive({
                 <ListItemButton
                   key={name}
                   onClick={async () => {
-                    await getAllImages(name);
                     setBucketName(() => name);
-                    setImages([]);
                   }}
                 >
                   <ListItemIcon>

@@ -1,3 +1,4 @@
+
 /* eslint-disable react/no-unstable-nested-components */
 import { Suspense, useEffect, useState } from 'react';
 import {
@@ -8,12 +9,12 @@ import {
 } from 'react-router-dom';
 import useConnection from './hooks/useConnection';
 import Dashboard from './screens/protected/dashboard';
-
-import './styles/global.css';
 import ProtectedLayout from './components/Layouts/ProtectedLayout';
 import SignIn from './screens/gate/sign-in';
 import AuthLayout from './components/Layouts/AuthLayout';
 import Inventory from './screens/protected/inventory';
+
+import './styles/global.css';
 
 const router = createMemoryRouter(
   createRoutesFromElements(

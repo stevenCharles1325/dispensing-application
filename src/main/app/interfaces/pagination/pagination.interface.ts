@@ -4,6 +4,7 @@ type IPagination<T> = [
     currentPage: number;
     previousPage: number | null;
     nextPage: number | null;
+    totalPage: number;
   }
 ];
 

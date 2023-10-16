@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('react-virtualized/styles.css');
 @font-face {
   font-family: 'Rubik';
   font-style: normal;

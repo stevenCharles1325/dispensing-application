@@ -36,7 +36,7 @@ export default class ImageShowEvent implements IEvent {
           .skip(skip);
 
         if (payload === 'all') {
-          return await usePagination(imageQuery, page);
+          return await usePagination(imageQuery, page, take);
         }
 
         if (payload instanceof Object && !(payload instanceof Array)) {

@@ -6,15 +6,20 @@ import handleError from 'App/modules/error-handler.module';
 
 const usePagination: IPaginationHook = async <T>(
   query: any,
-  page: number
+  page: number,
+  pageSize: number = 15
 ): Promise<IResponse<IPagination<T> | IPOSError[]>> => {
   try {
     const [entity, total] = await query.getManyAndCount();
 
+    const totalPage =
+      Math.round(total / pageSize) + (total % pageSize > 0 ? 1 : 0);
+
     const pagination = {
       currentPage: page,
       previousPage: page <= 1 ? null : page - 1,
-      nextPage: page >= total ? null : page + 1,
+      nextPage: page >= totalPage ? null : page + 1,
+      totalPage,
     };
 
     return {
