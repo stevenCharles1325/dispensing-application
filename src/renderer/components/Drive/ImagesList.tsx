@@ -19,11 +19,9 @@ import {
   createMasonryCellPositioner,
   Masonry,
 } from 'react-virtualized';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ImageMeasurer from 'react-virtualized-image-measurer';
 import Loading from '../Loading';
-
-// const ImageMeasurer = require('react-virtualized-image-measurer');
 
 interface MainMansoryProps {
   // totalSize: number;
@@ -32,7 +30,6 @@ interface MainMansoryProps {
   itemsWithSizes: any;
   onPreviewImage?: (image: ImageDTO) => void;
   onSelectImage?: (id: number) => void;
-  onScroll?: any;
   loading?: boolean;
   multiple?: boolean;
   onLoad?: (loadCount: number) => void;
@@ -41,7 +38,7 @@ interface MainMansoryProps {
 interface ImageListProps
   extends Omit<MainMansoryProps, 'itemsWithSizes' | 'totalSize'> {
   images: ImageDTO[];
-  // totalSize: number;
+  fetchNext?: () => void;
 }
 
 const columnWidth = 370;
@@ -49,12 +46,10 @@ const defaultHeight = 370;
 const defaultWidth = columnWidth;
 
 function MainMansory({
-  loading,
   multiple,
   selectedIds,
   onPreviewImage,
   onSelectImage,
-  onScroll,
   itemsWithSizes,
   onLoad,
 }: MainMansoryProps) {
@@ -80,10 +75,11 @@ function MainMansory({
 
   const cellRenderer = useCallback(
     ({ index, key, parent, style }: Record<string, any>) => {
+      console.log(itemsWithSizes);
+      if (!itemsWithSizes[index]) return null;
+
       const { item: image, size } = itemsWithSizes[index];
       const height = columnWidth * (size.height / size.width) || defaultHeight;
-
-      onLoad?.(index + 1);
 
       return (
         <CellMeasurer cache={cache} index={index} key={key} parent={parent}>
@@ -95,6 +91,7 @@ function MainMansory({
               height={height}
               width={columnWidth}
               className="cursor-pointer"
+              onLoad={() => onLoad?.(index + 1)}
               onClick={() => onPreviewImage?.(image)}
             />
             <ImageListItemBar
@@ -166,10 +163,17 @@ export default function AppImageList({
   selectedIds,
   onPreviewImage,
   onSelectImage,
-  onScroll,
+  fetchNext,
 }: ImageListProps) {
   const [loadedCount, setLoadedCount] = useState(0);
   const isLoading = loadedCount !== images.length;
+
+  useEffect(() => {
+    console.log('IS LOADING: ', isLoading);
+    if (!isLoading) {
+      fetchNext?.();
+    }
+  }, [fetchNext, isLoading]);
 
   return (
     <ImageMeasurer
@@ -177,7 +181,6 @@ export default function AppImageList({
       image={(item: ImageDTO) => item.url}
       defaultHeight={defaultHeight}
       defaultWidth={defaultWidth}
-      onScroll={onScroll}
     >
       {({ itemsWithSizes }: any) => (
         <>
@@ -193,7 +196,6 @@ export default function AppImageList({
             selectedIds={selectedIds}
             onPreviewImage={onPreviewImage}
             onSelectImage={onSelectImage}
-            onScroll={onScroll}
             itemsWithSizes={itemsWithSizes}
           />
           {isLoading || loading ? (

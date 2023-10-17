@@ -16,6 +16,7 @@ const usePagination: IPaginationHook = async <T>(
       Math.round(total / pageSize) + (total % pageSize > 0 ? 1 : 0);
 
     const pagination = {
+      data: entity,
       currentPage: page,
       previousPage: page <= 1 ? null : page - 1,
       nextPage: page >= totalPage ? null : page + 1,
@@ -23,7 +24,7 @@ const usePagination: IPaginationHook = async <T>(
     };
 
     return {
-      data: [entity as T[], pagination],
+      data: pagination,
       code: 'REQ_OK',
       status: 'SUCCESS',
     } as IResponse<IPagination<T>>;

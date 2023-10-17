@@ -33,7 +33,7 @@ import ImageDTO from 'App/data-transfer-objects/image.dto';
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import { CloudUpload, Folder } from '@mui/icons-material';
 import AppImageList from './ImagesList';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 
 interface AppDriveProps {
@@ -65,7 +65,7 @@ const VisuallyHiddenInput = styled('input')({
 const getAllImages = async (
   bucket_name: any,
   page: number
-): Promise<IResponse<IPagination<ImageDTO>>> => {
+): Promise<IPagination<ImageDTO>> => {
   const res = await window.image.getImages(
     { bucket_name: [bucket_name] },
     page
@@ -80,7 +80,8 @@ const getAllImages = async (
     return Promise.reject(errorMessage);
   }
 
-  return Promise.resolve(res as unknown as IResponse<IPagination<ImageDTO>>);
+  const data = res.data as unknown as IPagination<ImageDTO>;
+  return Promise.resolve(data);
 };
 
 export default function AppDrive({
@@ -102,38 +103,26 @@ export default function AppDrive({
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-  const { data, error, isLoading, isPreviousData } = useQuery({
-    queryKey: ['images', bucketName, imagesPage],
-    initialData: undefined,
-    queryFn: () => getAllImages(bucketName, imagesPage),
-    keepPreviousData: true,
-    staleTime: Infinity,
-    onSuccess: (res) => {
-      if (res.status === 'ERROR') {
-        console.log('ERROR FETCHING PAGE: ', imagesPage);
-        throw new Error(res?.errors?.[0] as unknown as string);
-      }
+  const { data, error, isLoading, isPreviousData, fetchNextPage, hasNextPage } =
+    useInfiniteQuery({
+      queryKey: ['images'],
+      queryFn: () => getAllImages(bucketName, imagesPage),
+      getNextPageParam: (lastPage, pages) => lastPage?.nextPage,
+      getPreviousPageParam: (lastPage, pages) => lastPage?.previousPage,
+    });
 
-      console.log('SUCCESS FETCHING PAGE: ', imagesPage);
-      return res;
-    },
-  });
+  if (error) {
+    throw error;
+  }
 
-  const images = data?.data?.[0] ?? [];
-  const pagination = data?.data?.[1];
+  // const images =
+  //   data?.pages?.reduce<ImageDTO[]>(
+  //     (prev, curr) => [...prev, ...curr.data],
+  //     []
+  //   ) ?? [];
 
-  const isNextPageAvaible = useMemo(() => {
-    if (!pagination?.nextPage) return false;
-    if (!pagination?.totalPage) return false;
-    if (pagination.nextPage > pagination.totalPage) return false;
-
-    return true;
-  }, [pagination]);
-
-  console.log(error);
-  console.log(isPreviousData, pagination, isNextPageAvaible);
-
-  const selectedImages = images.filter(({ id }) => selectedIds.includes(id));
+  console.log(data);
+  // const selectedImages = images.filter(({ id }) => selectedIds.includes(id));
 
   const handleSelectImage = (id: number) => {
     if (selectedIds.includes(id)) {
@@ -184,152 +173,152 @@ export default function AppDrive({
     }, 1000);
   };
 
-  const handleScroll = useCallback(
-    async (event: any) => {
-      const bottom =
-        event.target.scrollHeight - event.target.scrollTop ===
-        event.target.clientHeight;
+  // const handleScroll = useCallback(
+  //   async ({ clientHeight, scrollHeight, scrollTop }) => {
+  //     const bottom = scrollHeight - scrollTop === clientHeight;
 
-      const up = event.target.scrollTop === 0;
+  //     const top = scrollTop === 0;
 
-      if (bottom && isNextPageAvaible && bucketName) {
-        setImagesPage((page) => page + 1);
-      }
+  //     console.log(scrollHeight, clientHeight);
+  //     if (bottom && hasNextPage && bucketName) {
+  //       setImagesPage((page) => page + 1);
+  //     }
 
-      if (up && bucketName) {
-        setImagesPage((page) => (page <= 0 ? page : page - 1));
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [imagesPage, bucketName, isNextPageAvaible]
-  );
+  //     if (top && bucketName) {
+  //       setImagesPage((page) => (page <= 0 ? page : page - 1));
+  //     }
+  //   },
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   [imagesPage, bucketName, hasNextPage]
+  // );
 
   return (
-    <>
-      <Dialog
-        open={open && Boolean(driveTabs && driveTabs?.length)}
-        fullScreen={fullScreen}
-        maxWidth="xl"
-        onClose={handleOnClose}
-      >
-        <div className="h-full w-full p-5">
-          <Tabs
-            value={currentTab}
-            onChange={(_, value) => {
-              setCurrentTab(value);
-            }}
-            aria-label="Drive tabs"
-          >
-            {driveTabs.map((label) => (
-              <Tab
-                key={label}
-                disabled={!bucketName}
-                label={label}
-                {...a11yProps}
-              />
-            ))}
-          </Tabs>
-          {bucketName ? (
-            <div className="my-3">
-              <Button
-                startIcon={<ChevronLeftIcon />}
-                onClick={() => {
-                  setImagesPage(1);
-                  setBucketName(null);
-                }}
-              >
-                Back
-              </Button>
-            </div>
-          ) : null}
-          {bucketName ? (
-            currentTab === 0 ? (
-              <>
-                <AppImageList
-                  loading={isLoading}
-                  images={images}
-                  multiple={multiple}
-                  selectedIds={selectedIds}
-                  onScroll={handleScroll}
-                  onSelectImage={handleSelectImage}
-                  onPreviewImage={(image) => setPreviewImage(image)}
-                />
-              </>
-            ) : (
-              <div className="w-[800px] h-[600px] p-5 flex justify-center items-center">
-                <Button
-                  component="label"
-                  variant="outlined"
-                  startIcon={<CloudUpload />}
-                >
-                  Upload file
-                  <VisuallyHiddenInput
-                    type="file"
-                    onChange={handleSaveImage}
-                    accept="image/png, image/gif, image/jpeg"
-                  />
-                </Button>
-              </div>
-            )
-          ) : (
-            <div className="w-[800px] h-[600px] p-5">
-              <p>Please select a folder</p>
-              <br />
-              {bucketNames?.map((name) => (
-                <ListItemButton
-                  key={name}
-                  onClick={async () => {
-                    setBucketName(() => name);
-                  }}
-                >
-                  <ListItemIcon>
-                    <Folder />
-                  </ListItemIcon>
-                  <ListItemText primary={name} />
-                </ListItemButton>
-              ))}
-            </div>
-          )}
-        </div>
-        <DialogActions>
-          <Button
-            disabled={!selectedImages.length}
-            onClick={() => {
-              onSelect(selectedImages);
-              handleOnClose();
-            }}
-            color="primary"
-          >
-            Select
-          </Button>
-          <Button onClick={handleOnClose} color="error">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+    <div>tae</div>
+    // <>
+    //   <Dialog
+    //     open={open && Boolean(driveTabs && driveTabs?.length)}
+    //     fullScreen={fullScreen}
+    //     maxWidth="xl"
+    //     onClose={handleOnClose}
+    //   >
+    //     <div className="h-full w-full p-5">
+    //       <Tabs
+    //         value={currentTab}
+    //         onChange={(_, value) => {
+    //           setCurrentTab(value);
+    //         }}
+    //         aria-label="Drive tabs"
+    //       >
+    //         {driveTabs.map((label) => (
+    //           <Tab
+    //             key={label}
+    //             disabled={!bucketName}
+    //             label={label}
+    //             {...a11yProps}
+    //           />
+    //         ))}
+    //       </Tabs>
+    //       {bucketName ? (
+    //         <div className="my-3">
+    //           <Button
+    //             startIcon={<ChevronLeftIcon />}
+    //             onClick={() => {
+    //               setImagesPage(1);
+    //               setBucketName(null);
+    //             }}
+    //           >
+    //             Back
+    //           </Button>
+    //         </div>
+    //       ) : null}
+    //       {bucketName ? (
+    //         currentTab === 0 ? (
+    //           <>
+    //             <AppImageList
+    //               fetchNext={fetchNextPage}
+    //               loading={isLoading}
+    //               images={images}
+    //               multiple={multiple}
+    //               selectedIds={selectedIds}
+    //               onSelectImage={handleSelectImage}
+    //               onPreviewImage={(image) => setPreviewImage(image)}
+    //             />
+    //           </>
+    //         ) : (
+    //           <div className="w-[800px] h-[600px] p-5 flex justify-center items-center">
+    //             <Button
+    //               component="label"
+    //               variant="outlined"
+    //               startIcon={<CloudUpload />}
+    //             >
+    //               Upload file
+    //               <VisuallyHiddenInput
+    //                 type="file"
+    //                 onChange={handleSaveImage}
+    //                 accept="image/png, image/gif, image/jpeg"
+    //               />
+    //             </Button>
+    //           </div>
+    //         )
+    //       ) : (
+    //         <div className="w-[800px] h-[600px] p-5">
+    //           <p>Please select a folder</p>
+    //           <br />
+    //           {bucketNames?.map((name) => (
+    //             <ListItemButton
+    //               key={name}
+    //               onClick={async () => {
+    //                 setBucketName(() => name);
+    //               }}
+    //             >
+    //               <ListItemIcon>
+    //                 <Folder />
+    //               </ListItemIcon>
+    //               <ListItemText primary={name} />
+    //             </ListItemButton>
+    //           ))}
+    //         </div>
+    //       )}
+    //     </div>
+    //     <DialogActions>
+    //       <Button
+    //         // disabled={!selectedImages.length}
+    //         onClick={() => {
+    //           // onSelect(selectedImages);
+    //           handleOnClose();
+    //         }}
+    //         color="primary"
+    //       >
+    //         Select
+    //       </Button>
+    //       <Button onClick={handleOnClose} color="error">
+    //         Close
+    //       </Button>
+    //     </DialogActions>
+    //   </Dialog>
 
-      {/* PREVIEW IMAGE */}
-      <Dialog
-        open={Boolean(previewImage)}
-        maxWidth="md"
-        onClose={() => setPreviewImage(null)}
-      >
-        <div className="absolute top-0 right-0">
-          <IconButton onClick={() => setPreviewImage(null)}>
-            <CloseIcon color="primary" />
-          </IconButton>
-        </div>
-        {previewImage && (
-          <img
-            src={previewImage.url}
-            alt={previewImage.name}
-            loading="lazy"
-            style={{
-              aspectRatio: 'auto',
-            }}
-          />
-        )}
-      </Dialog>
-    </>
+    //   {/* PREVIEW IMAGE */}
+    //   <Dialog
+    //     open={Boolean(previewImage)}
+    //     maxWidth="md"
+    //     onClose={() => setPreviewImage(null)}
+    //   >
+    //     <div className="absolute top-0 right-0">
+    //       <IconButton onClick={() => setPreviewImage(null)}>
+    //         <CloseIcon color="primary" />
+    //       </IconButton>
+    //     </div>
+    //     {previewImage && (
+    //       <img
+    //         src={previewImage.url}
+    //         alt={previewImage.name}
+    //         loading="lazy"
+    //         style={{
+    //           aspectRatio: 'auto',
+    //         }}
+    //       />
+    //     )}
+    //   </Dialog>
+    // </>
   );
 }
