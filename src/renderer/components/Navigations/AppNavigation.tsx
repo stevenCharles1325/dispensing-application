@@ -1,11 +1,10 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
 import { IconButton } from '@mui/material';
 import Input from '../TextField/Input';
-import { SearchContext } from 'UI/providers/SearchProvider';
 
 // Icons
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
@@ -19,6 +18,7 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import useSearch from 'UI/hooks/useSearch';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -67,7 +67,7 @@ export const navigationRoutes: INavButtonprops[] = [
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
   const [activeRouteId, setActiveRouteId] = useState(0);
-  const { searchText, setSearchText } = useContext(SearchContext);
+  const { searchText, setSearchText } = useSearch();
 
   return (
     <div className="w-screen h-screen bg-transparent flex flex-row leading-normal">

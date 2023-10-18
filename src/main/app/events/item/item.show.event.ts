@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-else-return */
 import ItemDTO from 'App/data-transfer-objects/item.dto';
@@ -41,18 +42,16 @@ export default class ItemShowEvent implements IEvent {
         if (payload instanceof Object && !(payload instanceof Array)) {
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
+            if (!(propertyFind as any)?.length) continue;
+
             if (propertyFind instanceof Array) {
-              itemQuery.where(`${propertyName} IN (:...${propertyName})`, {
+              itemQuery.where(`item.${propertyName} IN (:...${propertyName})`, {
                 propertyName: propertyFind,
               });
             } else {
-              return {
-                errors: [
-                  'The look-up values for the property must be in array',
-                ],
-                code: 'REQ_INVALID',
-                status: 'ERROR',
-              } as unknown as IResponse<string[]>;
+              itemQuery.where(`item.${propertyName} LIKE :${propertyName}`, {
+                propertyName: `%${propertyFind}%`,
+              });
             }
           }
 

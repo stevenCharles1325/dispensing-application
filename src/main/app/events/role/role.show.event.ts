@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 /* eslint-disable react-hooks/rules-of-hooks */
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 import usePagination from 'App/hooks/pagination.hook';
@@ -40,18 +41,16 @@ export default class RoleShowEvent implements IEvent {
         if (payload instanceof Object && !(payload instanceof Array)) {
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
+            if (!(propertyFind as any)?.length) continue;
+
             if (propertyFind instanceof Array) {
               roleQuery.where(`${propertyName} IN (:...args)`, {
                 args: propertyFind,
               });
             } else {
-              return {
-                errors: [
-                  'The look-up values for the property must be in array',
-                ],
-                code: 'REQ_INVALID',
-                status: 'ERROR',
-              } as unknown as IResponse<string[]>;
+              roleQuery.where(`${propertyName} LIKE :${propertyName}`, {
+                propertyName: `%${propertyFind}%`,
+              });
             }
           }
 

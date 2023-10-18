@@ -51,7 +51,7 @@ const peerHandler = {
 + ================================ */
 const userHandler = {
   getUsers: async (
-    payload: Record<string, any[]> | string = 'all',
+    payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<UserDTO>>> =>
@@ -83,7 +83,7 @@ const userHandler = {
 + ================================ */
 const itemHandler = {
   getItems: async (
-    payload: Record<string, any[]> | string = 'all',
+    payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<ItemDTO>>> =>
@@ -119,7 +119,7 @@ const itemHandler = {
 + ================================ */
 const brandHandler = {
   getBrands: async (
-    payload: Record<string, any[]> | string = 'all',
+    payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<BrandDTO>>> =>
@@ -155,7 +155,7 @@ const brandHandler = {
 + ================================ */
 const categoryHandler = {
   getCategories: async (
-    payload: Record<string, any[]> | string = 'all',
+    payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<CategoryDTO>>> =>
@@ -191,7 +191,7 @@ const categoryHandler = {
 + ================================ */
 const imageHandler = {
   getImages: async (
-    payload: Record<string, any[]> | string = 'all',
+    payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
     total: number = 10
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<ImageDTO>>> =>
@@ -231,7 +231,7 @@ const imageHandler = {
 + ================================ */
 const supplierHandler = {
   getSuppliers: async (
-    payload: Record<string, any[]> | string = 'all',
+    payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
     total: number = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<SupplierDTO>>> =>

@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 /* eslint-disable react-hooks/rules-of-hooks */
 import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import usePagination from 'App/hooks/pagination.hook';
@@ -40,18 +41,16 @@ export default class BrandShowEvent implements IEvent {
         if (payload instanceof Object && !(payload instanceof Array)) {
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
+            if (!(propertyFind as any)?.length) continue;
+
             if (propertyFind instanceof Array) {
               brandQuery.where(`${propertyName} IN (:...args)`, {
                 args: propertyFind,
               });
             } else {
-              return {
-                errors: [
-                  'The look-up values for the property must be in array',
-                ],
-                code: 'REQ_INVALID',
-                status: 'ERROR',
-              } as unknown as IResponse<string[]>;
+              brandQuery.where(`${propertyName} LIKE :${propertyName}`, {
+                propertyName: `%${propertyFind}%`,
+              });
             }
           }
 

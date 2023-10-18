@@ -32,6 +32,7 @@ import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import useAppDrive from 'UI/hooks/useAppDrive';
 import useFieldRequired from 'UI/hooks/useFieldRequired';
+import IPagination from 'App/interfaces/pagination/pagination.interface';
 
 interface InventoryFormProps {
   action: 'create' | 'update' | null;
@@ -346,7 +347,7 @@ export default function InventoryForm({
               );
             }
 
-            const images = res.data?.[0] as ImageDTO[];
+            const { data: images } = res.data as IPagination<ImageDTO>;
 
             if (images && images.length) {
               setImageFile(images?.[0] as unknown as ImageDTO);
@@ -613,12 +614,6 @@ export default function InventoryForm({
               <br />
               <div className="flex flex-row gap-4">
                 <div className="border border-gray-300 hover:border-gray-950 rounded h-[170px] w-[170px] relative">
-                  {/* <input
-                    type="file"
-                    className="relative border rounded opacity-0 w-full h-full"
-                    onChange={handleSelectImage}
-                    accept="image/*, png, jpeg, jpg"
-                  /> */}
                   <div
                     className="relative border rounded opacity-0 w-full h-full"
                     onClick={() => {
@@ -680,7 +675,9 @@ export default function InventoryForm({
                     );
                   }
 
-                  handleSupplierToggle(supplierAction ?? supplierToggle);
+                  if (supplierAction) {
+                    handleSupplierToggle(supplierAction);
+                  }
                 }}
                 aria-label="Supplier-action-toggle"
               >

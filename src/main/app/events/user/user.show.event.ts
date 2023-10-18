@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 /* eslint-disable react-hooks/rules-of-hooks */
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import usePagination from 'App/hooks/pagination.hook';
@@ -29,7 +30,7 @@ export default class UserShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const userQuery = UserRepository.createQueryBuilder()
+        const userQuery = UserRepository.createQueryBuilder('user')
           .take(take)
           .skip(skip);
 
@@ -40,18 +41,16 @@ export default class UserShowEvent implements IEvent {
         if (payload instanceof Object && !(payload instanceof Array)) {
           // eslint-disable-next-line no-restricted-syntax
           for (const [propertyName, propertyFind] of Object.entries(payload)) {
+            if (!(propertyFind as any)?.length) continue;
+
             if (propertyFind instanceof Array) {
-              userQuery.where(`${propertyName} IN (:...args)`, {
+              userQuery.where(`user.${propertyName} IN (:...args)`, {
                 args: propertyFind,
               });
             } else {
-              return {
-                errors: [
-                  'The look-up values for the property must be in array',
-                ],
-                code: 'REQ_INVALID',
-                status: 'ERROR',
-              } as unknown as IResponse<string[]>;
+              userQuery.where(`user.${propertyName} LIKE :${propertyName}`, {
+                propertyName: `%${propertyFind}%`,
+              });
             }
           }
 

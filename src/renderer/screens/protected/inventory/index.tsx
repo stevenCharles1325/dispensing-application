@@ -9,6 +9,7 @@ import { Chip, Dialog, Slide } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
 import formatCurrency from 'UI/helpers/formatCurrency';
 import { TransitionProps } from '@mui/material/transitions';
+import { useQuery } from '@tanstack/react-query';
 
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
@@ -24,6 +25,7 @@ import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
+import useSearch from 'UI/hooks/useSearch';
 
 const columns: Array<GridColDef> = [
   {
@@ -73,6 +75,20 @@ const columns: Array<GridColDef> = [
   },
 ];
 
+const getItems = async (
+  page = 0,
+  searchText = ''
+): Promise<IPagination<ItemDTO>> => {
+  const res = await window.item.getItems({ name: searchText }, page);
+
+  if (res.status === 'ERROR') {
+    const errorMessage = res.errors?.[0] as unknown as string;
+    throw new Error(errorMessage);
+  }
+
+  return res.data as IPagination<ItemDTO>;
+};
+
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement;
@@ -83,30 +99,41 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Inventory() {
-  const [items, setItems] = useState<Array<ItemDTO>>([]);
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
 
+  const [itemsPage, setItemsPage] = useState<number>(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>(
     null
   );
   const { displayAlert } = useAlert();
+  const { searchText } = useSearch();
 
-  const selectedItem = items.find(({ id }) => id === selectedIds?.[0]) ?? null;
+  const { data, refetch: refetchItems } = useQuery({
+    queryKey: ['items', searchText, itemsPage],
+    queryFn: async () => {
+      const res = await getItems(itemsPage, searchText);
 
-  const getItems = async () => {
-    const res = await window.item.getItems();
+      return res;
+    },
+  });
 
-    console.log(res);
-    if (res.status === 'ERROR') {
-      return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
-    }
+  const items = (data?.data as ItemDTO[]) ?? [];
+  const selectedItem = items?.find(({ id }) => id === selectedIds?.[0]) ?? null;
 
-    const pagination = res.data as IPagination<ItemDTO>;
-    setItems(pagination.data);
-  };
+  // const getItems = async () => {
+  //   const res = await window.item.getItems();
+
+  //   console.log(res);
+  //   if (res.status === 'ERROR') {
+  //     return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+  //   }
+
+  //   const pagination = res.data as IPagination<ItemDTO>;
+  //   setItems(pagination.data);
+  // };
 
   const getCategories = async () => {
     const res = await window.category.getCategories();
@@ -143,7 +170,6 @@ export default function Inventory() {
   };
 
   useEffect(() => {
-    getItems();
     getBrands();
     getCategories();
     getSuppliers();
@@ -176,7 +202,7 @@ export default function Inventory() {
       return displayAlert?.(resErrors[0] as unknown as string, 'error');
     }
 
-    await getItems();
+    refetchItems();
     displayAlert?.('Successfully deleted selected item(s)', 'success');
   };
 
@@ -242,7 +268,7 @@ export default function Inventory() {
           onRowSelectionModelChange={(itemIds) =>
             setSelectedIds(itemIds as string[])
           }
-          hideFooterPagination
+          paginationModel={{ page: itemsPage, pageSize: data?.totalPage ?? 0 }}
         />
         <Dialog
           open={Boolean(modalAction)}
@@ -256,7 +282,7 @@ export default function Inventory() {
             brands={brands}
             categories={categories}
             suppliers={suppliers}
-            getItems={getItems}
+            getItems={refetchItems as any}
             getBrands={getBrands}
             getCategories={getCategories}
             getSuppliers={getSuppliers}
