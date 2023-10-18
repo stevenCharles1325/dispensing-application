@@ -39,8 +39,7 @@ import ImageDTO from 'App/data-transfer-objects/image.dto';
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import { CloudUpload, Folder } from '@mui/icons-material';
 import AppImageList from './ImagesList';
-import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
-import IResponse from 'App/interfaces/pos/pos.response.interface';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 interface AppDriveProps {
   multiple: boolean;
