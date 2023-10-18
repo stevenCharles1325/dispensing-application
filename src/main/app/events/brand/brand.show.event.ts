@@ -48,9 +48,9 @@ export default class BrandShowEvent implements IEvent {
                 args: propertyFind,
               });
             } else {
-              brandQuery.where(`${propertyName} LIKE :${propertyName}`, {
-                propertyName: `%${propertyFind}%`,
-              });
+              brandQuery
+                .where(`${propertyName} LIKE :${propertyName}`)
+                .setParameter(propertyName, `%${propertyFind}%`);
             }
           }
 

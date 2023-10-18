@@ -49,9 +49,9 @@ export default class ImageShowEvent implements IEvent {
                 args: propertyFind,
               });
             } else {
-              imageQuery.where(`image.${propertyName} LIKE :${propertyName}`, {
-                propertyName: `%${propertyFind}%`,
-              });
+              imageQuery
+                .where(`image.${propertyName} LIKE :${propertyName}`)
+                .setParameter(propertyName, `%${propertyFind}%`);
             }
           }
 

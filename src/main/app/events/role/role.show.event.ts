@@ -48,9 +48,9 @@ export default class RoleShowEvent implements IEvent {
                 args: propertyFind,
               });
             } else {
-              roleQuery.where(`${propertyName} LIKE :${propertyName}`, {
-                propertyName: `%${propertyFind}%`,
-              });
+              roleQuery
+                .where(`${propertyName} LIKE :${propertyName}`)
+                .setParameter(propertyName, `%${propertyFind}%`);
             }
           }
 

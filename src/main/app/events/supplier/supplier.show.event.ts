@@ -48,9 +48,9 @@ export default class SupplierShowEvent implements IEvent {
                 args: propertyFind,
               });
             } else {
-              supplierQuery.where(`${propertyName} LIKE :${propertyName}`, {
-                propertyName: `%${propertyFind}%`,
-              });
+              supplierQuery
+                .where(`${propertyName} LIKE :${propertyName}`)
+                .setParameter(propertyName, `%${propertyFind}%`);
             }
           }
 

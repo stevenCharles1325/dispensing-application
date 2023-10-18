@@ -49,9 +49,9 @@ export default class ItemShowEvent implements IEvent {
                 propertyName: propertyFind,
               });
             } else {
-              itemQuery.where(`item.${propertyName} LIKE :${propertyName}`, {
-                propertyName: `%${propertyFind}%`,
-              });
+              itemQuery
+                .where(`item.${propertyName} LIKE :${propertyName}`)
+                .setParameter(propertyName, `%${propertyFind}%`);
             }
           }
 

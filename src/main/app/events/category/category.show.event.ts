@@ -48,9 +48,9 @@ export default class CategoryShowEvent implements IEvent {
                 args: propertyFind,
               });
             } else {
-              categoryQuery.where(`${propertyName} LIKE :${propertyName}`, {
-                propertyName: `%${propertyFind}%`,
-              });
+              categoryQuery
+                .where(`${propertyName} LIKE :${propertyName}`)
+                .setParameter(propertyName, `%${propertyFind}%`);
             }
           }
 

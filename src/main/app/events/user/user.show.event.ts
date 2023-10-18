@@ -48,9 +48,9 @@ export default class UserShowEvent implements IEvent {
                 args: propertyFind,
               });
             } else {
-              userQuery.where(`user.${propertyName} LIKE :${propertyName}`, {
-                propertyName: `%${propertyFind}%`,
-              });
+              userQuery
+                .where(`user.${propertyName} LIKE :${propertyName}`)
+                .setParameter(propertyName, `%${propertyFind}%`);
             }
           }
 
