@@ -1,7 +1,10 @@
+import Provider from '@IOC:Provider';
+import ImageDTO from 'App/data-transfer-objects/image.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
+import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
 import handleError from 'App/modules/error-handler.module';
 import { Image } from 'Main/database/models/image.model';
 import { SqliteDataSource } from 'Main/datasource';
@@ -21,8 +24,20 @@ export default class ImageDeleteEvent implements IEvent {
         eventData.user.hasPermission?.('delete-image');
 
       if (requesterHasPermission) {
+        const id = eventData.payload[0];
         const imageRepo = SqliteDataSource.getRepository(Image);
-        const data = await imageRepo.delete(eventData.payload[0]);
+        const image = await imageRepo.findOneByOrFail({ id });
+
+        const objectStorageService = Provider.ioc<IObjectStorageService>(
+          'ObjectStorageProvider'
+        );
+
+        await objectStorageService.removeObject({
+          bucketName: image.bucket_name,
+          objectName: image.name,
+        });
+
+        const data = await imageRepo.delete(id);
 
         return {
           data,

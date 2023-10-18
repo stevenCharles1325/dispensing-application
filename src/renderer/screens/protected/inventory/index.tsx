@@ -23,6 +23,7 @@ import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
+import IPagination from 'App/interfaces/pagination/pagination.interface';
 
 const columns: Array<GridColDef> = [
   {
@@ -103,7 +104,8 @@ export default function Inventory() {
       return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
     }
 
-    setItems(res.data?.[0] as ItemDTO[]);
+    const pagination = res.data as IPagination<ItemDTO>;
+    setItems(pagination.data);
   };
 
   const getCategories = async () => {
@@ -114,7 +116,8 @@ export default function Inventory() {
       return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
     }
 
-    setCategories(() => [...(res.data?.[0] as CategoryDTO[])]);
+    const pagination = res.data as IPagination<CategoryDTO>;
+    setCategories(pagination.data);
   };
 
   const getBrands = async () => {
@@ -124,7 +127,8 @@ export default function Inventory() {
       return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
     }
 
-    setBrands(res.data?.[0] as BrandDTO[]);
+    const pagination = res.data as IPagination<BrandDTO>;
+    setBrands(pagination.data);
   };
 
   const getSuppliers = async () => {
@@ -134,7 +138,8 @@ export default function Inventory() {
       return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
     }
 
-    setSuppliers(res.data?.[0] as SupplierDTO[]);
+    const pagination = res.data as IPagination<SupplierDTO>;
+    setSuppliers(pagination.data);
   };
 
   useEffect(() => {

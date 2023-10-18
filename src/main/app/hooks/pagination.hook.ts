@@ -13,7 +13,7 @@ const usePagination: IPaginationHook = async <T>(
     const [entity, total] = await query.getManyAndCount();
 
     const totalPage =
-      Math.round(total / pageSize) + (total % pageSize > 0 ? 1 : 0);
+      Math.floor(total / pageSize) + (total % pageSize > 0 ? 1 : 0);
 
     const pagination = {
       data: entity,

@@ -142,7 +142,9 @@ const brandHandler = {
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('brand:archive', id),
 
-  deleteBrand: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteBrand: async (
+    id: number | number[]
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('brand:delete', id),
 };
 
@@ -177,7 +179,7 @@ const categoryHandler = {
     ipcRenderer.invoke('category:archive', id),
 
   deleteCategory: async (
-    id: number
+    id: number | number[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('category:delete', id),
 };
@@ -216,7 +218,9 @@ const imageHandler = {
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('image:archive', id),
 
-  deleteImage: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteImage: async (
+    id: number | number[]
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('image:delete', id),
 };
 
@@ -251,7 +255,7 @@ const supplierHandler = {
     ipcRenderer.invoke('supplier:archive', id),
 
   deleteSupplier: async (
-    id: number
+    id: number | number[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('supplier:delete', id),
 };

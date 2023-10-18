@@ -29,7 +29,6 @@ export default class ImageShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        console.log('PAGE: ', page);
         const imageQuery = ImageRepository.createQueryBuilder('image')
           .leftJoinAndSelect('image.uploader', 'uploader')
           .take(take)
@@ -57,7 +56,7 @@ export default class ImageShowEvent implements IEvent {
             }
           }
 
-          return await usePagination(imageQuery, page);
+          return await usePagination(imageQuery, page, take);
         }
 
         return {
