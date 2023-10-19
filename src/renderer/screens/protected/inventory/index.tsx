@@ -117,7 +117,6 @@ export default function Inventory() {
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, itemsPage, itemsPageSize],
     queryFn: async () => {
-      console.log(itemsPage);
       const res = await getItems(searchText, itemsPage + 1, itemsPageSize);
 
       return res;
@@ -130,7 +129,6 @@ export default function Inventory() {
   const getCategories = async () => {
     const res = await window.category.getCategories();
 
-    console.log(res);
     if (res.status === 'ERROR') {
       return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
     }
@@ -169,17 +167,17 @@ export default function Inventory() {
   }, []);
 
   const handleAddNewItem = () => {
-    console.log('Add new item');
+    console.log('Adding new item');
     setModalAction('create');
   };
 
   const handleEditSelectedItem = () => {
-    console.log('Edit item');
+    console.log('Updating item');
     setModalAction('update');
   };
 
   const handleDeleteSelectedItem = async () => {
-    console.log('Delete item');
+    console.log('Deleting item');
     const res = await window.item.deleteItem(selectedIds);
 
     if (res.status === 'ERROR') {
@@ -292,7 +290,6 @@ export default function Inventory() {
             ]}
             paginationModel={{ page: itemsPage, pageSize: itemsPageSize }}
             onPaginationModelChange={({ page, pageSize }) => {
-              console.log('SWITCHING TO PAGE: ', page);
               if (page !== itemsPage) {
                 setItemsPage(page);
               }
