@@ -53,7 +53,7 @@ const userHandler = {
   getUsers: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number = 15
+    total: number | 'max' = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<UserDTO>>> =>
     ipcRenderer.invoke('user:show', payload, page, total),
 
@@ -85,7 +85,7 @@ const itemHandler = {
   getItems: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number = 15
+    total: number | 'max' = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<ItemDTO>>> =>
     ipcRenderer.invoke('item:show', payload, page, total),
 
@@ -121,7 +121,7 @@ const brandHandler = {
   getBrands: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number = 15
+    total: number | 'max' = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<BrandDTO>>> =>
     ipcRenderer.invoke('brand:show', payload, page, total),
 
@@ -157,7 +157,7 @@ const categoryHandler = {
   getCategories: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number = 15
+    total: number | 'max' = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<CategoryDTO>>> =>
     ipcRenderer.invoke('category:show', payload, page, total),
 
@@ -193,7 +193,7 @@ const imageHandler = {
   getImages: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number = 10
+    total: number | 'max' = 10
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<ImageDTO>>> =>
     ipcRenderer.invoke('image:show', payload, page, total),
 
@@ -233,7 +233,7 @@ const supplierHandler = {
   getSuppliers: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number = 15
+    total: number | 'max' = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<SupplierDTO>>> =>
     ipcRenderer.invoke('supplier:show', payload, page, total),
 

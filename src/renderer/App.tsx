@@ -1,6 +1,5 @@
 
 /* eslint-disable react/no-unstable-nested-components */
-import { Suspense, useEffect, useState } from 'react';
 import {
   Route,
   defer,
@@ -15,6 +14,7 @@ import AuthLayout from './components/Layouts/AuthLayout';
 import Inventory from './screens/protected/inventory';
 
 import './styles/global.css';
+import Transaction from './screens/protected/transaction';
 
 const router = createMemoryRouter(
   createRoutesFromElements(
@@ -27,6 +27,7 @@ const router = createMemoryRouter(
       <Route path="/" element={<ProtectedLayout />}>
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="inventory" element={<Inventory />} />
+        <Route path="transaction" element={<Transaction />} />
       </Route>
 
       <Route path="/sign-in" element={<SignIn />} />

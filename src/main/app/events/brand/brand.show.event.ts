@@ -30,9 +30,11 @@ export default class BrandShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const brandQuery = BrandRepository.createQueryBuilder()
-          .take(take)
-          .skip(skip);
+        const brandQuery = BrandRepository.createQueryBuilder();
+
+        if (take === 'max') {
+          brandQuery.take(take).skip(skip);
+        }
 
         if (payload === 'all') {
           return await usePagination(brandQuery, page);

@@ -30,9 +30,11 @@ export default class RoleShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const roleQuery = RoleRepository.createQueryBuilder()
-          .take(take)
-          .skip(skip);
+        const roleQuery = RoleRepository.createQueryBuilder();
+
+        if (take === 'max') {
+          roleQuery.take(take).skip(skip);
+        }
 
         if (payload === 'all') {
           return await usePagination(RoleRepository, page);

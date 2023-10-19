@@ -35,8 +35,8 @@ export const navigationRoutes: INavButtonprops[] = [
   },
   {
     id: 2,
-    label: 'Transactions',
-    redirectPath: '/dashboard',
+    label: 'Transaction',
+    redirectPath: '/transaction',
     icon: <ReceiptOutlinedIcon />,
   },
   {

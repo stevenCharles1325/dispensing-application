@@ -30,9 +30,11 @@ export default class SupplierShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const supplierQuery = SupplierRepository.createQueryBuilder()
-          .take(take)
-          .skip(skip);
+        const supplierQuery = SupplierRepository.createQueryBuilder();
+
+        if (take === 'max') {
+          supplierQuery.take(take).skip(skip);
+        }
 
         if (payload === 'all') {
           return await usePagination(supplierQuery, page);

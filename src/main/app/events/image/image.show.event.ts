@@ -30,10 +30,13 @@ export default class ImageShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const imageQuery = ImageRepository.createQueryBuilder('image')
-          .leftJoinAndSelect('image.uploader', 'uploader')
-          .take(take)
-          .skip(skip);
+        const imageQuery = ImageRepository.createQueryBuilder(
+          'image'
+        ).leftJoinAndSelect('image.uploader', 'uploader');
+
+        if (take === 'max') {
+          imageQuery.take(take).skip(skip);
+        }
 
         if (payload === 'all') {
           return await usePagination(imageQuery, page, take);

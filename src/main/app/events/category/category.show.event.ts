@@ -30,9 +30,11 @@ export default class CategoryShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const categoryQuery = CategoryRepository.createQueryBuilder()
-          .take(take)
-          .skip(skip);
+        const categoryQuery = CategoryRepository.createQueryBuilder();
+
+        if (take === 'max') {
+          categoryQuery.take(take).skip(skip);
+        }
 
         if (payload === 'all') {
           return await usePagination(categoryQuery, page);

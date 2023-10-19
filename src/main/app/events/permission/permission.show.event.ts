@@ -31,9 +31,11 @@ export default class PermissionShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const permissionQuery = PermissionRepository.createQueryBuilder()
-          .take(take)
-          .skip(skip);
+        const permissionQuery = PermissionRepository.createQueryBuilder();
+
+        if (take === 'max') {
+          permissionQuery.take(take).skip(skip);
+        }
 
         if (payload === 'all') {
           return await usePagination(permissionQuery, page);

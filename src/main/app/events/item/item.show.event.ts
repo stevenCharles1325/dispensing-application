@@ -31,9 +31,11 @@ export default class ItemShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const itemQuery = ItemRepository.createQueryBuilder('item')
-          .take(take)
-          .skip(skip);
+        const itemQuery = ItemRepository.createQueryBuilder('item');
+
+        if (take === 'max') {
+          itemQuery.take(take).skip(skip);
+        }
 
         if (payload === 'all') {
           return await usePagination(itemQuery, page);

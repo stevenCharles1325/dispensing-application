@@ -30,9 +30,11 @@ export default class UserShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const userQuery = UserRepository.createQueryBuilder('user')
-          .take(take)
-          .skip(skip);
+        const userQuery = UserRepository.createQueryBuilder('user');
+
+        if (take === 'max') {
+          userQuery.take(take).skip(skip);
+        }
 
         if (payload === 'all') {
           return await usePagination(userQuery, page);

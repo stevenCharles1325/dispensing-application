@@ -112,7 +112,7 @@ export default function Inventory() {
     null
   );
   const { displayAlert } = useAlert();
-  const { searchText } = useSearch();
+  const { searchText, setSearchText } = useSearch();
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, itemsPage, itemsPageSize],
@@ -163,6 +163,8 @@ export default function Inventory() {
     getBrands();
     getCategories();
     getSuppliers();
+
+    return () => setSearchText?.('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
