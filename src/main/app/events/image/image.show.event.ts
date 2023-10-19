@@ -34,7 +34,7 @@ export default class ImageShowEvent implements IEvent {
           'image'
         ).leftJoinAndSelect('image.uploader', 'uploader');
 
-        if (take === 'max') {
+        if (take !== 'max') {
           imageQuery.take(take).skip(skip);
         }
 

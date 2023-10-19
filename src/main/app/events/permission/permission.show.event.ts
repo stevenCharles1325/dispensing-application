@@ -33,7 +33,7 @@ export default class PermissionShowEvent implements IEvent {
 
         const permissionQuery = PermissionRepository.createQueryBuilder();
 
-        if (take === 'max') {
+        if (take !== 'max') {
           permissionQuery.take(take).skip(skip);
         }
 

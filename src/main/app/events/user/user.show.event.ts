@@ -32,7 +32,7 @@ export default class UserShowEvent implements IEvent {
 
         const userQuery = UserRepository.createQueryBuilder('user');
 
-        if (take === 'max') {
+        if (take !== 'max') {
           userQuery.take(take).skip(skip);
         }
 

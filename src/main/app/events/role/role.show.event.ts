@@ -32,7 +32,7 @@ export default class RoleShowEvent implements IEvent {
 
         const roleQuery = RoleRepository.createQueryBuilder();
 
-        if (take === 'max') {
+        if (take !== 'max') {
           roleQuery.take(take).skip(skip);
         }
 

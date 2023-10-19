@@ -32,7 +32,7 @@ export default class CategoryShowEvent implements IEvent {
 
         const categoryQuery = CategoryRepository.createQueryBuilder();
 
-        if (take === 'max') {
+        if (take !== 'max') {
           categoryQuery.take(take).skip(skip);
         }
 

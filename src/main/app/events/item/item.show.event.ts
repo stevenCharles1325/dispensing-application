@@ -33,7 +33,7 @@ export default class ItemShowEvent implements IEvent {
 
         const itemQuery = ItemRepository.createQueryBuilder('item');
 
-        if (take === 'max') {
+        if (take !== 'max') {
           itemQuery.take(take).skip(skip);
         }
 

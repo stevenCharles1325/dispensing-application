@@ -32,7 +32,7 @@ export default class BrandShowEvent implements IEvent {
 
         const brandQuery = BrandRepository.createQueryBuilder();
 
-        if (take === 'max') {
+        if (take !== 'max') {
           brandQuery.take(take).skip(skip);
         }
 

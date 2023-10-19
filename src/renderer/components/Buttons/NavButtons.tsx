@@ -10,6 +10,7 @@ export interface INavButtonprops {
   label: string;
   onClick?: () => void;
   redirectPath?: string;
+  disabled?: boolean;
 }
 
 export default function NavButton({
@@ -19,6 +20,7 @@ export default function NavButton({
   label,
   redirectPath,
   onClick,
+  disabled = false,
 }: INavButtonprops) {
   const navigate = useNavigate();
   const color = active ? 'var(--text-color)' : 'white';
@@ -35,6 +37,7 @@ export default function NavButton({
     <div
       className={`bg-transparent flex flex-col items-end py-2 pl-5 ${fontWeight}`}
       style={{ color }}
+      aria-disabled={disabled}
     >
       {active ? (
         <>
@@ -54,8 +57,10 @@ export default function NavButton({
         </>
       ) : (
         <div
-          className="gap-3 bg-transparent rounded-l-full w-full p-5 flex flex-row cursor-pointer pl-[40px]"
-          onClick={handleClick}
+          className={`gap-3 bg-transparent rounded-l-full w-full p-5 flex flex-row cursor-pointer pl-[40px] ${
+            disabled ? 'disabled:opacity-75' : ''
+          }`}
+          onClick={!disabled ? handleClick : undefined}
         >
           <div>{icon}</div>
           <p className="leading-relaxed break-word">{label}</p>

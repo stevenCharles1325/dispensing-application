@@ -44,24 +44,28 @@ export const navigationRoutes: INavButtonprops[] = [
     label: 'Employee Management',
     redirectPath: '/dashboard',
     icon: <BadgeOutlinedIcon />,
+    disabled: true,
   },
   {
     id: 4,
     label: 'Branch Management',
     redirectPath: '/dashboard',
     icon: <StoreMallDirectoryOutlinedIcon />,
+    disabled: true,
   },
   {
     id: 5,
     label: 'Chats',
     redirectPath: '/dashboard',
     icon: <ChatBubbleOutlineOutlinedIcon />,
+    disabled: true,
   },
   {
     id: 6,
     label: 'Settings',
     redirectPath: '/dashboard',
     icon: <TuneOutlinedIcon />,
+    disabled: true,
   },
 ];
 

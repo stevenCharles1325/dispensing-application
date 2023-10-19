@@ -32,7 +32,7 @@ export default class SupplierShowEvent implements IEvent {
 
         const supplierQuery = SupplierRepository.createQueryBuilder();
 
-        if (take === 'max') {
+        if (take !== 'max') {
           supplierQuery.take(take).skip(skip);
         }
 
