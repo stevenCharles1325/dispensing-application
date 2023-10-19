@@ -76,10 +76,11 @@ const columns: Array<GridColDef> = [
 ];
 
 const getItems = async (
-  page = 0,
-  searchText = ''
+  searchText = '',
+  page = 1,
+  total = 15
 ): Promise<IPagination<ItemDTO>> => {
-  const res = await window.item.getItems({ name: searchText }, page);
+  const res = await window.item.getItems({ name: searchText }, page, total);
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
@@ -103,6 +104,8 @@ export default function Inventory() {
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
 
   const [itemsPage, setItemsPage] = useState<number>(0);
+  const [itemsPageSize, setItemsPageSize] = useState<number>(15);
+
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>(
@@ -112,9 +115,10 @@ export default function Inventory() {
   const { searchText } = useSearch();
 
   const { data, refetch: refetchItems } = useQuery({
-    queryKey: ['items', searchText, itemsPage],
+    queryKey: ['items', searchText, itemsPage, itemsPageSize],
     queryFn: async () => {
-      const res = await getItems(itemsPage, searchText);
+      console.log(itemsPage);
+      const res = await getItems(searchText, itemsPage + 1, itemsPageSize);
 
       return res;
     },
@@ -122,18 +126,6 @@ export default function Inventory() {
 
   const items = (data?.data as ItemDTO[]) ?? [];
   const selectedItem = items?.find(({ id }) => id === selectedIds?.[0]) ?? null;
-
-  // const getItems = async () => {
-  //   const res = await window.item.getItems();
-
-  //   console.log(res);
-  //   if (res.status === 'ERROR') {
-  //     return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
-  //   }
-
-  //   const pagination = res.data as IPagination<ItemDTO>;
-  //   setItems(pagination.data);
-  // };
 
   const getCategories = async () => {
     const res = await window.category.getCategories();
@@ -211,7 +203,7 @@ export default function Inventory() {
       <div className="w-full h-fit gap-5 flex flex-row flex-wrap">
         <CounterWidget
           icon={<CategoryOutlinedIcon color="info" fontSize="large" />}
-          count={items.length}
+          count={data?.total}
           label="total items"
         />
         <CounterWidget
@@ -259,17 +251,59 @@ export default function Inventory() {
             disabled={selectedIds.length === 0}
           />
         </div>
-        <DataGrid
-          className="shadow"
-          rows={items}
-          columns={columns}
-          checkboxSelection
-          onRowClick={(row) => console.log(row)}
-          onRowSelectionModelChange={(itemIds) =>
-            setSelectedIds(itemIds as string[])
-          }
-          paginationModel={{ page: itemsPage, pageSize: data?.totalPage ?? 0 }}
-        />
+        {data ? (
+          <DataGrid
+            className="shadow"
+            rows={items}
+            columns={columns}
+            rowCount={data?.total}
+            onRowSelectionModelChange={(itemIds) =>
+              setSelectedIds(itemIds as string[])
+            }
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  page: 0,
+                  pageSize: 15,
+                },
+              },
+            }}
+            pageSizeOptions={[
+              {
+                label: 'Regular',
+                value: 15,
+              },
+              {
+                label: 'Medium',
+                value: 50,
+              },
+              {
+                label: 'Large',
+                value: 100,
+              },
+              {
+                label: 'Half of total',
+                value: (data?.total ?? 100) / 2,
+              },
+              {
+                label: 'All',
+                value: data?.total ?? 100,
+              },
+            ]}
+            paginationModel={{ page: itemsPage, pageSize: itemsPageSize }}
+            onPaginationModelChange={({ page, pageSize }) => {
+              console.log('SWITCHING TO PAGE: ', page);
+              if (page !== itemsPage) {
+                setItemsPage(page);
+              }
+
+              if (pageSize !== itemsPageSize) {
+                setItemsPageSize(pageSize);
+              }
+            }}
+            checkboxSelection
+          />
+        ) : null}
         <Dialog
           open={Boolean(modalAction)}
           onClose={() => setModalAction(null)}

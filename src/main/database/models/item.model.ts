@@ -85,9 +85,6 @@ export class Item {
   selling_price: number;
 
   @Column()
-  @IsPositive({
-    message: ValidationMessage.positive,
-  })
   tax_rate: number;
 
   @Column()

@@ -34,9 +34,9 @@
   ],
   "main": "./src/main/main.ts",
   "scripts": {
-    "dep:binaries:minio:linux": "mkdir -p resources/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
-    "dep:binaries:minio:mac": "mkdir -p resources/mac/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
-    "dep:binaries:minio:win": "mkdir -p resources/win/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:linux": "mkdir -p resources/linux/bin && cd resources/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:mac": "mkdir -p resources/mac/bin && cd resources/mac/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:win": "mkdir -p resources/win/bin && cd resources/win/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
     "dep:binaries:minio": "concurrently \"npm run dep:binaries:minio:linux\" \"npm run dep:binaries:minio:mac\" \"npm run dep:binaries:minio:win\"",
     "migration:refresh": "npm run schema:drop && npm run migration:run",
     "migration:run": "cd release/app && npm run migration:run",

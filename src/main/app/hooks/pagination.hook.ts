@@ -17,6 +17,7 @@ const usePagination: IPaginationHook = async <T>(
 
     const pagination = {
       data: entity,
+      total,
       currentPage: page,
       previousPage: page <= 1 ? null : page - 1,
       nextPage: page >= totalPage ? null : page + 1,
