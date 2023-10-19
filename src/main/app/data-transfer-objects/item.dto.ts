@@ -1,5 +1,6 @@
 import { IItemMeasurement } from 'App/interfaces/item/item.measurements.interface';
 import { IItemStatus } from 'App/interfaces/item/item.status.interface';
+import ImageDTO from './image.dto';
 
 export default interface ItemDTO {
   id: string;
@@ -23,4 +24,6 @@ export default interface ItemDTO {
   created_at: Date;
   updated_at: Date;
   deleted_at: Date | null;
+
+  image: ImageDTO | null;
 }

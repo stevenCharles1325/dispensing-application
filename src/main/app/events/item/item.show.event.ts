@@ -31,7 +31,9 @@ export default class ItemShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const itemQuery = ItemRepository.createQueryBuilder('item');
+        const itemQuery = ItemRepository.createQueryBuilder(
+          'item'
+        ).leftJoinAndSelect('item.image', 'image');
 
         if (take !== 'max') {
           itemQuery.take(take).skip(skip);

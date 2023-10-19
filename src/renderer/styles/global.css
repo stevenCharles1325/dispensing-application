@@ -71,3 +71,13 @@ body {
 .navigation-screen-container {
   box-shadow: 15px 15px 15px rgba(0, 0, 0, 0.3);
 }
+
+.input-number-hidden-buttons input[type=number]::-webkit-inner-spin-button,
+.input-number-hidden-buttons input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+.input-number-hidden-buttons input[type="number"] {
+  -moz-appearance: textfield !important;
+}
