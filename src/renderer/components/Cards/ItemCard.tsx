@@ -18,7 +18,7 @@ export default function ItemCard({ cardInfo, onSelect }: ItemCardParams) {
             alt={cardInfo.image?.name}
             loading="lazy"
             style={{
-              objectFit: 'contain',
+              objectFit: 'cover',
               width: '325px',
               height: '255px',
             }}

@@ -3,7 +3,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable react/function-component-definition */
 /* eslint-disable react/no-unstable-nested-components */
-import { Button, Divider, IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
@@ -121,7 +121,6 @@ export default function Transaction() {
             (itemId) => itemId !== id
           );
 
-          console.log(tempOrders);
           setSelectedItemIds(filteredSelectedIds);
           return setOrders(tempOrders);
         }
@@ -185,77 +184,84 @@ export default function Transaction() {
         </AutoSizer>
       </div>
       <div className="w-[450px] h-full p-3">
-        <div className="w-full h-full rounded-md border p-3 shadow-lg flex flex-col">
+        <div
+          className="w-full h-full rounded-md border p-3 shadow-lg flex flex-col overflow-auto"
+          style={{ backgroundColor: 'var(--bg-color)' }}
+        >
           <div className="grow overflow-auto flex flex-col gap-2">
-            <b style={{ color: 'var(--info-text-color)' }}>ORDERS</b>
-            {selectedItems.map((item) => (
-              <div
-                key={item.id}
-                className="w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden"
-                style={{ backgroundColor: 'var(--bg-color)' }}
-              >
-                <div className="min-w-[80px] w-[80px] h-full">
-                  <img
-                    src={item.image?.url}
-                    alt={item.image?.name}
-                    style={{
-                      objectFit: 'fill',
-                      objectPosition: 'center',
-                      width: '80px',
-                      height: '80px',
-                    }}
-                  />
+            <b style={{ color: 'white' }}>ORDERS</b>
+            <div className="flex flex-col h-fit gap-2">
+              {selectedItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden"
+                  style={{ backgroundColor: 'white' }}
+                >
+                  <div className="min-w-[80px] w-[80px] h-full">
+                    <img
+                      src={item.image?.url}
+                      alt={item.image?.name}
+                      style={{
+                        objectFit: 'cover',
+                        objectPosition: 'center',
+                        width: '80px',
+                        height: '80px',
+                      }}
+                    />
+                  </div>
+                  <div className="shrink min-w-[100px] p-2 capitalize">
+                    <b>{item.name}</b>
+                    <br />
+                    <NumericFormat
+                      className="mb-2 px-1 bg-transparent"
+                      value={item.selling_price}
+                      prefix="₱ "
+                      thousandSeparator
+                      valueIsNumericString
+                      disabled
+                    />
+                  </div>
+                  <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
+                    <IconButton
+                      disabled={orders[item.id] <= 0}
+                      onClick={() =>
+                        handleIterateOrderQuantity('minus', item.id)
+                      }
+                    >
+                      <ChevronLeftIcon />
+                    </IconButton>
+                    <input
+                      className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
+                      value={orders[item.id]}
+                      max={item.stock_quantity}
+                      min={0}
+                      type="number"
+                      onChange={(e) =>
+                        setOrders((userOrders) => ({
+                          ...userOrders,
+                          [item.id]: Number(e.target.value),
+                        }))
+                      }
+                    />
+                    <IconButton
+                      disabled={orders[item.id] >= item.stock_quantity}
+                      onClick={() => handleIterateOrderQuantity('add', item.id)}
+                    >
+                      <ChevronRightIcon />
+                    </IconButton>
+                  </div>
                 </div>
-                <div className="shrink min-w-[100px] p-2 capitalize">
-                  <b className="text-white">{item.name}</b>
-                  <br />
-                  <NumericFormat
-                    className="mb-2 px-1 bg-transparent text-white"
-                    value={item.selling_price}
-                    prefix="₱ "
-                    thousandSeparator
-                    valueIsNumericString
-                    disabled
-                  />
-                </div>
-                <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
-                  <IconButton
-                    disabled={orders[item.id] <= 0}
-                    onClick={() => handleIterateOrderQuantity('minus', item.id)}
-                  >
-                    <ChevronLeftIcon />
-                  </IconButton>
-                  <input
-                    className="input-number-hidden-buttons text-white bg-transparent min-w-[30px] w-fit text-center"
-                    value={orders[item.id]}
-                    max={item.stock_quantity}
-                    min={0}
-                    type="number"
-                    onChange={(e) =>
-                      setOrders((userOrders) => ({
-                        ...userOrders,
-                        [item.id]: Number(e.target.value),
-                      }))
-                    }
-                  />
-                  <IconButton
-                    disabled={orders[item.id] >= item.stock_quantity}
-                    onClick={() => handleIterateOrderQuantity('add', item.id)}
-                  >
-                    <ChevronRightIcon />
-                  </IconButton>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-          <div className="w-full h-[350px] flex flex-col">
+          <div className="w-full h-[350px] flex flex-col text-white">
             <br />
-            <b style={{ color: 'var(--info-text-color)' }}>BILL</b>
+            <b style={{ color: 'white' }}>BILL</b>
             <div className="flex flex-row justify-between">
               <p>Sub-total:</p>
               <div>
                 <NumericFormat
-                  className="mb-2 px-1 bg-transparent w-[100px] text-end"
+                  className="mb-2 px-1 bg-transparent grow text-end"
                   value={subTotal}
                   prefix="₱ "
                   thousandSeparator
@@ -268,7 +274,7 @@ export default function Transaction() {
               <p>{`Tax ${tax ? `${computedTax}%` : ''} (VAT included):`}</p>
               <div>
                 <NumericFormat
-                  className="mb-2 px-1 bg-transparent w-[100px] text-end"
+                  className="mb-2 px-1 bg-transparent grow text-end"
                   value={tax}
                   prefix="₱ "
                   thousandSeparator
@@ -283,7 +289,7 @@ export default function Transaction() {
                 <p>Total:</p>
                 <div>
                   <NumericFormat
-                    className="mb-2 px-1 bg-transparent w-[100px] text-end"
+                    className="mb-2 px-1 bg-transparent grow text-end"
                     value={total}
                     prefix="₱ "
                     thousandSeparator
@@ -293,7 +299,12 @@ export default function Transaction() {
                 </div>
               </div>
 
-              <Button fullWidth variant="outlined" color="secondary">
+              <Button
+                fullWidth
+                variant="contained"
+                color="inherit"
+                sx={{ color: 'black' }}
+              >
                 Place Order
               </Button>
             </div>

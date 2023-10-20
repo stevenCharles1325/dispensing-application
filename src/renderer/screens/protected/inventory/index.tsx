@@ -32,46 +32,55 @@ const columns: Array<GridColDef> = [
     field: 'id',
     headerName: 'ID',
     width: 270,
+    type: 'string',
   },
   {
     field: 'sku',
     headerName: 'SKU (Stock Keeping Unit)',
     flex: 1,
+    type: 'number',
   },
   {
     field: 'name',
     headerName: 'Name',
     flex: 1,
+    type: 'string',
   },
   {
     field: 'stock_quantity',
     headerName: 'Quantity',
     width: 120,
+    type: 'string',
   },
   {
     field: 'cost_price',
     headerName: 'Cost Price (Peso)',
     width: 120,
+    type: 'number',
   },
   {
     field: 'selling_price',
     headerName: 'Selling Price (Peso)',
     width: 120,
+    type: 'number',
   },
   {
     field: 'tax_rate',
     headerName: 'Tax Rate',
     width: 120,
+    type: 'number',
   },
   {
     field: 'unit_of_measurement',
     headerName: 'Unit of Measurement',
     width: 120,
+    type: 'string',
   },
   {
     field: 'status',
     headerName: 'Status',
     width: 170,
+    type: 'string',
   },
 ];
 
@@ -268,6 +277,7 @@ export default function Inventory() {
                 },
               },
             }}
+            sortingOrder={['asc', 'desc']}
             pageSizeOptions={[
               {
                 label: 'Regular',
