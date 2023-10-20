@@ -6,7 +6,6 @@ import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import ItemRepository from 'App/repositories/item.repository';
-import { Item } from 'Main/database/models/item.model';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 
 export default class ItemCreateEvent implements IEvent {

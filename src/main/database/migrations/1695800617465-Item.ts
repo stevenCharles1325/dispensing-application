@@ -67,14 +67,14 @@ export class Item1695800617464 implements MigrationInterface {
           },
           {
             name: 'cost_price',
-            type: 'int',
+            type: 'real',
             isNullable: false,
             default: 0,
             comment: 'The cost of acquiring the item from the supplier.',
           },
           {
             name: 'selling_price',
-            type: 'int',
+            type: 'real',
             isNullable: false,
             default: 0,
             comment: 'The price at which the item is sold to customers.',
@@ -83,7 +83,8 @@ export class Item1695800617464 implements MigrationInterface {
             name: 'tax_rate',
             type: 'int',
             isNullable: false,
-            comment: 'The price at which the item is sold to customers.',
+            comment:
+              'The price at which the item is sold to customers. (percentage)',
           },
           {
             name: 'unit_of_measurement',

@@ -10,6 +10,7 @@ const message = {
   date: 'Date is invalid',
   notEmpty: 'Value must not be empty',
   mobileNumber: 'PH mobile number is invalid',
+  isIn: 'Invalid value, must be any of the following: $constraint1',
   measurements: 'Item measurement must be any of the following: $constraint1',
   status: 'Status must be in $constraint1',
   invalid: 'Value is invalid',

@@ -200,11 +200,13 @@ export default function InventoryForm({
   const [errors, setErrors] = useState<Record<string, any>>({});
   const [imageFile, setImageFile] = useState<ImageDTO | null>();
   const [form, dispatch] = useReducer(formReducer, initialForm);
-  const [isReady] = useFieldRequired(form, [
+  const [isReady, emptyFields] = useFieldRequired(form, [
     'image_id',
     'system_id',
     'tax_rate',
   ]);
+
+  console.log('Empty fields:', emptyFields);
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
   >('add-new');

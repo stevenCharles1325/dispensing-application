@@ -221,6 +221,113 @@ const permissions = [
     kebab: 'delete-attendance',
   },
 
+  // Transaction management permissions
+  // Customer Payment permissions
+  {
+    name: 'View Customer Payment',
+    kebab: 'view-customer-payment',
+  },
+  {
+    name: 'Create Customer Payment',
+    kebab: 'create-customer-payment',
+  },
+  {
+    name: 'Update Customer Payment',
+    kebab: 'update-customer-payment',
+  },
+  {
+    name: 'Archive Customer Payment',
+    kebab: 'archive-customer-payment',
+  },
+  {
+    name: 'Delete Customer Payment',
+    kebab: 'delete-customer-payment',
+  },
+  // Refund permissions
+  {
+    name: 'View Refund',
+    kebab: 'view-refund',
+  },
+  {
+    name: 'Create Refund',
+    kebab: 'create-refund',
+  },
+  {
+    name: 'Update Refund',
+    kebab: 'update-refund',
+  },
+  {
+    name: 'Archive Refund',
+    kebab: 'archive-refund',
+  },
+  {
+    name: 'Delete Refund',
+    kebab: 'delete-refund',
+  },
+  // Bill permissions
+  {
+    name: 'View Bill',
+    kebab: 'view-bill',
+  },
+  {
+    name: 'Create Bill',
+    kebab: 'create-bill',
+  },
+  {
+    name: 'Update Bill',
+    kebab: 'update-bill',
+  },
+  {
+    name: 'Archive Bill',
+    kebab: 'archive-bill',
+  },
+  {
+    name: 'Delete Bill',
+    kebab: 'delete-bill',
+  },
+  // Salary permissions
+  {
+    name: 'View Salary',
+    kebab: 'view-salary',
+  },
+  {
+    name: 'Create Salary',
+    kebab: 'create-salary',
+  },
+  {
+    name: 'Update Salary',
+    kebab: 'update-salary',
+  },
+  {
+    name: 'Archive Salary',
+    kebab: 'archive-salary',
+  },
+  {
+    name: 'Delete Salary',
+    kebab: 'delete-salary',
+  },
+  // Restocking permissions
+  {
+    name: 'View Restocking',
+    kebab: 'view-restocking',
+  },
+  {
+    name: 'Create Restocking',
+    kebab: 'create-restocking',
+  },
+  {
+    name: 'Update Restocking',
+    kebab: 'update-restocking',
+  },
+  {
+    name: 'Archive Restocking',
+    kebab: 'archive-restocking',
+  },
+  {
+    name: 'Delete Restocking',
+    kebab: 'delete-restocking',
+  },
+
   // Data/Peer/Graph management permissions
   {
     name: 'View Data',

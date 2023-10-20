@@ -3,7 +3,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable react/function-component-definition */
 /* eslint-disable react/no-unstable-nested-components */
-import { Button, IconButton, Switch, styled } from '@mui/material';
+import { Button, Chip, IconButton, Switch, styled } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
@@ -15,6 +15,8 @@ import { NumericFormat } from 'react-number-format';
 import { AutoSizer, List } from 'react-virtualized';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import POSMenu from 'UI/components/Menu/PosMenu';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -214,137 +216,122 @@ export default function Transaction() {
   );
 
   return (
-    <div className="w-full h-full flex">
-      <div className="grow min-w-[800px]">
-        <AutoSizer>
-          {({ height, width }) => {
-            const cardsPerRow = Math.floor(width / CARD_WIDTH) || 1;
-            const rowCount = Math.ceil(items.length / cardsPerRow);
-
-            return (
-              <div>
-                <List
-                  width={width}
-                  height={height}
-                  rowCount={rowCount}
-                  rowHeight={CARD_HEIGHT}
-                  rowRenderer={(params) =>
-                    rowRenderer({ ...params, cardsPerRow })
-                  }
-                />
-              </div>
-            );
-          }}
-        </AutoSizer>
-      </div>
-      <div className="w-[450px] h-full p-3">
-        <div
-          className="w-full h-full rounded-md border p-3 shadow-lg flex flex-col overflow-auto"
-          style={{ backgroundColor: 'var(--bg-color)' }}
-        >
-          <div className="grow overflow-auto flex flex-col gap-2">
-            <b style={{ color: 'white' }}>ORDERS</b>
-            <div className="flex flex-col h-fit gap-2">
-              {selectedItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden"
-                  style={{ backgroundColor: 'white' }}
-                >
-                  <div className="min-w-[80px] w-[80px] h-full">
-                    <img
-                      src={item.image?.url}
-                      alt={item.image?.name}
-                      style={{
-                        objectFit: 'cover',
-                        objectPosition: 'center',
-                        width: '80px',
-                        height: '80px',
-                      }}
-                    />
-                  </div>
-                  <div className="shrink min-w-[100px] p-2 capitalize">
-                    <b>{item.name}</b>
-                    <br />
-                    <NumericFormat
-                      className="mb-2 px-1 bg-transparent"
-                      value={item.selling_price}
-                      prefix="₱ "
-                      thousandSeparator
-                      valueIsNumericString
-                      disabled
-                    />
-                  </div>
-                  <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
-                    <IconButton
-                      disabled={orders[item.id] <= 0}
-                      onClick={() =>
-                        handleIterateOrderQuantity('minus', item.id)
-                      }
-                    >
-                      <ChevronLeftIcon />
-                    </IconButton>
-                    <input
-                      className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
-                      value={orders[item.id]}
-                      max={item.stock_quantity}
-                      min={0}
-                      type="number"
-                      onChange={(e) =>
-                        setOrders((userOrders) => ({
-                          ...userOrders,
-                          [item.id]: Number(e.target.value),
-                        }))
-                      }
-                    />
-                    <IconButton
-                      disabled={orders[item.id] >= item.stock_quantity}
-                      onClick={() => handleIterateOrderQuantity('add', item.id)}
-                    >
-                      <ChevronRightIcon />
-                    </IconButton>
-                  </div>
-                </div>
-              ))}
-            </div>
+    <>
+      <div className="w-full h-full flex">
+        <div className="grow min-w-[800px] flex flex-col">
+          <div className="w-full h-[50px]">
+            <Chip
+              label="Category"
+              icon={<ExpandMoreIcon />}
+              color="secondary"
+              variant="outlined"
+              onClick={}
+              className="shadow-md border"
+            />
           </div>
-          <div className="w-full h-[350px] flex flex-col text-white">
-            <br />
-            <b style={{ color: 'white' }}>BILL</b>
-            <div className="flex flex-row justify-between">
-              <p>Sub-total:</p>
-              <div>
-                <NumericFormat
-                  className="mb-2 px-1 bg-transparent grow text-end"
-                  value={subTotal}
-                  prefix="₱ "
-                  thousandSeparator
-                  valueIsNumericString
-                  disabled
-                />
+          <div className="grow">
+            <AutoSizer>
+              {({ height, width }) => {
+                const cardsPerRow = Math.floor(width / CARD_WIDTH) || 1;
+                const rowCount = Math.ceil(items.length / cardsPerRow);
+
+                return (
+                  <div>
+                    <List
+                      width={width}
+                      height={height}
+                      rowCount={rowCount}
+                      rowHeight={CARD_HEIGHT}
+                      rowRenderer={(params) =>
+                        rowRenderer({ ...params, cardsPerRow })
+                      }
+                    />
+                  </div>
+                );
+              }}
+            </AutoSizer>
+          </div>
+        </div>
+        <div className="w-[450px] h-full p-3">
+          <div
+            className="w-full h-full rounded-md border p-3 shadow-lg flex flex-col overflow-auto"
+            style={{ backgroundColor: 'var(--bg-color)' }}
+          >
+            <div className="grow overflow-auto flex flex-col gap-2">
+              <b style={{ color: 'white' }}>ORDERS</b>
+              <div className="flex flex-col h-fit gap-2">
+                {selectedItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden"
+                    style={{ backgroundColor: 'white' }}
+                  >
+                    <div className="min-w-[80px] w-[80px] h-full">
+                      <img
+                        src={item.image?.url}
+                        alt={item.image?.name}
+                        style={{
+                          objectFit: 'cover',
+                          objectPosition: 'center',
+                          width: '80px',
+                          height: '80px',
+                        }}
+                      />
+                    </div>
+                    <div className="shrink min-w-[100px] p-2 capitalize">
+                      <b>{item.name}</b>
+                      <br />
+                      <NumericFormat
+                        className="mb-2 px-1 bg-transparent"
+                        value={item.selling_price}
+                        prefix="₱ "
+                        thousandSeparator
+                        valueIsNumericString
+                        disabled
+                      />
+                    </div>
+                    <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
+                      <IconButton
+                        disabled={orders[item.id] <= 0}
+                        onClick={() =>
+                          handleIterateOrderQuantity('minus', item.id)
+                        }
+                      >
+                        <ChevronLeftIcon />
+                      </IconButton>
+                      <input
+                        className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
+                        value={orders[item.id]}
+                        max={item.stock_quantity}
+                        min={0}
+                        type="number"
+                        onChange={(e) =>
+                          setOrders((userOrders) => ({
+                            ...userOrders,
+                            [item.id]: Number(e.target.value),
+                          }))
+                        }
+                      />
+                      <IconButton
+                        disabled={orders[item.id] >= item.stock_quantity}
+                        onClick={() => handleIterateOrderQuantity('add', item.id)}
+                      >
+                        <ChevronRightIcon />
+                      </IconButton>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex flex-row justify-between">
-              <p>{`Tax ${tax ? `${computedTax}%` : ''} (VAT included):`}</p>
-              <div>
-                <NumericFormat
-                  className="mb-2 px-1 bg-transparent grow text-end"
-                  value={tax}
-                  prefix="₱ "
-                  thousandSeparator
-                  valueIsNumericString
-                  disabled
-                />
-              </div>
-            </div>
-            <br />
-            <div className="grow w-full border-dashed border-t-4 py-3 flex flex-col justify-between">
+            <div className="w-full h-[350px] flex flex-col text-white">
+              <br />
+              <b style={{ color: 'white' }}>BILL</b>
               <div className="flex flex-row justify-between">
-                <p>Total:</p>
+                <p>Sub-total:</p>
                 <div>
                   <NumericFormat
                     className="mb-2 px-1 bg-transparent grow text-end"
-                    value={total}
+                    value={subTotal}
                     prefix="₱ "
                     thousandSeparator
                     valueIsNumericString
@@ -352,35 +339,65 @@ export default function Transaction() {
                   />
                 </div>
               </div>
-
               <div className="flex flex-row justify-between">
+                <p>{`Tax ${tax ? `${computedTax}%` : ''} (VAT included):`}</p>
                 <div>
-                  <p>Payment Method:</p>
-                  <div className="flex flex-row justify-start items-center">
-                    <p className="text-sm text-gray-600">Cash</p>
-                    <PaymentUISwitch
-                      checked={checked}
-                      onChange={(e) => setChecked(e.target.checked)}
-                    />
-                    <p className="text-sm text-gray-600">Card</p>
-                  </div>
-                </div>
-                <div>
-                  <p>{selectedPaymentMethod}</p>
+                  <NumericFormat
+                    className="mb-2 px-1 bg-transparent grow text-end"
+                    value={tax}
+                    prefix="₱ "
+                    thousandSeparator
+                    valueIsNumericString
+                    disabled
+                  />
                 </div>
               </div>
-              <Button
-                fullWidth
-                variant="contained"
-                color="inherit"
-                sx={{ color: 'black' }}
-              >
-                Place Order
-              </Button>
+              <br />
+              <div className="grow w-full border-dashed border-t-4 py-3 flex flex-col justify-between">
+                <div className="flex flex-row justify-between">
+                  <p>Total:</p>
+                  <div>
+                    <NumericFormat
+                      className="mb-2 px-1 bg-transparent grow text-end"
+                      value={total}
+                      prefix="₱ "
+                      thousandSeparator
+                      valueIsNumericString
+                      disabled
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-row justify-between">
+                  <div>
+                    <p>Payment Method:</p>
+                    <div className="flex flex-row justify-start items-center">
+                      <p className="text-sm text-gray-600">Cash</p>
+                      <PaymentUISwitch
+                        checked={checked}
+                        onChange={(e) => setChecked(e.target.checked)}
+                      />
+                      <p className="text-sm text-gray-600">Card</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p>{selectedPaymentMethod}</p>
+                  </div>
+                </div>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="inherit"
+                  sx={{ color: 'black' }}
+                >
+                  Place Order
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <POSMenu />
+    </>
   );
 }
