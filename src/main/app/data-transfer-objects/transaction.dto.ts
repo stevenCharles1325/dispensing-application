@@ -1,3 +1,4 @@
+import { IPaymentTypes } from 'App/interfaces/transaction/payment/payment.methods.interface';
 import { System } from 'Main/database/models/system.model';
 import { User } from 'Main/database/models/user.model';
 
@@ -15,6 +16,8 @@ export interface IncomeDTO {
   category: 'income';
 
   type: 'customer-payment';
+
+  method: IPaymentTypes;
 
   total: number;
 
@@ -45,6 +48,8 @@ export interface ExpenseDTO {
   type: 'refund' | 'bill' | 'salary' | 'restocking';
 
   total: number;
+
+  method: IPaymentTypes;
 
   item_details: string;
 

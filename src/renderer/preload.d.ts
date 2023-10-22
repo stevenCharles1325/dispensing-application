@@ -4,6 +4,7 @@ import {
   CategoryHandler,
   ImageHandler,
   ItemHandler,
+  PaymentHandler,
   PeerHandler,
   SupplierHandler,
   UserHandler,
@@ -20,6 +21,7 @@ declare global {
     brand: BrandHandler;
     category: CategoryHandler;
     supplier: SupplierHandler;
+    payment: PaymentHandler;
   }
 }
 

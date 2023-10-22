@@ -4,6 +4,7 @@ import {
   Entity,
   OneToOne,
   JoinColumn,
+  BeforeUpdate,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
@@ -23,6 +24,15 @@ import { IsBarcode } from './validator/IsBarcode';
 
 @Entity('items')
 export class Item {
+  @BeforeUpdate()
+  updateStatus() {
+    if (this.stock_quantity <= 0) {
+      this.status = 'out-of-stock';
+    } else if (this.stock_quantity > 0 && this.status === 'out-of-stock') {
+      this.status = 'available';
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -143,4 +153,9 @@ export class Item {
   @OneToOne(() => System, { eager: true })
   @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })
   system: System;
+
+  // Custom functions
+  purchase(quantity: number = 1) {
+    this.stock_quantity -= quantity;
+  }
 }

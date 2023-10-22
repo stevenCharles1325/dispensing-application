@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable import/prefer-default-export */
 import {
   Column,
@@ -7,6 +9,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
+  AfterInsert,
 } from 'typeorm';
 import { IsIn, IsPositive, IsNotEmpty } from 'class-validator';
 import { ValidationMessage } from './validator/message/message';
@@ -15,9 +18,27 @@ import { User } from './user.model';
 import transactionCategories from 'Main/data/defaults/categories/transaction';
 import transactionTypes from 'Main/data/defaults/types/transaction';
 import paymentTypes from 'Main/data/defaults/types/payment';
+import { IOrderDetails } from 'App/interfaces/pos/pos.order-details.interface';
+import ItemRepository from 'App/repositories/item.repository';
 
 @Entity('transactions')
 export class Transaction {
+  @AfterInsert()
+  async updatePurchasedItem() {
+    if (this.category === 'income' && this.type === 'customer-payment') {
+      const purchase: IOrderDetails = JSON.parse(this.item_details);
+
+      for await (const purchasedItem of purchase.items) {
+        const item = await ItemRepository.findOneByOrFail({
+          id: purchasedItem.id,
+        });
+
+        item.purchase(purchasedItem.quantity);
+        await ItemRepository.save(item);
+      }
+    }
+  }
+
   @PrimaryGeneratedColumn('increment')
   id: number;
 

@@ -44,6 +44,7 @@ export default class PaymentCreateEvent implements IEvent {
             recipient_name: 'regular-customer',
             category: 'income',
             type: 'customer-payment',
+            method: 'cash',
             total: order.total,
             item_details: JSON.stringify(order),
           };
@@ -72,6 +73,12 @@ export default class PaymentCreateEvent implements IEvent {
         }
 
         // To add payment for 'card' and 'e-wallet'
+
+        return {
+          errors: ['Payment method is not supported yet'],
+          code: 'REQ_INVALID',
+          status: 'ERROR',
+        } as unknown as IResponse<string[]>;
       }
 
       return {

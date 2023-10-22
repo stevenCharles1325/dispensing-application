@@ -1,6 +1,6 @@
 import { IPaymentTypes } from '../transaction/payment/payment.methods.interface';
 
-interface IDesiredItems {
+export interface IDesiredItems {
   id: string;
   price: number;
   quantity: number;

@@ -14,6 +14,7 @@ import ImageDTO from 'App/data-transfer-objects/image.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import bucketNames from 'src/globals/object-storage/bucket-names';
+import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -226,7 +227,7 @@ const imageHandler = {
 
 /* ================================
 +
-+       IMAGE EVENT HANDLER
++       SUPPLIER EVENT HANDLER
 +
 + ================================ */
 const supplierHandler = {
@@ -260,6 +261,42 @@ const supplierHandler = {
     ipcRenderer.invoke('supplier:delete', id),
 };
 
+/* ================================
++
++       PAYMENT EVENT HANDLER
++
++ ================================ */
+const paymentHandler = {
+  // getSuppliers: async (
+  //   payload: Record<string, any | any[]> | string = 'all',
+  //   page: number = 1,
+  //   total: number | 'max' = 15
+  // ): Promise<IResponse<string[] | IPOSError[] | IPagination<SupplierDTO>>> =>
+  //   ipcRenderer.invoke('supplier:show', payload, page, total),
+
+  createPayment: async (
+    payload: PaymentDTO
+  ): Promise<
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | PaymentDTO[]>
+  > => ipcRenderer.invoke('payment:create', payload),
+
+  // updateSupplier: async (
+  //   id: number,
+  //   payload: Partial<SupplierDTO>
+  // ): Promise<IResponse<string[] | IPOSError[] | SupplierDTO>> =>
+  //   ipcRenderer.invoke('supplier:update', id, payload),
+
+  // archiveSupplier: async (
+  //   id: number
+  // ): Promise<IResponse<string[] | IPOSError[]>> =>
+  //   ipcRenderer.invoke('supplier:archive', id),
+
+  // deleteSupplier: async (
+  //   id: number | number[]
+  // ): Promise<IResponse<string[] | IPOSError[]>> =>
+  //   ipcRenderer.invoke('supplier:delete', id),
+};
+
 // EXPOSING HANDLERS
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
@@ -269,6 +306,7 @@ contextBridge.exposeInMainWorld('brand', brandHandler);
 contextBridge.exposeInMainWorld('image', imageHandler);
 contextBridge.exposeInMainWorld('category', categoryHandler);
 contextBridge.exposeInMainWorld('supplier', supplierHandler);
+contextBridge.exposeInMainWorld('payment', paymentHandler);
 
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
@@ -278,3 +316,4 @@ export type ImageHandler = typeof imageHandler;
 export type BrandHandler = typeof brandHandler;
 export type CategoryHandler = typeof categoryHandler;
 export type SupplierHandler = typeof supplierHandler;
+export type PaymentHandler = typeof paymentHandler;

@@ -12,7 +12,7 @@ export default function ItemCard({ cardInfo, onSelect }: ItemCardParams) {
   return (
     <div className="w-[325px] h-[460px] py-2">
       <div className="w-full h-full rounded border shadow flex flex-col overflow-hidden">
-        <div className="w-full h-[255px] bg-gray-300">
+        <div className="w-full h-[255px] bg-gray-300 relative">
           <img
             src={cardInfo.image?.url}
             alt={cardInfo.image?.name}
@@ -23,6 +23,13 @@ export default function ItemCard({ cardInfo, onSelect }: ItemCardParams) {
               height: '255px',
             }}
           />
+          {cardInfo.status !== 'available' ? (
+            <div className="absolute top-0 w-full h-full flex justify-center items-center bg-slate-800/50">
+              <div>
+                <Chip label={cardInfo.status} color="error" size="medium" />
+              </div>
+            </div>
+          ) : null}
         </div>
         <div className="grow p-3 flex flex-row justify-between">
           <div className="grow">
@@ -52,7 +59,10 @@ export default function ItemCard({ cardInfo, onSelect }: ItemCardParams) {
             />
           </div>
           <div className="w-[70px] flex flex-col justify-end items-end">
-            <IconButton onClick={() => onSelect(cardInfo.id)}>
+            <IconButton
+              disabled={cardInfo.status !== 'available'}
+              onClick={() => onSelect(cardInfo.id)}
+            >
               <AddCircleOutlineOutlinedIcon color="secondary" />
             </IconButton>
           </div>

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable consistent-return */
 /* eslint-disable default-param-last */
 /* eslint-disable no-plusplus */
@@ -18,6 +19,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import POSMenu from 'UI/components/Menu/PosMenu';
 import CategoryDTO from 'App/data-transfer-objects/category.dto';
+import { IOrderDetails } from 'App/interfaces/pos/pos.order-details.interface';
+import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -111,8 +114,8 @@ export default function Transaction() {
   const [categoryIds, setCategoryIds] = useState<Array<number>>([]);
 
   // Payment switch
-  const [checked, setChecked] = useState(true);
-  const selectedPaymentMethod = checked ? 'Card' : 'Cash';
+  const [checked, setChecked] = useState(false);
+  const selectedPaymentMethod = checked ? 'card' : 'cash';
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, categoryIds],
@@ -139,6 +142,7 @@ export default function Transaction() {
       ) ?? []
     );
   }, [data, searchText]);
+
   const categories = useMemo(
     () => (categs?.data as CategoryDTO[]) ?? [],
     [categs]
@@ -150,7 +154,8 @@ export default function Transaction() {
     }
 
     return [];
-  }, [items, selectedItemIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItemIds]);
 
   const subTotal = useMemo(() => {
     const ids = Object.keys(orders);
@@ -179,6 +184,39 @@ export default function Transaction() {
   }, [computedTax, selectedItems.length, subTotal]);
 
   const total = subTotal - tax;
+
+  const orderDetails: IOrderDetails = useMemo(
+    () => ({
+      items: selectedItems.map(({ id, selling_price, tax_rate }) => ({
+        id,
+        price: selling_price,
+        quantity: orders[id],
+        tax: tax_rate,
+      })),
+      total,
+      payment_method: selectedPaymentMethod,
+      discount: 0, // To be included soon
+    }),
+    [selectedItems, total, selectedPaymentMethod, orders]
+  );
+
+  const handlePurchaseItem = useCallback(async () => {
+    if (!orderDetails.items.length) {
+      return displayAlert?.('No item to be purchased', 'error');
+    }
+
+    const res = await window.payment.createPayment(orderDetails);
+
+    if (res.status === 'ERROR') {
+      const errorMessage = res.errors?.[0] as unknown as string;
+      return displayAlert?.(errorMessage, 'error');
+    }
+
+    setSelectedItemIds([]);
+    refetchItems();
+    displayAlert?.('Purchased successfully', 'success');
+    return res.data as unknown as IPagination<PaymentDTO>;
+  }, [orderDetails, displayAlert, refetchItems]);
 
   const handleSelectItem = useCallback(
     (id: string) => {
@@ -427,7 +465,7 @@ export default function Transaction() {
                     </div>
                   </div>
                   <div>
-                    <p>{selectedPaymentMethod}</p>
+                    <p className="capitalize">{selectedPaymentMethod}</p>
                   </div>
                 </div>
                 <Button
@@ -435,6 +473,7 @@ export default function Transaction() {
                   variant="contained"
                   color="inherit"
                   sx={{ color: 'black' }}
+                  onClick={() => handlePurchaseItem()}
                 >
                   Place Order
                 </Button>
