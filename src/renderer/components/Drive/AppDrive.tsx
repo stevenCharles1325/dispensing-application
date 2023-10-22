@@ -325,6 +325,7 @@ export default function AppDrive({
             loading="lazy"
             style={{
               aspectRatio: 'auto',
+              objectFit: 'cover',
             }}
           />
         )}

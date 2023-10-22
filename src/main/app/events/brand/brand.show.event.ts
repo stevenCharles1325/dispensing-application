@@ -46,9 +46,9 @@ export default class BrandShowEvent implements IEvent {
             if (!(propertyFind as any)?.length) continue;
 
             if (propertyFind instanceof Array) {
-              brandQuery.where(`${propertyName} IN (:...args)`, {
-                args: propertyFind,
-              });
+              brandQuery
+                .where(`${propertyName} IN (:...${propertyName})`)
+                .setParameter(propertyName, propertyFind);
             } else {
               brandQuery
                 .where(`${propertyName} LIKE :${propertyName}`)

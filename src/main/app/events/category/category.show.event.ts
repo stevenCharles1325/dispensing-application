@@ -46,9 +46,9 @@ export default class CategoryShowEvent implements IEvent {
             if (!(propertyFind as any)?.length) continue;
 
             if (propertyFind instanceof Array) {
-              categoryQuery.where(`${propertyName} IN (:...args)`, {
-                args: propertyFind,
-              });
+              categoryQuery
+                .where(`${propertyName} IN (:...${propertyName})`)
+                .setParameter(propertyName, propertyFind);
             } else {
               categoryQuery
                 .where(`${propertyName} LIKE :${propertyName}`)

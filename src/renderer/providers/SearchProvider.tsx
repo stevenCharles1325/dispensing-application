@@ -1,6 +1,5 @@
 import React, { createContext, useMemo, useState } from 'react';
 import str from 'string-sanitizer';
-import debounce from 'lodash.debounce';
 
 interface ISearchContext {
   searchText: string;
@@ -12,13 +11,15 @@ export const SearchContext = createContext<Partial<ISearchContext>>({});
 export default function SearchProvider({ children }: React.PropsWithChildren) {
   const [searchText, setSearchText] = useState('');
 
-  const debouncedSetSearchText = (text: string) =>
-    setSearchText(str.sanitize.keepSpace(text));
+  const handleSearchText = (text: string) => {
+    const txt = str.sanitize.keepSpace(text);
+    setSearchText(txt);
+  };
 
   const value = useMemo(
     () => ({
       searchText,
-      setSearchText: debouncedSetSearchText,
+      setSearchText: handleSearchText,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchText]

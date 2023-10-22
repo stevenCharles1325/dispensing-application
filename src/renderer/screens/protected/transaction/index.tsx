@@ -10,13 +10,14 @@ import IPagination from 'App/interfaces/pagination/pagination.interface';
 import ItemCard from 'UI/components/Cards/ItemCard';
 import useAlert from 'UI/hooks/useAlert';
 import useSearch from 'UI/hooks/useSearch';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 import { AutoSizer, List } from 'react-virtualized';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import POSMenu from 'UI/components/Menu/PosMenu';
+import CategoryDTO from 'App/data-transfer-objects/category.dto';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -72,8 +73,15 @@ const PaymentUISwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-const getItems = async (searchText = ''): Promise<IPagination<ItemDTO>> => {
-  const res = await window.item.getItems({ name: searchText }, 0, 'max');
+const getItems = async (
+  searchText = '',
+  categoryIds: Array<number>
+): Promise<IPagination<ItemDTO>> => {
+  const res = await window.item.getItems(
+    { name: searchText, category_id: categoryIds },
+    0,
+    'max'
+  );
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
@@ -83,26 +91,58 @@ const getItems = async (searchText = ''): Promise<IPagination<ItemDTO>> => {
   return res.data as IPagination<ItemDTO>;
 };
 
+const getCategories = async (): Promise<IPagination<CategoryDTO>> => {
+  const res = await window.category.getCategories('all', 0, 'max');
+
+  if (res.status === 'ERROR') {
+    const errorMessage = res.errors?.[0] as unknown as string;
+    throw new Error(errorMessage);
+  }
+
+  return res.data as unknown as IPagination<CategoryDTO>;
+};
+
 export default function Transaction() {
   const { displayAlert } = useAlert();
-  const { searchText, setSearchText } = useSearch();
+  const { searchText } = useSearch();
   const [selectedItemIds, setSelectedItemIds] = useState<Array<string>>([]);
   const [orders, setOrders] = useState<Record<string, number>>({});
+  const [posMenuAnchorEl, setPosMenuAnchorEl] = useState<HTMLElement | null>();
+  const [categoryIds, setCategoryIds] = useState<Array<number>>([]);
 
   // Payment switch
   const [checked, setChecked] = useState(true);
   const selectedPaymentMethod = checked ? 'Card' : 'Cash';
 
   const { data, refetch: refetchItems } = useQuery({
-    queryKey: ['items', searchText],
+    queryKey: ['items', searchText, categoryIds],
     queryFn: async () => {
-      const res = await getItems(searchText);
+      const res = await getItems(searchText, categoryIds);
 
       return res;
     },
   });
 
-  const items = useMemo(() => (data?.data as ItemDTO[]) ?? [], [data]);
+  const { data: categs } = useQuery({
+    queryKey: ['categories', searchText],
+    queryFn: async () => {
+      const res = await getCategories();
+
+      return res;
+    },
+  });
+
+  const items = useMemo(() => {
+    return (
+      data?.data.filter(({ name }) =>
+        name.toLowerCase().includes(searchText?.toLowerCase() ?? '')
+      ) ?? []
+    );
+  }, [data, searchText]);
+  const categories = useMemo(
+    () => (categs?.data as CategoryDTO[]) ?? [],
+    [categs]
+  );
 
   const selectedItems = useMemo(() => {
     if (items && items.length && selectedItemIds.length) {
@@ -215,6 +255,10 @@ export default function Transaction() {
     [handleSelectItem, items]
   );
 
+  const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
+    setPosMenuAnchorEl(event.currentTarget);
+  };
+
   return (
     <>
       <div className="w-full h-full flex">
@@ -225,7 +269,7 @@ export default function Transaction() {
               icon={<ExpandMoreIcon />}
               color="secondary"
               variant="outlined"
-              onClick={}
+              onClick={handleFilterClick}
               className="shadow-md border"
             />
           </div>
@@ -314,7 +358,9 @@ export default function Transaction() {
                       />
                       <IconButton
                         disabled={orders[item.id] >= item.stock_quantity}
-                        onClick={() => handleIterateOrderQuantity('add', item.id)}
+                        onClick={() =>
+                          handleIterateOrderQuantity('add', item.id)
+                        }
                       >
                         <ChevronRightIcon />
                       </IconButton>
@@ -397,7 +443,13 @@ export default function Transaction() {
           </div>
         </div>
       </div>
-      <POSMenu />
+      <POSMenu
+        list={categories}
+        anchorEl={posMenuAnchorEl}
+        open={Boolean(posMenuAnchorEl)}
+        onChange={(ids) => setCategoryIds(ids as Array<number>)}
+        onClose={() => setPosMenuAnchorEl(null)}
+      />
     </>
   );
 }

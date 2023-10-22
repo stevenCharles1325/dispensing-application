@@ -46,9 +46,9 @@ export default class SupplierShowEvent implements IEvent {
             if (!(propertyFind as any)?.length) continue;
 
             if (propertyFind instanceof Array) {
-              supplierQuery.where(`${propertyName} IN (:...args)`, {
-                args: propertyFind,
-              });
+              supplierQuery
+                .where(`${propertyName} IN (:...${propertyName})`)
+                .setParameter(propertyName, propertyFind);
             } else {
               supplierQuery
                 .where(`${propertyName} LIKE :${propertyName}`)

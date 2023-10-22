@@ -48,9 +48,9 @@ export default class ImageShowEvent implements IEvent {
             if (!(propertyFind as any)?.length) continue;
 
             if (propertyFind instanceof Array) {
-              imageQuery.where(`image.${propertyName} IN (:...args)`, {
-                args: propertyFind,
-              });
+              imageQuery
+                .where(`image.${propertyName} IN (:...${propertyName})`)
+                .setParameter(propertyName, propertyFind);
             } else {
               imageQuery
                 .where(`image.${propertyName} LIKE :${propertyName}`)

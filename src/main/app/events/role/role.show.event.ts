@@ -46,9 +46,9 @@ export default class RoleShowEvent implements IEvent {
             if (!(propertyFind as any)?.length) continue;
 
             if (propertyFind instanceof Array) {
-              roleQuery.where(`${propertyName} IN (:...args)`, {
-                args: propertyFind,
-              });
+              roleQuery
+                .where(`${propertyName} IN (:...${propertyName})`)
+                .setParameter(propertyName, propertyFind);
             } else {
               roleQuery
                 .where(`${propertyName} LIKE :${propertyName}`)

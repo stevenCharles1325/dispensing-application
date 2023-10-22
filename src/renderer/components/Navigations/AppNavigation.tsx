@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
 import { IconButton } from '@mui/material';
@@ -19,6 +19,7 @@ import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import useSearch from 'UI/hooks/useSearch';
+import debounce from 'lodash.debounce';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -72,6 +73,15 @@ export const navigationRoutes: INavButtonprops[] = [
 export default function AppNavigation({ children }: React.PropsWithChildren) {
   const [activeRouteId, setActiveRouteId] = useState(0);
   const { searchText, setSearchText } = useSearch();
+  const [text, setText] = useState(searchText ?? '');
+
+  const debouncedSearch = debounce((txtStr) => setSearchText?.(txtStr), 500);
+
+  const handleDebouncedSearching = useCallback(
+    (txt: string) => debouncedSearch(txt),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   return (
     <div className="w-screen h-screen bg-transparent flex flex-row leading-normal">
@@ -100,7 +110,10 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
             rightIcon={
               <IconButton
                 disabled={!searchText?.length}
-                onClick={() => setSearchText?.('')}
+                onClick={() => {
+                  setText('');
+                  setSearchText?.('');
+                }}
               >
                 {searchText?.length ? <CloseOutlinedIcon /> : null}
               </IconButton>
@@ -108,8 +121,11 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
             placeholder="Search"
             width={300}
             height="full"
-            value={searchText ?? ''}
-            onChange={(e) => setSearchText?.(e.target.value)}
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              handleDebouncedSearching(e.target.value);
+            }}
           />
           <div className="w-[100px] flex justify-between items-center">
             <IconButton>

@@ -49,9 +49,9 @@ export default class ItemShowEvent implements IEvent {
             if (!(propertyFind as any)?.length) continue;
 
             if (propertyFind instanceof Array) {
-              itemQuery.where(`item.${propertyName} IN (:...${propertyName})`, {
-                propertyName: propertyFind,
-              });
+              itemQuery
+                .where(`item.${propertyName} IN (:...${propertyName})`)
+                .setParameter(propertyName, propertyFind);
             } else {
               itemQuery
                 .where(`item.${propertyName} LIKE :${propertyName}`)

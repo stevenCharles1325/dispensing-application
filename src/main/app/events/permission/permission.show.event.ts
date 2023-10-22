@@ -47,9 +47,9 @@ export default class PermissionShowEvent implements IEvent {
             if (!(propertyFind as any)?.length) continue;
 
             if (propertyFind instanceof Array) {
-              permissionQuery.where(`${propertyName} IN (:...args)`, {
-                args: propertyFind,
-              });
+              permissionQuery
+                .where(`${propertyName} IN (:...${propertyName})`)
+                .setParameter(propertyName, propertyFind);
             } else {
               permissionQuery
                 .where(`${propertyName} LIKE :${propertyName}`)

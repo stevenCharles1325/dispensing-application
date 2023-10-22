@@ -634,6 +634,9 @@ export default function InventoryForm({
                     {imageFile ? (
                       <img
                         className="w-full h-full"
+                        style={{
+                          objectFit: 'cover',
+                        }}
                         src={imageFile?.url}
                         alt={imageFile?.name}
                       />

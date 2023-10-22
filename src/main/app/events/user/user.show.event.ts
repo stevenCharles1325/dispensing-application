@@ -46,9 +46,9 @@ export default class UserShowEvent implements IEvent {
             if (!(propertyFind as any)?.length) continue;
 
             if (propertyFind instanceof Array) {
-              userQuery.where(`user.${propertyName} IN (:...args)`, {
-                args: propertyFind,
-              });
+              userQuery
+                .where(`user.${propertyName} IN (:...${propertyName})`)
+                .setParameter(propertyName, propertyFind);
             } else {
               userQuery
                 .where(`user.${propertyName} LIKE :${propertyName}`)
