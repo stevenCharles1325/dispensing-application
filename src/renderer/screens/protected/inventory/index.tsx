@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable consistent-return */
 /* eslint-disable jsx-a11y/label-has-associated-control */
@@ -29,16 +30,12 @@ import useSearch from 'UI/hooks/useSearch';
 
 const columns: Array<GridColDef> = [
   {
-    field: 'id',
-    headerName: 'ID',
-    width: 270,
-    type: 'string',
-  },
-  {
     field: 'sku',
     headerName: 'SKU (Stock Keeping Unit)',
-    flex: 1,
+    width: 220,
     type: 'number',
+    align: 'left',
+    headerAlign: 'left',
   },
   {
     field: 'name',
@@ -49,19 +46,19 @@ const columns: Array<GridColDef> = [
   {
     field: 'stock_quantity',
     headerName: 'Quantity',
-    width: 120,
+    width: 100,
     type: 'string',
   },
   {
     field: 'cost_price',
     headerName: 'Cost Price (Peso)',
-    width: 120,
+    width: 190,
     type: 'number',
   },
   {
     field: 'selling_price',
     headerName: 'Selling Price (Peso)',
-    width: 120,
+    width: 190,
     type: 'number',
   },
   {
@@ -73,7 +70,7 @@ const columns: Array<GridColDef> = [
   {
     field: 'unit_of_measurement',
     headerName: 'Unit of Measurement',
-    width: 120,
+    width: 190,
     type: 'string',
   },
   {
@@ -81,6 +78,18 @@ const columns: Array<GridColDef> = [
     headerName: 'Status',
     width: 170,
     type: 'string',
+    renderCell: (params) => (
+      <Chip
+        label={params.value}
+        color={
+          params.value === 'available'
+            ? 'success'
+            : params.value === 'out-of-stock'
+            ? 'error'
+            : 'warning'
+        }
+      />
+    ),
   },
 ];
 
