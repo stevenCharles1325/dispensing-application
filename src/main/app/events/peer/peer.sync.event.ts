@@ -17,14 +17,15 @@ export default class PeerSyncEvent implements IEvent {
   public async listener({
     event,
     eventData,
-    storage,
+    localStorage,
+    globalStorage,
   }: IEventListenerProperties): Promise<
     IResponse<Partial<UserDTO> | IPOSError[] | any>
   > {
     // eslint-disable-next-line no-undef
     const data: PeerDataContract = eventData.payload[0];
     const authService = Provider.ioc<IAuthService>('AuthProvider');
-    const events: Record<string, IListener> = storage.get('POS_EVENTS');
+    const events: Record<string, IListener> = localStorage.get('POS_EVENTS');
 
     // Mannually verifies the token
     const authResponse = authService.verifyToken(eventData.user.token);
@@ -101,7 +102,8 @@ export default class PeerSyncEvent implements IEvent {
                     token: data.token,
                   },
                 },
-                storage,
+                localStorage,
+                globalStorage,
               });
 
               if (response.status === 'SUCCESS') {

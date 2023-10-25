@@ -5,5 +5,6 @@ import IStorage from '../storage/storage.interface';
 export default interface IEventListenerProperties {
   event: IpcMainInvokeEvent;
   eventData: IEventDataProperties;
-  storage: IStorage;
+  localStorage: IStorage;
+  globalStorage: IStorage;
 }

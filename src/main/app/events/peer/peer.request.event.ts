@@ -12,7 +12,8 @@ export default class PeerRequestEvent implements IEvent {
   public async listener({
     event,
     eventData,
-    storage,
+    localStorage,
+    globalStorage,
   }: IEventListenerProperties): Promise<
     IResponse<
       | string[]
@@ -26,7 +27,7 @@ export default class PeerRequestEvent implements IEvent {
     try {
       // eslint-disable-next-line no-undef
       const data: PeerDataContract = eventData.payload[0];
-      const events: Record<string, IListener> = storage.get('POS_EVENTS');
+      const events: Record<string, IListener> = localStorage.get('POS_EVENTS');
       const desiredEvent =
         events?.[data.response?.name ?? data.request?.name ?? ''];
 
@@ -56,7 +57,8 @@ export default class PeerRequestEvent implements IEvent {
               token: data.token,
             },
           },
-          storage,
+          localStorage,
+          globalStorage,
         });
 
         return {
@@ -98,7 +100,8 @@ export default class PeerRequestEvent implements IEvent {
             token: data.token,
           },
         },
-        storage,
+        localStorage,
+        globalStorage,
       });
 
       const payload = {

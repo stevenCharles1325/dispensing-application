@@ -9,6 +9,7 @@ import {
 export class AuditTrailSubscriber implements EntitySubscriberInterface {
   afterInsert(event: InsertEvent<any>): void | Promise<any> {
     // To audit here...
+    
   }
 
   afterUpdate(event: UpdateEvent<any>): void | Promise<any> {

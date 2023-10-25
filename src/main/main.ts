@@ -29,7 +29,6 @@ import IAuthService from 'App/interfaces/service/service.auth.interface';
 import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
-import policies from './data/defaults/object-storage/policies';
 import bucketNames from 'src/globals/object-storage/bucket-names';
 
 // Initializing .ENV

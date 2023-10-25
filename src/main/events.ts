@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { ipcMain } from 'electron';
-import { ALSStorage } from './stores';
+import { ALSStorage, GlobalStorage } from './stores';
 
 import IEvent from './app/interfaces/event/event.interface';
 import IListener from './app/interfaces/event/event.listener.interface';
@@ -26,7 +26,8 @@ export default function () {
 
   if (eventsObject) {
     const flattenEvents = objectToFlattenArray(eventsObject);
-    const storage = ALSStorage();
+    const localStorage = ALSStorage();
+    const globalStorage = GlobalStorage();
 
     const events: Record<string, IListener> = {};
 
@@ -44,7 +45,11 @@ export default function () {
           return middlewares[`${middlewareFileName}.middleware`];
         }) || [];
 
-      const listener = applyMiddleware(middlewareList, event.listener);
+      const listener = applyMiddleware(
+        middlewareList,
+        event.channel,
+        event.listener
+      );
       console.log('Initializing event channel: ', event.channel);
 
       events[event.channel] = listener as unknown as IListener;
@@ -57,10 +62,11 @@ export default function () {
           },
         };
 
-        return listener({ event: e, eventData, storage });
+        return listener({ event: e, eventData, localStorage, globalStorage });
       });
     });
 
-    storage.set('POS_EVENTS', events);
+    localStorage.set('POS_EVENTS', events);
+    globalStorage.set('POS_EVENTS', events);
   }
 }

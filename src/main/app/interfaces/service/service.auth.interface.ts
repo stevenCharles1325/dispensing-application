@@ -26,7 +26,7 @@ export default interface IAuthService extends IService {
   revoke(this: any): Promise<IResponse<IPOSError[] | string[] | null>>;
   verifyToken(
     this: any,
-    token?: string
+    token?: string | null
   ): IResponse<Partial<UserDTO> | string[] | IPOSError[]>;
   generateToken(this: any): [string, string];
 
