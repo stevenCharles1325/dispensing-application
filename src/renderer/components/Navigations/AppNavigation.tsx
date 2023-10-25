@@ -5,6 +5,8 @@ import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
 import { IconButton } from '@mui/material';
 import Input from '../TextField/Input';
+import useSearch from 'UI/hooks/useSearch';
+import debounce from 'lodash.debounce';
 
 // Icons
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
@@ -18,8 +20,7 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import useSearch from 'UI/hooks/useSearch';
-import debounce from 'lodash.debounce';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -42,24 +43,9 @@ export const navigationRoutes: INavButtonprops[] = [
   },
   {
     id: 3,
-    label: 'Employee Management',
-    redirectPath: '/dashboard',
-    icon: <BadgeOutlinedIcon />,
-    disabled: true,
-  },
-  {
-    id: 4,
-    label: 'Branch Management',
-    redirectPath: '/dashboard',
-    icon: <StoreMallDirectoryOutlinedIcon />,
-    disabled: true,
-  },
-  {
-    id: 5,
-    label: 'Chats',
-    redirectPath: '/dashboard',
-    icon: <ChatBubbleOutlineOutlinedIcon />,
-    disabled: true,
+    label: 'Logs & History',
+    redirectPath: '/logs',
+    icon: <ArticleOutlinedIcon />,
   },
   {
     id: 6,

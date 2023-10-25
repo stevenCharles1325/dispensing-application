@@ -18,6 +18,9 @@ type IResponseCode =
   | 'REQ_ERR'
   | 'REQ_INVALID' // If local action does not exist
   | 'REQ_UNAUTH' // If local user is not authorized to perform the action
+  | 'AUDIT_OK'
+  | 'AUDIT_WAIT'
+  | 'AUDIT_ERR'
   | 'SYS_ERR';
 
 export default IResponseCode;

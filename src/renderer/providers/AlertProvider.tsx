@@ -70,6 +70,7 @@ export default function AlertProvider({ children }: React.PropsWithChildren) {
             textTransform: 'capitalize',
           },
           '& .MuiSnackbarContent-message': {
+            textTransform: 'lowercase',
             width: '100%',
           },
         }}

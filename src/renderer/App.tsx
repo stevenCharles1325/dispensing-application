@@ -14,6 +14,7 @@ import Inventory from './screens/protected/inventory';
 
 import './styles/global.css';
 import Transaction from './screens/protected/transaction';
+import Logs from './screens/protected/logs';
 
 const router = createMemoryRouter(
   createRoutesFromElements(
@@ -27,6 +28,7 @@ const router = createMemoryRouter(
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="transaction" element={<Transaction />} />
+        <Route path="logs" element={<Logs />} />
       </Route>
 
       <Route path="/sign-in" element={<SignIn />} />
