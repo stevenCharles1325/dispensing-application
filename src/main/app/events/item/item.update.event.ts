@@ -28,7 +28,6 @@ export default class ItemDeleteEvent implements IEvent {
       const { user } = eventData;
       const id = eventData.payload[0];
       const itemUpdate: Item = eventData.payload[1];
-
       const requesterHasPermission = user.hasPermission?.('update-item');
 
       if (requesterHasPermission) {
@@ -69,7 +68,7 @@ export default class ItemDeleteEvent implements IEvent {
           resource_id_type: 'uuid',
           action: 'update',
           status: 'SUCCEEDED',
-          description: `User ${user.fullName} has successfully deleted an Item`,
+          description: `User ${user.fullName} has successfully updated an Item`,
         });
 
         return {
@@ -86,7 +85,7 @@ export default class ItemDeleteEvent implements IEvent {
         resource_id_type: 'uuid',
         action: 'update',
         status: 'FAILED',
-        description: `User ${user.fullName} has failed to delete an Item`,
+        description: `User ${user.fullName} has failed to update an Item`,
       });
 
       return {

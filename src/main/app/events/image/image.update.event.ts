@@ -50,7 +50,7 @@ export default class ImageDeleteEvent implements IEvent {
           resource_id_type: 'integer',
           action: 'update',
           status: 'SUCCEEDED',
-          description: `User ${user.fullName} has successfully deleted an Image`,
+          description: `User ${user.fullName} has successfully updated an Image`,
         });
 
         return {
@@ -67,7 +67,7 @@ export default class ImageDeleteEvent implements IEvent {
         resource_id_type: 'integer',
         action: 'update',
         status: 'FAILED',
-        description: `User ${user.fullName} has failed to delete an Image`,
+        description: `User ${user.fullName} has failed to update an Image`,
       });
 
       return {

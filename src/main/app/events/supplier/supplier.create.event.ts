@@ -7,6 +7,8 @@ import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
+import { Supplier } from 'Main/database/models/supplier.model';
+import { Bull } from 'Main/jobs';
 
 export default class SupplierCreateEvent implements IEvent {
   public channel: string = 'supplier:create';
@@ -21,11 +23,12 @@ export default class SupplierCreateEvent implements IEvent {
     >
   > {
     try {
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('create-supplier');
+      const { user } = eventData;
+      const payload: Supplier = eventData.payload[0];
+      const requesterHasPermission = user.hasPermission?.('create-supplier');
 
       if (requesterHasPermission) {
-        const supplier = SupplierRepository.create(eventData.payload[0]);
+        const supplier = SupplierRepository.create(payload);
         const errors = await validator(supplier);
 
         console.log(errors);
@@ -37,9 +40,18 @@ export default class SupplierCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await SupplierRepository.save(
-          supplier
-        )) as unknown as SupplierDTO;
+        const data: Supplier = await SupplierRepository.save(supplier);
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: data.id,
+          resource_table: 'suppliers',
+          resource_id_type: 'uuid',
+          action: 'create',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully created a new Supplier`,
+        });
+
         console.log('CREATED A CATEGORY');
         return {
           data,
@@ -47,6 +59,14 @@ export default class SupplierCreateEvent implements IEvent {
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'suppliers',
+        action: 'create',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to create a new Supplier`,
+      });
 
       return {
         errors: ['You are not allowed to create a Supplier'],

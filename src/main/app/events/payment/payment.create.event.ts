@@ -35,7 +35,7 @@ export default class PaymentCreateEvent implements IEvent {
         const personnel = await UserRepository.findOneByOrFail({
           id: user.id,
         });
-        const order: IOrderDetails = eventData.payload[0];
+        const order: IOrderDetails = payload;
 
         if (order.payment_method === 'cash') {
           const orderTransaction: Omit<

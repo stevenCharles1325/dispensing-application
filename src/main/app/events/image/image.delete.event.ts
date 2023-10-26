@@ -22,7 +22,7 @@ export default class ImageDeleteEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const id: ImageDTO['id'] | Image['id'] = eventData.payload[0];
+      const id: Image['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('delete-image');
 
       if (requesterHasPermission) {

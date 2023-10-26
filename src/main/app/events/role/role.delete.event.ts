@@ -22,7 +22,7 @@ export default class RoleDeleteEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const payload: RoleDTO['id'] | Role['id'] = eventData.payload[0];
+      const payload: Role['id'] = eventData.payload[0];
       const requesterHasPermission =
         eventData.user.hasPermission?.('delete-role');
 

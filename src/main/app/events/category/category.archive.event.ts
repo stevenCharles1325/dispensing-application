@@ -20,7 +20,7 @@ export default class CategoryArchiveEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const id: CategoryDTO['id'] | Category['id'] = eventData.payload[0];
+      const id: Category['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('archive-category');
 
       if (requesterHasPermission) {

@@ -23,7 +23,7 @@ export default class CategoryDeleteEvent implements IEvent {
     try {
       const { user } = eventData;
       const id = eventData.payload[0];
-      const categoryUpdate: CategoryDTO | Category = eventData.payload[1];
+      const categoryUpdate: Category = eventData.payload[1];
       const requesterHasPermission = user.hasPermission?.('update-category');
 
       if (requesterHasPermission) {

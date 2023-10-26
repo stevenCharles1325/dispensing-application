@@ -21,7 +21,7 @@ export default class BrandArchiveEvent implements IEvent {
     try {
       // Copy these
       const { user } = eventData;
-      const id: BrandDTO['id'] | Brand['id'] = eventData.payload[0];
+      const id: Brand['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('archive-brand');
 
       if (requesterHasPermission) {

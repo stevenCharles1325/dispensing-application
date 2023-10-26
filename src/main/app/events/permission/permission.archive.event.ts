@@ -21,7 +21,7 @@ export default class PermissionArchiveEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const id: PermissionDTO['id'] | Permission['id'] = eventData.payload[0];
+      const id: Permission['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('archive-permission');
 
       if (requesterHasPermission) {

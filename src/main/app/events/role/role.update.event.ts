@@ -23,7 +23,7 @@ export default class UserDeleteEvent implements IEvent {
     try {
       const { user } = eventData;
       const id = eventData.payload[0];
-      const roleUpdate: RoleDTO | Role = eventData.payload[1];
+      const roleUpdate: Role = eventData.payload[1];
 
       const requesterHasPermission = user.hasPermission?.('update-role');
 
@@ -49,10 +49,10 @@ export default class UserDeleteEvent implements IEvent {
           resource_id_type: 'integer',
           action: 'update',
           status: 'SUCCEEDED',
-          description: `User ${user.fullName} has successfully deleted a Role`,
+          description: `User ${user.fullName} has successfully updated a Role`,
         });
 
-        const data: RoleDTO = await RoleRepository.save(updatedRole);
+        const data: Role = await RoleRepository.save(updatedRole);
 
         return {
           data,
@@ -68,7 +68,7 @@ export default class UserDeleteEvent implements IEvent {
         resource_id_type: 'integer',
         action: 'update',
         status: 'FAILED',
-        description: `User ${user.fullName} has failed to delete a Role`,
+        description: `User ${user.fullName} has failed to update a Role`,
       });
 
       return {

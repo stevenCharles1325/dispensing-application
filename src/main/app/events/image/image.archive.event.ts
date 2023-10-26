@@ -20,7 +20,7 @@ export default class ImageArchiveEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const id: ImageDTO['id'] | Image['id'] = eventData.payload[0];
+      const id: Image['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('archive-image');
 
       if (requesterHasPermission) {

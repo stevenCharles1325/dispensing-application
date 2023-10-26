@@ -20,7 +20,7 @@ export default class ItemArchiveEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const id: ItemDTO['id'] | Item['id'] = eventData.payload[0];
+      const id: Item['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('archive-item');
 
       if (requesterHasPermission) {

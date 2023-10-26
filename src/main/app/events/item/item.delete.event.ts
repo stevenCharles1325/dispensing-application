@@ -21,7 +21,7 @@ export default class ItemDeleteEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const payload: ItemDTO['id'] | Item['id'] = eventData.payload[0];
+      const payload: Item['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('delete-item');
 
       if (requesterHasPermission) {

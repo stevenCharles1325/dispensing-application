@@ -24,7 +24,7 @@ export default class CategoryCreateEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const payload: CategoryDTO | Category = eventData.payload[0];
+      const payload: Category = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('create-category');
 
       if (requesterHasPermission) {
@@ -40,7 +40,7 @@ export default class CategoryCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data: CategoryDTO = await CategoryRepository.save(category);
+        const data: Category = await CategoryRepository.save(category);
 
         await Bull('AUDIT_JOB', {
           user_id: user.id as number,

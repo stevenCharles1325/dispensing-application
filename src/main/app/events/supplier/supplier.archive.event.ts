@@ -20,7 +20,7 @@ export default class SupplierArchiveEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const id: SupplierDTO['id'] | Supplier['id'] = eventData.payload[0];
+      const id: Supplier['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('archive-supplier');
 
       if (requesterHasPermission) {

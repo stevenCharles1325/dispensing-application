@@ -22,7 +22,7 @@ export default class RoleArchiveEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const id: RoleDTO['id'] | Brand['id'] = eventData.payload[0];
+      const id: Brand['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('archive-role');
 
       if (requesterHasPermission) {

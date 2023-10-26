@@ -22,7 +22,7 @@ export default class RoleCreateEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const payload: RoleDTO | Role = eventData.payload[0];
+      const payload: Role = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('create-role');
 
       if (requesterHasPermission) {
@@ -38,7 +38,7 @@ export default class RoleCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await RoleRepository.save(role)) as unknown as RoleDTO;
+        const data: Role = await RoleRepository.save(role);
 
         await Bull('AUDIT_JOB', {
           user_id: user.id as number,

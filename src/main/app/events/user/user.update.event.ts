@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
@@ -8,6 +9,7 @@ import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
 import UserRepository from 'App/repositories/user.repository';
 import { User } from 'Main/database/models/user.model';
+import { Bull } from 'Main/jobs';
 
 export default class UserDeleteEvent implements IEvent {
   public channel: string = 'user:update';
@@ -20,17 +22,18 @@ export default class UserDeleteEvent implements IEvent {
     IResponse<string[] | IPOSError[] | UserDTO | any>
   > {
     try {
+      const { user } = eventData;
       const id = eventData.payload[0];
-      const userUpdate = eventData.payload[1];
+      const userUpdate: User = eventData.payload[1];
 
       const requesterHasPermission =
         eventData.user.hasPermission?.('update-user');
 
       if (requesterHasPermission) {
-        const user = await UserRepository.findOneByOrFail({
+        const _user = await UserRepository.findOneByOrFail({
           id,
         });
-        const updatedUser = UserRepository.merge(user, userUpdate);
+        const updatedUser = UserRepository.merge(_user, userUpdate);
         const errors = await validator(updatedUser);
 
         if (errors.length) {
@@ -41,15 +44,34 @@ export default class UserDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await UserRepository.save(
-          updatedUser
-        )) as unknown as UserDTO;
+        const data: User = await UserRepository.save(updatedUser);
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: id.toString(),
+          resource_table: 'users',
+          resource_id_type: 'integer',
+          action: 'update',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully updated a User`,
+        });
+
         return {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_id: id.toString(),
+        resource_table: 'users',
+        resource_id_type: 'integer',
+        action: 'update',
+        status: 'FAILED',
+        description: `User ${user.fullName} has failed to update a User`,
+      });
 
       return {
         errors: ['You are not allowed to update a User'],

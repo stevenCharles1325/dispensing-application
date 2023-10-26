@@ -48,7 +48,7 @@ export default class BrandDeleteEvent implements IEvent {
           resource_id_type: 'integer',
           action: 'update',
           status: 'SUCCEEDED',
-          description: `User ${user.fullName} has successfully deleted a Brand`,
+          description: `User ${user.fullName} has successfully updated a Brand`,
         });
 
         const data = await BrandRepository.save(updatedBrand);
@@ -66,7 +66,7 @@ export default class BrandDeleteEvent implements IEvent {
         resource_id_type: 'integer',
         action: 'update',
         status: 'FAILED',
-        description: `User ${user.fullName} has failed to delete a Brand`,
+        description: `User ${user.fullName} has failed to update a Brand`,
       });
 
       return {

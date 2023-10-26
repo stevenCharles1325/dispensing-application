@@ -23,7 +23,7 @@ export default class BrandDeleteEvent implements IEvent {
     try {
       // Copy these
       const { user } = eventData;
-      const payload: BrandDTO['id'] | Brand['id'] = eventData.payload[0];
+      const payload: Brand['id'] = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('delete-brand');
 
       if (requesterHasPermission) {

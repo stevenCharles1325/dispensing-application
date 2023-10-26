@@ -23,7 +23,7 @@ export default class BrandCreateEvent implements IEvent {
     try {
       // Copy these
       const { user } = eventData;
-      const payload: BrandDTO | Brand = eventData.payload[0];
+      const payload: Brand = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('create-brand');
 
       if (requesterHasPermission) {
