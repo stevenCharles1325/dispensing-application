@@ -8,6 +8,7 @@ import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
 import ImageRepository from 'App/repositories/image.repository';
 import { Image } from 'Main/database/models/image.model';
+import { Bull } from 'Main/jobs';
 
 export default class ImageDeleteEvent implements IEvent {
   public channel: string = 'image:update';
@@ -20,11 +21,10 @@ export default class ImageDeleteEvent implements IEvent {
     IResponse<string[] | IPOSError[] | ImageDTO | any>
   > {
     try {
+      const { user } = eventData;
       const id = eventData.payload[0];
-      const imageUpdate = eventData.payload[1];
-
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('update-image');
+      const imageUpdate: Image = eventData.payload[1];
+      const requesterHasPermission = user.hasPermission?.('update-image');
 
       if (requesterHasPermission) {
         const image = await ImageRepository.findOneByOrFail({
@@ -42,12 +42,33 @@ export default class ImageDeleteEvent implements IEvent {
         }
 
         const data = await ImageRepository.save(updatedImage);
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: id.toString(),
+          resource_table: 'images',
+          resource_id_type: 'integer',
+          action: 'update',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully deleted an Image`,
+        });
+
         return {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_id: id.toString(),
+        resource_table: 'images',
+        resource_id_type: 'integer',
+        action: 'update',
+        status: 'FAILED',
+        description: `User ${user.fullName} has failed to delete an Image`,
+      });
 
       return {
         errors: ['You are not allowed to update a Image'],

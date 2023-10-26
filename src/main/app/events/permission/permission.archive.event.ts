@@ -1,3 +1,4 @@
+import PermissionDTO from 'App/data-transfer-objects/permission.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
@@ -6,6 +7,7 @@ import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interfa
 import handleError from 'App/modules/error-handler.module';
 import { Permission } from 'Main/database/models/permission.model';
 import { SqliteDataSource } from 'Main/datasource';
+import { Bull } from 'Main/jobs';
 
 export default class PermissionArchiveEvent implements IEvent {
   public channel: string = 'permission:archive';
@@ -18,12 +20,23 @@ export default class PermissionArchiveEvent implements IEvent {
     IResponse<string[] | IPOSError[] | any>
   > {
     try {
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('archive-permission');
+      const { user } = eventData;
+      const id: PermissionDTO['id'] | Permission['id'] = eventData.payload[0];
+      const requesterHasPermission = user.hasPermission?.('archive-permission');
 
       if (requesterHasPermission) {
         const permissionRepo = SqliteDataSource.getRepository(Permission);
-        const data = await permissionRepo.softDelete(eventData.payload[0]);
+        const data = await permissionRepo.softDelete(id);
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: id.toString(),
+          resource_table: 'permissions',
+          resource_id_type: 'integer',
+          action: 'archive',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully archived a Permission`,
+        });
 
         return {
           data,
@@ -31,6 +44,14 @@ export default class PermissionArchiveEvent implements IEvent {
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'permissions',
+        action: 'archive',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to archive a Permission`,
+      });
 
       return {
         errors: ['You are not allowed to archive a Permission'],

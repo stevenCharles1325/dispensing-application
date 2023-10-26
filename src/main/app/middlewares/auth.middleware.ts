@@ -28,6 +28,8 @@ const authMiddleware: IMiddleware<IPOSError[] | void> = ({
     const hasPermission = authService.hasPermission.bind(this, user);
 
     eventData.user.id = user.id;
+    eventData.user.fullName =
+      user?.fullName?.() ?? `${user.first_name} ${user.last_name}`;
     eventData.user.hasPermission = hasPermission;
     return next();
   }

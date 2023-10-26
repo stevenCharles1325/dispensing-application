@@ -8,6 +8,7 @@ import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
 import BrandRepository from 'App/repositories/brand.repository';
 import { Brand } from 'Main/database/models/brand.model';
+import { Bull } from 'Main/jobs';
 
 export default class BrandDeleteEvent implements IEvent {
   public channel: string = 'brand:update';
@@ -20,11 +21,10 @@ export default class BrandDeleteEvent implements IEvent {
     IResponse<string[] | IPOSError[] | BrandDTO | any>
   > {
     try {
+      const { user } = eventData;
       const id = eventData.payload[0];
-      const brandUpdate = eventData.payload[1];
-
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('update-brand');
+      const brandUpdate: BrandDTO | Brand = eventData.payload[1];
+      const requesterHasPermission = user.hasPermission?.('update-brand');
 
       if (requesterHasPermission) {
         const brand = await BrandRepository.findOneByOrFail({
@@ -41,6 +41,16 @@ export default class BrandDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: id.toString(),
+          resource_table: 'brands',
+          resource_id_type: 'integer',
+          action: 'update',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully deleted a Brand`,
+        });
+
         const data = await BrandRepository.save(updatedBrand);
         return {
           data,
@@ -48,6 +58,16 @@ export default class BrandDeleteEvent implements IEvent {
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_id: id.toString(),
+        resource_table: 'brands',
+        resource_id_type: 'integer',
+        action: 'update',
+        status: 'FAILED',
+        description: `User ${user.fullName} has failed to delete a Brand`,
+      });
 
       return {
         errors: ['You are not allowed to update a Brand'],

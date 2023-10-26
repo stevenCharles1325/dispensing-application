@@ -18,7 +18,7 @@ export default interface IAuthService extends IService {
   readonly encryptor: typeof bcrypt;
   readonly stores: Array<IStorage | any>;
 
-  authentication(
+  authenticate(
     this: any,
     email: string,
     password: string
@@ -31,7 +31,7 @@ export default interface IAuthService extends IService {
   generateToken(this: any): [string, string];
 
   setAuthUser(this: any, payload: IAuth<UserDTO>): void;
-  getAuthUser(this: any): Partial<UserDTO>;
+  getAuthUser(this: any): IAuth<UserDTO>['user'];
 
   getAuthToken(this: any): IAuth<UserDTO>;
 

@@ -8,6 +8,7 @@ import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
 import RoleRepository from 'App/repositories/role.repository';
 import { Role } from 'Main/database/models/role.model';
+import { Bull } from 'Main/jobs';
 
 export default class UserDeleteEvent implements IEvent {
   public channel: string = 'role:update';
@@ -20,11 +21,11 @@ export default class UserDeleteEvent implements IEvent {
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | RoleDTO | any>
   > {
     try {
+      const { user } = eventData;
       const id = eventData.payload[0];
-      const roleUpdate = eventData.payload[1];
+      const roleUpdate: RoleDTO | Role = eventData.payload[1];
 
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('update-role');
+      const requesterHasPermission = user.hasPermission?.('update-role');
 
       if (requesterHasPermission) {
         const role = await RoleRepository.findOneByOrFail({
@@ -41,15 +42,34 @@ export default class UserDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await RoleRepository.save(
-          updatedRole
-        )) as unknown as RoleDTO;
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: id.toString(),
+          resource_table: 'roles',
+          resource_id_type: 'integer',
+          action: 'update',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully deleted a Role`,
+        });
+
+        const data: RoleDTO = await RoleRepository.save(updatedRole);
+
         return {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_id: id.toString(),
+        resource_table: 'roles',
+        resource_id_type: 'integer',
+        action: 'update',
+        status: 'FAILED',
+        description: `User ${user.fullName} has failed to delete a Role`,
+      });
 
       return {
         errors: ['You are not allowed to update a Role'],

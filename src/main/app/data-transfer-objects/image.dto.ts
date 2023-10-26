@@ -9,5 +9,5 @@ export default interface ImageDTO {
   name: string;
   created_at: Date;
   deleted_at: Date;
-  uploader: UserDTO;
+  uploader?: User | UserDTO;
 }

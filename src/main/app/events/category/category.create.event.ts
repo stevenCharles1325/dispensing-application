@@ -7,6 +7,8 @@ import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import CategoryDTO from 'App/data-transfer-objects/category.dto';
+import { Category } from 'Main/database/models/category.model';
+import { Bull } from 'Main/jobs';
 
 export default class CategoryCreateEvent implements IEvent {
   public channel: string = 'category:create';
@@ -21,12 +23,12 @@ export default class CategoryCreateEvent implements IEvent {
     >
   > {
     try {
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('create-category');
+      const { user } = eventData;
+      const payload: CategoryDTO | Category = eventData.payload[0];
+      const requesterHasPermission = user.hasPermission?.('create-category');
 
       if (requesterHasPermission) {
-        console.log(eventData.payload);
-        const category = CategoryRepository.create(eventData.payload[0]);
+        const category = CategoryRepository.create(payload);
         const errors = await validator(category);
 
         console.log(errors);
@@ -38,9 +40,17 @@ export default class CategoryCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await CategoryRepository.save(
-          category
-        )) as unknown as CategoryDTO;
+        const data: CategoryDTO = await CategoryRepository.save(category);
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: data.id.toString(),
+          resource_table: 'categories',
+          resource_id_type: 'integer',
+          action: 'create',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully created a new Category`,
+        });
 
         console.log('CREATED A CATEGORY');
         return {
@@ -49,6 +59,14 @@ export default class CategoryCreateEvent implements IEvent {
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'categories',
+        action: 'create',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to create a new Category`,
+      });
 
       return {
         errors: ['You are not allowed to create a Category'],

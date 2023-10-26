@@ -1,7 +1,7 @@
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import { validate } from 'class-validator';
 
-export default async function validator(model: object) {
+export default async function validator(this: any, model: object) {
   const validationErrors = await validate(model);
   let errors: Array<IPOSValidationError | null> = [];
 

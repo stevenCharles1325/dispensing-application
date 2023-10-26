@@ -9,7 +9,7 @@ export class AuditTrail1698132562574 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'audit_trail',
+        name: 'audit_trails',
         columns: [
           {
             name: 'id',
@@ -43,44 +43,24 @@ export class AuditTrail1698132562574 implements MigrationInterface {
           {
             name: 'resource_id',
             type: 'varchar',
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: 'resource_id_type',
             type: 'varchar',
             enum: ['uuid', 'integer'],
-            isNullable: false,
-          },
-          {
-            name: 'resource_field',
-            type: 'varchar',
-            isNullable: false,
-          },
-          {
-            name: 'old_value',
-            type: 'varchar',
-            isNullable: false,
-          },
-          {
-            name: 'old_value_type',
-            type: 'varchar',
-            enum: ['string', 'number', 'boolean', 'object'],
-            isNullable: false,
-          },
-          {
-            name: 'new_value',
-            type: 'varchar',
-            isNullable: false,
-          },
-          {
-            name: 'new_value_type',
-            type: 'varchar',
-            enum: ['string', 'number', 'boolean', 'object'],
-            isNullable: false,
+            default: "'uuid'",
+            isNullable: true,
           },
           {
             name: 'action',
             type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'status',
+            type: 'varchar',
+            enum: ['SUCCEEDED', 'FAILED'],
             isNullable: false,
           },
           {
@@ -93,7 +73,7 @@ export class AuditTrail1698132562574 implements MigrationInterface {
     );
 
     await queryRunner.createForeignKey(
-      'audit_trail',
+      'audit_trails',
       new TableForeignKey({
         name: 'user',
         columnNames: ['user_id'],
@@ -106,7 +86,7 @@ export class AuditTrail1698132562574 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('audit_trail', 'user');
-    await queryRunner.dropTable('audit_trail');
+    await queryRunner.dropForeignKey('audit_trails', 'user');
+    await queryRunner.dropTable('audit_trails');
   }
 }

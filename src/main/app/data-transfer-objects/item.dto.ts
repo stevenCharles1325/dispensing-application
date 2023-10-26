@@ -1,14 +1,15 @@
 import { IItemMeasurement } from 'App/interfaces/item/item.measurements.interface';
 import { IItemStatus } from 'App/interfaces/item/item.status.interface';
 import ImageDTO from './image.dto';
+import { Image } from 'Main/database/models/image.model';
 
 export default interface ItemDTO {
   id: string;
-  image_id: number | null;
+  image_id?: number;
   system_id: number;
   category_id: number;
   brand_id: number;
-  supplier_id: number;
+  supplier_id: string;
   sku: string;
   name: string;
   description: string;
@@ -23,7 +24,7 @@ export default interface ItemDTO {
 
   created_at: Date;
   updated_at: Date;
-  deleted_at: Date | null;
+  deleted_at?: Date;
 
-  image: ImageDTO | null;
+  image?: ImageDTO | Image;
 }

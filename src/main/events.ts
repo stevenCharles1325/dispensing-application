@@ -9,6 +9,7 @@ import requireAll from './app/modules/require-all.module';
 import applyMiddleware from './app/modules/apply-middleware.module';
 import objectToFlattenArray from './app/modules/object-to-flatten-array.module';
 import objectToFlattenObject from './app/modules/object-to-flatten-object.module';
+import IEventDataProperties from 'App/interfaces/event/event.data-props.interface';
 
 const eventsObject = requireAll(join(__dirname, 'app/events'), true);
 const middlewareObject = requireAll(join(__dirname, 'app/middlewares'), true);
@@ -54,10 +55,11 @@ export default function () {
 
       events[event.channel] = listener as unknown as IListener;
       ipcMain.handle(event.channel, (e, ...args: any[]) => {
-        const eventData = {
+        const eventData: IEventDataProperties = {
           payload: args,
           user: {
             id: null,
+            fullName: null,
             token: null,
           },
         };

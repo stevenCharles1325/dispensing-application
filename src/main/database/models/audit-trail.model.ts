@@ -8,7 +8,7 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { MinLength, IsNotEmpty, IsNotIn } from 'class-validator';
+import { MinLength, IsNotEmpty, IsIn, ValidateIf } from 'class-validator';
 import { ValidationMessage } from './validator/message/message';
 import { User } from './user.model';
 import { SqliteDataSource } from 'Main/datasource';
@@ -34,7 +34,7 @@ export class AuditTrail {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   system_id: number;
 
   @Column()
@@ -54,13 +54,26 @@ export class AuditTrail {
   resource_table: string;
 
   @Column()
+  @ValidateIf(
+    (audit: AuditTrail) =>
+      audit.action.toLowerCase().includes('update') ||
+      (audit.action.toLowerCase().includes('create') &&
+        audit.status === 'SUCCEEDED') ||
+      audit.action.toLowerCase().includes('delete') ||
+      audit.action.toLowerCase().includes('archive')
+  )
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
   resource_id: string;
 
   @Column()
-  @IsNotIn(['uuid', 'integer'], {
+  @ValidateIf(
+    (audit: AuditTrail) =>
+      audit.action.toLowerCase().includes('update') ||
+      audit.action.toLowerCase().includes('archive')
+  )
+  @IsIn(['uuid', 'integer'], {
     message: ValidationMessage.notEmpty,
   })
   resource_id_type: string;
@@ -69,37 +82,13 @@ export class AuditTrail {
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  resource_field: string;
-
-  @Column()
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
-  })
-  old_value: string;
-
-  @Column()
-  @IsNotIn(['string', 'number', 'boolean', 'object'], {
-    message: ValidationMessage.isIn,
-  })
-  old_value_type: string;
-
-  @Column()
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
-  })
-  new_value: string;
-
-  @Column()
-  @IsNotIn(['string', 'number', 'boolean', 'object'], {
-    message: ValidationMessage.isIn,
-  })
-  new_value_type: string;
-
-  @Column()
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
-  })
   action: string;
+
+  @Column()
+  @IsIn(['SUCCEEDED', 'FAILED'], {
+    message: ValidationMessage.isIn,
+  })
+  status: string;
 
   @CreateDateColumn()
   created_at: Date;

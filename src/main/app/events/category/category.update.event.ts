@@ -8,6 +8,7 @@ import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
 import CategoryRepository from 'App/repositories/category.repository';
 import { Category } from 'Main/database/models/category.model';
+import { Bull } from 'Main/jobs';
 
 export default class CategoryDeleteEvent implements IEvent {
   public channel: string = 'category:update';
@@ -20,11 +21,10 @@ export default class CategoryDeleteEvent implements IEvent {
     IResponse<string[] | IPOSError[] | CategoryDTO | any>
   > {
     try {
+      const { user } = eventData;
       const id = eventData.payload[0];
-      const categoryUpdate = eventData.payload[1];
-
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('update-category');
+      const categoryUpdate: CategoryDTO | Category = eventData.payload[1];
+      const requesterHasPermission = user.hasPermission?.('update-category');
 
       if (requesterHasPermission) {
         const category = await CategoryRepository.findOneByOrFail({
@@ -44,6 +44,16 @@ export default class CategoryDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: id.toString(),
+          resource_table: 'categories',
+          resource_id_type: 'integer',
+          action: 'update',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully updated a Category`,
+        });
+
         const data = await CategoryRepository.save(updatedCategory);
         return {
           data,
@@ -51,6 +61,16 @@ export default class CategoryDeleteEvent implements IEvent {
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_id: id.toString(),
+        resource_table: 'categories',
+        resource_id_type: 'integer',
+        action: 'update',
+        status: 'FAILED',
+        description: `User ${user.fullName} has failed to update a Category`,
+      });
 
       return {
         errors: ['You are not allowed to update a Category'],

@@ -7,6 +7,8 @@ import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interfa
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import ItemRepository from 'App/repositories/item.repository';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
+import { Item } from 'Main/database/models/item.model';
+import { Bull } from 'Main/jobs';
 
 export default class ItemCreateEvent implements IEvent {
   public channel: string = 'item:create';
@@ -19,11 +21,12 @@ export default class ItemCreateEvent implements IEvent {
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | ItemDTO | any>
   > {
     try {
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('create-item');
+      const { user } = eventData;
+      const payload: Item = eventData.payload[0];
+      const requesterHasPermission = user.hasPermission?.('create-item');
 
       if (requesterHasPermission) {
-        const item = ItemRepository.create(eventData.payload[0]);
+        const item = ItemRepository.create(payload);
         const errors = await validator(item);
 
         console.log(errors);
@@ -36,13 +39,31 @@ export default class ItemCreateEvent implements IEvent {
         }
 
         const data = (await ItemRepository.save(item)) as unknown as ItemDTO;
-        console.log('CREATED A ITEM');
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: data.id.toString(),
+          resource_table: 'items',
+          resource_id_type: 'uuid',
+          action: 'create',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully created a new Item`,
+        });
+
         return {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'items',
+        action: 'create',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to create a new Item`,
+      });
 
       return {
         errors: ['You are not allowed to create an Item'],

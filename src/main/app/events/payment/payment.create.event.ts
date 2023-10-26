@@ -11,6 +11,8 @@ import TransactionRepository from 'App/repositories/transaction.repository';
 import UserRepository from 'App/repositories/user.repository';
 import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
+import PaymentDTO from 'App/data-transfer-objects/payment.dto';
+import { Bull } from 'Main/jobs';
 
 export default class PaymentCreateEvent implements IEvent {
   public channel: string = 'payment:create';
@@ -23,13 +25,15 @@ export default class PaymentCreateEvent implements IEvent {
     IResponse<string[] | IPOSError[] | TransactionDTO | any>
   > {
     try {
-      const requesterHasPermission = eventData.user.hasPermission?.(
+      const { user } = eventData;
+      const payload: PaymentDTO = eventData.payload[0];
+      const requesterHasPermission = user.hasPermission?.(
         'create-customer-payment'
       );
 
-      if (requesterHasPermission && eventData.user.id) {
-        const user = await UserRepository.findOneByOrFail({
-          id: eventData.user.id,
+      if (requesterHasPermission && user.id) {
+        const personnel = await UserRepository.findOneByOrFail({
+          id: user.id,
         });
         const order: IOrderDetails = eventData.payload[0];
 
@@ -39,8 +43,8 @@ export default class PaymentCreateEvent implements IEvent {
             'id' | 'created_at' | 'updated_at' | 'system' | 'creator'
           > = {
             // to add system_id
-            creator_id: user.id,
-            source_name: user.fullName(),
+            creator_id: personnel.id,
+            source_name: personnel.fullName(),
             recipient_name: 'regular-customer',
             category: 'income',
             type: 'customer-payment',
@@ -52,7 +56,6 @@ export default class PaymentCreateEvent implements IEvent {
           const transaction = TransactionRepository.create(orderTransaction);
           const errors = await validator(transaction);
 
-          console.log(errors);
           if (errors && errors.length) {
             return {
               errors,
@@ -64,6 +67,16 @@ export default class PaymentCreateEvent implements IEvent {
           const data = (await TransactionRepository.save(
             transaction
           )) as unknown as TransactionDTO;
+
+          await Bull('AUDIT_JOB', {
+            user_id: user.id as number,
+            resource_id: data.id.toString(),
+            resource_table: 'transactions',
+            resource_id_type: 'integer',
+            action: 'payment',
+            status: 'SUCCEEDED',
+            description: `User ${user.fullName} has successfully received a customer payment`,
+          });
 
           return {
             data,
@@ -80,6 +93,14 @@ export default class PaymentCreateEvent implements IEvent {
           status: 'ERROR',
         } as unknown as IResponse<string[]>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'transactions',
+        action: 'payment',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to receive a customer payment`,
+      });
 
       return {
         errors: ['You are not allowed to create a Payment'],

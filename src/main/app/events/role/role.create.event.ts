@@ -8,6 +8,7 @@ import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interfa
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { Role } from 'Main/database/models/role.model';
 import RoleDTO from 'App/data-transfer-objects/role.dto';
+import { Bull } from 'Main/jobs';
 
 export default class RoleCreateEvent implements IEvent {
   public channel: string = 'role:create';
@@ -20,11 +21,12 @@ export default class RoleCreateEvent implements IEvent {
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | RoleDTO | any>
   > {
     try {
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('create-role');
+      const { user } = eventData;
+      const payload: RoleDTO | Role = eventData.payload[0];
+      const requesterHasPermission = user.hasPermission?.('create-role');
 
       if (requesterHasPermission) {
-        const role = RoleRepository.create(eventData.payload[0]);
+        const role = RoleRepository.create(payload);
         const errors = await validator(role);
 
         console.log(errors);
@@ -37,13 +39,31 @@ export default class RoleCreateEvent implements IEvent {
         }
 
         const data = (await RoleRepository.save(role)) as unknown as RoleDTO;
-        console.log('CREATED A ROLE');
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: data.id.toString(),
+          resource_table: 'roles',
+          resource_id_type: 'integer',
+          action: 'create',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully created a new Role`,
+        });
+
         return {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'roles',
+        action: 'create',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to create a new Role`,
+      });
 
       return {
         errors: ['You are not allowed to create a Role'],

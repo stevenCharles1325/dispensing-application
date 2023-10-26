@@ -1,3 +1,4 @@
+import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
@@ -5,6 +6,7 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import handleError from 'App/modules/error-handler.module';
 import { Brand } from 'Main/database/models/brand.model';
 import { SqliteDataSource } from 'Main/datasource';
+import { Bull } from 'Main/jobs';
 
 export default class BrandArchiveEvent implements IEvent {
   public channel: string = 'brand:archive';
@@ -17,12 +19,25 @@ export default class BrandArchiveEvent implements IEvent {
     IResponse<string[] | IPOSError[] | any>
   > {
     try {
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('archive-brand');
+      // Copy these
+      const { user } = eventData;
+      const id: BrandDTO['id'] | Brand['id'] = eventData.payload[0];
+      const requesterHasPermission = user.hasPermission?.('archive-brand');
 
       if (requesterHasPermission) {
         const brandRepo = SqliteDataSource.getRepository(Brand);
-        const data = await brandRepo.softDelete(eventData.payload[0]);
+        const data = await brandRepo.softDelete(id); // Change this
+
+        // Copy these
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: id.toString(),
+          resource_table: 'brands', // Change this
+          resource_id_type: 'integer', // Watchout for this
+          action: 'archive',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully archived a Brand`, // Change this
+        });
 
         return {
           data,
@@ -30,6 +45,15 @@ export default class BrandArchiveEvent implements IEvent {
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      // Copy these
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'brands', // Change this
+        action: 'archive',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to archive a Brand`, // Change this
+      });
 
       return {
         errors: ['You are not allowed to archive a Brand'],

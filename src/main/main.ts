@@ -30,6 +30,7 @@ import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
 import bucketNames from 'src/globals/object-storage/bucket-names';
+import initJobs from './jobs';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -160,6 +161,7 @@ app
   .then(async () => {
     // Initialize database
     try {
+      initJobs();
       await SqliteDataSource.initialize();
       console.log('[DB]: Initialized Successfully');
 

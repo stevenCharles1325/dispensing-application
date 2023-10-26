@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* eslint-disable no-restricted-syntax */
 import { AsyncLocalStorage } from 'node:async_hooks';
 import IStorage from './app/interfaces/storage/storage.interface';
@@ -8,7 +9,7 @@ type Callback = () => void;
 const asyncLocalStorage = new AsyncLocalStorage();
 const posGlobalStorage = new ElectronStore();
 
-class Storage implements IStorage {
+class LocalStorage implements IStorage {
   constructor(public storage: Record<string, any> = {}) {}
 
   get(key: string): any {
@@ -29,7 +30,7 @@ class Storage implements IStorage {
 }
 
 export default function (callback: Callback) {
-  const storage = new Storage();
+  const storage = new LocalStorage();
   asyncLocalStorage.enterWith(storage);
   callback();
 }
@@ -39,11 +40,5 @@ export function ALSStorage(): IStorage {
 }
 
 export function GlobalStorage(): IStorage {
-  return {
-    storage: posGlobalStorage.store,
-    set: posGlobalStorage.set,
-    get: posGlobalStorage.get,
-    delete: posGlobalStorage.delete,
-    clear: posGlobalStorage.clear,
-  } as unknown as IStorage;
+  return posGlobalStorage as unknown as IStorage;
 }

@@ -10,6 +10,7 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
 import Provider from '@IOC:Provider';
+import { Bull } from 'Main/jobs';
 
 export default class ImageCreateEvent implements IEvent {
   public channel: string = 'image:create';
@@ -22,8 +23,8 @@ export default class ImageCreateEvent implements IEvent {
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | ImageDTO | any>
   > {
     try {
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('create-image');
+      const { user } = eventData;
+      const requesterHasPermission = user.hasPermission?.('create-image');
 
       if (requesterHasPermission) {
         const bucketName = eventData.payload[0] as string;
@@ -75,14 +76,32 @@ export default class ImageCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await ImageRepository.save(image)) as unknown as ImageDTO;
-        console.log('CREATED A CATEGORY');
+        const data: ImageDTO = await ImageRepository.save(image);
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: data.id.toString(),
+          resource_table: 'images',
+          resource_id_type: 'integer',
+          action: 'create',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully created a new Image`,
+        });
+
         return {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'images',
+        action: 'create',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to create a new Image`,
+      });
 
       return {
         errors: ['You are not allowed to create an Image'],

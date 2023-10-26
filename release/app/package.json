@@ -27,6 +27,7 @@
     "@types/bcrypt": "^5.0.0",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.1",
+    "bullmq": "^4.12.5",
     "class-validator": "^0.14.0",
     "jsonwebtoken": "^9.0.1",
     "reflect-metadata": "^0.1.13",

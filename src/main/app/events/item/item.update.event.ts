@@ -12,6 +12,7 @@ import ImageRepository from 'App/repositories/image.repository';
 import ItemRepository from 'App/repositories/item.repository';
 import SupplierRepository from 'App/repositories/supplier.repository';
 import { Item } from 'Main/database/models/item.model';
+import { Bull } from 'Main/jobs';
 
 export default class ItemDeleteEvent implements IEvent {
   public channel: string = 'item:update';
@@ -24,11 +25,11 @@ export default class ItemDeleteEvent implements IEvent {
     IResponse<string[] | IPOSError[] | ItemDTO | any>
   > {
     try {
+      const { user } = eventData;
       const id = eventData.payload[0];
-      const itemUpdate = eventData.payload[1];
+      const itemUpdate: Item = eventData.payload[1];
 
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('update-item');
+      const requesterHasPermission = user.hasPermission?.('update-item');
 
       if (requesterHasPermission) {
         const item = await ItemRepository.findOneByOrFail({
@@ -60,12 +61,33 @@ export default class ItemDeleteEvent implements IEvent {
         });
 
         const data = await ItemRepository.save(updatedItem);
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: id.toString(),
+          resource_table: 'items',
+          resource_id_type: 'uuid',
+          action: 'update',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully deleted an Item`,
+        });
+
         return {
           data,
           code: 'REQ_OK',
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_id: id.toString(),
+        resource_table: 'items',
+        resource_id_type: 'uuid',
+        action: 'update',
+        status: 'FAILED',
+        description: `User ${user.fullName} has failed to delete an Item`,
+      });
 
       return {
         errors: ['You are not allowed to update an Item'],

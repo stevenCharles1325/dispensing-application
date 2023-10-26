@@ -250,7 +250,17 @@ export default function InventoryForm({
     });
 
     if (res.status === 'ERROR') {
-      return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+      if (typeof res.errors?.[0] === 'string') {
+        return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+      }
+
+      const errors: Record<string, any> = {};
+      const resErrors = res.errors as unknown as IPOSValidationError[];
+      for (const error of resErrors) {
+        errors['brand_id'] = error.message;
+      }
+
+      return setErrors(errors);
     }
 
     dispatch({

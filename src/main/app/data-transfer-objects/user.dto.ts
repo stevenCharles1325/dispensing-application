@@ -13,6 +13,7 @@ export default interface UserDTO {
   address: string;
   role: RoleDTO;
   lead?: UserDTO | null;
+  fullName(): string;
   created_at: Date;
   updated_at: Date;
   deleted_at: Date | null;

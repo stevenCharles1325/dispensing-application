@@ -4,6 +4,7 @@ export default interface IEventDataProperties {
   payload: any[];
   user: {
     id?: number | null;
+    fullName?: string | null;
     token?: string | null;
     /*
       'hasPermission' is a method from AuthService that takes

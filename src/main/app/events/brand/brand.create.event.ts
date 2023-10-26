@@ -7,6 +7,8 @@ import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import BrandDTO from 'App/data-transfer-objects/brand.dto';
+import { Bull } from 'Main/jobs';
+import { Brand } from 'Main/database/models/brand.model';
 
 export default class BrandCreateEvent implements IEvent {
   public channel: string = 'brand:create';
@@ -19,11 +21,13 @@ export default class BrandCreateEvent implements IEvent {
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | BrandDTO | any>
   > {
     try {
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('create-brand');
+      // Copy these
+      const { user } = eventData;
+      const payload: BrandDTO | Brand = eventData.payload[0];
+      const requesterHasPermission = user.hasPermission?.('create-brand');
 
       if (requesterHasPermission) {
-        const brand = BrandRepository.create(eventData.payload[0]);
+        const brand = BrandRepository.create(payload);
         const errors = await validator(brand);
 
         console.log(errors);
@@ -35,7 +39,19 @@ export default class BrandCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (await BrandRepository.save(brand)) as unknown as BrandDTO;
+        const data: BrandDTO = await BrandRepository.save(brand);
+
+        // Copy this
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as number,
+          resource_id: data.id.toString(),
+          resource_table: 'brands', // Change this
+          resource_id_type: 'integer',
+          action: 'create',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully created a new Brand`, // Change this
+        });
+
         console.log('CREATED A CATEGORY');
         return {
           data,
@@ -43,6 +59,15 @@ export default class BrandCreateEvent implements IEvent {
           status: 'SUCCESS',
         } as IResponse<typeof data>;
       }
+
+      // Copy this
+      await Bull('AUDIT_JOB', {
+        user_id: user.id as number,
+        resource_table: 'brands', // Change this
+        action: 'create',
+        status: 'FAILED',
+        description: `User ${user.fullName} has no permission to create a new Brand`, // Change this
+      });
 
       return {
         errors: ['You are not allowed to create a Brand'],
