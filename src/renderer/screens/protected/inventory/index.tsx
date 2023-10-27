@@ -96,7 +96,7 @@ const columns: Array<GridColDef> = [
 const getItems = async (
   searchText = '',
   page = 1,
-  total = 15
+  total: number | 'max' = 'max'
 ): Promise<IPagination<ItemDTO>> => {
   const res = await window.item.getItems({ name: searchText }, page, total);
 
@@ -121,21 +121,18 @@ export default function Inventory() {
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
 
-  const [itemsPage, setItemsPage] = useState<number>(0);
-  const [itemsPageSize, setItemsPageSize] = useState<number>(15);
-
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>(
     null
   );
   const { displayAlert } = useAlert();
-  const { searchText, setSearchText, setPlaceHolder } = useSearch();
+  const { searchText, setPlaceHolder } = useSearch();
 
   const { data, refetch: refetchItems } = useQuery({
-    queryKey: ['items', searchText, itemsPage, itemsPageSize],
+    queryKey: ['items', searchText],
     queryFn: async () => {
-      const res = await getItems(searchText, itemsPage + 1, itemsPageSize);
+      const res = await getItems(searchText);
 
       return res;
     },
@@ -278,47 +275,7 @@ export default function Inventory() {
             onRowSelectionModelChange={(itemIds) =>
               setSelectedIds(itemIds as string[])
             }
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  page: 0,
-                  pageSize: 15,
-                },
-              },
-            }}
             sortingOrder={['asc', 'desc']}
-            pageSizeOptions={[
-              {
-                label: 'Regular',
-                value: 15,
-              },
-              {
-                label: 'Medium',
-                value: 50,
-              },
-              {
-                label: 'Large',
-                value: 100,
-              },
-              {
-                label: 'Half of total',
-                value: (data?.total ?? 100) / 2,
-              },
-              {
-                label: 'All',
-                value: data?.total ?? 100,
-              },
-            ]}
-            paginationModel={{ page: itemsPage, pageSize: itemsPageSize }}
-            onPaginationModelChange={({ page, pageSize }) => {
-              if (page !== itemsPage) {
-                setItemsPage(page);
-              }
-
-              if (pageSize !== itemsPageSize) {
-                setItemsPageSize(pageSize);
-              }
-            }}
             checkboxSelection
           />
         ) : null}
