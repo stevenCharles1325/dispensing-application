@@ -11,7 +11,7 @@ import IPagination from 'App/interfaces/pagination/pagination.interface';
 import ItemCard from 'UI/components/Cards/ItemCard';
 import useAlert from 'UI/hooks/useAlert';
 import useSearch from 'UI/hooks/useSearch';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 import { AutoSizer, List } from 'react-virtualized';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -55,9 +55,9 @@ const getCategories = async (): Promise<IPagination<CategoryDTO>> => {
   return res.data as unknown as IPagination<CategoryDTO>;
 };
 
-export default function Transaction() {
+export default function Home() {
   const { displayAlert } = useAlert();
-  const { searchText } = useSearch();
+  const { searchText, setPlaceHolder } = useSearch();
   const [selectedItemIds, setSelectedItemIds] = useState<Array<string>>([]);
   const [orders, setOrders] = useState<Record<string, number>>({});
   const [posMenuAnchorEl, setPosMenuAnchorEl] = useState<HTMLElement | null>();
@@ -246,6 +246,10 @@ export default function Transaction() {
   const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
     setPosMenuAnchorEl(event.currentTarget);
   };
+
+  useEffect(() => {
+    setPlaceHolder?.('Search for product name');
+  }, [setPlaceHolder]);
 
   return (
     <>

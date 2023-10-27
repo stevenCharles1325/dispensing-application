@@ -10,7 +10,7 @@ export default function ProtectedLayout({ children }: React.PropsWithChildren) {
 
   useEffect(() => {
     if (userData && location.pathname === '/' && navigate) {
-      navigate('/dashboard');
+      navigate('/home');
     }
   }, [userData, location, navigate]);
 

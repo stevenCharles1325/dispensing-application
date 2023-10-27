@@ -12,9 +12,6 @@ import debounce from 'lodash.debounce';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
-import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
-import StoreMallDirectoryOutlinedIcon from '@mui/icons-material/StoreMallDirectoryOutlined';
-import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
@@ -25,8 +22,8 @@ import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 export const navigationRoutes: INavButtonprops[] = [
   {
     id: 0,
-    label: 'Dashboard',
-    redirectPath: '/dashboard',
+    label: 'Home',
+    redirectPath: '/home',
     icon: <AssessmentOutlinedIcon />,
   },
   {
@@ -37,20 +34,14 @@ export const navigationRoutes: INavButtonprops[] = [
   },
   {
     id: 2,
-    label: 'Transaction',
-    redirectPath: '/transaction',
-    icon: <ReceiptOutlinedIcon />,
-  },
-  {
-    id: 3,
     label: 'Logs & History',
     redirectPath: '/logs',
     icon: <ArticleOutlinedIcon />,
   },
   {
-    id: 6,
+    id: 3,
     label: 'Settings',
-    redirectPath: '/dashboard',
+    redirectPath: '/home',
     icon: <TuneOutlinedIcon />,
     disabled: true,
   },
@@ -58,7 +49,7 @@ export const navigationRoutes: INavButtonprops[] = [
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
   const [activeRouteId, setActiveRouteId] = useState(0);
-  const { searchText, setSearchText } = useSearch();
+  const { searchText, placeHolder, disabled, setSearchText } = useSearch();
   const [text, setText] = useState(searchText ?? '');
 
   const debouncedSearch = debounce((txtStr) => setSearchText?.(txtStr), 500);
@@ -79,7 +70,11 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           <NavButton
             key={index}
             active={data.id === activeRouteId}
-            onClick={() => setActiveRouteId(data.id)}
+            onClick={() => {
+              setActiveRouteId(data.id);
+              setText('');
+              setSearchText?.('');
+            }}
             {...data}
           />
         ))}
@@ -88,6 +83,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         <div className="w-full h-[50px] flex justify-between px-5">
           <Input
             opacity="clear"
+            disabled={disabled}
             leftIcon={
               <IconButton disabled>
                 <SearchOutlinedIcon />
@@ -95,16 +91,16 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
             }
             rightIcon={
               <IconButton
-                disabled={!searchText?.length}
+                disabled={!text?.length}
                 onClick={() => {
                   setText('');
                   setSearchText?.('');
                 }}
               >
-                {searchText?.length ? <CloseOutlinedIcon /> : null}
+                {text?.length ? <CloseOutlinedIcon /> : null}
               </IconButton>
             }
-            placeholder="Search"
+            placeholder={placeHolder}
             width={300}
             height="full"
             value={text}

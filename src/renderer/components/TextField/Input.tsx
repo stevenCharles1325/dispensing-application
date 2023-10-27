@@ -16,6 +16,7 @@ interface InputProps {
   opacity?: number | 'clear' | 'normal';
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  disabled?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -29,6 +30,7 @@ export default function Input(props: InputProps) {
     leftIcon = null,
     rightIcon = null,
     placeholder,
+    disabled,
     name,
     label,
     onChange,
@@ -79,6 +81,7 @@ export default function Input(props: InputProps) {
           type={priorityType}
           name={name}
           onChange={onChange}
+          disabled={disabled}
         />
         {rightIcon ? (
           <div className="grow flex justify-center items-center">

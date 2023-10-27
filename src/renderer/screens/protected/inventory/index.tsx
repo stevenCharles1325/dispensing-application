@@ -130,7 +130,7 @@ export default function Inventory() {
     null
   );
   const { displayAlert } = useAlert();
-  const { searchText, setSearchText } = useSearch();
+  const { searchText, setSearchText, setPlaceHolder } = useSearch();
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, itemsPage, itemsPageSize],
@@ -182,9 +182,9 @@ export default function Inventory() {
     getCategories();
     getSuppliers();
 
-    return () => setSearchText?.('');
+    setPlaceHolder?.('Search for item name');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setPlaceHolder]);
 
   const handleAddNewItem = () => {
     console.log('Adding new item');

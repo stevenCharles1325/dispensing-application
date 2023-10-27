@@ -30,7 +30,7 @@ export default function AuthProvider({
   };
 
   const goToIndex = () => {
-    navigate('/dashboard', { replace: true });
+    navigate('/home', { replace: true });
   };
 
   const goSignOut = (cb?: Function) => {
