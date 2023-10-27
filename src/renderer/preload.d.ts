@@ -1,4 +1,5 @@
 import {
+  AuditTrailHandler,
   AuthHandler,
   BrandHandler,
   CategoryHandler,
@@ -22,6 +23,7 @@ declare global {
     category: CategoryHandler;
     supplier: SupplierHandler;
     payment: PaymentHandler;
+    auditTrail: AuditTrailHandler;
   }
 }
 

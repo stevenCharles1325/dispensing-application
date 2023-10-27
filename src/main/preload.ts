@@ -15,6 +15,8 @@ import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import PaymentDTO from 'App/data-transfer-objects/payment.dto';
+import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
+import TransactionDTO, { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -267,12 +269,12 @@ const supplierHandler = {
 +
 + ================================ */
 const paymentHandler = {
-  // getSuppliers: async (
-  //   payload: Record<string, any | any[]> | string = 'all',
-  //   page: number = 1,
-  //   total: number | 'max' = 15
-  // ): Promise<IResponse<string[] | IPOSError[] | IPagination<SupplierDTO>>> =>
-  //   ipcRenderer.invoke('supplier:show', payload, page, total),
+  getPayments: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<IncomeDTO>>> =>
+    ipcRenderer.invoke('payment:show', payload, page, total),
 
   createPayment: async (
     payload: PaymentDTO
@@ -297,6 +299,20 @@ const paymentHandler = {
   //   ipcRenderer.invoke('supplier:delete', id),
 };
 
+/* ================================
++
++     AUDIT TRAIL EVENT HANDLER
++
++ ================================ */
+const auditTrailHandler = {
+  getAuditTrail: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<AuditTrailDTO>>> =>
+    ipcRenderer.invoke('audit-trail:show', payload, page, total),
+};
+
 // EXPOSING HANDLERS
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
@@ -307,6 +323,7 @@ contextBridge.exposeInMainWorld('image', imageHandler);
 contextBridge.exposeInMainWorld('category', categoryHandler);
 contextBridge.exposeInMainWorld('supplier', supplierHandler);
 contextBridge.exposeInMainWorld('payment', paymentHandler);
+contextBridge.exposeInMainWorld('auditTrail', auditTrailHandler);
 
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
@@ -317,3 +334,4 @@ export type BrandHandler = typeof brandHandler;
 export type CategoryHandler = typeof categoryHandler;
 export type SupplierHandler = typeof supplierHandler;
 export type PaymentHandler = typeof paymentHandler;
+export type AuditTrailHandler = typeof auditTrailHandler;

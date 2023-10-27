@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /* eslint-disable import/prefer-default-export */
 import {
   Column,
@@ -24,11 +25,23 @@ export class AuditTrail {
       this.resource_id_type === 'uuid'
         ? `'${this.resource_id}'`
         : this.resource_id;
-    const rawData = await manager.query(
+    const rawData: any[] = await manager.query(
       `SELECT * FROM '${this.resource_table}' WHERE id = ${id}`
     );
 
-    this.related = rawData;
+    this.related = rawData[0];
+  }
+
+  @AfterLoad()
+  async getUser() {
+    if (!this.user) {
+      const manager = SqliteDataSource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'users' WHERE id = ${this.user_id}`
+      );
+
+      this.user = rawData[0];
+    }
   }
 
   @PrimaryGeneratedColumn('uuid')
@@ -95,7 +108,6 @@ export class AuditTrail {
 
   @OneToOne(() => User, {
     eager: true,
-    cascade: true,
   })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: User;

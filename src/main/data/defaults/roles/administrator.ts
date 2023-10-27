@@ -1,6 +1,6 @@
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 
-const administrator: RoleDTO = {
+const administrator: Omit<RoleDTO, 'id'> = {
   name: 'Administrator',
   kebab: 'administrator',
 };

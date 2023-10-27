@@ -1,6 +1,12 @@
 /* eslint-disable prettier/prettier */
 
 const permissions = [
+  // Audit-Trail permissions
+  {
+    name: 'View Audit Trail',
+    kebab: 'view-audit-trail',
+  },
+
   // Role management permissions
   {
     name: 'View Role',

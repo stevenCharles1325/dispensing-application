@@ -133,7 +133,7 @@ export default function Transaction() {
     return 0;
   }, [computedTax, selectedItems.length, subTotal]);
 
-  const total = subTotal - tax;
+  const total = subTotal + tax;
 
   const orderDetails: IOrderDetails = useMemo(
     () => ({

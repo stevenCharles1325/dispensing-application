@@ -30,6 +30,8 @@ export interface IncomeDTO {
   system: System | null;
 
   creator: User | null;
+
+  items?: any;
 }
 
 export interface ExpenseDTO {

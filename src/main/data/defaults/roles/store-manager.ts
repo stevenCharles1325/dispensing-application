@@ -1,6 +1,6 @@
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 
-const storeManager: RoleDTO = {
+const storeManager: Omit<RoleDTO, 'id'> = {
   name: 'Store Manager',
   kebab: 'store-manager',
 };
