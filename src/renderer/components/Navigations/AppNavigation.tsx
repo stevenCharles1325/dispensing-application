@@ -9,9 +9,8 @@ import useSearch from 'UI/hooks/useSearch';
 import debounce from 'lodash.debounce';
 
 // Icons
-import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+import CottageOutlinedIcon from '@mui/icons-material/CottageOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
-import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
@@ -24,7 +23,7 @@ export const navigationRoutes: INavButtonprops[] = [
     id: 0,
     label: 'Home',
     redirectPath: '/home',
-    icon: <AssessmentOutlinedIcon />,
+    icon: <CottageOutlinedIcon />,
   },
   {
     id: 1,
