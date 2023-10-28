@@ -24,6 +24,7 @@ export default function AuthLayout() {
     if (userData && setUser) {
       setUser('token', userData.token);
       setUser('refresh_token', userData.refresh_token);
+
       setUser(userData.user);
     }
   }, [setUser, userData]);

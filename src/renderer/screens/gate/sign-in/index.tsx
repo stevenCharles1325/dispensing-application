@@ -74,9 +74,9 @@ export default function SignIn() {
             Sign-In
           </Button>
           <br />
-          <Link href="#" color="inherit" underline="hover" variant="body2">
+          {/* <Link href="#" color="inherit" underline="hover" variant="body2">
             Forgot your password?
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>

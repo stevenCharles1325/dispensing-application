@@ -33,6 +33,9 @@ const authHandler = {
     payload: IAuthSignIn
   ): Promise<IResponse<IAuth<UserDTO> | IPOSError[]>> =>
     ipcRenderer.invoke('auth:sign-in', payload),
+
+  authSignOut: async (): Promise<IResponse<null | IPOSError[]>> =>
+    ipcRenderer.invoke('auth:sign-out'),
 };
 
 /* ================================

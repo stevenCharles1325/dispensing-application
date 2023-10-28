@@ -31,6 +31,7 @@ import dotenvExpand from 'dotenv-expand';
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs from './jobs';
+import policies from './data/defaults/object-storage/policies';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -207,6 +208,18 @@ app
                 if (err)
                   console.log(
                     `[ERROR CREATING ${bucketName.toUpperCase()} BUCKET]: `,
+                    err
+                  );
+              },
+            });
+
+            objectStorageService.setBucketPolicy({
+              bucketName,
+              bucketPolicy: JSON.stringify(policies),
+              callback: (err: any) => {
+                if (err)
+                  console.log(
+                    `[ERROR SETTING ${bucketName.toUpperCase()} BUCKET POLICY]: `,
                     err
                   );
               },

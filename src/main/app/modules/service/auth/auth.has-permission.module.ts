@@ -6,7 +6,6 @@ export default function hasPermission(
   user: UserDTO,
   ...permission: PermissionsKebabType[]
 ): boolean {
-  console.log(user.role.permissions?.map(({ kebab }) => kebab));
   return user.role.permissions!.some(({ kebab }) =>
     permission.includes(kebab as PermissionsKebabType)
   );

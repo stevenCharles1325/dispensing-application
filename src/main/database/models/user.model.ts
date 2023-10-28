@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/prefer-default-export */
 import {
@@ -29,6 +30,7 @@ import RoleRepository from 'App/repositories/role.repository';
 import SystemRepository from 'App/repositories/system.repository';
 import { ValidationMessage } from './validator/message/message';
 import { Image } from './image.model';
+import { SqliteDataSource } from 'Main/datasource';
 
 @Entity('users')
 export class User {
@@ -45,6 +47,9 @@ export class User {
 
   @Column()
   role_id: number;
+
+  @Column({ nullable: true })
+  image_url: string;
 
   @Column()
   @Length(3, 20, {
@@ -127,10 +132,6 @@ export class User {
   @ManyToOne(() => User, (user: User) => user.subordinates)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
   lead: User;
-
-  @OneToMany(() => Image, (image: Image) => image.uploader)
-  @JoinColumn({ name: 'uploader_id', referencedColumnName: 'id' })
-  images: Image[];
 
   @AfterLoad()
   fullName() {

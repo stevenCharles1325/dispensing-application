@@ -37,6 +37,11 @@ export class User1692175684026 implements MigrationInterface {
             foreignKeyConstraintName: 'role',
           },
           {
+            name: 'image_url',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
             name: 'first_name',
             type: 'varchar',
             isNullable: false,

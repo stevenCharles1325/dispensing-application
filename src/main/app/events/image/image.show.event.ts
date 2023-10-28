@@ -34,6 +34,12 @@ export default class ImageShowEvent implements IEvent {
           'image'
         ).leftJoinAndSelect('image.uploader', 'uploader');
 
+        if (payload['bucket_name'] === 'users') {
+          imageQuery
+            .where('image.uploader_id = :user_id')
+            .setParameter('user_id', eventData.user.id);
+        }
+
         if (take !== 'max') {
           imageQuery.take(take).skip(skip);
         }

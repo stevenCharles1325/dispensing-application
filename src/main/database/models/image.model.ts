@@ -40,7 +40,7 @@ export class Image {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @OneToOne(() => User, { eager: true })
+  @OneToOne(() => User)
   @JoinColumn({ name: 'uploader_id', referencedColumnName: 'id' })
   uploader: User;
 }

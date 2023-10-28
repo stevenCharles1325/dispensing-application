@@ -5,7 +5,7 @@ const policies = {
       Effect: 'Allow',
       Principal: '*',
       Action: ['s3:GetObject'],
-      Resource: ['arn:aws:s3:::inventory/*'],
+      Resource: ['arn:aws:s3:::*'],
     },
   ],
 };

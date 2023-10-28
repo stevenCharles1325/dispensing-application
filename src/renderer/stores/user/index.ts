@@ -13,6 +13,7 @@ export interface AppUserState {
   full_name: string;
   email: string;
   phone_number: string;
+  image_url: string;
   token: string;
   refresh_token: string;
   setUser: (
@@ -27,6 +28,7 @@ const useUser = create<AppUserState>((set) => ({
   full_name: '',
   email: '',
   phone_number: '',
+  image_url: '',
   token: '',
   refresh_token: '',
   setUser(keyOrUser: string | Partial<UserDTO>, value?: any) {
@@ -37,6 +39,7 @@ const useUser = create<AppUserState>((set) => ({
     } else {
       // eslint-disable-next-line no-restricted-syntax
       for (const [propertyName, propertyValue] of Object.entries(keyOrUser)) {
+        console.log(propertyName, propertyValue);
         set((state: AppUserState) => ({
           ...state,
           [propertyName]: propertyValue,
