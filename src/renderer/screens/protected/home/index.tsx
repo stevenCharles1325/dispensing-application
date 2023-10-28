@@ -266,26 +266,35 @@ export default function Home() {
             />
           </div>
           <div className="grow">
-            <AutoSizer>
-              {({ height, width }) => {
-                const cardsPerRow = Math.floor(width / CARD_WIDTH) || 1;
-                const rowCount = Math.ceil(items.length / cardsPerRow);
+            {items?.length ? (
+              <AutoSizer>
+                {({ height, width }) => {
+                  const cardsPerRow = Math.floor(width / CARD_WIDTH) || 1;
+                  const rowCount = Math.ceil(items.length / cardsPerRow);
 
-                return (
-                  <div>
-                    <List
-                      width={width}
-                      height={height}
-                      rowCount={rowCount}
-                      rowHeight={CARD_HEIGHT}
-                      rowRenderer={(params) =>
-                        rowRenderer({ ...params, cardsPerRow })
-                      }
-                    />
-                  </div>
-                );
-              }}
-            </AutoSizer>
+                  return (
+                    <div>
+                      <List
+                        width={width}
+                        height={height}
+                        rowCount={rowCount}
+                        rowHeight={CARD_HEIGHT}
+                        rowRenderer={(params) =>
+                          rowRenderer({ ...params, cardsPerRow })
+                        }
+                      />
+                    </div>
+                  );
+                }}
+              </AutoSizer>
+            ) : (
+              <div
+                className="w-full text-sm text-center py-5"
+                style={{ color: 'var(--info-text-color)' }}
+              >
+                No available items
+              </div>
+            )}
           </div>
         </div>
         <div className="w-[450px] h-full p-3">

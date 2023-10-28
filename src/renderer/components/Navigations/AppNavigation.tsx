@@ -17,6 +17,7 @@ import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -39,9 +40,9 @@ export const navigationRoutes: INavButtonprops[] = [
   },
   {
     id: 3,
-    label: 'Settings',
-    redirectPath: '/home',
-    icon: <TuneOutlinedIcon />,
+    label: 'Reports',
+    redirectPath: '/reports',
+    icon: <AssessmentOutlinedIcon />,
     disabled: true,
   },
 ];
