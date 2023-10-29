@@ -51,13 +51,23 @@ export class User {
   @Column({ nullable: true })
   image_url: string;
 
-  @Column()
+  @Column({
+    transformer: {
+      to: (value: string) => value.toLowerCase(),
+      from: (value: string) => value,
+    },
+  })
   @Length(3, 20, {
     message: ValidationMessage.maxLength,
   })
   first_name: string;
 
-  @Column()
+  @Column({
+    transformer: {
+      to: (value: string) => value.toLowerCase(),
+      from: (value: string) => value,
+    },
+  })
   @Length(3, 20, {
     message: ValidationMessage.maxLength,
   })

@@ -291,6 +291,9 @@ export default function AppDrive({
           </div>
         </div>
         <DialogActions>
+          <Button onClick={handleOnClose} color="error">
+            Close
+          </Button>
           <Button
             disabled={!selectedImages.length}
             onClick={() => {
@@ -300,9 +303,6 @@ export default function AppDrive({
             color="primary"
           >
             {multiple ? `Select (${selectedImages.length})` : 'Select'}
-          </Button>
-          <Button onClick={handleOnClose} color="error">
-            Close
           </Button>
         </DialogActions>
       </Dialog>

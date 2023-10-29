@@ -34,6 +34,7 @@ export default async function authenticate(
         const user_data = {
           id: user.id,
           email: user.email,
+          image_url: user.image_url,
           first_name: user.first_name,
           last_name: user.last_name,
           full_name: user.fullName(),

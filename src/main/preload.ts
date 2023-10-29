@@ -16,7 +16,9 @@ import ItemDTO from 'App/data-transfer-objects/item.dto';
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
-import TransactionDTO, { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
+import TransactionDTO, {
+  IncomeDTO,
+} from 'App/data-transfer-objects/transaction.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -36,6 +38,13 @@ const authHandler = {
 
   authSignOut: async (): Promise<IResponse<null | IPOSError[]>> =>
     ipcRenderer.invoke('auth:sign-out'),
+
+  authUpdateMe: async (
+    payload: Partial<
+      UserDTO & { isChangingPassword: boolean; current_password?: string }
+    >
+  ): Promise<IResponse<null | IPOSError[]>> =>
+    ipcRenderer.invoke('auth:update-me', payload),
 };
 
 /* ================================

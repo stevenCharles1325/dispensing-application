@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import AppLogo from 'UI/components/Logo/AppLogo';
 import Input from 'UI/components/TextField/Input';
-import { Button, Link } from '@mui/material';
+import { Button, Link, TextField } from '@mui/material';
 import useAlert from 'UI/hooks/useAlert';
 import { useState } from 'react';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from 'UI/hooks/useAuth';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import IAuth from 'App/interfaces/auth/auth.interface';
+import PasswordInput from 'UI/components/TextField/PasswordInput';
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -47,19 +48,19 @@ export default function SignIn() {
           <AppLogo withName />
         </div>
 
-        <div className="mb-[30px]">
-          <Input
+        <div className="mb-[30px] flex flex-col gap-1">
+          <TextField
+            label="Email"
             placeholder="Email"
-            width="full"
+            fullWidth
+            color="secondary"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <br />
-          <Input
-            width="full"
-            type="password"
+          <PasswordInput
+            label="Password"
             value={password}
-            placeholder="Password"
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>

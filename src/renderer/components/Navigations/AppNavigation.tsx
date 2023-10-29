@@ -1,3 +1,6 @@
+/* eslint-disable jsx-a11y/img-redundant-alt */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable camelcase */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -10,6 +13,7 @@ import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
 import {
   Button,
+  Chip,
   Dialog,
   DialogActions,
   IconButton,
@@ -38,6 +42,10 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { useNavigate } from 'react-router-dom';
 import useAppDrive from 'UI/hooks/useAppDrive';
 import useUser from 'UI/stores/user';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuth from 'App/interfaces/auth/auth.interface';
+import PasswordInput from '../TextField/PasswordInput';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -68,9 +76,8 @@ export const navigationRoutes: INavButtonprops[] = [
 ];
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
-  const navigate = useNavigate();
   const drive = useAppDrive();
-  const user = useUser();
+  const navigate = useNavigate();
   const { displayAlert } = useAlert();
   const { searchText, placeHolder, disabled, setSearchText } = useSearch();
 
@@ -80,6 +87,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
 
   // User form
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [role, setUserRole] = useState<string>('');
   const [userForm, setUserForm] = useState<Record<string, any>>({
     first_name: '',
     last_name: '',
@@ -156,26 +164,67 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   };
 
   const handleUpdateProfile = useCallback(async () => {
-    if (!userForm.email.length)
+    if (!userForm?.email?.length)
       return setErrors({ email: 'Must not be empty' });
-    if (!userForm.first_name.length)
+    if (!userForm?.first_name?.length)
       return setErrors({ first_name: 'Must not be empty' });
-    if (!userForm.last_name.length)
+    if (!userForm?.last_name?.length)
       return setErrors({ last_name: 'Must not be empty' });
-    if (!userForm.phone_number.length)
+    if (!userForm?.phone_number?.length)
       return setErrors({ phone_number: 'Must not be empty' });
-    if (!userForm.current_password.length && userForm.new_password.length)
+    if (!userForm?.current_password?.length && userForm?.new_password?.length)
       return setErrors({ current_password: 'Must not be empty' });
 
     if (
-      userForm.new_password.length &&
-      userForm.current_password.length &&
-      userForm.confirm_password !== userForm.new_password
+      userForm?.new_password?.length &&
+      userForm?.current_password?.length &&
+      userForm?.confirm_password !== userForm?.new_password
     ) {
       return setErrors({
         confirm_password: 'Does not match with new password',
       });
     }
+
+    const res = await window.auth.authUpdateMe({
+      image_url: userForm?.image_url,
+      email: userForm?.email,
+      first_name: userForm?.first_name,
+      last_name: userForm?.last_name,
+      phone_number: userForm?.phone_number,
+      current_password: userForm?.current_password?.length
+        ? userForm?.current_password
+        : undefined,
+      password: userForm?.new_password?.length
+        ? userForm?.new_password
+        : undefined,
+      isChangingPassword: Boolean(userForm.new_password?.length),
+    });
+
+    console.log('UPDATE RES: ', res);
+    if (res.status === 'ERROR') {
+      if (typeof res.errors?.[0] === 'string') {
+        return displayAlert?.(
+          (res.errors?.[0] as string) ?? 'Please try again',
+          'error'
+        );
+      }
+
+      const errors: Record<string, any> = {};
+      const resErrors = res.errors as unknown as IPOSValidationError[];
+      for (const error of resErrors) {
+        errors[error.field] = error.message;
+      }
+
+      return setErrors(errors);
+    }
+
+    setUserForm((form) => ({
+      ...form,
+      current_password: '',
+      new_password: '',
+      confirm_password: '',
+    }));
+    return displayAlert?.('Successfully updated profile', 'success');
   }, [
     userForm?.email,
     userForm?.first_name,
@@ -184,30 +233,39 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     userForm?.current_password,
     userForm?.new_password,
     userForm?.confirm_password,
+    userForm?.image_url,
   ]);
 
   useEffect(() => {
     if (drive.selected?.length) {
       setImageFile(drive.selected?.[0]);
-      setUserForm({
+      setUserForm((form) => ({
+        ...form,
         image_url: drive.selected?.[0].url,
-      });
+      }));
     }
   }, [drive.selected]);
 
   useEffect(() => {
-    if (user) {
-      const { email, first_name, last_name, phone_number } = user;
+    const fetchFreshUser = async () => {
+      const res = await window.auth.authMe();
+      const { data } = res;
+      const { image_url, email, first_name, last_name, phone_number, role } =
+        data as Record<string, any>;
 
+      setUserRole(role?.name ?? '');
       setUserForm((form) => ({
         ...form,
+        image_url,
         email,
         first_name,
         last_name,
         phone_number,
       }));
-    }
-  }, [user]);
+    };
+
+    fetchFreshUser();
+  }, []);
 
   return (
     <>
@@ -280,6 +338,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         sx={{
           '& .MuiMenu-list': {
             paddingTop: '0px !important',
+            backgroundColor: 'var(--bg-color)',
           },
         }}
         anchorOrigin={{
@@ -295,16 +354,44 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         }}
       >
         <div
-          className="w-[300px] h-[300px]"
-          style={{ color: 'var(--text-color) ' }}
+          className="w-[300px] h-[350px]"
+          style={{
+            color: 'white',
+            backgroundColor: 'var(--bg-color)',
+          }}
         >
           <div
-            className="w-full h-[200px] flex justify-center items-center rounded-b-lg"
-            style={{ backgroundColor: 'var(--bg-color) ' }}
+            className="w-full h-[250px] flex flex-col justify-center items-center rounded-b-lg shadow-lg"
+            style={{ backgroundColor: 'white' }}
           >
-            <div className="w-[55%] h-[160px] rounded-full bg-gray-300 flex justify-center items-center text-white shadow-lg">
-              <LandscapeOutlinedIcon />
+            <div className="w-[55%] h-[160px] overflow-hidden rounded-full bg-gray-300 flex justify-center items-center text-white shadow-lg">
+              {userForm.image_url ? (
+                <img
+                  src={userForm.image_url}
+                  alt="User image"
+                  style={{
+                    width: '165px',
+                    height: '160px',
+                    objectFit: 'cover',
+                  }}
+                />
+              ) : (
+                <LandscapeOutlinedIcon />
+              )}
             </div>
+            <br />
+            <p
+              style={{
+                color: 'var(--text-color)',
+              }}
+              className="uppercase"
+            >{`- ${userForm.first_name} ${userForm.last_name} -`}</p>
+            <Chip
+              label={role}
+              color="secondary"
+              variant="outlined"
+              size="small"
+            />
           </div>
           <br />
           <MenuItem
@@ -343,13 +430,13 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                 className="absolute inset-0 flex flex-col justify-center items-center select-none pointer-events-none"
                 style={{ color: 'var(--info-text-color) ' }}
               >
-                {imageFile ? (
+                {imageFile || userForm.image_url?.length ? (
                   <img
                     className="w-full h-full rounded-full"
                     style={{
                       objectFit: 'cover',
                     }}
-                    src={imageFile?.url ?? user.image_url}
+                    src={imageFile?.url ?? userForm.image_url}
                     alt={imageFile?.name ?? 'User profile image'}
                   />
                 ) : (
@@ -395,30 +482,30 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                 helperText={errors.phone_number}
                 error={Boolean(errors.phone_number)}
               />
-              <TextField
-                label="Current Password"
-                color="secondary"
-                type="password"
-                onChange={handleFormInput('current_password')}
-                helperText={errors.current_password}
-                error={Boolean(errors.current_password)}
-              />
-              <TextField
+              <PasswordInput
+                value={userForm.new_password}
                 label="New Password"
-                color="secondary"
-                type="password"
                 onChange={handleFormInput('new_password')}
                 helperText={errors.new_password}
                 error={Boolean(errors.new_password)}
               />
-              <TextField
+              <PasswordInput
                 label="Confirm-password"
+                value={userForm.confirm_password}
                 type="password"
-                color="secondary"
                 onChange={handleFormInput('confirm_password')}
                 helperText={errors.confirm_password}
                 error={Boolean(errors.confirm_password)}
               />
+              {userForm.new_password?.length ? (
+                <PasswordInput
+                  label="Current Password"
+                  value={userForm.current_password}
+                  onChange={handleFormInput('current_password')}
+                  helperText={errors.current_password}
+                  error={Boolean(errors.current_password)}
+                />
+              ) : null}
             </div>
           </div>
         </div>

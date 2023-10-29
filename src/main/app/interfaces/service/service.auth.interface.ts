@@ -28,7 +28,7 @@ export default interface IAuthService extends IService {
     this: any,
     token?: string | null
   ): IResponse<Partial<UserDTO> | string[] | IPOSError[]>;
-  generateToken(this: any): [string, string];
+  generateToken(this: any, payload: Record<string, any>): [string, string];
 
   setAuthUser(this: any, payload: IAuth<UserDTO>): void;
   getAuthUser(this: any): IAuth<UserDTO>['user'];

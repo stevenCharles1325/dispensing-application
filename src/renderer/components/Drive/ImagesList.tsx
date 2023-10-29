@@ -17,6 +17,7 @@ import {
 } from 'react-virtualized';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Loading from '../Loading';
+import useAlert from 'UI/hooks/useAlert';
 
 interface MainMansoryProps {
   images: ImageDTO[];
@@ -87,7 +88,7 @@ function MainMansory({
               src={image.url}
               alt={image.name}
               style={{
-                objectFit: 'contain',
+                objectFit: 'cover',
                 width: `${columnWidth}px`,
                 height: `${cardHeight}px`,
               }}
@@ -180,6 +181,7 @@ export default function AppImageList({
   hasNextPage,
   onDelete,
 }: ImageListProps) {
+  const { displayAlert } = useAlert();
   const [loadedCount, setLoadedCount] = useState(0);
   const isLoading = loadedCount !== images.length || hasNextPage;
 
