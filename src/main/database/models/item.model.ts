@@ -11,7 +11,13 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Length, IsPositive, IsNotEmpty, IsIn } from 'class-validator';
+import {
+  Length,
+  IsPositive,
+  IsNotEmpty,
+  IsIn,
+  ValidateIf,
+} from 'class-validator';
 import { ValidationMessage } from './validator/message/message';
 import measurements from 'Main/data/defaults/unit-of-measurements';
 import itemStatuses from 'Main/data/defaults/statuses/item';
@@ -21,6 +27,7 @@ import { Supplier } from './supplier.model';
 import { Brand } from './brand.model';
 import { Category } from './category.model';
 import { IsBarcode } from './validator/IsBarcode';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
 
 @Entity('items')
 export class Item {
@@ -103,7 +110,8 @@ export class Item {
   })
   unit_of_measurement: string;
 
-  @Column()
+  @Column({ nullable: true })
+  @ValidateIf((item: ItemDTO) => Boolean(item.barcode.length))
   @IsBarcode({
     message: ValidationMessage.invalid,
   })

@@ -71,7 +71,6 @@ export const navigationRoutes: INavButtonprops[] = [
     label: 'Reports',
     redirectPath: '/reports',
     icon: <AssessmentOutlinedIcon />,
-    disabled: true,
   },
 ];
 

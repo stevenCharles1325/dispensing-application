@@ -7,6 +7,12 @@ const permissions = [
     kebab: 'view-audit-trail',
   },
 
+  // Audit-Trail permissions
+  {
+    name: 'View Report',
+    kebab: 'view-report',
+  },
+
   // Role management permissions
   {
     name: 'View Role',

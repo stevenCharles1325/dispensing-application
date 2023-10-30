@@ -52,8 +52,8 @@ interface CustomProps {
   name: string;
 }
 
-const NumericFormatCustom = React.forwardRef<NumericFormatProps, CustomProps>(
-  function NumericFormatCustom(props, ref) {
+const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
+  function PesoNumberFormat(props, ref) {
     const { onChange, ...other } = props;
 
     return (
@@ -71,6 +71,28 @@ const NumericFormatCustom = React.forwardRef<NumericFormatProps, CustomProps>(
         thousandSeparator
         valueIsNumericString
         prefix="₱"
+      />
+    );
+  }
+);
+
+const NumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
+  function PesoNumberFormat(props, ref) {
+    const { onChange, ...other } = props;
+
+    return (
+      <NumericFormat
+        {...other}
+        getInputRef={ref}
+        onValueChange={(values) => {
+          onChange({
+            target: {
+              name: props.name,
+              value: values.value,
+            },
+          });
+        }}
+        valueIsNumericString
       />
     );
   }
@@ -204,6 +226,7 @@ export default function InventoryForm({
     'image_id',
     'system_id',
     'tax_rate',
+    'barcode',
   ]);
 
   console.log('Empty fields:', emptyFields);
@@ -524,7 +547,7 @@ export default function InventoryForm({
               variant="outlined"
               size="small"
               InputProps={{
-                inputComponent: NumericFormatCustom as any,
+                inputComponent: PesoNumberFormat as any,
               }}
               sx={{
                 width: 300,
@@ -544,7 +567,7 @@ export default function InventoryForm({
               variant="outlined"
               size="small"
               InputProps={{
-                inputComponent: NumericFormatCustom as any,
+                inputComponent: PesoNumberFormat as any,
               }}
               sx={{
                 width: 300,
@@ -561,6 +584,9 @@ export default function InventoryForm({
                   type: 'tax_rate',
                   payload: Number(event.target.value),
                 });
+              }}
+              InputProps={{
+                inputComponent: NumberFormat as any,
               }}
               variant="outlined"
               size="small"
@@ -592,6 +618,9 @@ export default function InventoryForm({
               size="small"
               sx={{
                 width: 300,
+              }}
+              InputProps={{
+                inputComponent: NumberFormat as any,
               }}
               helperText={errors.stock_quantity}
               error={Boolean(errors.stock_quantity)}

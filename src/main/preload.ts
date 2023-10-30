@@ -19,6 +19,7 @@ import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import TransactionDTO, {
   IncomeDTO,
 } from 'App/data-transfer-objects/transaction.dto';
+import IReport from 'App/interfaces/report/report.interface';
 
 export type Channels = 'ipc-pos';
 
@@ -325,6 +326,16 @@ const auditTrailHandler = {
     ipcRenderer.invoke('audit-trail:show', payload, page, total),
 };
 
+/* ================================
++
++       REPORT EVENT HANDLER
++
++ ================================ */
+const reportHandler = {
+  getReport: async (): Promise<IResponse<string[] | IPOSError[] | IReport>> =>
+    ipcRenderer.invoke('report:show'),
+};
+
 // EXPOSING HANDLERS
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
@@ -336,6 +347,7 @@ contextBridge.exposeInMainWorld('category', categoryHandler);
 contextBridge.exposeInMainWorld('supplier', supplierHandler);
 contextBridge.exposeInMainWorld('payment', paymentHandler);
 contextBridge.exposeInMainWorld('auditTrail', auditTrailHandler);
+contextBridge.exposeInMainWorld('report', reportHandler);
 
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
@@ -347,3 +359,4 @@ export type CategoryHandler = typeof categoryHandler;
 export type SupplierHandler = typeof supplierHandler;
 export type PaymentHandler = typeof paymentHandler;
 export type AuditTrailHandler = typeof auditTrailHandler;
+export type ReportHandler = typeof reportHandler;

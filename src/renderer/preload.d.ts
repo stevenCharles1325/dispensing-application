@@ -7,6 +7,7 @@ import {
   ItemHandler,
   PaymentHandler,
   PeerHandler,
+  ReportHandler,
   SupplierHandler,
   UserHandler,
 } from 'Main/preload';
@@ -24,6 +25,7 @@ declare global {
     supplier: SupplierHandler;
     payment: PaymentHandler;
     auditTrail: AuditTrailHandler;
+    report: ReportHandler;
   }
 }
 

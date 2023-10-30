@@ -32,8 +32,9 @@ export default class PaymentShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const paymentQuery =
-          TransactionRepository.createQueryBuilder('payment');
+        const paymentQuery = TransactionRepository.createQueryBuilder(
+          'transaction'
+        ).where(`transaction.type = 'customer-payment'`);
 
         if (take !== 'max') {
           paymentQuery.take(take).skip(skip);
@@ -50,11 +51,11 @@ export default class PaymentShowEvent implements IEvent {
 
             if (propertyFind instanceof Array) {
               paymentQuery
-                .where(`payment.${propertyName} IN (:...${propertyName})`)
+                .where(`transaction.${propertyName} IN (:...${propertyName})`)
                 .setParameter(propertyName, propertyFind);
             } else {
               paymentQuery
-                .where(`payment.${propertyName} LIKE :${propertyName}`)
+                .where(`transaction.${propertyName} LIKE :${propertyName}`)
                 .setParameter(propertyName, `%${propertyFind}%`);
             }
           }

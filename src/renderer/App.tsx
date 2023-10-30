@@ -13,7 +13,8 @@ import AuthLayout from './components/Layouts/AuthLayout';
 import Inventory from './screens/protected/inventory';
 
 import './styles/global.css';
-import Logs from './screens/protected/logs';
+import Logs from './screens/protected/history';
+import Report from './screens/protected/report';
 
 const router = createMemoryRouter(
   createRoutesFromElements(
@@ -27,6 +28,7 @@ const router = createMemoryRouter(
         <Route path="home" element={<Home />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="logs" element={<Logs />} />
+        <Route path="reports" element={<Report />} />
       </Route>
 
       <Route path="/sign-in" element={<SignIn />} />
