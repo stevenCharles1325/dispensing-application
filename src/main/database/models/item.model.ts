@@ -153,7 +153,7 @@ export class Item {
   @JoinColumn({ name: 'brand_id', referencedColumnName: 'id' })
   brand: Brand;
 
-  @ManyToOne(() => Category, (category) => category.items, {
+  @ManyToOne(() => Category, {
     eager: true,
     cascade: true,
   })
