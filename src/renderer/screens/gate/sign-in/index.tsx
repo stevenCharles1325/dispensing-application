@@ -43,7 +43,7 @@ export default function SignIn() {
 
   return (
     <div className="w-screen h-screen bg-transparent flex justify-center items-center shadow-inner">
-      <div className="w-[397px] h-[493px] bg-white rounded-[20px] shadow-2xl p-5 flex flex-col items-center">
+      <div className="w-[397px] h-[450px] bg-white rounded-[20px] shadow-2xl p-5 flex flex-col items-center">
         <div className="mb-[30px]">
           <AppLogo withName />
         </div>

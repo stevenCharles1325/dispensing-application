@@ -254,13 +254,20 @@ export default function Home() {
     <>
       <div className="w-full h-full flex">
         <div className="grow min-w-[800px] flex flex-col">
-          <div className="w-full h-[50px]">
+          <div className="w-full h-[50px] flex flex-row gap-3">
             <Chip
               label="Category"
               icon={<ExpandMoreIcon />}
               color="secondary"
               variant="outlined"
               onClick={handleFilterClick}
+              className="shadow-md border"
+            />
+            <Chip
+              label="Barcode scanning"
+              color="secondary"
+              variant="outlined"
+              onClick={() => displayAlert?.('feature coming soon', 'info')}
               className="shadow-md border"
             />
           </div>

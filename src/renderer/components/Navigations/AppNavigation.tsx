@@ -41,10 +41,7 @@ import useAlert from 'UI/hooks/useAlert';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { useNavigate } from 'react-router-dom';
 import useAppDrive from 'UI/hooks/useAppDrive';
-import useUser from 'UI/stores/user';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
-import UserDTO from 'App/data-transfer-objects/user.dto';
-import IAuth from 'App/interfaces/auth/auth.interface';
 import PasswordInput from '../TextField/PasswordInput';
 
 export const navigationRoutes: INavButtonprops[] = [
@@ -78,7 +75,8 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   const drive = useAppDrive();
   const navigate = useNavigate();
   const { displayAlert } = useAlert();
-  const { searchText, placeHolder, disabled, setSearchText } = useSearch();
+  const { searchText, placeHolder, disabled, setSearchText, setDisabled } =
+    useSearch();
 
   const [activeRouteId, setActiveRouteId] = useState(0);
   const [text, setText] = useState(searchText ?? '');
@@ -281,6 +279,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                 setActiveRouteId(data.id);
                 setText('');
                 setSearchText?.('');
+                setDisabled?.(false);
               }}
               {...data}
             />

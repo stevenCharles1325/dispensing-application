@@ -2,7 +2,7 @@
 import TotalDifferenceWidget from 'UI/components/Widgets/TotalDifferenceWidget';
 import PaidTwoToneIcon from '@mui/icons-material/PaidTwoTone';
 import TableRestaurantTwoToneIcon from '@mui/icons-material/TableRestaurantTwoTone';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   BarChart,
   LineChart,
@@ -17,6 +17,7 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import Loading from 'UI/components/Loading';
 import styled from '@mui/material/styles/styled';
 import { Chip } from '@mui/material';
+import useSearch from 'UI/hooks/useSearch';
 
 const colorsPalette = ['#9C27B0', '#B02780', '#5727B0'];
 
@@ -36,7 +37,6 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-
 const getReport = async (): Promise<
   IResponse<IReport | IPOSError[] | string[]>
 > => {
@@ -46,6 +46,7 @@ const getReport = async (): Promise<
 };
 
 export default function Report() {
+  const { setPlaceHolder, setDisabled } = useSearch();
   const {
     data,
     isLoading,
@@ -64,6 +65,11 @@ export default function Report() {
   const orders = report?.daily_overview_reports.orders;
   const currSalesReport = report?.current_sale_reports;
   const trendSales = report?.trend_sales;
+
+  useEffect(() => {
+    setPlaceHolder?.('Search is disabled here');
+    setDisabled?.(true);
+  }, [setDisabled, setPlaceHolder]);
 
   return (
     <div className="w-full h-full flex flex-col">
