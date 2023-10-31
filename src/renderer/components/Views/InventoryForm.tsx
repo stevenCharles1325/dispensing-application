@@ -326,7 +326,6 @@ export default function InventoryForm({
   const handleUpdateItem = useCallback(async () => {
     if (!selectedItem) return;
 
-    console.log(form);
     const res = await window.item.updateItem(
       selectedItem.id,
       form as unknown as ItemDTO
@@ -412,6 +411,7 @@ export default function InventoryForm({
           <div className="w-full flex flex-wrap gap-7">
             <TextField
               label="Item name"
+              required
               value={form.name}
               onChange={(event) => {
                 dispatch({ type: 'name', payload: event.target.value });
@@ -426,9 +426,13 @@ export default function InventoryForm({
             />
             <TextField
               label="Stock Keeping Unit (SKU)"
+              required
               value={form.sku}
               onChange={(event) => {
-                dispatch({ type: 'sku', payload: event.target.value });
+                dispatch({
+                  type: 'sku',
+                  payload: event.target.value?.toUpperCase(),
+                });
               }}
               variant="outlined"
               size="small"
@@ -454,6 +458,7 @@ export default function InventoryForm({
             />
             <CustomAutoComplete
               value={brands.find(({ id }) => id === form.brand_id)?.name}
+              required
               options={brands}
               onAdd={handleAddNewBrand}
               onChange={({ name }) => {
@@ -471,6 +476,7 @@ export default function InventoryForm({
             />
             <CustomAutoComplete
               options={categories}
+              required
               value={categories.find(({ id }) => id === form.category_id)?.name}
               onAdd={handleAddNewCategory}
               onChange={({ name }) => {
@@ -489,6 +495,7 @@ export default function InventoryForm({
             <Autocomplete
               size="small"
               options={itemStatuses}
+              required
               value={form.status}
               onChange={(_, value) => {
                 dispatch({
@@ -510,6 +517,7 @@ export default function InventoryForm({
             />
             <TextField
               label="Description"
+              required
               value={form.description}
               onChange={(event) => {
                 dispatch({
@@ -536,6 +544,7 @@ export default function InventoryForm({
           <br />
           <div className="w-full flex flex-wrap gap-5">
             <TextField
+              required
               label="Cost Price (Peso)"
               value={form.cost_price}
               onChange={(event) => {
@@ -556,6 +565,7 @@ export default function InventoryForm({
               error={Boolean(errors.cost_price)}
             />
             <TextField
+              required
               label="Selling Price (Peso)"
               value={form.selling_price}
               onChange={(event) => {
@@ -605,22 +615,23 @@ export default function InventoryForm({
           <br />
           <div className="w-full flex flex-wrap gap-5">
             <TextField
-              label="Stock quantity"
+              required
+              label="Stock Quantity"
               value={form.stock_quantity}
+              type="number"
               onChange={(event) => {
                 dispatch({
                   type: 'stock_quantity',
-                  payload: event.target.value,
+                  payload: Number(event.target.value),
                 });
               }}
-              type="number"
+              InputProps={{
+                inputComponent: NumberFormat as any,
+              }}
               variant="outlined"
               size="small"
               sx={{
                 width: 300,
-              }}
-              InputProps={{
-                inputComponent: NumberFormat as any,
               }}
               helperText={errors.stock_quantity}
               error={Boolean(errors.stock_quantity)}
@@ -641,6 +652,7 @@ export default function InventoryForm({
               renderInput={(params) => (
                 <TextField
                   {...params}
+                  required
                   label="Unit of measurement"
                   helperText={errors.unit_of_measurement}
                   error={Boolean(errors.unit_of_measurement)}
@@ -741,6 +753,7 @@ export default function InventoryForm({
                   <h5>Select Existing Supplier</h5>
                   <Autocomplete
                     size="small"
+                    required
                     options={suppliers}
                     getOptionLabel={(option) => option.email}
                     value={

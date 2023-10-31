@@ -31,7 +31,6 @@ export default class SupplierCreateEvent implements IEvent {
         const supplier = SupplierRepository.create(payload);
         const errors = await validator(supplier);
 
-        console.log(errors);
         if (errors && errors.length) {
           return {
             errors,

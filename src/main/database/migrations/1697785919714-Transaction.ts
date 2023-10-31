@@ -3,7 +3,6 @@ import {
   QueryRunner,
   Table,
   TableForeignKey,
-  TableIndex,
 } from 'typeorm';
 
 export class Transaction1697785919714 implements MigrationInterface {
@@ -74,24 +73,9 @@ export class Transaction1697785919714 implements MigrationInterface {
             isNullable: false,
           },
           {
-            name: 'item_details',
-            type: 'text',
-            isNullable: false,
-          },
-          {
             name: 'created_at',
             type: 'timestamp',
             default: 'now()',
-          },
-          {
-            name: 'updated_at',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'deleted_at',
-            type: 'timestamp',
-            isNullable: true,
           },
         ],
       }),

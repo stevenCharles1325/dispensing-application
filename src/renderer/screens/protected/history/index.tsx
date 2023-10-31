@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import OrderDTO from 'App/data-transfer-objects/order.dto';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -236,6 +237,7 @@ export default function Logs() {
     }
   }, [currenTab, setPlaceHolder]);
 
+  console.log(selectedPayment);
   return (
     <div className="w-full h-full flex flex-col gap-y-5">
       <div className="w-full h-fit">
@@ -298,15 +300,18 @@ export default function Logs() {
                 </div>
                 <div className="w-full h-[400px] overflow-auto border-b-2">
                   <div className="w-full h-fit">
-                    {selectedPayment.items.map((item: any) => (
-                      <div className="w-full h-[50px] flex py-5 px-2">
-                        <div className="grow">{item.name}</div>
-                        <div className="w-[100px]">{item.order_quantity}</div>
+                    {selectedPayment.orders?.map((order: any) => (
+                      <div
+                        key={order.id}
+                        className="w-full h-[50px] flex py-5 px-2"
+                      >
+                        <div className="grow">{order.item.name}</div>
+                        <div className="w-[100px]">{order.quantity}</div>
                         <div className="w-[100px]">
                           <NumericFormat
                             style={{ width: '100%', textAlign: 'left' }}
                             className="mb-2 px-1 bg-transparent grow text-end"
-                            value={item.selling_price}
+                            value={order.item.selling_price}
                             prefix="₱ "
                             thousandSeparator
                             valueIsNumericString
@@ -328,9 +333,9 @@ export default function Logs() {
                         <NumericFormat
                           style={{ width: '150px', textAlign: 'center' }}
                           className="mb-2 px-1 bg-transparent grow text-end"
-                          value={selectedPayment.items.reduce(
-                            (prev: any, curr: any) =>
-                              prev + curr.selling_price * curr.order_quantity,
+                          value={selectedPayment.orders?.reduce(
+                            (prev: number, curr: OrderDTO) =>
+                              prev + curr.item.selling_price * curr.quantity,
                             0
                           )}
                           prefix="₱ "
@@ -344,8 +349,8 @@ export default function Logs() {
                       </div>
                     </div>
                     <div className="w-full flex justify-between">
-                      <div className="font-bold">{`Tax ${`${selectedPayment.items.reduce(
-                        (prev: any, curr: any) => prev + curr.tax,
+                      <div className="font-bold">{`Tax ${`${selectedPayment.orders?.reduce(
+                        (prev: number, curr: OrderDTO) => prev + curr.tax_rate,
                         0
                       )}%`} (VAT included):`}</div>
                       <div>
@@ -353,16 +358,16 @@ export default function Logs() {
                           style={{ width: '150px', textAlign: 'center' }}
                           className="mb-2 px-1 bg-transparent grow text-end"
                           value={
-                            selectedPayment.items.reduce(
-                              (prev: any, curr: any) =>
-                                prev + curr.selling_price,
+                            (selectedPayment.orders?.reduce(
+                              (prev: number, curr: OrderDTO) =>
+                                prev + curr.item.selling_price,
                               0
-                            ) *
-                            (selectedPayment.items.reduce(
-                              (prev: any, curr: any) => prev + curr.tax,
+                            ) ?? 0) *
+                            (selectedPayment.orders?.reduce(
+                              (prev: number, curr: OrderDTO) =>
+                                prev + curr.item.tax_rate,
                               0
-                            ) /
-                              100)
+                            ) ?? 0 / 100)
                           }
                           prefix="₱ "
                           thousandSeparator

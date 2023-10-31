@@ -148,6 +148,7 @@ export default function SupplierForm({
         />
         <TextField
           label="Name"
+          required
           value={form.name}
           onChange={(event) => {
             dispatch({ type: 'name', payload: event.target.value });
@@ -162,6 +163,7 @@ export default function SupplierForm({
         />
         <TextField
           label="Email"
+          required
           value={form.email}
           onChange={(event) => {
             dispatch({ type: 'email', payload: event.target.value });
@@ -175,6 +177,7 @@ export default function SupplierForm({
           error={Boolean(errors.email)}
         />
         <TextField
+          required
           label="Phone Number"
           inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           value={form.phone_number}
@@ -191,6 +194,7 @@ export default function SupplierForm({
           error={Boolean(errors.phone_number)}
         />
         <TextField
+          required
           label="Contact Name"
           value={form.contact_name}
           onChange={(event) => {
@@ -205,6 +209,7 @@ export default function SupplierForm({
           error={Boolean(errors.contact_name)}
         />
         <TextField
+          required
           label="Contact Email"
           value={form.contact_email}
           onChange={(event) => {
@@ -219,6 +224,7 @@ export default function SupplierForm({
           error={Boolean(errors.contact_email)}
         />
         <TextField
+          required
           label="Contact Phone Number"
           placeholder="+63912345689"
           value={form.contact_phone_number}
@@ -238,6 +244,7 @@ export default function SupplierForm({
           error={Boolean(errors.contact_phone_number)}
         />
         <TextField
+          required
           label="Address"
           value={form.address}
           onChange={(event) => {

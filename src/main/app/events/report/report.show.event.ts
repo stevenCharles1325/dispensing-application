@@ -3,17 +3,16 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-continue */
 /* eslint-disable react-hooks/rules-of-hooks */
-import RoleDTO from 'App/data-transfer-objects/role.dto';
-import usePagination from 'App/hooks/pagination.hook';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
-import IPagination from 'App/interfaces/pagination/pagination.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IReport from 'App/interfaces/report/report.interface';
 import handleError from 'App/modules/error-handler.module';
 import getPercentageDifference from 'App/modules/get-percentage-diff.module';
-import RoleRepository from 'App/repositories/role.repository';
+import getCurrentSalesReport from 'App/modules/service/report/report.get-current-sales-report.module';
+import getOrders from 'App/modules/service/report/report.get-orders.module';
+import getRevenue from 'App/modules/service/report/report.get-revenue.module';
 import TransactionRepository from 'App/repositories/transaction.repository';
 
 export default class RoleShowEvent implements IEvent {
@@ -53,70 +52,9 @@ export default class RoleShowEvent implements IEvent {
           },
         };
 
-        // Revenue query
-        const { totalYesterday: revenueYesterday } =
-          (await TransactionRepository.createQueryBuilder('transaction')
-            .select('SUM(transaction.total)', 'totalYesterday')
-            .where(`transaction.type = 'customer-payment'`)
-            .where(`date(transaction.created_at) = date('now', '-1 day')`)
-            .getRawOne()) ?? 0;
-
-        const { totalToday: revenueToday } =
-          (await TransactionRepository.createQueryBuilder('transaction')
-            .select('SUM(transaction.total)', 'totalToday')
-            .where(`transaction.type = 'customer-payment'`)
-            .where(`date(transaction.created_at) = date('now')`)
-            .getRawOne()) ?? 0;
-
-        // Revenue
-        reports.daily_overview_reports.revenue = {
-          total: revenueToday,
-          difference_yesterday: getPercentageDifference(
-            revenueToday,
-            revenueYesterday
-          ),
-          has_increased: revenueToday > revenueYesterday,
-        };
-
-        // Orders query
-        const { totalYesterday: orderYesterday } =
-          (await TransactionRepository.createQueryBuilder('transaction')
-            .select('COUNT(*)', 'totalYesterday')
-            .where(`transaction.type = 'customer-payment'`)
-            .where(`date(transaction.created_at) = date('now', '-1 day')`)
-            .getRawOne()) ?? 0;
-
-        const { totalToday: orderToday } =
-          (await TransactionRepository.createQueryBuilder('transaction')
-            .select('COUNT(*)', 'totalToday')
-            .where(`transaction.type = 'customer-payment'`)
-            .where(`date(transaction.created_at) = date('now')`)
-            .getRawOne()) ?? 0;
-
-        console.log(revenueToday, revenueYesterday);
-        // Orders
-        reports.daily_overview_reports.orders = {
-          total: orderToday,
-          difference_yesterday: getPercentageDifference(
-            orderToday,
-            orderYesterday
-          ),
-          has_increased: orderToday > orderYesterday,
-        };
-
-        // Current sales report
-        const currentSaleReports =
-          await TransactionRepository.createQueryBuilder('transaction')
-            .select([
-              'strftime("%H", datetime(transaction.created_at, "localtime")) as hour',
-              'count(*) as count',
-            ])
-            .where(`transaction.type = 'customer-payment'`)
-            .groupBy('hour')
-            .orderBy('hour')
-            .getRawMany();
-
-        reports.current_sale_reports = currentSaleReports;
+        reports.daily_overview_reports.revenue = await getRevenue();
+        reports.daily_overview_reports.orders = await getOrders();
+        reports.current_sale_reports = await getCurrentSalesReport();
 
         // POS sales report
         const groupCategory = ['daily', 'monthly', 'yearly'] as const;

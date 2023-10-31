@@ -137,11 +137,10 @@ export default function Home() {
 
   const orderDetails: IOrderDetails = useMemo(
     () => ({
-      items: selectedItems.map(({ id, selling_price, tax_rate }) => ({
+      items: selectedItems.map(({ id, tax_rate }) => ({
         id,
-        price: selling_price,
         quantity: orders[id],
-        tax: tax_rate,
+        tax_rate,
       })),
       total,
       payment_method: selectedPaymentMethod,

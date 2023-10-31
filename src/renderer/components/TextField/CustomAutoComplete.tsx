@@ -8,6 +8,7 @@ interface CustomAutoCompleteProps {
   options: any[];
   label: string;
   value?: any;
+  required?: boolean;
   onChange?: (value: any) => void;
   onAdd?: (value: any) => void;
   helperText?: string;
@@ -26,6 +27,7 @@ export default function CustomAutoComplete({
   label,
   value: providedValue = null,
   options,
+  required,
   onChange,
   onAdd,
   helperText,
@@ -101,6 +103,7 @@ export default function CustomAutoComplete({
       renderInput={(params) => (
         <TextField
           {...params}
+          required={required}
           size="small"
           label={label}
           helperText={helperText}

@@ -12,7 +12,7 @@ export default interface IReport {
     };
   };
   trend_sales: Array<number>;
-  current_sale_reports: Array<number>;
+  current_sale_reports: Array<{ hour: string; count: number }>;
   pos_sale_reports: {
     daily: Array<any>;
     monthly: Array<any>;

@@ -34,8 +34,9 @@ export class Supplier {
 
   @Column({
     nullable: true,
+    default: null,
   })
-  tax_id: number;
+  tax_id: string;
 
   @Column()
   @Length(3, 20, {

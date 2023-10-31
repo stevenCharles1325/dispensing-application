@@ -46,9 +46,12 @@ export default class ItemDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        updatedItem.image = await ImageRepository.findOneByOrFail({
-          id: itemUpdate.image_id,
-        });
+        if (itemUpdate.image_id) {
+          updatedItem.image = await ImageRepository.findOneByOrFail({
+            id: itemUpdate.image_id,
+          });
+        }
+
         updatedItem.brand = await BrandRepository.findOneByOrFail({
           id: itemUpdate.brand_id,
         });

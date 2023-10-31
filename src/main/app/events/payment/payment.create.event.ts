@@ -13,6 +13,10 @@ import validator from 'App/modules/validator.module';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import { Bull } from 'Main/jobs';
+import OrderRepository from 'App/repositories/order.repository';
+import { Order } from 'Main/database/models/order.model';
+import OrderDTO from 'App/data-transfer-objects/order.dto';
+import { Transaction } from 'Main/database/models/transaction.model';
 
 export default class PaymentCreateEvent implements IEvent {
   public channel: string = 'payment:create';
@@ -50,10 +54,11 @@ export default class PaymentCreateEvent implements IEvent {
             type: 'customer-payment',
             method: 'cash',
             total: order.total,
-            item_details: JSON.stringify(order),
           };
 
-          const transaction = TransactionRepository.create(orderTransaction);
+          const transaction = TransactionRepository.create(
+            orderTransaction as any
+          ) as unknown as Transaction;
           const errors = await validator(transaction);
 
           if (errors && errors.length) {
@@ -64,9 +69,19 @@ export default class PaymentCreateEvent implements IEvent {
             } as unknown as IResponse<IPOSValidationError[]>;
           }
 
-          const data = (await TransactionRepository.save(
-            transaction
-          )) as unknown as TransactionDTO;
+          const data = await TransactionRepository.save(transaction);
+
+          const desiredOrder: any = order.items.map((item) => ({
+            item_id: item.id,
+            quantity: item.quantity,
+            transaction_id: data.id,
+            tax_rate: item.tax_rate,
+          }));
+          const orders = OrderRepository.create(desiredOrder);
+          await OrderRepository.save(orders);
+          data.orders = orders;
+
+          await TransactionRepository.save(data);
 
           await Bull('AUDIT_JOB', {
             user_id: user.id as number,

@@ -2,9 +2,8 @@ import { IPaymentTypes } from '../transaction/payment/payment.methods.interface'
 
 export interface IDesiredItems {
   id: string;
-  price: number;
   quantity: number;
-  tax: number;
+  tax_rate: number;
 }
 
 export interface IOrderDetails {

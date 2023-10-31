@@ -75,7 +75,8 @@ export class Supplier1696655002476 implements MigrationInterface {
           {
             name: 'tax_id',
             type: 'varchar',
-            isNullable: false,
+            isNullable: true,
+            default: null,
             comment:
               'The tax identification number or VAT (Value Added Tax) number for the supplier, which may be necessary for tax reporting purposes.',
           },

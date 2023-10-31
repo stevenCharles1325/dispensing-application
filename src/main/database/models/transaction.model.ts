@@ -6,9 +6,9 @@ import {
   Column,
   Entity,
   OneToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
-  UpdateDateColumn,
   PrimaryGeneratedColumn,
   AfterInsert,
   AfterLoad,
@@ -20,33 +20,21 @@ import { User } from './user.model';
 import transactionCategories from 'Main/data/defaults/categories/transaction';
 import transactionTypes from 'Main/data/defaults/types/transaction';
 import paymentTypes from 'Main/data/defaults/types/payment';
-import { IOrderDetails } from 'App/interfaces/pos/pos.order-details.interface';
-import ItemRepository from 'App/repositories/item.repository';
 import { SqliteDataSource } from 'Main/datasource';
+import { Order } from './order.model';
+import OrderRepository from 'App/repositories/order.repository';
 
 @Entity('transactions')
 export class Transaction {
   @AfterLoad()
-  async getItemsForCustomerPayment() {
+  async getOrdersForCustomerPayment() {
     if (this.type === 'customer-payment') {
-      const parsedDetails = JSON.parse(this.item_details);
-      const { items } = parsedDetails;
-      const manager = SqliteDataSource.createEntityManager();
+      const orders = await OrderRepository.createQueryBuilder('order')
+        .where('order.transaction_id = :transactionId')
+        .setParameter('transactionId', this.id)
+        .getMany();
 
-      const rawData: any[] = await manager.query(
-        `SELECT * FROM 'items' WHERE id IN (${items
-          .map(({ id }: { id: string }) => `'${id}'`)
-          .join(',')})`
-      );
-
-      this.items = rawData.map((item, index) => ({
-        selling_price: item.selling_price,
-        sku: item.sku,
-        name: item.name,
-        tax: item.tax_rate,
-        unit_of_measurement: item.unit_of_measurement,
-        order_quantity: items[index].quantity,
-      }));
+      this.orders = orders;
     }
   }
 
@@ -59,22 +47,6 @@ export class Transaction {
       );
 
       this.creator = rawData[0];
-    }
-  }
-
-  @AfterInsert()
-  async updatePurchasedItem() {
-    if (this.category === 'income' && this.type === 'customer-payment') {
-      const purchase: IOrderDetails = JSON.parse(this.item_details);
-
-      for await (const purchasedItem of purchase.items) {
-        const item = await ItemRepository.findOneByOrFail({
-          id: purchasedItem.id,
-        });
-
-        item.purchase(purchasedItem.quantity);
-        await ItemRepository.save(item);
-      }
     }
   }
 
@@ -132,14 +104,8 @@ export class Transaction {
   })
   total: number;
 
-  @Column()
-  item_details: string;
-
   @CreateDateColumn()
   created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 
   @OneToOne(() => System, { eager: true })
   @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })
@@ -149,6 +115,9 @@ export class Transaction {
   @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
   creator: User;
 
-  // Only field out when Income type is 'customer-payment'
-  items: any[];
+  @OneToMany(() => Order, (order) => order.transaction, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'id', referencedColumnName: 'transaction_id' })
+  orders: Order[];
 }
