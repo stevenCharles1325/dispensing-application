@@ -35,4 +35,4 @@ npm-debug.log.*
 *.scss.d.ts
 
 # Database
-# *.sqlite
+*.sqlite
