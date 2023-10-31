@@ -11,7 +11,7 @@ export default interface IReport {
       has_increased: boolean;
     };
   };
-  trend_sales: Array<number>;
+  trend_sales: Array<{ category_name: string; frequency: number }>;
   current_sale_reports: Array<{ hour: string; count: number }>;
   pos_sale_reports: {
     daily: Array<any>;

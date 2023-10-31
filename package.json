@@ -112,6 +112,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.12",
+    "@mui/x-charts": "^6.0.0-alpha.17",
     "@mui/x-data-grid": "^6.16.0",
     "@tanstack/react-query": "^4.36.1",
     "@types/bcrypt": "^5.0.0",

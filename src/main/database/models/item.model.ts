@@ -3,6 +3,8 @@ import {
   Column,
   Entity,
   OneToOne,
+  OneToMany,
+  ManyToOne,
   JoinColumn,
   BeforeUpdate,
   CreateDateColumn,
@@ -28,6 +30,7 @@ import { Brand } from './brand.model';
 import { Category } from './category.model';
 import { IsBarcode } from './validator/IsBarcode';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
+import { Order } from './order.model';
 
 @Entity('items')
 export class Item {
@@ -150,7 +153,10 @@ export class Item {
   @JoinColumn({ name: 'brand_id', referencedColumnName: 'id' })
   brand: Brand;
 
-  @OneToOne(() => Category, { eager: true, cascade: true })
+  @ManyToOne(() => Category, (category) => category.items, {
+    eager: true,
+    cascade: true,
+  })
   @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
   category: Category;
 

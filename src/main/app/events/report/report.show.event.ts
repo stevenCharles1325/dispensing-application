@@ -9,11 +9,11 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IReport from 'App/interfaces/report/report.interface';
 import handleError from 'App/modules/error-handler.module';
-import getPercentageDifference from 'App/modules/get-percentage-diff.module';
 import getCurrentSalesReport from 'App/modules/service/report/report.get-current-sales-report.module';
 import getOrders from 'App/modules/service/report/report.get-orders.module';
 import getRevenue from 'App/modules/service/report/report.get-revenue.module';
-import TransactionRepository from 'App/repositories/transaction.repository';
+import getSalesReport from 'App/modules/service/report/report.get-sales-report.module';
+import getTrendSales from 'App/modules/service/report/report.get-trend-sales.module';
 
 export default class RoleShowEvent implements IEvent {
   public channel: string = 'report:show';
@@ -55,51 +55,8 @@ export default class RoleShowEvent implements IEvent {
         reports.daily_overview_reports.revenue = await getRevenue();
         reports.daily_overview_reports.orders = await getOrders();
         reports.current_sale_reports = await getCurrentSalesReport();
-
-        // POS sales report
-        const groupCategory = ['daily', 'monthly', 'yearly'] as const;
-        for (const groupBy of groupCategory) {
-          let groupByClause;
-          switch (groupBy) {
-            case 'daily':
-              groupByClause = "strftime('%Y-%m-%d', transaction.created_at)";
-              break;
-            case 'monthly':
-              groupByClause = "strftime('%Y-%m', transaction.created_at)";
-              break;
-            case 'yearly':
-              groupByClause = "strftime('%Y', transaction.created_at)";
-              break;
-
-            default:
-              groupByClause = "strftime('%Y-%m-%d', transaction.created_at)";
-              break;
-          }
-
-          const result: any[] = await TransactionRepository.createQueryBuilder(
-            'transaction'
-          )
-            .select([
-              `strftime('%Y-%m-%d', transaction.created_at, 'localtime') as formattedTimestamp`,
-              'count(*) as count',
-            ])
-            .where(`transaction.type = 'customer-payment'`)
-            .groupBy(groupByClause)
-            .orderBy('formattedTimestamp')
-            .getRawMany();
-
-          reports.pos_sale_reports[groupBy] = result;
-        }
-
-        // Trend sales
-        // const trendSales = await TransactionRepository.createQueryBuilder(
-        //   'transaction'
-        // )
-        //   .select(['transaction.', 'SUM(quantity) as totalQuantity'])
-        //   .groupBy('product_name')
-        //   .orderBy('totalQuantity', 'DESC')
-        //   .limit(1)
-        //   .getRawOne();
+        reports.pos_sale_reports = await getSalesReport();
+        reports.trend_sales = await getTrendSales();
 
         return {
           data: reports,
