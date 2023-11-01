@@ -1,10 +1,12 @@
 import {
   Column,
   Entity,
+  BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import bcrypt from 'bcrypt';
 
 @Entity('systems')
 export class System {
@@ -26,6 +28,9 @@ export class System {
   @Column()
   store_name: string;
 
+  @Column({ nullable: true })
+  master_key: string;
+
   @Column({
     nullable: true,
     default: 0,
@@ -37,4 +42,13 @@ export class System {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @BeforeInsert()
+  hashKey() {
+    if (this.master_key?.length) {
+      const saltRound = 10;
+      const salt = bcrypt.genSaltSync(saltRound);
+      this.master_key = bcrypt.hashSync(this.master_key, salt);
+    }
+  }
 }

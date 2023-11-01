@@ -10,6 +10,7 @@ import {
   ReportHandler,
   SupplierHandler,
   UserHandler,
+  ValidationHandler,
 } from 'Main/preload';
 
 declare global {
@@ -26,6 +27,7 @@ declare global {
     payment: PaymentHandler;
     auditTrail: AuditTrailHandler;
     report: ReportHandler;
+    validation: ValidationHandler;
   }
 }
 

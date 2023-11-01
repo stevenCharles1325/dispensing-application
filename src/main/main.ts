@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+/* eslint-disable consistent-return */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable promise/no-nesting */
@@ -24,7 +26,7 @@ import { runSeeders } from 'typeorm-extension';
 import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all.module';
-import stores from './stores';
+import stores, { ALSStorage } from './stores';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
@@ -32,6 +34,8 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs from './jobs';
 import policies from './data/defaults/object-storage/policies';
+import SystemRepository from 'App/repositories/system.repository';
+import { System } from './database/models/system.model';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -175,6 +179,8 @@ app
         // Initialize Stores
         // Each events now has access to the Store
         stores(() => {
+          const storage = ALSStorage();
+
           if (providers) {
             console.log('[PROVIDERS]: Initializing...');
             Object.entries(providers).forEach(([name, AppProviderClass]) => {
@@ -226,6 +232,42 @@ app
             });
           }
         }, 5000);
+
+        ipcMain.handle('get:master-key', async () => {
+          const system = await SqliteDataSource.createEntityManager().query(
+            'SELECT * FROM systems WHERE is_branch = 0'
+          );
+
+          if (!system[0]) return false;
+
+          const { master_key: key } = system[0];
+
+          if (key && key.length && key === process.env.MASTER_KEY) {
+            return true;
+          }
+
+          return false;
+        });
+
+        ipcMain.handle('set:master-key', async (_, ...payload: any[]) => {
+          const key = payload[0];
+
+          if (key === process.env.MASTER_KEY) {
+            try {
+              await SqliteDataSource.createEntityManager().query(
+                `UPDATE systems SET master_key = '${key}' WHERE is_branch = 0`
+              );
+
+              return true;
+            } catch (err) {
+              console.log('ERROR: ', err);
+            }
+
+            return true;
+          }
+
+          return false;
+        });
 
         createWindow();
 

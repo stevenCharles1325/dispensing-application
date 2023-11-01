@@ -29,8 +29,6 @@ import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 import RoleRepository from 'App/repositories/role.repository';
 import SystemRepository from 'App/repositories/system.repository';
 import { ValidationMessage } from './validator/message/message';
-import { Image } from './image.model';
-import { SqliteDataSource } from 'Main/datasource';
 
 @Entity('users')
 export class User {

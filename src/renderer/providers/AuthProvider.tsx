@@ -50,6 +50,5 @@ export default function AuthProvider({
     [userData]
   );
 
-  console.log('VALUE: ', value);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

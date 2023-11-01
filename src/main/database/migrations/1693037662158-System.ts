@@ -37,6 +37,12 @@ export class System1693037662158 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: 'master_key',
+            comment: 'The key from the application creator',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
             name: 'branch_quantity',
             comment: 'This will be incremented if a new branch is added',
             type: 'int',

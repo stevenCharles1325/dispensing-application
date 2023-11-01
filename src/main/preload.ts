@@ -16,12 +16,22 @@ import ItemDTO from 'App/data-transfer-objects/item.dto';
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
-import TransactionDTO, {
-  IncomeDTO,
-} from 'App/data-transfer-objects/transaction.dto';
+import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IReport from 'App/interfaces/report/report.interface';
 
 export type Channels = 'ipc-pos';
+
+/* ================================
++
++   USER VALIDATION EVENT HANDLER
++
++ ================================ */
+const validationHandler = {
+  isUserPermitted: async (): Promise<boolean> =>
+    ipcRenderer.invoke('get:master-key'),
+  makeUserPermitted: async (key: string): Promise<boolean> =>
+    ipcRenderer.invoke('set:master-key', key),
+};
 
 /* ================================
 +
@@ -348,6 +358,7 @@ contextBridge.exposeInMainWorld('supplier', supplierHandler);
 contextBridge.exposeInMainWorld('payment', paymentHandler);
 contextBridge.exposeInMainWorld('auditTrail', auditTrailHandler);
 contextBridge.exposeInMainWorld('report', reportHandler);
+contextBridge.exposeInMainWorld('validation', validationHandler);
 
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
@@ -360,3 +371,4 @@ export type SupplierHandler = typeof supplierHandler;
 export type PaymentHandler = typeof paymentHandler;
 export type AuditTrailHandler = typeof auditTrailHandler;
 export type ReportHandler = typeof reportHandler;
+export type ValidationHandler = typeof validationHandler;
