@@ -34,9 +34,9 @@
   ],
   "main": "./src/main/main.ts",
   "scripts": {
-    "dep:binaries:minio:linux": "mkdir -p resources/linux/bin && cd resources/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
-    "dep:binaries:minio:mac": "mkdir -p resources/mac/bin && cd resources/mac/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
-    "dep:binaries:minio:win": "mkdir -p resources/win/bin && cd resources/win/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:linux": "mkdir -p assets/object-storage/linux/bin && cd assets/object-storage/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:mac": "mkdir -p assets/object-storage/mac/bin && cd assets/object-storage/mac/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:win": "mkdir -p assets/object-storage/win/bin && cd assets/object-storage/win/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
     "dep:binaries:minio": "concurrently \"npm run dep:binaries:minio:linux\" \"npm run dep:binaries:minio:mac\" \"npm run dep:binaries:minio:win\"",
     "migration:fresh": "npm run schema:drop && npm run migration:run",
     "migration:refresh": "npm run migration:rollback && npm run migration:run",
@@ -224,8 +224,8 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "XGen",
+    "appId": "org.erb.XGen",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -283,22 +283,22 @@
     ],
     "extraFiles": [
       {
-        "from": "resources/win/bin",
-        "to": "Resources/bin",
+        "from": "assets/object-storage/win/bin",
+        "to": "Assets/win/bin",
         "filter": [
           "**/*"
         ]
       },
       {
-        "from": "resources/linux/bin",
-        "to": "Resources/bin",
+        "from": "assets/object-storage/linux/bin",
+        "to": "Assets/linux/bin",
         "filter": [
           "**/*"
         ]
       },
       {
-        "from": "resources/mac/bin",
-        "to": "Resources/bin",
+        "from": "assets/object-storage/mac/bin",
+        "to": "Assets/mac/bin",
         "filter": [
           "**/*"
         ]

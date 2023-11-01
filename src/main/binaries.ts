@@ -32,8 +32,8 @@ const MINIO_PORT = process.env.MINIO_PORT ?? 9001;
 const IS_PROD = process.env.NODE_ENV === 'production';
 const EXEC_PATH =
   IS_PROD && app.isPackaged
-    ? `${AppRootDir.get()}/Contents/Resources/bin`
-    : `${AppRootDir.get()}/resources/${getPlatform()}/bin`;
+    ? `${AppRootDir.get()}/Contents/Assets/${getPlatform()}/bin`
+    : `${AppRootDir.get()}/assets/object-storage/${getPlatform()}/bin`;
 
 const executeBinaries = () => {
   const os = getPlatform();
