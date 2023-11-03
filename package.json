@@ -32,7 +32,7 @@
       "url": "https://github.com/amilajack"
     }
   ],
-  "main": "./src/main/main.ts",
+  "main": "./dist/main/main.js",
   "scripts": {
     "dep:binaries:minio:linux": "mkdir -p assets/object-storage/linux/bin && cd assets/object-storage/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
     "dep:binaries:minio:mac": "mkdir -p assets/object-storage/mac/bin && cd assets/object-storage/mac/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
@@ -283,22 +283,22 @@
     ],
     "extraFiles": [
       {
-        "from": "assets/object-storage/win/bin",
-        "to": "Assets/win/bin",
+        "from": "src/main/database/migrations",
+        "to": "resources/assets/database/migrations",
         "filter": [
           "**/*"
         ]
       },
       {
-        "from": "assets/object-storage/linux/bin",
-        "to": "Assets/linux/bin",
+        "from": "src/main/database/models",
+        "to": "resources/assets/database/models",
         "filter": [
           "**/*"
         ]
       },
       {
-        "from": "assets/object-storage/mac/bin",
-        "to": "Assets/mac/bin",
+        "from": "src/main/database/seeders",
+        "to": "resources/assets/database/seeders",
         "filter": [
           "**/*"
         ]

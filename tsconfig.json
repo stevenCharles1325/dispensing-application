@@ -9,10 +9,13 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "incremental": true,
-    "target": "ES2021",
+    "target": "ES2015",
+    "module": "CommonJS",
     "lib": [
       "dom",
-      "es2021"
+      "dom.iterable",
+      "es2015",
+      "es6",
     ],
     "jsx": "react-jsx",
     "strict": true,

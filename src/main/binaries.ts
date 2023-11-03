@@ -2,8 +2,9 @@
 import { platform } from 'os';
 import dotenv from 'dotenv';
 import AppRootDir from 'app-root-dir';
-import { app } from 'electron';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import path from 'path';
+import { app } from 'electron';
 
 dotenv.config();
 
@@ -30,10 +31,12 @@ const MINIO_PASSWORD = process.env.MINIO_PASSWORD ?? 'password';
 const MINIO_PORT = process.env.MINIO_PORT ?? 9001;
 
 const IS_PROD = process.env.NODE_ENV === 'production';
-const EXEC_PATH =
-  IS_PROD && app.isPackaged
-    ? `${AppRootDir.get()}/Contents/Assets/${getPlatform()}/bin`
-    : `${AppRootDir.get()}/assets/object-storage/${getPlatform()}/bin`;
+const EXEC_PATH = IS_PROD
+  ? path.join(
+      AppRootDir.get(),
+      `../../assets/object-storage/${getPlatform()}/bin`
+    )
+  : `${AppRootDir.get()}/assets/object-storage/${getPlatform()}/bin`;
 
 const executeBinaries = () => {
   const os = getPlatform();
@@ -47,8 +50,13 @@ const executeBinaries = () => {
   }
 
   if (os === 'win') {
-    cmd = `cd ${EXEC_PATH} && move ${EXEC_PATH}/minio C:\\minio && setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && C:\\minio.exe server F:\\Data --console-address ":${MINIO_PORT}"`;
+    cmd = `setx path "PATH=%PATH%;${EXEC_PATH}" && setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && minio server ${app.getPath(
+      'appData'
+    )} --console-address ":${MINIO_PORT}"`;
 
+    /*
+      The /C option is to run command then terminate command prompt
+    */
     minioProcess = spawn('cmd', ['/C', cmd]);
   }
 

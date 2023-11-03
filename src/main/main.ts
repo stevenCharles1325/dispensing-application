@@ -26,7 +26,7 @@ import { runSeeders } from 'typeorm-extension';
 import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all.module';
-import stores, { ALSStorage } from './stores';
+import stores from './stores';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
@@ -34,8 +34,6 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs from './jobs';
 import policies from './data/defaults/object-storage/policies';
-import SystemRepository from 'App/repositories/system.repository';
-import { System } from './database/models/system.model';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -168,8 +166,13 @@ app
     try {
       initJobs();
       await SqliteDataSource.initialize();
-      console.log('[DB]: Initialized Successfully');
+      const shouldMigrate = await SqliteDataSource.showMigrations();
 
+      if (shouldMigrate) {
+        await SqliteDataSource.runMigrations();
+      }
+
+      console.log('[DB]: Initialized Successfully');
       try {
         await runSeeders(SqliteDataSource);
         console.log('[DB]: Seeded Successfully');
@@ -179,8 +182,6 @@ app
         // Initialize Stores
         // Each events now has access to the Store
         stores(() => {
-          const storage = ALSStorage();
-
           if (providers) {
             console.log('[PROVIDERS]: Initializing...');
             Object.entries(providers).forEach(([name, AppProviderClass]) => {
@@ -269,7 +270,9 @@ app
           return false;
         });
 
-        createWindow();
+        if (SqliteDataSource.isInitialized) {
+          createWindow();
+        }
 
         app.on('activate', () => {
           // On macOS it's common to re-create a window in the app when the
