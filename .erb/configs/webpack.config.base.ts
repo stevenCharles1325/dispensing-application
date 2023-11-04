@@ -16,13 +16,14 @@ const configuration: webpack.Configuration = {
     rules: [
       {
         test: /\.[jt]sx?$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /db.sqlite/],
         use: {
           loader: 'ts-loader',
           options: {
             // Remove this line to enable type checking in webpack builds
             transpileOnly: true,
             compilerOptions: {
+              sourceMap: true,
               module: 'esnext',
             },
           },

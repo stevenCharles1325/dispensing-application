@@ -15,6 +15,7 @@ const roles = requireAll(`${__dirname}/../../data/defaults/roles`, true);
 
 export default class MainSeeder implements Seeder {
   public async run(dataSource: DataSource): Promise<any> {
+    console.log('RUNNING SEEDER...');
     const PermissionRepo = dataSource.getRepository(Permission);
     const RoleRepo = dataSource.getRepository(Role);
     const UserRepo = dataSource.getRepository(User);

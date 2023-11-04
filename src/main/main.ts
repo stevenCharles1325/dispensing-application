@@ -22,7 +22,7 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { SqliteDataSource } from './datasource';
-import { runSeeders } from 'typeorm-extension';
+import { runSeeders, OptionsError } from 'typeorm-extension';
 import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all.module';
@@ -34,6 +34,8 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs from './jobs';
 import policies from './data/defaults/object-storage/policies';
+import { User } from './database/models/user.model';
+import MainSeeder from './database/seeders/main.seeder';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -95,7 +97,6 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  console.log(app.isPackaged);
   mainWindow = new BrowserWindow({
     show: false,
     width: 1130,
@@ -166,16 +167,25 @@ app
     try {
       initJobs();
       await SqliteDataSource.initialize();
+      console.log('[DB]: Initialized Successfully');
+
       const shouldMigrate = await SqliteDataSource.showMigrations();
 
+      console.log('[DB]: IS MIGRATING: ', shouldMigrate);
       if (shouldMigrate) {
         await SqliteDataSource.runMigrations();
+        console.log('[DB]: Migrated Successfully');
       }
 
-      console.log('[DB]: Initialized Successfully');
       try {
-        await runSeeders(SqliteDataSource);
-        console.log('[DB]: Seeded Successfully');
+        try {
+          await runSeeders(SqliteDataSource, {
+            seeds: [MainSeeder],
+          });
+          console.log('[DB]: Seeded Successfully');
+        } catch (err) {
+          console.log('[DB-SEEDER-ERR]: ', err);
+        }
       } finally {
         executeBinaries();
 

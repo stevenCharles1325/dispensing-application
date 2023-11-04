@@ -1,5 +1,7 @@
 {
   "description": "A foundation for scalable desktop apps",
+  "version": "1.0.0",
+  "productName": "XGen",
   "keywords": [
     "electron",
     "boilerplate",
@@ -32,7 +34,7 @@
       "url": "https://github.com/amilajack"
     }
   ],
-  "main": "./dist/main/main.js",
+  "main": "./src/main/main.ts",
   "scripts": {
     "dep:binaries:minio:linux": "mkdir -p assets/object-storage/linux/bin && cd assets/object-storage/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
     "dep:binaries:minio:mac": "mkdir -p assets/object-storage/mac/bin && cd assets/object-storage/mac/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
@@ -47,7 +49,8 @@
     "migration:rollback": "cd release/app && npm run migration:revert",
     "schema:drop": "cd release/app && npm run schema:drop",
     "typeorm:version": "cd release/app && npm run typeorm:version",
-    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
+    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\" \"npm run build:db\"",
+    "build:db": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.db.ts",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
@@ -280,29 +283,6 @@
     },
     "extraResources": [
       "./assets/**"
-    ],
-    "extraFiles": [
-      {
-        "from": "src/main/database/migrations",
-        "to": "resources/assets/database/migrations",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "src/main/database/models",
-        "to": "resources/assets/database/models",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "src/main/database/seeders",
-        "to": "resources/assets/database/seeders",
-        "filter": [
-          "**/*"
-        ]
-      }
     ],
     "publish": {
       "provider": "github",
