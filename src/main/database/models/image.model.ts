@@ -4,13 +4,14 @@ import {
   JoinColumn,
   Column,
   Entity,
+  Relation,
   CreateDateColumn,
   DeleteDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MinLength } from 'class-validator';
-import { ValidationMessage } from './validator/message/message';
-import { User } from './user.model';
+import { ValidationMessage } from '../../app/validators/message/message';
+import type { User } from './user.model';
 
 @Entity('images')
 export class Image {
@@ -40,7 +41,7 @@ export class Image {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @OneToOne(() => User)
+  @OneToOne('User')
   @JoinColumn({ name: 'uploader_id', referencedColumnName: 'id' })
-  uploader: User;
+  uploader: Relation<User>;
 }

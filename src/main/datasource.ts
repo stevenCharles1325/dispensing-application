@@ -1,7 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 import { app } from 'electron';
-import { User } from './database/models/user.model';
 import { AuditTrail } from './database/models/audit-trail.model';
 import { Brand } from './database/models/brand.model';
 import { Category } from './database/models/category.model';
@@ -14,11 +13,13 @@ import { Supplier } from './database/models/supplier.model';
 import { System } from './database/models/system.model';
 import { Token } from './database/models/token.model';
 import { Transaction } from './database/models/transaction.model';
+import { User } from './database/models/user.model';
+import MainSeeder from './database/seeders/main.seeder';
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 const PATH = IS_PROD ? app.getPath('userData') : __dirname;
 
-const options: DataSourceOptions & SeederOptions = {
+export const options: DataSourceOptions & SeederOptions = {
   type: 'sqlite',
   database: `${PATH}/database/db.sqlite`,
   entities: [
@@ -36,13 +37,20 @@ const options: DataSourceOptions & SeederOptions = {
     Transaction,
     User,
   ],
+  // entities: [
+  //   `${app.getAppPath()}/dist/database/models/*`,
+  //   `${__dirname}/database/models/*`,
+  //   `${__dirname}/database/models/**/*.model.{js,ts}`,
+  // ],
   migrations: [
     `${app.getAppPath()}/dist/database/migrations/*`,
     `${__dirname}/database/migrations/*.ts`,
   ],
-  seeds: [`${__dirname}/database/seeders/*.seeder.ts`],
+  seeds: [
+    MainSeeder,
+  ],
   logging: true,
-  synchronize: Boolean(process.env.SYNCHRONIZE) ?? false,
+  synchronize: Boolean(process.env.SYNCHRONIZE) ?? true,
 };
 
 const sqliteDataSource = new DataSource(options);

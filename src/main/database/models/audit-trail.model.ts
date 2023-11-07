@@ -6,13 +6,13 @@ import {
   OneToOne,
   JoinColumn,
   AfterLoad,
+  Relation,
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MinLength, IsNotEmpty, IsIn, ValidateIf } from 'class-validator';
-import { ValidationMessage } from './validator/message/message';
-import { User } from './user.model';
-import { SqliteDataSource } from 'Main/datasource';
+import { ValidationMessage } from '../../app/validators/message/message';
+import type { User } from './user.model';
 
 @Entity('audit_trails')
 export class AuditTrail {
@@ -20,7 +20,7 @@ export class AuditTrail {
 
   @AfterLoad()
   async getRelated() {
-    const manager = SqliteDataSource.createEntityManager();
+    const manager = global.datasource.createEntityManager();
     const id =
       this.resource_id_type === 'uuid'
         ? `'${this.resource_id}'`
@@ -35,7 +35,7 @@ export class AuditTrail {
   @AfterLoad()
   async getUser() {
     if (!this.user) {
-      const manager = SqliteDataSource.createEntityManager();
+      const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
         `SELECT * FROM 'users' WHERE id = ${this.user_id}`
       );
@@ -106,9 +106,9 @@ export class AuditTrail {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToOne(() => User, {
+  @OneToOne('User', {
     eager: true,
   })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: User;
+  user: Relation<User>;
 }

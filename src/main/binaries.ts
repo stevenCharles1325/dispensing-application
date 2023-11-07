@@ -8,7 +8,7 @@ import { app } from 'electron';
 
 dotenv.config();
 
-const getPlatform = () => {
+export const getPlatform = () => {
   switch (platform()) {
     case 'aix':
     case 'freebsd':
@@ -39,41 +39,49 @@ const EXEC_PATH = IS_PROD
   : `${AppRootDir.get()}/assets/object-storage/${getPlatform()}/bin`;
 
 const executeBinaries = () => {
-  const os = getPlatform();
-  let cmd = '';
-  let minioProcess: ChildProcessWithoutNullStreams | null = null;
+  try {
 
-  if (os === 'linux' || os === 'mac') {
-    cmd = `chmod +x ${EXEC_PATH}/minio && sudo -S MINIO_ROOT_USER=${MINIO_USER} MINIO_ROOT_PASSWORD=${MINIO_PASSWORD} minio server /mnt/data --console-address ":${MINIO_PORT}"`;
+    console.log('[BINARIES]: Running binaries');
+    const os = getPlatform();
+    let cmd = '';
+    let minioProcess: ChildProcessWithoutNullStreams | null = null;
 
-    minioProcess = spawn('bash', ['-c', cmd]);
-  }
+    if (os === 'linux' || os === 'mac') {
+      cmd = `chmod +x ${EXEC_PATH}/minio && sudo -S MINIO_ROOT_USER=${MINIO_USER} MINIO_ROOT_PASSWORD=${MINIO_PASSWORD} minio server /mnt/data --console-address ":${MINIO_PORT}"`;
 
-  if (os === 'win') {
-    cmd = `setx path "PATH=%PATH%;${EXEC_PATH}" && setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && minio server ${app.getPath(
-      'appData'
-    )} --console-address ":${MINIO_PORT}"`;
+      minioProcess = spawn('bash', ['-c', cmd]);
+    }
 
-    /*
-      The /C option is to run command then terminate command prompt
-    */
-    minioProcess = spawn('cmd', ['/C', cmd]);
-  }
+    if (os === 'win') {
+      cmd = `setx path "PATH=%PATH%;${EXEC_PATH}" && setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && minio server ${app.getPath(
+        'appData'
+      )} --console-address ":${MINIO_PORT}"`;
 
-  if (minioProcess) {
-    minioProcess.stdout.on('data', (data) => {
-      console.log('[STDOUT]: ----------------------');
-      console.log(data.toString());
-    });
+      /*
+        The /C option is to run command then terminate command prompt
+      */
+      minioProcess = spawn('cmd', ['/C', cmd]);
+    }
 
-    minioProcess.stderr.on('data', (data) => {
-      console.log('[STDERR]: ----------------------');
-      console.log(data.toString());
-    });
+    if (minioProcess) {
+      minioProcess.stdout.on('data', (data) => {
+        console.log('[STDOUT]: ----------------------');
+        console.log(data.toString());
+      });
 
-    minioProcess.on('close', (code) => {
-      console.log(`Minio process exited with code ${code}`);
-    });
+      minioProcess.stderr.on('data', (data) => {
+        console.log('[STDERR]: ----------------------');
+        console.log(data.toString());
+      });
+
+      minioProcess.on('close', (code) => {
+        console.log(`Minio process exited with code ${code}`);
+      });
+    }
+    console.log('[BINARIES]: Binaries ran successfully');
+  } catch (err) {
+    console.log('[BINARIES-ERROR]: ', err);
+    throw err;
   }
 };
 

@@ -5,26 +5,19 @@ import webpackPaths from './webpack.paths';
 import baseConfig from './webpack.config.base';
 import dotenv from 'dotenv';
 import checkNodeEnv from '../scripts/check-node-env';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 checkNodeEnv('production');
 
-const glob = require('glob');
-
-const migrationPath = path.resolve('src/main/database/migrations/*.ts');
-const entry = glob.sync(migrationPath).reduce((entries, filename) => {
-  const migrationName = path.basename(filename, '.ts');
-  return { ...entries, [migrationName]: filename };
-}, {});
-
-const dbConfiguration: webpack.Configuration = {
+const dbDatasourceConfiguration: webpack.Configuration = {
   devtool: 'source-map',
 
   mode: 'production',
 
   target: 'electron-main',
 
-  entry,
+  entry: {
+    datasource: path.join(webpackPaths.srcMainPath, 'datasource.ts'),
+  },
 
   resolve: {
     // assuming all your migration files are written in TypeScript
@@ -33,7 +26,7 @@ const dbConfiguration: webpack.Configuration = {
 
   output: {
     // change `path` to where you want to put transpiled migration files.
-    path: `${webpackPaths.distPath}/database/migrations`,
+    path: `${webpackPaths.distPath}/main`,
     filename: '[name].js',
     // this is important - we want UMD (Universal Module Definition) for migration files.
     library: {
@@ -46,11 +39,6 @@ const dbConfiguration: webpack.Configuration = {
   },
 
   plugins: [
-    new BundleAnalyzerPlugin({
-      analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
-      analyzerPort: 8887,
-    }),
-
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
       DEBUG_PROD: false,
@@ -59,9 +47,14 @@ const dbConfiguration: webpack.Configuration = {
     }),
 
     new webpack.DefinePlugin({
-      'process.type': '"browser-db"',
+      'process.type': '"browser-db-entities"',
     }),
   ],
+
+  node: {
+    __dirname: false,
+    __filename: false,
+  },
 };
 
-export default merge(baseConfig, dbConfiguration);
+export default merge(baseConfig, dbDatasourceConfiguration);

@@ -3,6 +3,7 @@ import path from 'path';
 import _requireAll from 'require-all';
 import { esmResolver } from './esm-resolver.module';
 import { isScriptFile } from './is-script-file.module';
+import { getPlatform } from 'Main/binaries';
 
 /**
  * Function to filter and keep script files only
@@ -17,35 +18,59 @@ function fileFilter(file: string): boolean {
  * `.d.ts` are ignored.
  */
 function requireAll(
-  location: string,
-  recursive = true,
+  context: __WebpackModuleApi.RequireContext,
   optional = false,
   filter: (file: string) => boolean = fileFilter
 ) {
   try {
-    return _requireAll({
-      dirname: location,
-      recursive,
-      filter: (file: string) => {
-        let result = true;
-        /**
-         * Invoke user defined function
-         */
-        if (typeof filter === 'function') {
-          result = filter(file);
+    const files = context.keys();
+
+    const modules = files.reduce((acc: Record<string, any>, file: string) => {
+      const resolved = esmResolver(context(file));
+      if (filter(file)) {
+        const ext = path.extname(file);
+
+        const os = getPlatform();
+
+        if (os === 'linux' || os === 'mac') {
+          const paths = file.split('/');
+          const fileName = paths[paths.length - 1];
+
+          acc[fileName.replace(new RegExp(`${ext}$`), '')] = resolved;
+        } else {
+          const paths = file.split('\\');
+          const fileName = paths[paths.length];
+
+          acc[fileName.replace(new RegExp(`${ext}$`), '')] = resolved;
         }
-        /**
-         * Use the default file name when file is meant to
-         * be kept
-         */
-        if (result === true) {
-          const ext = path.extname(file);
-          return file.replace(new RegExp(`${ext}$`), '');
-        }
-        return result;
-      },
-      resolve: esmResolver,
-    });
+      }
+      return acc;
+    }, {});
+
+    return modules;
+    // return _requireAll({
+    //   dirname: location,
+    //   recursive,
+    //   filter: (file: string) => {
+    //     let result = true;
+    //     /**
+    //      * Invoke user defined function
+    //      */
+    //     if (typeof filter === 'function') {
+    //       result = filter(file);
+    //     }
+    //     /**
+    //      * Use the default file name when file is meant to
+    //      * be kept
+    //      */
+    //     if (result === true) {
+    //       const ext = path.extname(file);
+    //       return file.replace(new RegExp(`${ext}$`), '');
+    //     }
+    //     return result;
+    //   },
+    //   resolve: esmResolver,
+    // });
   } catch (error: any) {
     if (error.code !== 'ENOENT' && !optional) {
       throw error;

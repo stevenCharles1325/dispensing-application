@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MinLength } from 'class-validator';
-import { ValidationMessage } from './validator/message/message';
+import { ValidationMessage } from '../../app/validators/message/message';
 
 @Entity('brands')
 export class Brand {

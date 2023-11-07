@@ -1,17 +1,25 @@
 /* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
-import { Seeder } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
+import { Seeder } from 'typeorm-extension';
 import permissions from 'Main/data/defaults/permissions';
 import PermissionDTO from 'App/data-transfer-objects/permission.dto';
 import { Permission } from '../models/permission.model';
 import { Role } from '../models/role.model';
 import { System } from '../models/system.model';
 import { User } from '../models/user.model';
-import requireAll from 'App/modules/require-all.module';
+import administrator from 'Main/data/defaults/roles/administrator';
+import cashier from 'Main/data/defaults/roles/cashier';
+import storeManager from 'Main/data/defaults/roles/store-manager';
+import owner from 'Main/data/defaults/roles/owner';
 
-const roles = requireAll(`${__dirname}/../../data/defaults/roles`, true);
+const roles = {
+  administrator,
+  cashier,
+  storeManager,
+  owner,
+};
 
 export default class MainSeeder implements Seeder {
   public async run(dataSource: DataSource): Promise<any> {
@@ -49,7 +57,6 @@ export default class MainSeeder implements Seeder {
       const _roles = RoleRepo.create(
         Object.values(roles).map((role) => {
           if (role?.permissions) {
-            console.log('ROLE PERMISSIONS: ', role.permissions);
             const permissionNames = role.permissions.map(
               (permission: PermissionDTO) => permission.kebab
             );
@@ -58,7 +65,6 @@ export default class MainSeeder implements Seeder {
               permissionNames.includes(kebab)
             ) as Permission[];
 
-            console.log('PERMS: ', perms);
             const _role: any = {
               name: role!.name,
               kebab: role!.kebab,
@@ -74,7 +80,6 @@ export default class MainSeeder implements Seeder {
         })
       );
 
-      console.log('ROLES: ', roles);
       await RoleRepo.save(_roles);
 
       console.log('[SEEDER]: Seeded Roles successfully');

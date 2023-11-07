@@ -2,14 +2,15 @@
 import {
   Column,
   Entity,
+  Relation,
   ManyToMany,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Role } from './role.model';
 import { MinLength } from 'class-validator';
-import { ValidationMessage } from './validator/message/message';
+import { ValidationMessage } from '../../app/validators/message/message';
+import type { Role } from './role.model';
 
 @Entity('permissions')
 export class Permission {
@@ -36,6 +37,6 @@ export class Permission {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToMany(() => Role, (role) => role.permissions)
-  roles: Role[];
+  @ManyToMany('Role', (role: Role) => role.permissions)
+  roles: Relation<Role>[];
 }

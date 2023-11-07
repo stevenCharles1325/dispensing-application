@@ -4,6 +4,7 @@ import {
   Column,
   Entity,
   OneToOne,
+  Relation,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
@@ -11,9 +12,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IsMobilePhone, Length, IsEmail, MinLength } from 'class-validator';
-import { ValidationMessage } from './validator/message/message';
-import { Image } from './image.model';
-import { System } from './system.model';
+import { ValidationMessage } from '../../app/validators/message/message';
+import type { Image } from './image.model';
+import type { System } from './system.model';
 
 @Entity('suppliers')
 export class Supplier {
@@ -111,11 +112,11 @@ export class Supplier {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @OneToOne(() => Image, { eager: true })
+  @OneToOne('Image', { eager: true })
   @JoinColumn({ name: 'image_id', referencedColumnName: 'id' })
-  image: Image;
+  image: Relation<Image>;
 
-  @OneToOne(() => System, { eager: true })
+  @OneToOne('System', { eager: true })
   @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })
-  system: System;
+  system: Relation<System>;
 }

@@ -12,23 +12,24 @@ import {
   AfterLoad,
   AfterInsert,
   PrimaryGeneratedColumn,
+  Relation,
 } from 'typeorm';
-import { Item } from './item.model';
-import { Transaction } from './transaction.model';
-import { SqliteDataSource } from 'Main/datasource';
-import ItemRepository from 'App/repositories/item.repository';
+import type { Transaction } from './transaction.model';
+import type { Item } from './item.model';
 
 @Entity('orders')
 export class Order {
   @AfterLoad()
   async getItems() {
+    const ItemRepository = global.datasource.getRepository('items');
     const item = await ItemRepository.findOneByOrFail({ id: this.item_id });
 
-    this.item = item;
+    this.item = item as Item;
   }
 
   @AfterInsert()
   async updatePurchasedItem() {
+    const ItemRepository = global.datasource.getRepository('items');
     const item = await ItemRepository.findOneByOrFail({
       id: this.item_id as unknown as string,
     });
@@ -58,11 +59,11 @@ export class Order {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToOne(() => Item, { eager: true })
+  @OneToOne('Item', { eager: true })
   @JoinColumn({ name: 'item_id', referencedColumnName: 'id' })
-  item: Item;
+  item: Relation<Item>;
 
-  @ManyToOne(() => Transaction, (transaction) => transaction.orders)
+  @ManyToOne('Transaction', (transaction: Transaction) => transaction.orders)
   @JoinColumn({ name: 'transaction_id', referencedColumnName: 'id' })
-  transaction: Transaction;
+  transaction: Relation<Transaction>;
 }

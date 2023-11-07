@@ -13,16 +13,16 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import dotenv from 'dotenv';
 import 'reflect-metadata';
-import path, { join } from 'path';
+import dotenv from 'dotenv';
+import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { SqliteDataSource } from './datasource';
-import { runSeeders, OptionsError } from 'typeorm-extension';
+import { runSeeders } from 'typeorm-extension';
 import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all.module';
@@ -34,14 +34,12 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs from './jobs';
 import policies from './data/defaults/object-storage/policies';
-import { User } from './database/models/user.model';
-import MainSeeder from './database/seeders/main.seeder';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
 dotenvExpand(myEnv);
 
-const providers = requireAll(join(__dirname, '/app/providers'), true);
+const providers = requireAll(require.context('./app/providers', true, /\.(js|ts|json)$/));
 
 class AppUpdater {
   constructor() {
@@ -89,7 +87,7 @@ const createWindow = async () => {
     await installExtensions();
   }
 
-  const RESOURCES_PATH = app.isPackaged
+  const RESOURCES_PATH = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'assets')
     : path.join(__dirname, '../../assets');
 
@@ -107,7 +105,7 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     webPreferences: {
       nodeIntegration: true,
-      preload: app.isPackaged
+      preload: process.env.NODE_ENV === 'production'
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
@@ -127,6 +125,7 @@ const createWindow = async () => {
   });
 
   mainWindow.on('closed', () => {
+    console.log('CLOSING APP');
     mainWindow = null;
   });
 
@@ -165,9 +164,11 @@ app
   .then(async () => {
     // Initialize database
     try {
-      initJobs();
       await SqliteDataSource.initialize();
       console.log('[DB]: Initialized Successfully');
+
+      initJobs();
+      global.datasource = SqliteDataSource;
 
       const shouldMigrate = await SqliteDataSource.showMigrations();
 
@@ -178,14 +179,8 @@ app
       }
 
       try {
-        try {
-          await runSeeders(SqliteDataSource, {
-            seeds: [MainSeeder],
-          });
-          console.log('[DB]: Seeded Successfully');
-        } catch (err) {
-          console.log('[DB-SEEDER-ERR]: ', err);
-        }
+        await runSeeders(SqliteDataSource);
+        console.log('[DB]: Seeded Successfully');
       } finally {
         executeBinaries();
 
@@ -195,9 +190,9 @@ app
           if (providers) {
             console.log('[PROVIDERS]: Initializing...');
             Object.entries(providers).forEach(([name, AppProviderClass]) => {
-              const appProvider = new AppProviderClass(Provider);
-
               try {
+                const appProvider = new AppProviderClass(Provider);
+
                 // Saving this provider inside main IOC provider
                 appProvider.run();
                 console.log(`[PROVIDERS]: Provider ${name} ran successfully`);
@@ -280,11 +275,10 @@ app
           return false;
         });
 
-        if (SqliteDataSource.isInitialized) {
-          createWindow();
-        }
+        await createWindow();
 
         app.on('activate', () => {
+          console.log('APP IS ACTIVE');
           // On macOS it's common to re-create a window in the app when the
           // dock icon is clicked and there are no other windows open.
           if (mainWindow === null) createWindow();

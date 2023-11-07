@@ -9,12 +9,16 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "incremental": true,
-    "target": "ES2015",
+    "target": "ES2022",
     "module": "CommonJS",
+    "types": [
+      "node",
+      "webpack-env" // here
+    ],
     "lib": [
       "dom",
       "dom.iterable",
-      "es2015",
+      "ES2022",
       "es6",
     ],
     "jsx": "react-jsx",

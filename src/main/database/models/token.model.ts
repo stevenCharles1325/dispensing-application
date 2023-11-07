@@ -2,12 +2,13 @@
 import {
   Column,
   Entity,
+  Relation,
   OneToOne,
   JoinColumn,
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.model';
+import type { User } from './user.model';
 
 @Entity('tokens')
 export class Token {
@@ -32,7 +33,7 @@ export class Token {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToOne(() => User, { eager: true })
+  @OneToOne('User', { eager: true })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: User;
+  user: Relation<User>;
 }

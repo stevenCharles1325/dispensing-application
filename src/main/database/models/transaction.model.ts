@@ -10,43 +10,44 @@ import {
   JoinColumn,
   CreateDateColumn,
   PrimaryGeneratedColumn,
-  AfterInsert,
   AfterLoad,
+  Relation,
 } from 'typeorm';
 import { IsIn, IsPositive, IsNotEmpty } from 'class-validator';
-import { ValidationMessage } from './validator/message/message';
-import { System } from './system.model';
-import { User } from './user.model';
+import { ValidationMessage } from '../../app/validators/message/message';
+import { GlobalStorage } from 'Main/stores';
 import transactionCategories from 'Main/data/defaults/categories/transaction';
 import transactionTypes from 'Main/data/defaults/types/transaction';
 import paymentTypes from 'Main/data/defaults/types/payment';
-import { SqliteDataSource } from 'Main/datasource';
-import { Order } from './order.model';
-import OrderRepository from 'App/repositories/order.repository';
+
+import type { Order } from './order.model';
+import type { System } from './system.model';
+import type { User } from './user.model';
 
 @Entity('transactions')
 export class Transaction {
   @AfterLoad()
   async getOrdersForCustomerPayment() {
     if (this.type === 'customer-payment') {
+      const OrderRepository = global.datasource.getRepository('orders');
       const orders = await OrderRepository.createQueryBuilder('order')
         .where('order.transaction_id = :transactionId')
         .setParameter('transactionId', this.id)
         .getMany();
 
-      this.orders = orders;
+      this.orders = orders as Order[];
     }
   }
 
   @AfterLoad()
   async getUser() {
     if (!this.creator) {
-      const manager = SqliteDataSource.createEntityManager();
+      const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
         `SELECT * FROM 'users' WHERE id = ${this.creator_id}`
       );
 
-      this.creator = rawData[0];
+      this.creator = rawData[0] as User;
     }
   }
 
@@ -107,17 +108,17 @@ export class Transaction {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToOne(() => System, { eager: true })
+  @OneToOne('System', { eager: true })
   @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })
-  system: System;
+  system: Relation<System>;
 
-  @OneToOne(() => User, { eager: true })
+  @OneToOne('User', { eager: true })
   @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
-  creator: User;
+  creator: Relation<User>;
 
-  @OneToMany(() => Order, (order) => order.transaction, {
+  @OneToMany('Order', (order: Order) => order.transaction, {
     eager: true,
   })
   @JoinColumn({ name: 'id', referencedColumnName: 'transaction_id' })
-  orders: Order[];
+  orders: Relation<Order>[];
 }

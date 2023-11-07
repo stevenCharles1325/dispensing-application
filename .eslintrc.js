@@ -9,7 +9,7 @@ module.exports = {
     'no-useless-constructor': 'off',
     'import/prefer-default-export': 'off',
     'class-methods-use-this': 'off',
-    'import/order': 'off',
+    'import/order': 'on',
     'dot-notation': 'off',
     'import/no-extraneous-dependencies': 'off',
     'react/react-in-jsx-scope': 'off',

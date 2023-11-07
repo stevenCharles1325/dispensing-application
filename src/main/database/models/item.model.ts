@@ -3,7 +3,7 @@ import {
   Column,
   Entity,
   OneToOne,
-  OneToMany,
+  Relation,
   ManyToOne,
   JoinColumn,
   BeforeUpdate,
@@ -20,17 +20,16 @@ import {
   IsIn,
   ValidateIf,
 } from 'class-validator';
-import { ValidationMessage } from './validator/message/message';
+import { ValidationMessage } from '../../app/validators/message/message';
 import measurements from 'Main/data/defaults/unit-of-measurements';
 import itemStatuses from 'Main/data/defaults/statuses/item';
-import { System } from './system.model';
-import { Image } from './image.model';
-import { Supplier } from './supplier.model';
-import { Brand } from './brand.model';
-import { Category } from './category.model';
-import { IsBarcode } from './validator/IsBarcode';
+import type { System } from './system.model';
+import type { Image } from './image.model';
+import type { Supplier } from './supplier.model';
+import type { Brand } from './brand.model';
+import type { Category } from './category.model';
+import { IsBarcode } from '../../app/validators/IsBarcode';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
-import { Order } from './order.model';
 
 @Entity('items')
 export class Item {
@@ -142,31 +141,31 @@ export class Item {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @OneToOne(() => Image, {
+  @OneToOne('Image', {
     eager: true,
     cascade: true,
   })
   @JoinColumn({ name: 'image_id', referencedColumnName: 'id' })
-  image: Image;
+  image: Relation<Image>;
 
-  @OneToOne(() => Brand, { eager: true, cascade: true })
+  @OneToOne('Brand', { eager: true, cascade: true })
   @JoinColumn({ name: 'brand_id', referencedColumnName: 'id' })
-  brand: Brand;
+  brand: Relation<Brand>;
 
-  @ManyToOne(() => Category, {
+  @ManyToOne('Category', {
     eager: true,
     cascade: true,
   })
   @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
-  category: Category;
+  category: Relation<Category>;
 
-  @OneToOne(() => Supplier, { eager: true, cascade: true })
+  @OneToOne('Supplier', { eager: true, cascade: true })
   @JoinColumn({ name: 'supplier_id', referencedColumnName: 'id' })
-  supplier: Supplier;
+  supplier: Relation<Supplier>;
 
-  @OneToOne(() => System, { eager: true })
+  @OneToOne('System', { eager: true })
   @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })
-  system: System;
+  system: Relation<System>;
 
   // Custom functions
   purchase(quantity: number = 1) {

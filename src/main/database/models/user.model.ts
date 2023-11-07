@@ -4,6 +4,7 @@
 import {
   Column,
   Entity,
+  Relation,
   OneToOne,
   OneToMany,
   ManyToOne,
@@ -24,11 +25,9 @@ import {
   MinLength,
   IsStrongPassword,
 } from 'class-validator';
-import { Role } from './role.model';
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
-import RoleRepository from 'App/repositories/role.repository';
-import SystemRepository from 'App/repositories/system.repository';
-import { ValidationMessage } from './validator/message/message';
+import { ValidationMessage } from '../../app/validators/message/message';
+import type { Role } from './role.model';
 
 @Entity('users')
 export class User {
@@ -129,17 +128,17 @@ export class User {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @OneToOne(() => Role, { eager: true })
+  @OneToOne('Role', { eager: true })
   @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
-  role: Role;
+  role: Relation<Role>;
 
-  @OneToMany(() => User, (user: User) => user.lead)
+  @OneToMany('User', (user: User) => user.lead)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
-  subordinates: User[];
+  subordinates: Relation<User>[];
 
-  @ManyToOne(() => User, (user: User) => user.subordinates)
+  @ManyToOne('User', (user: User) => user.subordinates)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
-  lead: User;
+  lead: Relation<User>;
 
   @AfterLoad()
   fullName() {
@@ -163,6 +162,7 @@ export class User {
   @BeforeInsert()
   async assignBasicRole() {
     if (!this.role_id) {
+      const RoleRepository = global.datasource.getRepository('roles');
       const cashierRole = await RoleRepository.findOneByOrFail({
         kebab: 'cashier',
       });
@@ -174,6 +174,7 @@ export class User {
   @BeforeInsert()
   async setSystemId() {
     if (!this.system_id) {
+      const SystemRepository = global.datasource.getRepository('systems');
       const thisSystem = await SystemRepository.createQueryBuilder()
         .where('uuid = main_branch_id')
         .getOne();

@@ -11,7 +11,7 @@ import { Redis } from 'ioredis';
 const QUEUE_NAME = 'main';
 
 const connection = new Redis();
-const jobsObject = requireAll(join(__dirname, 'app/jobs'), true);
+const jobsObject = requireAll(require.context('./app/jobs', true, /\.(js|ts|json)$/));
 const queue = new Queue(QUEUE_NAME, { connection });
 
 const jobs: Record<string, IJob> = {};
@@ -29,13 +29,20 @@ export async function Bull(jobName: string, data: BullData) {
 }
 
 export default function () {
-  if (jobsObject) {
-    const flattenJobs = objectToFlattenArray(jobsObject);
+  try {
+    console.log('[JOBS]: Initializing jobs');
+    if (jobsObject) {
+      const flattenJobs = objectToFlattenArray(jobsObject);
 
-    for (const [_, JobClass] of flattenJobs) {
-      const job: IJob = new JobClass();
+      for (const [_, JobClass] of flattenJobs) {
+        const job: IJob = new JobClass();
 
-      jobs[job.key] = job;
+        jobs[job.key] = job;
+      }
     }
+    console.log('[JOBS]: Jobs initialized successfully');
+  } catch (err) {
+    console.log('[JOBS-ERROR]: ', err);
+    throw err;
   }
 }

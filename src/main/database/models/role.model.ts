@@ -2,15 +2,16 @@
 import {
   Column,
   Entity,
+  Relation,
   JoinTable,
   ManyToMany,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Permission } from './permission.model';
 import { MinLength } from 'class-validator';
-import { ValidationMessage } from './validator/message/message';
+import { ValidationMessage } from '../../app/validators/message/message';
+import type { Permission } from './permission.model';
 
 @Entity('roles')
 export class Role {
@@ -39,7 +40,7 @@ export class Role {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToMany(() => Permission, (permission) => permission.roles, {
+  @ManyToMany('Permission', (permission: Permission) => permission.roles, {
     eager: true,
   })
   @JoinTable({
@@ -51,5 +52,5 @@ export class Role {
       name: 'permission_id',
     },
   })
-  permissions: Permission[];
+  permissions: Relation<Permission>[];
 }

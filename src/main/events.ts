@@ -1,4 +1,3 @@
-import { join } from 'path';
 import { ipcMain } from 'electron';
 import { ALSStorage, GlobalStorage } from './stores';
 
@@ -11,64 +10,73 @@ import objectToFlattenArray from './app/modules/object-to-flatten-array.module';
 import objectToFlattenObject from './app/modules/object-to-flatten-object.module';
 import IEventDataProperties from 'App/interfaces/event/event.data-props.interface';
 
-const eventsObject = requireAll(join(__dirname, 'app/events'), true);
-const middlewareObject = requireAll(join(__dirname, 'app/middlewares'), true);
+const eventsObject = requireAll(require.context('./app/events', true, /\.(js|ts|json)$/));
+const middlewareObject = requireAll(require.context('./app/middlewares', true, /\.(js|ts|json)$/));
 
 /*
   This is an event-reader. It reads all events from the App/Events folder
   and run it on the same order as what you see when you open any folder inside.
 */
 export default function () {
-  let middlewares: Record<string, any> = {};
+  try {
+    console.log('[EVENTS]: Initializing events');
+    let middlewares: Record<string, any> = {};
 
-  if (middlewareObject) {
-    middlewares = objectToFlattenObject(middlewareObject);
-  }
+    if (middlewareObject) {
+      middlewares = objectToFlattenObject(middlewareObject);
+    }
 
-  if (eventsObject) {
-    const flattenEvents = objectToFlattenArray(eventsObject);
-    const localStorage = ALSStorage();
-    const globalStorage = GlobalStorage();
+    if (eventsObject) {
+      const flattenEvents = objectToFlattenArray(eventsObject);
+      const localStorage = ALSStorage();
+      const globalStorage = GlobalStorage();
 
-    const events: Record<string, IListener> = {};
+      const events: Record<string, IListener> = {};
 
-    flattenEvents.forEach((eventInfo) => {
-      const [_, EventClass] = eventInfo;
+      flattenEvents.forEach((eventInfo) => {
+        const [_, EventClass] = eventInfo;
 
-      const event: IEvent = new EventClass();
+        const event: IEvent = new EventClass();
 
-      const middlewareList =
-        event.middlewares?.map((middlewareFileName: string) => {
-          if (middlewareFileName.includes('.middleware')) {
-            return middlewares[middlewareFileName];
-          }
+        const middlewareList =
+          event.middlewares?.map((middlewareFileName: string) => {
+            if (middlewareFileName.includes('.middleware')) {
+              return middlewares[middlewareFileName];
+            }
 
-          return middlewares[`${middlewareFileName}.middleware`];
-        }) || [];
+            return middlewares[`${middlewareFileName}.middleware`];
+          }) || [];
 
-      const listener = applyMiddleware(
-        middlewareList,
-        event.channel,
-        event.listener
-      );
-      console.log('Initializing event channel: ', event.channel);
+        const listener = applyMiddleware(
+          middlewareList,
+          event.channel,
+          event.listener
+        );
+        console.log('Initializing event channel: ', event.channel);
 
-      events[event.channel] = listener as unknown as IListener;
-      ipcMain.handle(event.channel, (e, ...args: any[]) => {
-        const eventData: IEventDataProperties = {
-          payload: args,
-          user: {
-            id: null,
-            fullName: null,
-            token: null,
-          },
-        };
+        events[event.channel] = listener as unknown as IListener;
 
-        return listener({ event: e, eventData, localStorage, globalStorage });
+        ipcMain.handle(event.channel, (e, ...args: any[]) => {
+          const eventData: IEventDataProperties = {
+            payload: args,
+            user: {
+              id: null,
+              fullName: null,
+              token: null,
+            },
+          };
+
+          return listener({ event: e, eventData, localStorage, globalStorage });
+        });
       });
-    });
 
-    localStorage.set('POS_EVENTS', events);
-    globalStorage.set('POS_EVENTS', events);
+      localStorage.set('POS_EVENTS', events);
+      globalStorage.set('POS_EVENTS', events);
+    }
+
+    console.log('[EVENTS]: Events initialized successfully');
+  } catch (err) {
+    console.log('[EVENTS-ERROR]: ', err);
+    throw err;
   }
 }

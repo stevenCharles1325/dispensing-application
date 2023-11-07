@@ -16,8 +16,8 @@ export default function SignIn() {
   const { setUserData } = useAuth();
   const { displayAlert } = useAlert();
 
-  const [email, setEmail] = useState('johndoe123@gmail.com');
-  const [password, setPassword] = useState('passWORD123@@@');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const login = async () => {
     const res = await window.auth.authSignIn({
