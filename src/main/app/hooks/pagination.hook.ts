@@ -7,9 +7,13 @@ import handleError from 'App/modules/error-handler.module';
 const usePagination: IPaginationHook = async <T>(
   query: any,
   page: number,
-  pageSize: number = 15
+  pageSize: number = 15,
+  orderBy: { fieldName: string, order: 'ASC' | 'DESC' } | null = null,
 ): Promise<IResponse<IPagination<T> | IPOSError[]>> => {
   try {
+    if (orderBy) {
+      query.orderBy(orderBy.fieldName, orderBy.order)
+    }
     const [entity, total] = await query.getManyAndCount();
 
     const totalPage = pageSize

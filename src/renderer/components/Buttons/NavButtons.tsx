@@ -29,7 +29,7 @@ export default function NavButton({
   const handleClick = () => {
     if (redirectPath) {
       onClick?.();
-      navigate(redirectPath);
+      return navigate(redirectPath);
     }
   };
 

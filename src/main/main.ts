@@ -101,6 +101,7 @@ const createWindow = async () => {
     height: 850,
     minWidth: 1130,
     minHeight: 850,
+    autoHideMenuBar: true,
     frame: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
@@ -148,9 +149,9 @@ const createWindow = async () => {
  */
 app.on('window-all-closed', async () => {
   // Log-outs the user first before closing
-  const authService = Provider.ioc<IAuthService>('AuthProvider');
-  const res = await authService.revoke();
-  console.log('Window-close auto log-out response: ', res);
+  // const authService = Provider.ioc<IAuthService>('AuthProvider');
+  // const res = await authService.revoke();
+  // console.log('Window-close auto log-out response: ', res);
 
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed

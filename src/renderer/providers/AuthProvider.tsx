@@ -26,16 +26,16 @@ export default function AuthProvider({
   const navigate = useNavigate();
 
   const goToLogin = () => {
-    navigate('/sign-in', { replace: true });
+    return navigate('/sign-in', { replace: true });
   };
 
   const goToIndex = () => {
-    navigate('/home', { replace: true });
+    return navigate('/home', { replace: true });
   };
 
   const goSignOut = (cb?: Function) => {
     cb?.();
-    navigate('/sign-in', { replace: true });
+    return navigate('/sign-in', { replace: true });
   };
 
   const value = useMemo(

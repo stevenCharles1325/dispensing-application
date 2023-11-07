@@ -60,6 +60,7 @@ const logsColumns: Array<GridColDef> = [
     valueFormatter(params) {
       return new Date(params.value).toLocaleString();
     },
+    sortingOrder: ['desc', 'asc'],
   },
 ];
 
@@ -266,6 +267,7 @@ export default function Logs() {
             sortingOrder={['asc', 'desc']}
             checkboxSelection={false}
             disableRowSelectionOnClick
+            sortingMode='client'
           />
         ) : null}
         <Dialog

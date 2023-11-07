@@ -29,20 +29,10 @@ function requireAll(
       const resolved = esmResolver(context(file));
       if (filter(file)) {
         const ext = path.extname(file);
+        const paths = file.split('/');
+        const fileName = paths[paths.length - 1];
 
-        const os = getPlatform();
-
-        if (os === 'linux' || os === 'mac') {
-          const paths = file.split('/');
-          const fileName = paths[paths.length - 1];
-
-          acc[fileName.replace(new RegExp(`${ext}$`), '')] = resolved;
-        } else {
-          const paths = file.split('\\');
-          const fileName = paths[paths.length];
-
-          acc[fileName.replace(new RegExp(`${ext}$`), '')] = resolved;
-        }
+        acc[fileName.replace(new RegExp(`${ext}$`), '')] = resolved;
       }
       return acc;
     }, {});

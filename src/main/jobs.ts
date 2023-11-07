@@ -1,5 +1,4 @@
 /* eslint-disable no-restricted-syntax */
-import { join } from 'path';
 import requireAll from 'App/modules/require-all.module';
 import { Queue, Worker } from 'bullmq';
 import objectToFlattenArray from 'App/modules/object-to-flatten-array.module';

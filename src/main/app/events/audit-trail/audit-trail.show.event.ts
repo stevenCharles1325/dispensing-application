@@ -52,11 +52,14 @@ export default class AuditTrailShowEvent implements IEvent {
             } else {
               auditTrailQuery
                 .where(`${propertyName} LIKE :${propertyName}`)
-                .setParameter(propertyName, `%${propertyFind}%`);
+                .setParameter(propertyName, `%${propertyFind}%`)
             }
           }
 
-          return await usePagination(auditTrailQuery, page);
+          return await usePagination(auditTrailQuery, page, take, {
+            fieldName: 'created_at',
+            order: 'DESC',
+          });
         }
 
         return {

@@ -25,6 +25,7 @@ export default function SignIn() {
       password,
     });
 
+    console.log(res);
     if (res.status === 'ERROR') {
       const type = 'error';
       const message = (res.errors as unknown as IPOSError[])[0]?.message;
@@ -37,7 +38,7 @@ export default function SignIn() {
 
       displayAlert?.('Login success', 'success');
 
-      navigate('/home', { replace: true });
+      return navigate('/home', { replace: true });
     }
   };
 

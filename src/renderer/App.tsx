@@ -3,7 +3,7 @@ import {
   Route,
   defer,
   createRoutesFromElements,
-  createMemoryRouter,
+  createHashRouter,
 } from 'react-router-dom';
 import useConnection from './hooks/useConnection';
 import Home from './screens/protected/home';
@@ -18,7 +18,7 @@ import Report from './screens/protected/report';
 import ValidatorLayout from './components/Layouts/ValidatorLayout';
 import Validate from './screens/gate/validate';
 
-const router = createMemoryRouter(
+const router = createHashRouter(
   createRoutesFromElements(
     <Route
       path="/"
