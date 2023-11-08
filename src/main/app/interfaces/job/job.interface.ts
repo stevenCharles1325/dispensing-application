@@ -1,9 +1,10 @@
 import { Job } from 'bullmq';
 import IResponse from '../pos/pos.response.interface';
+import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 
 export default interface IJob {
   readonly key: string;
-  handler(this: any, job: Job): Promise<any>;
+  handler(this: any, job: Omit<AuditTrailDTO, 'id' | 'user' | 'related' | 'created_at'> | Job): Promise<any>;
   onProgress?(
     this: any,
     job: Job<any, IResponse<any>, string>,
@@ -12,7 +13,8 @@ export default interface IJob {
   onComplete?(
     this: any,
     job: Job<any, IResponse<any>, string>,
-    progress: number | object
+    result: any,
+    prev: string,
   ): Promise<void>;
   onFail?(
     this: any,

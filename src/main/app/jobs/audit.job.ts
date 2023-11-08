@@ -3,8 +3,6 @@ import AuditTrailRepository from 'App/repositories/audit-trail.repository';
 import validator from 'App/modules/validator.module';
 import { Job } from 'bullmq';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
-import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
-import { AuditTrail } from 'Main/database/models/audit-trail.model';
 
 export default class AuditJob implements IJob {
   readonly key = 'AUDIT_JOB';

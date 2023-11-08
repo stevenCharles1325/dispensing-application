@@ -53,7 +53,7 @@ const executeBinaries = () => {
     }
 
     if (os === 'win') {
-      cmd = `setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && ${EXEC_PATH} server ${app.getPath(
+      cmd = `setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && ${EXEC_PATH}/minio.exe server ${app.getPath(
         'appData'
       )} --console-address ":${MINIO_PORT}"`;
 
