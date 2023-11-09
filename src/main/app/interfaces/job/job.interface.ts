@@ -4,7 +4,7 @@ import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 
 export default interface IJob {
   readonly key: string;
-  handler(this: any, job: Omit<AuditTrailDTO, 'id' | 'user' | 'related' | 'created_at'> | Job): Promise<any>;
+  handler(this: any, job: Job | any): Promise<any>;
   onProgress?(
     this: any,
     job: Job<any, IResponse<any>, string>,

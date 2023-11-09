@@ -40,43 +40,46 @@ const EXEC_PATH = IS_PROD
 
 const executeBinaries = () => {
   try {
-
     console.log('[BINARIES]: Running binaries');
     const os = getPlatform();
     let cmd = '';
-    let minioProcess: ChildProcessWithoutNullStreams | null = null;
+    let binaryProcess: ChildProcessWithoutNullStreams | null = null;
 
     if (os === 'linux' || os === 'mac') {
       cmd = `chmod +x ${EXEC_PATH}/minio && sudo -S MINIO_ROOT_USER=${MINIO_USER} MINIO_ROOT_PASSWORD=${MINIO_PASSWORD} minio server /mnt/data --console-address ":${MINIO_PORT}"`;
 
-      minioProcess = spawn('bash', ['-c', cmd]);
+      console.log('COMMAND: ', cmd);
+      binaryProcess = spawn('bash', ['-c', cmd]);
     }
 
     if (os === 'win') {
-      cmd = `setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && ${EXEC_PATH}/minio.exe server ${app.getPath(
+      cmd = `"setx MINIO_ROOT_USER ${MINIO_USER} && setx MINIO_ROOT_PASSWORD ${MINIO_PASSWORD} && cd "${EXEC_PATH}" && .\\minio.exe server "${app.getPath(
         'appData'
-      )} --console-address ":${MINIO_PORT}"`;
+      )}" --console-address :${MINIO_PORT}"`;
 
+      console.log('COMMAND: ', cmd);
       /*
         The /C option is to run command then terminate command prompt
       */
-      minioProcess = spawn('cmd', ['/C', cmd]);
+      binaryProcess = spawn('cmd', ['/C', cmd], { shell: true });
     }
 
-    if (minioProcess) {
-      minioProcess.stdout.on('data', (data) => {
+    if (binaryProcess) {
+      binaryProcess.stdout.on('data', (data) => {
         console.log('[STDOUT]: ----------------------');
         console.log(data.toString());
       });
 
-      minioProcess.stderr.on('data', (data) => {
+      binaryProcess.stderr.on('data', (data) => {
         console.log('[STDERR]: ----------------------');
         console.log(data.toString());
       });
 
-      minioProcess.on('close', (code) => {
+      binaryProcess.on('close', (code) => {
         console.log(`Minio process exited with code ${code}`);
       });
+
+      return binaryProcess;
     }
     console.log('[BINARIES]: Binaries ran successfully');
   } catch (err) {

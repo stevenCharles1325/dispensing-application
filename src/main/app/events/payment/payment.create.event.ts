@@ -76,6 +76,7 @@ export default class PaymentCreateEvent implements IEvent {
             quantity: item.quantity,
             transaction_id: data.id,
             tax_rate: item.tax_rate,
+            price: item.selling_price,
           }));
           const orders = OrderRepository.create(desiredOrder);
           await OrderRepository.save(orders);

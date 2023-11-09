@@ -56,6 +56,9 @@ export class Order {
   @Column()
   tax_rate: number;
 
+  @Column()
+  price: number;
+
   @CreateDateColumn()
   created_at: Date;
 

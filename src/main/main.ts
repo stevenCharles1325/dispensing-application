@@ -127,6 +127,11 @@ const createWindow = async () => {
 
   mainWindow.on('closed', () => {
     console.log('CLOSING APP');
+
+    if (global.binaryProcess) {
+      global.binaryProcess.kill();
+    }
+
     mainWindow = null;
   });
 
@@ -183,7 +188,11 @@ app
         await runSeeders(SqliteDataSource);
         console.log('[DB]: Seeded Successfully');
       } finally {
-        executeBinaries();
+        const binaryProcess = executeBinaries();
+
+        if (binaryProcess) {
+          global.binaryProcess = binaryProcess;
+        }
 
         // Initialize Stores
         // Each events now has access to the Store

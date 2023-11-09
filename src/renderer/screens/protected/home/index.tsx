@@ -303,9 +303,9 @@ export default function Home() {
             )}
           </div>
         </div>
-        <div className="w-[450px] h-full p-3">
+        <div className="min-w-[320px] max-w-[450px] h-full p-3">
           <div
-            className="w-full h-full rounded-md border p-3 shadow-lg flex flex-col overflow-auto"
+            className="min-w-[320px] max-w-full h-full rounded-md border p-3 shadow-lg flex flex-col overflow-auto"
             style={{ backgroundColor: 'var(--bg-color)' }}
           >
             <div className="grow overflow-auto flex flex-col gap-2">
@@ -314,7 +314,7 @@ export default function Home() {
                 {selectedItems.map((item) => (
                   <div
                     key={item.id}
-                    className="w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden"
+                    className="w-full w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden"
                     style={{ backgroundColor: 'white' }}
                   >
                     <div className="min-w-[80px] w-[80px] h-full">

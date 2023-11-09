@@ -46,6 +46,11 @@ export class Orders1698705146069 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: 'price',
+            type: 'real',
+            isNullable: false,
+          },
+          {
             name: 'created_at',
             type: 'timestamp',
             default: 'now()',

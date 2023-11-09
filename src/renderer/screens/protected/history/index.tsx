@@ -215,6 +215,28 @@ export default function Logs() {
     return payments.find(({ id }) => id === selectedId);
   }, [selectedId, payments]);
 
+  const subTotal = useMemo(() => {
+    if (ids.length) {
+      return selectedPayment?.orders?.reduce?.((prev, curr) => {
+        return prev + curr.item.selling_price * curr.quantity;
+      }, 0) ?? 0;
+    }
+
+    return 0;
+  }, [selectedPayment]);
+
+  const computedTax = selectedItems.reduce((prev, curr) => {
+    return prev + curr.tax_rate;
+  }, 0);
+
+  const tax = useMemo(() => {
+    if (selectedItems.length) {
+      return subTotal * (computedTax / 100);
+    }
+
+    return 0;
+  }, [computedTax, selectedItems.length, subTotal]);
+
   const data = currenTab === 0 ? auditData : paymentData;
   const selectedRows = currenTab === 0 ? audits : payments;
   const selectedColumn = currenTab === 0 ? logsColumns : paymentsColumns;
@@ -238,7 +260,6 @@ export default function Logs() {
     }
   }, [currenTab, setPlaceHolder]);
 
-  console.log(selectedPayment);
   return (
     <div className="w-full h-full flex flex-col gap-y-5">
       <div className="w-full h-fit">
@@ -374,9 +395,6 @@ export default function Logs() {
                           prefix="₱ "
                           thousandSeparator
                           valueIsNumericString
-                          decimalSeparator="."
-                          decimalScale={2}
-                          fixedDecimalScale
                           disabled
                         />
                       </div>

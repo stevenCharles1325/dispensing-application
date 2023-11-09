@@ -34,8 +34,9 @@ export async function Bull(this: any, jobName: string, data: BullData) {
 
   if (os === 'win' || os === 'mac') {
     try {
-      const result = await job.handler(data);
+      const result = await job.handler({ data });
 
+      console.log(result);
       if (job?.onComplete) job.onComplete(job as unknown as Job, result, '');
     } catch (err) {
       if (job?.onFail) job.onFail(job as unknown as Job, err as Error, '');
@@ -43,12 +44,24 @@ export async function Bull(this: any, jobName: string, data: BullData) {
   }
 
   if (os === 'linux') {
-    await queue.add(jobName, data);
-    const worker = new Worker<any, IResponse<any>>(QUEUE_NAME, job.handler);
+    try {
+      await queue.add(jobName, data);
+      const worker = new Worker<any, IResponse<any>>(QUEUE_NAME, job.handler);
 
-    if (job?.onProgress) worker.on('progress', job.onProgress);
-    if (job?.onComplete) worker.on('completed', job.onComplete);
-    if (job?.onFail) worker.on('failed', job.onFail);
+      if (job?.onProgress) worker.on('progress', job.onProgress);
+      if (job?.onComplete) worker.on('completed', job.onComplete);
+      if (job?.onFail) worker.on('failed', job.onFail);
+    } catch (err) {
+      console.log(err);
+
+      try {
+        const result = await job.handler({ data });
+
+        if (job?.onComplete) job.onComplete(job as unknown as Job, result, '');
+      } catch (err) {
+        if (job?.onFail) job.onFail(job as unknown as Job, err as Error, '');
+      }
+    }
   }
 }
 

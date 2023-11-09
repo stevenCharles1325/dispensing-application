@@ -3,7 +3,7 @@ import AppLogo from 'UI/components/Logo/AppLogo';
 import Input from 'UI/components/TextField/Input';
 import { Button, Link, TextField } from '@mui/material';
 import useAlert from 'UI/hooks/useAlert';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { useNavigate } from 'react-router-dom';
 import useAuth from 'UI/hooks/useAuth';
@@ -25,7 +25,6 @@ export default function SignIn() {
       password,
     });
 
-    console.log(res);
     if (res.status === 'ERROR') {
       const type = 'error';
       const message = (res.errors as unknown as IPOSError[])[0]?.message;
@@ -42,6 +41,8 @@ export default function SignIn() {
     }
   };
 
+  const handleEnter = useCallback(() => login(), [navigate, email, password, displayAlert, setUserData]);
+
   return (
     <div className="w-screen h-screen bg-transparent flex justify-center items-center shadow-inner">
       <div className="w-[397px] h-[450px] bg-white rounded-[20px] shadow-2xl p-5 flex flex-col items-center">
@@ -57,12 +58,22 @@ export default function SignIn() {
             color="secondary"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleEnter();
+              }
+            }}
           />
           <br />
           <PasswordInput
             label="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleEnter();
+              }
+            }}
           />
         </div>
 

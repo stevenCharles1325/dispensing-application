@@ -67,25 +67,12 @@ export class AuditTrail {
   resource_table: string;
 
   @Column()
-  @ValidateIf(
-    (audit: AuditTrail) =>
-      audit.action.toLowerCase().includes('update') ||
-      (audit.action.toLowerCase().includes('create') &&
-        audit.status === 'SUCCEEDED') ||
-      audit.action.toLowerCase().includes('delete') ||
-      audit.action.toLowerCase().includes('archive')
-  )
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
   resource_id: string;
 
   @Column()
-  @ValidateIf(
-    (audit: AuditTrail) =>
-      audit.action.toLowerCase().includes('update') ||
-      audit.action.toLowerCase().includes('archive')
-  )
   @IsIn(['uuid', 'integer'], {
     message: ValidationMessage.notEmpty,
   })

@@ -19,6 +19,7 @@ interface PasswordInputProps extends InputProps {
   onChange: (
     event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => void;
+  onKeyDown?: (event: React.KeyboardEvent) => void;
 }
 
 export default function PasswordInput({
@@ -27,6 +28,7 @@ export default function PasswordInput({
   value,
   helperText,
   onChange,
+  onKeyDown,
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -71,6 +73,7 @@ export default function PasswordInput({
         value={value}
         error={error ?? false}
         onChange={onChange}
+        onKeyDown={onKeyDown}
       />
       {helperText?.length ? (
         <FormHelperText error>{helperText}</FormHelperText>

@@ -7,6 +7,7 @@ export default interface OrderDTO {
   transaction_id: number;
   quantity: number;
   tax_rate: number;
+  price: number;
   created_at: Date;
   item: ItemDTO;
 }
