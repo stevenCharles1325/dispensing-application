@@ -603,7 +603,7 @@ export default function InventoryForm({
               sx={{
                 width: 300,
               }}
-              helperText={errors.tax_rate}
+              helperText={errors.tax_rate ?? 'Input value will be automatically converted into percentage.'}
               error={Boolean(errors.tax_rate)}
             />
           </div>

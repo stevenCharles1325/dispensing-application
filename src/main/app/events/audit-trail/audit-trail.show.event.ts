@@ -37,7 +37,10 @@ export default class AuditTrailShowEvent implements IEvent {
         }
 
         if (payload === 'all') {
-          return await usePagination(auditTrailQuery, page);
+          return await usePagination(auditTrailQuery, page, take, {
+            fieldName: 'created_at',
+            order: 'DESC',
+          });
         }
 
         if (payload instanceof Object && !(payload instanceof Array)) {

@@ -41,7 +41,10 @@ export default class PaymentShowEvent implements IEvent {
         }
 
         if (payload === 'all') {
-          return await usePagination(paymentQuery, page);
+          return await usePagination(paymentQuery, page, take, {
+            fieldName: 'created_at',
+            order: 'DESC',
+          });
         }
 
         if (payload instanceof Object && !(payload instanceof Array)) {
@@ -60,7 +63,10 @@ export default class PaymentShowEvent implements IEvent {
             }
           }
 
-          return await usePagination(paymentQuery, page);
+          return await usePagination(paymentQuery, page, take, {
+            fieldName: 'created_at',
+            order: 'DESC',
+          });
         }
 
         return {

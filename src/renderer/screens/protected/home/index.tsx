@@ -137,10 +137,11 @@ export default function Home() {
 
   const orderDetails: IOrderDetails = useMemo(
     () => ({
-      items: selectedItems.map(({ id, tax_rate }) => ({
+      items: selectedItems.map(({ id, tax_rate, selling_price }) => ({
         id,
         quantity: orders[id],
         tax_rate,
+        selling_price,
       })),
       total,
       payment_method: selectedPaymentMethod,
@@ -303,7 +304,7 @@ export default function Home() {
             )}
           </div>
         </div>
-        <div className="min-w-[320px] max-w-[450px] h-full p-3">
+        <div className="min-w-[320px] w-[450px] max-w-[450px] h-full p-3">
           <div
             className="min-w-[320px] max-w-full h-full rounded-md border p-3 shadow-lg flex flex-col overflow-auto"
             style={{ backgroundColor: 'var(--bg-color)' }}

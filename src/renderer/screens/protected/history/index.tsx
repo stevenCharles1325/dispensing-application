@@ -116,6 +116,7 @@ const paymentsColumns: Array<GridColDef> = [
     valueFormatter(params) {
       return new Date(params.value).toLocaleString();
     },
+    sortingOrder: ['desc', 'asc'],
   },
   {
     field: '',
@@ -216,26 +217,26 @@ export default function Logs() {
   }, [selectedId, payments]);
 
   const subTotal = useMemo(() => {
-    if (ids.length) {
+    if (selectedPayment) {
       return selectedPayment?.orders?.reduce?.((prev, curr) => {
-        return prev + curr.item.selling_price * curr.quantity;
+        return prev + curr.price * curr.quantity;
       }, 0) ?? 0;
     }
 
     return 0;
   }, [selectedPayment]);
 
-  const computedTax = selectedItems.reduce((prev, curr) => {
+  const computedTax = selectedPayment?.orders?.reduce?.((prev, curr) => {
     return prev + curr.tax_rate;
-  }, 0);
+  }, 0) ?? 0;
 
   const tax = useMemo(() => {
-    if (selectedItems.length) {
+    if (selectedPayment?.orders?.length) {
       return subTotal * (computedTax / 100);
     }
 
     return 0;
-  }, [computedTax, selectedItems.length, subTotal]);
+  }, [computedTax, selectedPayment, subTotal]);
 
   const data = currenTab === 0 ? auditData : paymentData;
   const selectedRows = currenTab === 0 ? audits : payments;
@@ -356,11 +357,7 @@ export default function Logs() {
                         <NumericFormat
                           style={{ width: '150px', textAlign: 'center' }}
                           className="mb-2 px-1 bg-transparent grow text-end"
-                          value={selectedPayment.orders?.reduce(
-                            (prev: number, curr: OrderDTO) =>
-                              prev + curr.item.selling_price * curr.quantity,
-                            0
-                          )}
+                          value={subTotal}
                           prefix="₱ "
                           thousandSeparator
                           valueIsNumericString
@@ -372,26 +369,12 @@ export default function Logs() {
                       </div>
                     </div>
                     <div className="w-full flex justify-between">
-                      <div className="font-bold">{`Tax ${`${selectedPayment.orders?.reduce(
-                        (prev: number, curr: OrderDTO) => prev + curr.tax_rate,
-                        0
-                      )}%`} (VAT included):`}</div>
+                      <div className="font-bold">{`Tax ${`${computedTax}%`} (VAT included):`}</div>
                       <div>
                         <NumericFormat
                           style={{ width: '150px', textAlign: 'center' }}
                           className="mb-2 px-1 bg-transparent grow text-end"
-                          value={
-                            (selectedPayment.orders?.reduce(
-                              (prev: number, curr: OrderDTO) =>
-                                prev + curr.item.selling_price,
-                              0
-                            ) ?? 0) *
-                            (selectedPayment.orders?.reduce(
-                              (prev: number, curr: OrderDTO) =>
-                                prev + curr.item.tax_rate,
-                              0
-                            ) ?? 0 / 100)
-                          }
+                          value={tax}
                           prefix="₱ "
                           thousandSeparator
                           valueIsNumericString

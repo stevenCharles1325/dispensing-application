@@ -43,8 +43,8 @@ export const options: DataSourceOptions & SeederOptions = {
   //   `${__dirname}/database/models/**/*.model.{js,ts}`,
   // ],
   migrations: [
-    `${__dirname}/database/migrations/*.ts`,
     `${app.getAppPath()}/dist/database/migrations/*`,
+    `${__dirname}/database/migrations/*.ts`,
   ],
   seeds: [
     MainSeeder,

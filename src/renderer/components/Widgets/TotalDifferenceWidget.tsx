@@ -44,7 +44,7 @@ export default function TotalDifferenceWidget({
                   fontSize="inherit"
                 />
               )}
-              {`${hasIncreased ? '+' : '-'} ${differenceYesterday}%`}
+              {`${differenceYesterday.toFixed(2)}%`}
             </p>
           ) : null}
         </div>
