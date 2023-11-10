@@ -73,6 +73,9 @@ export const navigationRoutes: INavButtonprops[] = [
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
   const drive = useAppDrive();
+  const [openDrive, driveListener, clearImages] =
+    drive?.subscribe?.('APP_NAVIGATION') ?? [];
+
   const navigate = useNavigate();
   const { displayAlert } = useAlert();
   const { searchText, placeHolder, disabled, setSearchText, setDisabled } =
@@ -140,6 +143,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   };
 
   const handleCloseProfile = () => {
+    clearImages?.();
     setOpenProfile(false);
   };
 
@@ -233,15 +237,23 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     userForm?.image_url,
   ]);
 
-  useEffect(() => {
-    if (drive.selected?.length) {
-      setImageFile(drive.selected?.[0]);
-      setUserForm((form) => ({
-        ...form,
-        image_url: drive.selected?.[0].url,
-      }));
-    }
-  }, [drive.selected]);
+  // useEffect(() => {
+  //   if (drive.selected?.length) {
+  //     setImageFile(drive.selected?.[0]);
+  //     setUserForm((form) => ({
+  //       ...form,
+  //       image_url: drive.selected?.[0].url,
+  //     }));
+  //   }
+  // }, [drive.selected]);
+
+  driveListener?.((images) => {
+    setImageFile(images[0]);
+    setUserForm((form) => ({
+      ...form,
+      image_url: images?.[0].url,
+    }));
+  });
 
   useEffect(() => {
     const fetchFreshUser = async () => {
@@ -421,7 +433,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                 className="relative border rounded-full opacity-0 w-full h-full"
                 onClick={() => {
                   drive.setMultiple?.(false);
-                  drive.open?.();
+                  openDrive?.();
                 }}
               />
               <div

@@ -111,7 +111,8 @@ export default function InventoryForm({
   onClose,
 }: InventoryFormProps) {
   const { displayAlert } = useAlert();
-  const drive = useAppDrive();
+  const drive = useAppDrive?.();
+  const [openDrive, driveListener, clearImages] = drive?.subscribe?.('INVENTORY_FORM') ?? [];
 
   const initialForm = {
     system_id: null, // Sample System-ID
@@ -295,6 +296,7 @@ export default function InventoryForm({
   };
 
   const handleRemoveSelectedImage = () => {
+    clearImages?.();
     setImageFile(null);
   };
 
@@ -353,15 +355,13 @@ export default function InventoryForm({
     onClose();
   }, [displayAlert, form, getItems, onClose, selectedItem]);
 
-  useEffect(() => {
-    if (drive.selected?.length) {
-      setImageFile(drive.selected?.[0]);
-      dispatch({
-        type: 'image_id',
-        payload: drive.selected[0].id,
-      });
-    }
-  }, [drive.selected]);
+  driveListener?.((images) => {
+    setImageFile(images[0]);
+    dispatch({
+      type: 'image_id',
+      payload: images[0].id,
+    });
+  });
 
   useEffect(() => {
     if (action === 'update' && selectedItem) {
@@ -675,7 +675,7 @@ export default function InventoryForm({
                     className="relative border rounded opacity-0 w-full h-full"
                     onClick={() => {
                       drive.setMultiple?.(false);
-                      drive.open?.();
+                      openDrive?.();
                     }}
                   />
                   <div

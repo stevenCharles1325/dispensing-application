@@ -1,39 +1,70 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-no-constructed-context-values */
-import React, { createContext, useMemo, useState } from 'react';
+import ImageDTO from 'App/data-transfer-objects/image.dto';
+import React, { createContext, useCallback, useMemo, useState } from 'react';
 import AppDrive from 'UI/components/Drive/AppDrive';
+import useEventEmitter from 'UI/hooks/useEventEmitter';
+
+type Callback = (callback: (data: ImageDTO[]) => void) => void
 
 interface IAppDriveContext {
-  selected: any;
-  open: () => void;
-  close: () => void;
+  subscribe: (id: string | number) => [
+    open: () => void,
+    listener: Callback,
+    clearImage: () => void,
+  ];
   setMultiple: (value: boolean) => void;
-  setOpen: (value: boolean) => void;
 }
-
 export const AppDriveContext = createContext<Partial<IAppDriveContext>>({});
 
 export default function AppDriveProvider({
   children,
 }: React.PropsWithChildren) {
+  const eventEmitter = useEventEmitter();
+  const [storage, setStorage] = useState<Record<string, any>>({});
+  const [requestingId, setRequestingId] = useState<number | string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<Array<Record<any, string>>>();
   const [multiple, setMultiple] = useState<boolean>(true);
 
-  const open = () => setIsOpen(true);
-  const close = () => setIsOpen(false);
-  const clearSelected = () => setIsOpen(false);
+  const open = (id: number | string) => {
+    setRequestingId(id);
+    setIsOpen(true);
+  };
+  const close = () => {
+    setRequestingId(null);
+    setIsOpen(false);
+  }
+  const subscribe: IAppDriveContext['subscribe'] = useCallback((id: number | string) => {
+    if (!id) {
+      throw new Error('ApDrive Subscribe requires ID as an argument');
+    }
+
+    setStorage((storage) => ({
+      ...storage,
+      id: null,
+    }));
+
+    return [
+      () => open(id),
+      eventEmitter.subscribe.bind(id) as unknown as Callback,
+      () => {
+        if (id) {
+          setStorage((storage) => ({
+            ...storage,
+            [id]: null,
+          }));
+        }
+      }
+    ];
+  }, [storage]);
 
   const value = useMemo(
     () => ({
-      open,
-      close,
-      selected,
+      subscribe,
       setMultiple,
-      clearSelected,
     }),
-    [selected]
+    []
   );
 
   return (
@@ -43,7 +74,11 @@ export default function AppDriveProvider({
         multiple={multiple}
         open={isOpen}
         onClose={close}
-        onSelect={(object) => setSelected(object)}
+        onSelect={(object) => {
+          if (requestingId) {
+            eventEmitter.emit(requestingId.toString(), object);
+          }
+        }}
       />
     </AppDriveContext.Provider>
   );
