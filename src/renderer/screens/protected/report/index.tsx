@@ -18,6 +18,7 @@ import Loading from 'UI/components/Loading';
 import styled from '@mui/material/styles/styled';
 import { Chip } from '@mui/material';
 import useSearch from 'UI/hooks/useSearch';
+import formatCurrency from 'UI/helpers/formatCurrency';
 
 const colorsPalette = ['#9C27B0', '#B02780', '#5727B0'];
 
@@ -76,11 +77,13 @@ export default function Report() {
       <div className="w-full h-fit flex flex-row justify-between items-center">
         <div className="p-3">
           <div className="py-3 text-gray-500">
-            <p className="text-lg font-bold">Total overview</p>
+            <p className="text-lg font-bold">Today total overview</p>
           </div>
           <div className="flex flex-row gap-5">
             <TotalDifferenceWidget
-              total={revenue?.total ?? 0}
+              total={formatCurrency(
+                revenue?.total ?? 0
+              )}
               hasIncreased={revenue?.has_increased}
               icon={<PaidTwoToneIcon color="secondary" />}
               differenceYesterday={revenue?.difference_yesterday ?? 0}

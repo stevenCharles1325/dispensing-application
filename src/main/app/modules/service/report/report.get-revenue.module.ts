@@ -11,16 +11,19 @@ const getRevenue = async (): Promise<{
     (await TransactionRepository.createQueryBuilder('transaction')
       .select('SUM(transaction.total)', 'totalYesterday')
       .where(`transaction.type = 'customer-payment'`)
-      .where(`date(transaction.created_at) = date('now', '-1 day')`)
+      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now', '-1 day'))`)
       .getRawOne()) ?? 0;
 
   const { totalToday: revenueToday } =
     (await TransactionRepository.createQueryBuilder('transaction')
       .select('SUM(transaction.total)', 'totalToday')
       .where(`transaction.type = 'customer-payment'`)
-      .where(`date(transaction.created_at) = date('now')`)
+      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now'))`)
       .getRawOne()) ?? 0;
 
+
+  console.log('REVENUE TODAY: ', revenueToday);
+  console.log('REVENUE YESTERDAY: ', revenueYesterday);
   return {
     total: revenueToday,
     difference_yesterday: getPercentageDifference(

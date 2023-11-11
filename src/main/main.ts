@@ -27,7 +27,6 @@ import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all.module';
 import stores from './stores';
-import IAuthService from 'App/interfaces/service/service.auth.interface';
 import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
@@ -129,7 +128,8 @@ const createWindow = async () => {
     console.log('CLOSING APP');
 
     if (global.binaryProcess) {
-      global.binaryProcess.kill();
+      console.log('TERMINATING BINARY-PROCESS');
+      global.binaryProcess.kill('SIGINT');
     }
 
     mainWindow = null;

@@ -12,7 +12,6 @@ interface IAppDriveContext {
   subscribe: (id: string | number) => [
     open: () => void,
     listener: Callback,
-    clearImage: () => void,
   ];
   setMultiple: (value: boolean) => void;
 }
@@ -22,7 +21,7 @@ export default function AppDriveProvider({
   children,
 }: React.PropsWithChildren) {
   const eventEmitter = useEventEmitter();
-  const [storage, setStorage] = useState<Record<string, any>>({});
+  const [cachedListeners, setCachedListeners] = useState<Record<string, any>>({});
   const [requestingId, setRequestingId] = useState<number | string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [multiple, setMultiple] = useState<boolean>(true);
@@ -35,29 +34,34 @@ export default function AppDriveProvider({
     setRequestingId(null);
     setIsOpen(false);
   }
-  const subscribe: IAppDriveContext['subscribe'] = useCallback((id: number | string) => {
-    if (!id) {
-      throw new Error('ApDrive Subscribe requires ID as an argument');
-    }
-
-    setStorage((storage) => ({
-      ...storage,
-      id: null,
-    }));
-
-    return [
-      () => open(id),
-      eventEmitter.subscribe.bind(id) as unknown as Callback,
-      () => {
-        if (id) {
-          setStorage((storage) => ({
-            ...storage,
-            [id]: null,
-          }));
-        }
+  const subscribe: IAppDriveContext['subscribe'] =
+    useCallback(function (this: any, id: number | string) {
+      if (!id) {
+        throw new Error('ApDrive Subscribe requires ID as an argument');
       }
-    ];
-  }, [storage]);
+
+      let listener = cachedListeners?.[id];
+
+      if (!listener) {
+        listener = (cb: Function) => {
+          eventEmitter.subscribe(
+            id.toString(),
+            (data: ImageDTO) =>
+              cb?.(data)
+          );
+        }
+
+        setCachedListeners((listeners) => ({
+          ...listeners,
+          [id]: listener,
+        }));
+      }
+
+      return [
+        open.bind(this, id),
+        listener,
+      ];
+    }, [cachedListeners]);
 
   const value = useMemo(
     () => ({

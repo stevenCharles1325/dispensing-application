@@ -225,8 +225,8 @@ export default function Inventory() {
           icon={<LocalOfferOutlinedIcon color="secondary" fontSize="large" />}
           count={
             formatCurrency(
-              items.reduce((prev, curr) => prev + curr.selling_price, 0)
-            ) ?? 0
+              items.reduce((prev, curr) => prev + curr.selling_price, 0) ?? 0
+            )
           }
           label="total selling price"
         />
@@ -234,8 +234,8 @@ export default function Inventory() {
           icon={<MonetizationOnOutlinedIcon color="warning" fontSize="large" />}
           count={
             formatCurrency(
-              items.reduce((prev, curr) => prev + curr.cost_price, 0)
-            ) ?? 0
+              items.reduce((prev, curr) => prev + curr.cost_price, 0) ?? 0
+            )
           }
           label="Total cost price"
         />

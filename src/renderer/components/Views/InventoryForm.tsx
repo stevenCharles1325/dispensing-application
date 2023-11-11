@@ -112,7 +112,7 @@ export default function InventoryForm({
 }: InventoryFormProps) {
   const { displayAlert } = useAlert();
   const drive = useAppDrive?.();
-  const [openDrive, driveListener, clearImages] = drive?.subscribe?.('INVENTORY_FORM') ?? [];
+  const [openDrive, driveListener] = drive?.subscribe?.('INVENTORY_FORM') ?? [];
 
   const initialForm = {
     system_id: null, // Sample System-ID
@@ -230,7 +230,6 @@ export default function InventoryForm({
     'barcode',
   ]);
 
-  console.log('Empty fields:', emptyFields);
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
   >('add-new');
@@ -296,7 +295,10 @@ export default function InventoryForm({
   };
 
   const handleRemoveSelectedImage = () => {
-    clearImages?.();
+    dispatch({
+      type: 'image_id',
+      payload: null,
+    });
     setImageFile(null);
   };
 
@@ -356,11 +358,13 @@ export default function InventoryForm({
   }, [displayAlert, form, getItems, onClose, selectedItem]);
 
   driveListener?.((images) => {
-    setImageFile(images[0]);
-    dispatch({
-      type: 'image_id',
-      payload: images[0].id,
-    });
+    if (images.length) {
+      setImageFile(images[0]);
+      dispatch({
+        type: 'image_id',
+        payload: images[0].id,
+      });
+    }
   });
 
   useEffect(() => {
