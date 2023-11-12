@@ -1,27 +1,27 @@
 import getPercentageDifference from 'App/modules/get-percentage-diff.module';
-import OrderRepository from 'App/repositories/order.repository';
+import TransactionRepository from 'App/repositories/transaction.repository';
 
 const getOrders = async (): Promise<{
   total: number;
   difference_yesterday: number;
   has_increased: boolean;
 }> => {
-  const { totalYesterday: orderYesterday } =
-    (await OrderRepository.createQueryBuilder('order')
+  const { totalYesterday: transactionYesterday } =
+  (await TransactionRepository.createQueryBuilder('transaction')
       .select('COUNT(*)', 'totalYesterday')
-      .where(`date(order.created_at) = date('now', '-1 day')`)
+      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now', '-1 day'))`)
       .getRawOne()) ?? 0;
 
-  const { totalToday: orderToday } =
-    (await OrderRepository.createQueryBuilder('order')
+  const { totalToday: transactionToday } =
+    (await TransactionRepository.createQueryBuilder('transaction')
       .select('COUNT(*)', 'totalToday')
-      .where(`date(order.created_at) = date('now')`)
+      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now'))`)
       .getRawOne()) ?? 0;
 
   return {
-    total: orderToday,
-    difference_yesterday: getPercentageDifference(orderToday, orderYesterday),
-    has_increased: orderToday > orderYesterday,
+    total: transactionToday,
+    difference_yesterday: getPercentageDifference(transactionToday, transactionYesterday),
+    has_increased: transactionToday > transactionYesterday,
   };
 };
 

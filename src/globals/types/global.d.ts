@@ -3,7 +3,10 @@ import { DataSource } from 'typeorm';
 
 declare global {
   var datasource: DataSource;
-  var binaryProcess: ChildProcessWithoutNullStreams;
+  var binaryProcesses: {
+    binaries: Record<string, ChildProcessWithoutNullStreams | undefined>;
+    killAll(): void;
+  };
 }
 
 export {}

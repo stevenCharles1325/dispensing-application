@@ -15,7 +15,7 @@
  */
 import 'reflect-metadata';
 import dotenv from 'dotenv';
-import path from 'path';
+import path, { join } from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -38,7 +38,13 @@ import policies from './data/defaults/object-storage/policies';
 const myEnv = dotenv.config();
 dotenvExpand(myEnv);
 
-const providers = requireAll(require.context('./app/providers', true, /\.(js|ts|json)$/));
+const IS_PROD = process.env.NODE_ENV === 'production';
+const providers = requireAll(
+  IS_PROD
+    ? require?.context?.('./app/providers', true, /\.(js|ts|json)$/)
+    : join(__dirname, '/app/providers')
+);
+
 
 class AppUpdater {
   constructor() {
@@ -127,9 +133,9 @@ const createWindow = async () => {
   mainWindow.on('closed', () => {
     console.log('CLOSING APP');
 
-    if (global.binaryProcess) {
+    if (global.binaryProcesses) {
       console.log('TERMINATING BINARY-PROCESS');
-      global.binaryProcess.kill('SIGINT');
+      global.binaryProcesses.killAll();
     }
 
     mainWindow = null;
@@ -175,6 +181,7 @@ app
 
       initJobs();
       global.datasource = SqliteDataSource;
+      console.log(global.datasource);
 
       const shouldMigrate = await SqliteDataSource.showMigrations();
 
@@ -188,10 +195,10 @@ app
         await runSeeders(SqliteDataSource);
         console.log('[DB]: Seeded Successfully');
       } finally {
-        const binaryProcess = executeBinaries();
+        const binaryProcesses = executeBinaries();
 
-        if (binaryProcess) {
-          global.binaryProcess = binaryProcess;
+        if (binaryProcesses) {
+          global.binaryProcesses = binaryProcesses;
         }
 
         // Initialize Stores

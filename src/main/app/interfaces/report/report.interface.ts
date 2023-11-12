@@ -10,6 +10,11 @@ export default interface IReport {
       difference_yesterday: number;
       has_increased: boolean;
     };
+    sold_items: {
+      total: number;
+      difference_yesterday: number;
+      has_increased: boolean;
+    };
   };
   trend_sales: Array<{ category_name: string; frequency: number }>;
   current_sale_reports: Array<{ hour: string; count: number }>;

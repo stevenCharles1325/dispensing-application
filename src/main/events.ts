@@ -9,9 +9,20 @@ import applyMiddleware from './app/modules/apply-middleware.module';
 import objectToFlattenArray from './app/modules/object-to-flatten-array.module';
 import objectToFlattenObject from './app/modules/object-to-flatten-object.module';
 import IEventDataProperties from 'App/interfaces/event/event.data-props.interface';
+import { join } from 'path';
 
-const eventsObject = requireAll(require.context('./app/events', true, /\.(js|ts|json)$/));
-const middlewareObject = requireAll(require.context('./app/middlewares', true, /\.(js|ts|json)$/));
+const IS_PROD = process.env.NODE_ENV === 'production';
+const eventsObject = requireAll(
+  IS_PROD
+    ? require?.context?.('./app/events', true, /\.(js|ts|json)$/)
+    : join(__dirname, 'app/events')
+);
+
+const middlewareObject = requireAll(
+  IS_PROD
+    ? require?.context?.('./app/middlewares', true, /\.(js|ts|json)$/)
+    : join(__dirname, '/app/middlewares')
+);
 
 /*
   This is an event-reader. It reads all events from the App/Events folder

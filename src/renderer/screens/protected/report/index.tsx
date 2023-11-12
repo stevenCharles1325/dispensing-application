@@ -19,6 +19,7 @@ import styled from '@mui/material/styles/styled';
 import { Chip } from '@mui/material';
 import useSearch from 'UI/hooks/useSearch';
 import formatCurrency from 'UI/helpers/formatCurrency';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 const colorsPalette = ['#9C27B0', '#B02780', '#5727B0'];
 
@@ -64,6 +65,7 @@ export default function Report() {
   const report: IReport = data?.data as IReport;
   const revenue = report?.daily_overview_reports.revenue;
   const orders = report?.daily_overview_reports.orders;
+  const soldItems = report?.daily_overview_reports.sold_items;
   const currSalesReport = report?.current_sale_reports;
   const trendSales = report?.trend_sales;
 
@@ -95,6 +97,13 @@ export default function Report() {
               icon={<TableRestaurantTwoToneIcon color="secondary" />}
               differenceYesterday={orders?.difference_yesterday}
               label="Orders"
+            />
+            <TotalDifferenceWidget
+              total={soldItems?.total ?? 0}
+              hasIncreased={soldItems?.has_increased}
+              icon={<ReceiptIcon color="secondary" />}
+              differenceYesterday={soldItems?.difference_yesterday}
+              label="Sold Items"
             />
           </div>
         </div>

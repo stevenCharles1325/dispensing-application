@@ -43,7 +43,6 @@ import { useNavigate } from 'react-router-dom';
 import useAppDrive from 'UI/hooks/useAppDrive';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import PasswordInput from '../TextField/PasswordInput';
-import useEventEmitter from 'UI/hooks/useEventEmitter';
 
 export const navigationRoutes: INavButtonprops[] = [
   {

@@ -13,6 +13,7 @@ import getCurrentSalesReport from 'App/modules/service/report/report.get-current
 import getOrders from 'App/modules/service/report/report.get-orders.module';
 import getRevenue from 'App/modules/service/report/report.get-revenue.module';
 import getSalesReport from 'App/modules/service/report/report.get-sales-report.module';
+import getSoldItems from 'App/modules/service/report/report.get-sold-items.module';
 import getTrendSales from 'App/modules/service/report/report.get-trend-sales.module';
 
 export default class RoleShowEvent implements IEvent {
@@ -42,6 +43,11 @@ export default class RoleShowEvent implements IEvent {
               difference_yesterday: 0,
               has_increased: false,
             },
+            sold_items: {
+              total: 0,
+              difference_yesterday: 0,
+              has_increased: false,
+            },
           },
           trend_sales: [],
           current_sale_reports: [],
@@ -54,6 +60,7 @@ export default class RoleShowEvent implements IEvent {
 
         reports.daily_overview_reports.revenue = await getRevenue();
         reports.daily_overview_reports.orders = await getOrders();
+        reports.daily_overview_reports.sold_items = await getSoldItems();
         reports.current_sale_reports = await getCurrentSalesReport();
         reports.pos_sale_reports = await getSalesReport();
         reports.trend_sales = await getTrendSales();

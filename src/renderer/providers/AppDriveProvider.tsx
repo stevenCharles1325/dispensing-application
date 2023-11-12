@@ -2,7 +2,7 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-no-constructed-context-values */
 import ImageDTO from 'App/data-transfer-objects/image.dto';
-import React, { createContext, useCallback, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useMemo, useRef, useState } from 'react';
 import AppDrive from 'UI/components/Drive/AppDrive';
 import useEventEmitter from 'UI/hooks/useEventEmitter';
 
@@ -17,11 +17,12 @@ interface IAppDriveContext {
 }
 export const AppDriveContext = createContext<Partial<IAppDriveContext>>({});
 
+
 export default function AppDriveProvider({
   children,
 }: React.PropsWithChildren) {
   const eventEmitter = useEventEmitter();
-  const [cachedListeners, setCachedListeners] = useState<Record<string, any>>({});
+  const cachedListeners = useRef<Record<string, any>>({});
   const [requestingId, setRequestingId] = useState<number | string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [multiple, setMultiple] = useState<boolean>(true);
@@ -40,7 +41,7 @@ export default function AppDriveProvider({
         throw new Error('ApDrive Subscribe requires ID as an argument');
       }
 
-      let listener = cachedListeners?.[id];
+      let listener = cachedListeners.current?.[id];
 
       if (!listener) {
         listener = (cb: Function) => {
@@ -51,10 +52,7 @@ export default function AppDriveProvider({
           );
         }
 
-        setCachedListeners((listeners) => ({
-          ...listeners,
-          [id]: listener,
-        }));
+        cachedListeners.current[id] = listener;
       }
 
       return [

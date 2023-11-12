@@ -6,8 +6,10 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IJob from 'App/interfaces/job/job.interface';
 import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { Redis } from 'ioredis';
-import { getPlatform } from './binaries';
+import { getPlatform } from 'App/modules/get-platform.module';
+import { join } from 'path';
 
+const IS_PROD = process.env.NODE_ENV === 'production';
 const QUEUE_NAME = 'main';
 
 const os = getPlatform();
@@ -22,7 +24,12 @@ connection.on('error', (err) => {
   connection.disconnect();
 });
 
-const jobsObject = requireAll(require.context('./app/jobs', true, /\.(js|ts|json)$/));
+const jobsObject = requireAll(
+  IS_PROD
+    ? require?.context?.('./app/jobs', true, /\.(js|ts|json)$/)
+    : join(__dirname, 'app/jobs')
+);
+
 const queue = new Queue(QUEUE_NAME, { connection });
 
 const jobs: Record<string, IJob> = {};
@@ -32,6 +39,15 @@ export type BullData = Omit<AuditTrailDTO, 'id' | 'user' | 'related' | 'created_
 export async function Bull(this: any, jobName: string, data: BullData) {
   const job = jobs[jobName];
 
+  /* ============================================================
+    Since in Windows there is a lot of things to setup before we
+    can start using Redis, I decided not to use it on windows
+    and mac as Redis is primarily supported on Linux.
+
+    But if linux failed to connect to Redis we have a fallback
+    process.
+    =============================================================
+  */
   if (os === 'win' || os === 'mac') {
     try {
       const result = await job.handler({ data });
