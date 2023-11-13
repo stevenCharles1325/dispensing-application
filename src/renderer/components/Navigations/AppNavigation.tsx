@@ -406,8 +406,8 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           disabled={!notif.link}
           onClick={() => {
             if (notif.link) {
-              handleVisitedNotif(notif.id);
               handleCloseMenuNotif();
+              handleVisitedNotif(notif.id);
               navigate(notif.link, { replace: true });
             }
           }}
@@ -415,8 +415,8 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           <ListItemIcon>
             {
               notif.status === 'VISITED'
-              ? <MailOutlinedIcon />
-              : <DraftsOutlinedIcon />
+              ? <DraftsOutlinedIcon />
+              : <MailOutlinedIcon />
             }
           </ListItemIcon>
           <ListItemText

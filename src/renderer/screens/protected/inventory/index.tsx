@@ -216,8 +216,13 @@ export default function Inventory() {
     displayAlert?.('Successfully deleted selected item(s)', 'success');
   };
 
+  const handleOnClose = () => {
+    setSearchParams({ id: '' });
+    setSelectedIds([]);
+    setModalAction(null);
+  }
+
   useEffect(() => {
-    console.log(searchParams);
     const id = searchParams.get('id');
 
     if (id) {
@@ -294,7 +299,7 @@ export default function Inventory() {
         ) : null}
         <Dialog
           open={Boolean(modalAction)}
-          onClose={() => setModalAction(null)}
+          onClose={handleOnClose}
           TransitionComponent={Transition}
           maxWidth="xl"
         >
@@ -308,7 +313,7 @@ export default function Inventory() {
             getBrands={getBrands}
             getCategories={getCategories}
             getSuppliers={getSuppliers}
-            onClose={() => setModalAction(null)}
+            onClose={handleOnClose}
           />
         </Dialog>
       </div>
