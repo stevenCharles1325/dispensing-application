@@ -20,6 +20,7 @@ import { Chip } from '@mui/material';
 import useSearch from 'UI/hooks/useSearch';
 import formatCurrency from 'UI/helpers/formatCurrency';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import { ReactECharts } from 'UI/components/Charts/ReactECharts';
 
 const colorsPalette = ['#9C27B0', '#B02780', '#5727B0'];
 
@@ -68,6 +69,7 @@ export default function Report() {
   const soldItems = report?.daily_overview_reports.sold_items;
   const currSalesReport = report?.current_sale_reports;
   const trendSales = report?.trend_sales;
+  const dbAvailableSpace = report?.space_report;
 
   useEffect(() => {
     setPlaceHolder?.('Search is disabled here');
@@ -185,8 +187,27 @@ export default function Report() {
               )}
             </div>
             <div className="grow h-[570px] p-5 border shadow-lg rounded">
-              <div>
-                <p>Feature coming soon</p>
+              <div className="w-fit h-full">
+                <Chip
+                  label="Database Space"
+                  color="secondary"
+                  variant="outlined"
+                  size="medium"
+                />
+                {
+                  dbAvailableSpace
+                  ? (
+                    <ReactECharts
+                      option={{
+                        series: {
+                            type: 'liquidFill',
+                            data: [dbAvailableSpace.percentage ?? 0]
+                          }
+                      }}
+                    />
+                  )
+                  : null
+                }
               </div>
               {/* <BarChart
                 dataset={[]}

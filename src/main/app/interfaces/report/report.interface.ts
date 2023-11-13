@@ -23,4 +23,9 @@ export default interface IReport {
     monthly: Array<any>;
     yearly: Array<any>;
   };
+  space_report: {
+    free: any;
+    size: any;
+    percentage: number;
+  }
 }

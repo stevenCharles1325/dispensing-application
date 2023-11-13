@@ -9,6 +9,7 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IReport from 'App/interfaces/report/report.interface';
 import handleError from 'App/modules/error-handler.module';
+import getAvailableDBSpace from 'App/modules/service/report/report.get-available-db-space.module';
 import getCurrentSalesReport from 'App/modules/service/report/report.get-current-sales-report.module';
 import getOrders from 'App/modules/service/report/report.get-orders.module';
 import getRevenue from 'App/modules/service/report/report.get-revenue.module';
@@ -56,6 +57,11 @@ export default class RoleShowEvent implements IEvent {
             monthly: [],
             yearly: [],
           },
+          space_report: {
+            free: 0,
+            size: 0,
+            percentage: 0,
+          }
         };
 
         reports.daily_overview_reports.revenue = await getRevenue();
@@ -64,7 +70,9 @@ export default class RoleShowEvent implements IEvent {
         reports.current_sale_reports = await getCurrentSalesReport();
         reports.pos_sale_reports = await getSalesReport();
         reports.trend_sales = await getTrendSales();
+        reports.space_report = await getAvailableDBSpace();
 
+        console.log('SPACEEEE: ', reports.space_report);
         return {
           data: reports,
           status: 'SUCCESS',
