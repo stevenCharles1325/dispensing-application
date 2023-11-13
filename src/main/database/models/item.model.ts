@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
   BeforeUpdate,
+  AfterUpdate,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
@@ -20,19 +21,37 @@ import {
   IsIn,
   ValidateIf,
 } from 'class-validator';
+import { Bull } from 'Main/jobs';
 import { ValidationMessage } from '../../app/validators/message/message';
 import measurements from 'Main/data/defaults/unit-of-measurements';
 import itemStatuses from 'Main/data/defaults/statuses/item';
+import { IsBarcode } from '../../app/validators/IsBarcode';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
 import type { System } from './system.model';
 import type { Image } from './image.model';
 import type { Supplier } from './supplier.model';
 import type { Brand } from './brand.model';
 import type { Category } from './category.model';
-import { IsBarcode } from '../../app/validators/IsBarcode';
-import ItemDTO from 'App/data-transfer-objects/item.dto';
 
 @Entity('items')
 export class Item {
+  @BeforeUpdate()
+  async notifyIfRunningOut() {
+    if (this.stock_quantity <= 0) {
+      await Bull(
+        'NOTIF_JOB',
+        {
+          title: `An item is out-of-stock`,
+          description: `An item named ${this.name} is out-of-stock now`,
+          link: `/inventory?id=${this.id}`,
+          is_system_generated: true,
+          status: 'UNSEEN',
+          type: 'ERROR',
+        }
+      );
+    }
+  }
+
   @BeforeUpdate()
   updateStatus() {
     if (this.stock_quantity <= 0) {
@@ -168,7 +187,21 @@ export class Item {
   system: Relation<System>;
 
   // Custom functions
-  purchase(quantity: number = 1) {
+  async purchase(quantity: number = 1) {
     this.stock_quantity -= quantity;
+
+    if (this.stock_quantity > 15 && this.stock_quantity <= 20) {
+      await Bull(
+        'NOTIF_JOB',
+        {
+          title: `An item is running out-of-stock`,
+          description: `An item named ${this.name} is running out-of-stock`,
+          link: `/inventory?id=${this.id}`,
+          status: 'UNSEEN',
+          is_system_generated: true,
+          type: 'WARNING',
+        }
+      );
+    }
   }
 }

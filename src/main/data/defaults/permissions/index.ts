@@ -340,6 +340,28 @@ const permissions = [
     kebab: 'delete-restocking',
   },
 
+   // Notification permissions
+   {
+    name: 'View Notification',
+    kebab: 'view-notification',
+  },
+  {
+    name: 'Create Notification',
+    kebab: 'create-notification',
+  },
+  {
+    name: 'Update Notification',
+    kebab: 'update-notification',
+  },
+  {
+    name: 'Archive Notification',
+    kebab: 'archive-notification',
+  },
+  {
+    name: 'Delete Notification',
+    kebab: 'delete-notification',
+  },
+
   // Data/Peer/Graph management permissions
   {
     name: 'View Data',

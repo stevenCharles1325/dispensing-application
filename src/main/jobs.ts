@@ -4,7 +4,6 @@ import { Queue, Worker, Job } from 'bullmq';
 import objectToFlattenArray from 'App/modules/object-to-flatten-array.module';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IJob from 'App/interfaces/job/job.interface';
-import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { Redis } from 'ioredis';
 import { getPlatform } from 'App/modules/get-platform.module';
 import { join } from 'path';
@@ -17,6 +16,7 @@ const connection = new Redis();
 
 connection.on('connect', () => {
   console.log('IOREDIS IS CONNECTED');
+  connection.disconnect();
 });
 
 connection.on('error', (err) => {
@@ -34,9 +34,7 @@ const queue = new Queue(QUEUE_NAME, { connection });
 
 const jobs: Record<string, IJob> = {};
 
-export type BullData = Omit<AuditTrailDTO, 'id' | 'user' | 'related' | 'created_at'>;
-
-export async function Bull(this: any, jobName: string, data: BullData) {
+export async function Bull(this: any, jobName: string, data: any) {
   const job = jobs[jobName];
 
   /* ============================================================
@@ -68,7 +66,7 @@ export async function Bull(this: any, jobName: string, data: BullData) {
       if (job?.onComplete) worker.on('completed', job.onComplete);
       if (job?.onFail) worker.on('failed', job.onFail);
     } catch (err) {
-      console.log(err);
+      console.log('JOB ERROR: ', err);
 
       try {
         const result = await job.handler({ data });

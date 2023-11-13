@@ -12,11 +12,16 @@ import React, { useCallback, useEffect, useState } from 'react';
 import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
 import {
+  Badge,
   Button,
   Chip,
   Dialog,
   DialogActions,
   IconButton,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Menu,
   MenuItem,
   TextField,
@@ -24,6 +29,8 @@ import {
 import Input from '../TextField/Input';
 import useSearch from 'UI/hooks/useSearch';
 import debounce from 'lodash.debounce';
+import { List, ListRowRenderer } from 'react-virtualized';
+import Loading from '../Loading';
 
 // Icons
 import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
@@ -39,10 +46,16 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import useAlert from 'UI/hooks/useAlert';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import useAppDrive from 'UI/hooks/useAppDrive';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import PasswordInput from '../TextField/PasswordInput';
+import NotificationDTO from 'App/data-transfer-objects/notification.dto';
+import IPagination from 'App/interfaces/pagination/pagination.interface';
+import { useQuery } from '@tanstack/react-query';
+import DraftsOutlinedIcon from '@mui/icons-material/DraftsOutlined';
+import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -71,17 +84,34 @@ export const navigationRoutes: INavButtonprops[] = [
   },
 ];
 
+const getNotifs = async (
+  page = 1,
+  total: number | 'max' = 'max'
+): Promise<IPagination<NotificationDTO>> => {
+  const res = await window.notif.getNotifs('all', page, total);
+
+  if (res.status === 'ERROR') {
+    const errorMessage = res.errors?.[0] as unknown as string;
+    throw new Error(errorMessage);
+  }
+
+  return res.data as IPagination<NotificationDTO>;
+};
+
 export default function AppNavigation({ children }: React.PropsWithChildren) {
   const drive = useAppDrive();
   const [openDrive, driveListener] =
     drive?.subscribe?.('APP_NAVIGATION') ?? [];
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { displayAlert } = useAlert();
   const { searchText, placeHolder, disabled, setSearchText, setDisabled } =
     useSearch();
 
-  const [activeRouteId, setActiveRouteId] = useState(0);
+  const activeRouteId = navigationRoutes.findIndex(({ redirectPath }) =>
+    redirectPath === location?.pathname
+  ) ?? 0;
   const [text, setText] = useState(searchText ?? '');
   const [imageFile, setImageFile] = useState<any>();
 
@@ -107,7 +137,24 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   // Main profile dialog box variables
   const [openProfile, setOpenProfile] = useState(false);
 
+  // Nofitication menu variables
+  const [nofiticationMenuAnchorEl, setNofiticationMenuAnchorEl] =
+    useState<null | HTMLElement>(null);
+  const nofiticationMenuProfile = Boolean(nofiticationMenuAnchorEl);
+
   const debouncedSearch = debounce((txtStr) => setSearchText?.(txtStr), 500);
+
+  const { data, refetch: refetchNotifs, isLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      const res = await getNotifs();
+
+      return res;
+    },
+  });
+
+  const notifs = (data?.data as NotificationDTO[]) ?? [];
+  const unseenNotifs = notifs?.filter?.(({ status }) => status === 'UNSEEN');
 
   const handleDebouncedSearching = useCallback(
     (txt: string) => debouncedSearch(txt),
@@ -124,8 +171,62 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
       }));
     };
 
-  const handleOpenNotif = () => {
-    displayAlert?.('Feature coming soon', 'info');
+  const handleSeenNotifs = useCallback(async () => {
+    if (unseenNotifs?.length) {
+      for (const notif of unseenNotifs) {
+        const res = await window.notif.updateNotif(notif.id, 'SEEN');
+
+        if (res.status === 'ERROR') {
+          console.log(res.errors);
+          const errorMessage = res.errors?.[0] as unknown as string;
+          throw new Error(errorMessage);
+        }
+      }
+    }
+  }, [unseenNotifs]);
+
+  const handleVisitedNotif = async (id: string) => {
+    const res = await window.notif.updateNotif(id, 'VISITED');
+
+    if (res.status === 'ERROR') {
+      console.log(res.errors);
+      const errorMessage = res.errors?.[0] as unknown as string;
+      throw new Error(errorMessage);
+    }
+  }
+
+  const handleDeleteNotif = async (id: string) => {
+    const res = await window.notif.deleteNotif(id);
+
+    if (res.status === 'ERROR') {
+      console.log(res.errors);
+      const errorMessage = res.errors?.[0] as unknown as string;
+      throw new Error(errorMessage);
+    }
+
+    refetchNotifs();
+  }
+
+  const handleClearAllNotifs = useCallback(async () => {
+    if (notifs?.length) {
+      const ids = notifs.map(({ id }) => id);
+      const res = await window.notif.deleteNotif(ids);
+
+      if (res.status === 'ERROR') {
+        console.log(res.errors);
+        const errorMessage = res.errors?.[0] as unknown as string;
+        throw new Error(errorMessage);
+      }
+
+      refetchNotifs();
+    }
+  }, [notifs, refetchNotifs]);
+
+  const handleOpenNotifMenu = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    refetchNotifs();
+    setNofiticationMenuAnchorEl(event.currentTarget);
   };
 
   const handleOpenProfileMenu = (
@@ -134,12 +235,18 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     setProfileMenuAnchorEl(event.currentTarget);
   };
 
-  const handleOpenProfile = () => {
-    setOpenProfile(true);
+  const handleCloseMenuNotif = async () => {
+    setNofiticationMenuAnchorEl(null);
+    await handleSeenNotifs();
+    refetchNotifs();
   };
 
   const handleCloseMenuProfile = () => {
     setProfileMenuAnchorEl(null);
+  };
+
+  const handleOpenProfile = () => {
+    setOpenProfile(true);
   };
 
   const handleCloseProfile = () => {
@@ -267,6 +374,69 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     fetchFreshUser();
   }, []);
 
+  // useEffect(() => {
+  //   const notifRefresh = setInterval(() => {
+  //     if (refetchNotifs) {
+  //       refetchNotifs();
+  //     }
+  //   }, 5000);
+
+  //   return () => clearInterval(notifRefresh);
+  // }, [refetchNotifs]);
+
+  const notifRowRenderer: ListRowRenderer = ({ index, key, style }) => {
+    const notif = notifs[index];
+
+    return (
+      <ListItem
+        key={key}
+        style={style}
+        component="div"
+        alignItems="center"
+        disablePadding
+        disableGutters
+        className={`${notif.status !== 'VISITED' ? 'bg-blue-700/10' : ''}`}
+        secondaryAction={
+          <IconButton onClick={() => handleDeleteNotif(notif.id)}>
+            <DeleteOutlineOutlinedIcon />
+          </IconButton>
+        }
+      >
+        <ListItemButton
+          disabled={!notif.link}
+          onClick={() => {
+            if (notif.link) {
+              handleVisitedNotif(notif.id);
+              handleCloseMenuNotif();
+              navigate(notif.link, { replace: true });
+            }
+          }}
+        >
+          <ListItemIcon>
+            {
+              notif.status === 'VISITED'
+              ? <MailOutlinedIcon />
+              : <DraftsOutlinedIcon />
+            }
+          </ListItemIcon>
+          <ListItemText
+            primary={`${notif.title}`}
+            secondary={
+              <span className='w-full h-fit flex flex-row'>
+                <span className='grow'>
+                  <span>{notif.description}</span>
+                </span>
+                <span className='shrink text-gray-400/60'>
+                  <span>{new Date(notif.created_at).toLocaleDateString()}</span>
+                </span>
+              </span>
+            }
+          />
+        </ListItemButton>
+      </ListItem>
+    )
+  }
+
   return (
     <>
       <div className="w-screen h-screen bg-transparent flex flex-row leading-normal">
@@ -279,7 +449,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               key={index}
               active={data.id === activeRouteId}
               onClick={() => {
-                setActiveRouteId(data.id);
                 setText('');
                 setSearchText?.('');
                 setDisabled?.(false);
@@ -319,8 +488,10 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               }}
             />
             <div className="w-[100px] flex justify-between items-center">
-              <IconButton onClick={handleOpenNotif}>
-                <NotificationsNoneOutlinedIcon />
+              <IconButton onClick={handleOpenNotifMenu}>
+                <Badge badgeContent={unseenNotifs?.length ?? 0} color="secondary">
+                  <NotificationsNoneOutlinedIcon />
+                </Badge>
               </IconButton>
 
               <IconButton onClick={handleOpenProfileMenu}>
@@ -328,7 +499,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               </IconButton>
             </div>
           </div>
-          <div className="grow overflow-auto">{children}</div>
+          <div className="grow overflow-auto scrollbar scrollbar-thumb-blue-700 scrollbar-track-blue-300">{children}</div>
         </div>
       </div>
       <Menu
@@ -407,6 +578,65 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
             <LogoutOutlinedIcon />
             Logout
           </MenuItem>
+        </div>
+      </Menu>
+      <Menu
+        id="basic-notification"
+        anchorEl={nofiticationMenuAnchorEl}
+        open={nofiticationMenuProfile}
+        onClose={handleCloseMenuNotif}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        MenuListProps={{
+          'aria-labelledby': 'notification-menu',
+        }}
+      >
+        <div
+          className="w-[400px] h-[450px] flex flex-col px-2"
+          style={{
+            backgroundColor: 'white',
+          }}
+        >
+          <div className='grow overflow-auto'>
+            <div className='w-full h-fit scrollbar-thin scrollbar-thumb-blue-700 scrollbar-track-blue-300'>
+              {
+                notifs.length
+                ? <List
+                    width={380}
+                    height={400}
+                    rowHeight={100}
+                    rowCount={notifs.length}
+                    rowRenderer={notifRowRenderer}
+                  />
+                : null
+              }
+              {
+                !notifs.length && !isLoading
+                ? <p className='p-3 text-gray-300 text-center'>No notifications yet</p>
+                : null
+              }
+              {
+                isLoading
+                ? <Loading />
+                : null
+              }
+            </div>
+          </div>
+          <div className='shrink'>
+            <Button
+              fullWidth
+              color="secondary"
+              onClick={handleClearAllNotifs}
+            >
+              Clear All
+            </Button>
+          </div>
         </div>
       </Menu>
       <Dialog

@@ -14,6 +14,7 @@ import { System } from './database/models/system.model';
 import { Token } from './database/models/token.model';
 import { Transaction } from './database/models/transaction.model';
 import { User } from './database/models/user.model';
+import { Notification } from './database/models/notification.model';
 import MainSeeder from './database/seeders/main.seeder';
 
 type DataSourceWithSeederOption = DataSourceOptions & SeederOptions;
@@ -22,28 +23,27 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const DB_PATH = IS_PROD ? app.getPath('userData') : __dirname;
 const MIGRATION_PATH = IS_PROD ? `${app.getAppPath()}/dist` : __dirname;
 
-const entities: DataSourceWithSeederOption['entities'] = [
-  AuditTrail,
-  Brand,
-  Category,
-  Image,
-  Item,
-  Order,
-  Permission,
-  Role,
-  Supplier,
-  System,
-  Token,
-  Transaction,
-  User,
-];
-
 export const options: DataSourceWithSeederOption = {
   type: 'sqlite',
   database: `${DB_PATH}/database/db.sqlite`,
-  entities,
+  entities: [
+    AuditTrail,
+    Brand,
+    Category,
+    Image,
+    Item,
+    Order,
+    Permission,
+    Role,
+    Supplier,
+    System,
+    Token,
+    Transaction,
+    User,
+    Notification
+  ],
   migrations: [
-    `${MIGRATION_PATH}database/migrations/*`,
+    `${MIGRATION_PATH}/database/migrations/*`,
   ],
   seeds: [
     MainSeeder,

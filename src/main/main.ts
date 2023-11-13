@@ -45,7 +45,6 @@ const providers = requireAll(
     : join(__dirname, '/app/providers')
 );
 
-
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -176,23 +175,25 @@ app
   .then(async () => {
     // Initialize database
     try {
-      await SqliteDataSource.initialize();
+      const datasource = await SqliteDataSource.initialize();
       console.log('[DB]: Initialized Successfully');
 
-      initJobs();
-      global.datasource = SqliteDataSource;
-      console.log(global.datasource);
-
-      const shouldMigrate = await SqliteDataSource.showMigrations();
+      const shouldMigrate = await datasource.showMigrations();
 
       console.log('[DB]: IS MIGRATING: ', shouldMigrate);
       if (shouldMigrate) {
-        await SqliteDataSource.runMigrations();
+        await datasource.runMigrations({
+          transaction: 'all',
+          fake: false,
+        });
         console.log('[DB]: Migrated Successfully');
       }
 
+      global.datasource = datasource;
+      initJobs();
+
       try {
-        await runSeeders(SqliteDataSource);
+        await runSeeders(datasource);
         console.log('[DB]: Seeded Successfully');
       } finally {
         const binaryProcesses = executeBinaries();

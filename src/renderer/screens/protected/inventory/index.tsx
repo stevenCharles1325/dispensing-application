@@ -11,6 +11,7 @@ import CounterWidget from 'UI/components/Widgets/CounterWidget';
 import formatCurrency from 'UI/helpers/formatCurrency';
 import { TransitionProps } from '@mui/material/transitions';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from "react-router-dom";
 
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
@@ -118,11 +119,13 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Inventory() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
 
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>(
     null
   );
@@ -212,6 +215,16 @@ export default function Inventory() {
     refetchItems();
     displayAlert?.('Successfully deleted selected item(s)', 'success');
   };
+
+  useEffect(() => {
+    console.log(searchParams);
+    const id = searchParams.get('id');
+
+    if (id) {
+      setSelectedIds([ id ]);
+      setModalAction('update');
+    }
+  }, [searchParams]);
 
   return (
     <div className="w-full h-full flex flex-col justify-around">

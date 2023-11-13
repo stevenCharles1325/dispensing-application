@@ -18,6 +18,7 @@ import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IReport from 'App/interfaces/report/report.interface';
+import NotificationDTO from 'App/data-transfer-objects/notification.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -346,6 +347,31 @@ const reportHandler = {
     ipcRenderer.invoke('report:show'),
 };
 
+/* ================================
++
++   NOTIFICATION EVENT HANDLER
++
++ ================================ */
+const notifHandler = {
+  getNotifs: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<NotificationDTO>>> =>
+    ipcRenderer.invoke('notification:show', payload, page, total),
+
+  updateNotif: async (
+    id: string,
+    payload: 'SEEN' | 'UNSEEN' | 'VISITED',
+  ): Promise<IResponse<string[] | IPOSError[] | NotificationDTO>> =>
+    ipcRenderer.invoke('notification:update', id, payload),
+
+  deleteNotif: async (
+    id: string | string[]
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('notification:delete', id),
+};
+
 // EXPOSING HANDLERS
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
@@ -358,6 +384,7 @@ contextBridge.exposeInMainWorld('supplier', supplierHandler);
 contextBridge.exposeInMainWorld('payment', paymentHandler);
 contextBridge.exposeInMainWorld('auditTrail', auditTrailHandler);
 contextBridge.exposeInMainWorld('report', reportHandler);
+contextBridge.exposeInMainWorld('notif', notifHandler);
 contextBridge.exposeInMainWorld('validation', validationHandler);
 
 export type AuthHandler = typeof authHandler;
@@ -371,4 +398,5 @@ export type SupplierHandler = typeof supplierHandler;
 export type PaymentHandler = typeof paymentHandler;
 export type AuditTrailHandler = typeof auditTrailHandler;
 export type ReportHandler = typeof reportHandler;
+export type NotifHandler = typeof notifHandler;
 export type ValidationHandler = typeof validationHandler;

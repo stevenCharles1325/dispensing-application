@@ -5,6 +5,7 @@ import {
   CategoryHandler,
   ImageHandler,
   ItemHandler,
+  NotifHandler,
   PaymentHandler,
   PeerHandler,
   ReportHandler,
@@ -27,6 +28,7 @@ declare global {
     payment: PaymentHandler;
     auditTrail: AuditTrailHandler;
     report: ReportHandler;
+    notif: NotifHandler;
     validation: ValidationHandler;
   }
 }
