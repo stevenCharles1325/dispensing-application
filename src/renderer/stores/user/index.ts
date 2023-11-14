@@ -39,7 +39,6 @@ const useUser = create<AppUserState>((set) => ({
     } else {
       // eslint-disable-next-line no-restricted-syntax
       for (const [propertyName, propertyValue] of Object.entries(keyOrUser)) {
-        console.log(propertyName, propertyValue);
         set((state: AppUserState) => ({
           ...state,
           [propertyName]: propertyValue,

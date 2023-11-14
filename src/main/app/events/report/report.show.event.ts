@@ -72,7 +72,6 @@ export default class RoleShowEvent implements IEvent {
         reports.trend_sales = await getTrendSales();
         reports.space_report = await getAvailableDBSpace();
 
-        console.log('SPACEEEE: ', reports.space_report);
         return {
           data: reports,
           status: 'SUCCESS',
