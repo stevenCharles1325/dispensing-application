@@ -3,6 +3,7 @@ import {
   AuthHandler,
   BrandHandler,
   CategoryHandler,
+  ExportHandler,
   ImageHandler,
   ItemHandler,
   MainHandler,
@@ -32,6 +33,7 @@ declare global {
     report: ReportHandler;
     notif: NotifHandler;
     validation: ValidationHandler;
+    export: ExportHandler;
   }
 }
 

@@ -390,6 +390,13 @@ const notifHandler = {
     ipcRenderer.invoke('notification:delete', id),
 };
 
+const exportHandler = {
+  exportTransactionHistory: async (
+    payload: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' = 'WHOLE',
+  ): Promise<IResponse<string[] | IPOSError[] | null>> =>
+    ipcRenderer.invoke('transaction-history:export', payload),
+};
+
 // EXPOSING HANDLERS
 contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
@@ -405,6 +412,7 @@ contextBridge.exposeInMainWorld('auditTrail', auditTrailHandler);
 contextBridge.exposeInMainWorld('report', reportHandler);
 contextBridge.exposeInMainWorld('notif', notifHandler);
 contextBridge.exposeInMainWorld('validation', validationHandler);
+contextBridge.exposeInMainWorld('export', exportHandler);
 
 export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
@@ -420,3 +428,4 @@ export type AuditTrailHandler = typeof auditTrailHandler;
 export type ReportHandler = typeof reportHandler;
 export type NotifHandler = typeof notifHandler;
 export type ValidationHandler = typeof validationHandler;
+export type ExportHandler = typeof exportHandler;

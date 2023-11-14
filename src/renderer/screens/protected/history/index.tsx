@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Tabs, Tab, Chip, IconButton, Dialog } from '@mui/material';
+import { Tabs, Tab, Chip, IconButton, Dialog, Button, Menu, ListItem, ListItemButton, ListItemText, CircularProgress } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
@@ -9,9 +9,12 @@ import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
 import { useEffect, useMemo, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
+import useAlert from 'UI/hooks/useAlert';
 
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import OrderDTO from 'App/data-transfer-objects/order.dto';
+import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -184,12 +187,21 @@ function a11yProps(index: number) {
 }
 
 export default function Logs() {
+  const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
 
-  const [currenTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState(0);
   const [receiptDialogOpen, setReceiptDialogOpen] = useState<boolean>(false);
 
   const [selectedId, setSelectedId] = useState<number | null>(0);
+
+  const [exportMenuAnchorEl, setExportMenuAnchorEl] =
+    useState<null | HTMLElement>(null);
+  const openMenuExport = Boolean(exportMenuAnchorEl);
+
+  const [exportDownloadState, setDownLoadExportState] = useState<
+    Record<string, 'LOADING' | 'SUCCESS' | 'ERROR' | null>
+  >({});
 
   const { data: auditData } = useQuery({
     queryKey: ['audits', searchText],
@@ -238,9 +250,20 @@ export default function Logs() {
     return 0;
   }, [computedTax, selectedPayment, subTotal]);
 
-  const data = currenTab === 0 ? auditData : paymentData;
-  const selectedRows = currenTab === 0 ? audits : payments;
-  const selectedColumn = currenTab === 0 ? logsColumns : paymentsColumns;
+  const data = currentTab === 0 ? auditData : paymentData;
+  const selectedRows = currentTab === 0 ? audits : payments;
+  const selectedColumn = currentTab === 0 ? logsColumns : paymentsColumns;
+
+  const handleOpenExportMenu = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    setExportMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseExportMenu = () => {
+    setExportMenuAnchorEl(null);
+    setDownLoadExportState({});
+  };
 
   const handleChangeTab = (_: any, newValue: number) => {
     setCurrentTab(newValue);
@@ -251,91 +274,233 @@ export default function Logs() {
     setSelectedId(null);
   };
 
+  const handleExportTransactionHistory = (
+    type: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' = 'WHOLE',
+  ) => async () => {
+    setDownLoadExportState((state) => ({
+      ...state,
+      [type]: 'LOADING',
+    }));
+    const res = await window.export.exportTransactionHistory(type);
+
+    if (res && res.status === 'ERROR') {
+      const errorMessage = res.errors?.[0] as unknown as string;
+
+      setDownLoadExportState((state) => ({
+        ...state,
+        [type]: 'ERROR',
+      }));
+      return displayAlert?.(errorMessage, 'error');
+    }
+
+    setDownLoadExportState((state) => ({
+      ...state,
+      [type]: 'SUCCESS',
+    }));
+    return displayAlert?.('Successfully downloaded', 'success');
+  }
+
   useEffect(() => {
     if (setPlaceHolder) {
-      if (currenTab === 0) {
+      if (currentTab === 0) {
         setPlaceHolder('Search for audit description');
       } else {
         setPlaceHolder('Search for payment receiver');
       }
     }
-  }, [currenTab, setPlaceHolder]);
+  }, [currentTab, setPlaceHolder]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-y-5">
-      <div className="w-full h-fit">
-        <Tabs
-          value={currenTab}
-          onChange={handleChangeTab}
-          aria-label="basic tabs example"
-          textColor="secondary"
-          indicatorColor="secondary"
-        >
-          <Tab label="Audit Trail" {...a11yProps(0)} />
-          <Tab label="Transaction History" {...a11yProps(1)} />
-        </Tabs>
-      </div>
-      <div className="w-full h-[750px]">
-        {data ? (
-          <DataGrid
-            className="shadow"
-            rows={selectedRows}
-            columns={selectedColumn}
-            rowCount={data?.total}
-            onRowSelectionModelChange={(itemIds: any[]) => {
-              setSelectedId(itemIds[0]);
-              setReceiptDialogOpen(true);
-            }}
-            sortingOrder={['asc', 'desc']}
-            checkboxSelection={false}
-            disableRowSelectionOnClick
-            sortingMode='client'
-          />
-        ) : null}
-        <Dialog
-          onClose={handleCloseReceiptDialog}
-          open={Boolean(receiptDialogOpen && selectedPayment)}
-        >
-          {selectedPayment ? (
-            <div className="w-[500px] h-[800px] overflow-auto">
-              <div
-                className="w-full min-h-[800px] h-fit p-5"
-                style={{ color: 'var(--info-text-color)' }}
-              >
-                <div className="w-full h-[60px] flex flex-row justify-between">
-                  <div className="font-bold">
-                    <p>Date: </p>
+    <>
+      <Menu
+        id="basic-menu"
+        anchorEl={exportMenuAnchorEl}
+        open={openMenuExport}
+        onClose={handleCloseExportMenu}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        MenuListProps={{
+          'aria-labelledby': 'export-menu',
+        }}
+      >
+        <div className='w-[300px]'>
+          <ListItem
+            component="div"
+            alignItems="center"
+            disablePadding
+          >
+            <ListItemButton
+              onClick={handleExportTransactionHistory('WHOLE')}
+            >
+              <ListItemText primary={`Whole`} />
+              {exportDownloadState['WHOLE'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
+              {exportDownloadState['WHOLE'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" color="success" /> : null}
+              {exportDownloadState['WHOLE'] === 'ERROR' ? <CloseOutlinedIcon fontSize="small" color="error" /> : null}
+            </ListItemButton>
+          </ListItem>
+          <ListItem
+            component="div"
+            alignItems="center"
+            disablePadding
+          >
+            <ListItemButton
+              onClick={handleExportTransactionHistory('CURRENT:DAY')}
+            >
+              <ListItemText primary={`Current day`} />
+              {exportDownloadState['CURRENT:DAY'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
+              {exportDownloadState['CURRENT:DAY'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" color="success" /> : null}
+              {exportDownloadState['CURRENT:DAY'] === 'ERROR' ? <CloseOutlinedIcon fontSize="small" color="error" /> : null}
+            </ListItemButton>
+          </ListItem>
+          <ListItem
+            component="div"
+            alignItems="center"
+            disablePadding
+          >
+            <ListItemButton
+              onClick={handleExportTransactionHistory('CURRENT:MONTH')}
+            >
+              <ListItemText primary={`Current month`} />
+              {exportDownloadState['CURRENT:MONTH'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
+              {exportDownloadState['CURRENT:MONTH'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" color="success" /> : null}
+              {exportDownloadState['CURRENT:MONTH'] === 'ERROR' ? <CloseOutlinedIcon fontSize="small" color="error" /> : null}
+            </ListItemButton>
+          </ListItem>
+          <ListItem
+            component="div"
+            alignItems="center"
+            disablePadding
+          >
+            <ListItemButton
+              onClick={handleExportTransactionHistory('CURRENT:YEAR')}
+            >
+              <ListItemText primary={`Current year`} />
+              {exportDownloadState['CURRENT:YEAR'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
+              {exportDownloadState['CURRENT:YEAR'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" /> : null}
+              {exportDownloadState['CURRENT:YEAR'] === 'ERROR' ? <CloseOutlinedIcon fontSize="small" color="error" /> : null}
+            </ListItemButton>
+          </ListItem>
+        </div>
+      </Menu>
+      <div className="w-full h-full flex flex-col gap-y-5">
+        <div className="w-full h-fit">
+          <Tabs
+            value={currentTab}
+            onChange={handleChangeTab}
+            aria-label="basic tabs example"
+            textColor="secondary"
+            indicatorColor="secondary"
+          >
+            <Tab label="Audit Trail" {...a11yProps(0)} />
+            <Tab label="Transaction History" {...a11yProps(1)} />
+          </Tabs>
+        </div>
+        <div className="w-full h-[750px]">
+          {currentTab === 1
+            ? (
+              <div className='w-full h-fit flex flex-row-reverse mb-3'>
+                <Button
+                  disabled={!selectedRows.length}
+                  className="shadow shadow-md"
+                  variant="outlined"
+                  color="secondary"
+                  size="medium"
+                  startIcon={<DownloadOutlinedIcon fontSize="small" />}
+                  onClick={handleOpenExportMenu}
+                >
+                  Export
+                </Button>
+              </div>
+            )
+            : null}
+          {data ? (
+            <DataGrid
+              className="shadow"
+              rows={selectedRows}
+              columns={selectedColumn}
+              rowCount={data?.total}
+              onRowSelectionModelChange={(itemIds: any[]) => {
+                setSelectedId(itemIds[0]);
+                setReceiptDialogOpen(true);
+              }}
+              sortingOrder={['asc', 'desc']}
+              checkboxSelection={false}
+              disableRowSelectionOnClick
+              sortingMode='client'
+            />
+          ) : null}
+          <Dialog
+            onClose={handleCloseReceiptDialog}
+            open={Boolean(receiptDialogOpen && selectedPayment)}
+          >
+            {selectedPayment ? (
+              <div className="w-[500px] h-[800px] overflow-auto">
+                <div
+                  className="w-full min-h-[800px] h-fit p-5"
+                  style={{ color: 'var(--info-text-color)' }}
+                >
+                  <div className="w-full h-[60px] flex flex-row justify-between">
+                    <div className="font-bold">
+                      <p>Date: </p>
+                    </div>
+                    <div>
+                      <p>
+                        {`${new Date(
+                          selectedPayment.created_at
+                        ).toLocaleString()}`}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p>
-                      {`${new Date(
-                        selectedPayment.created_at
-                      ).toLocaleString()}`}
-                    </p>
+                  <div className="w-full bg-gray-200 h-[60px] p-5 font-bold">
+                    <p>Item Description</p>
                   </div>
-                </div>
-                <div className="w-full bg-gray-200 h-[60px] p-5 font-bold">
-                  <p>Item Description</p>
-                </div>
-                <div className="w-full h-[50px] flex py-5 px-2">
-                  <div className="grow font-bold">Name</div>
-                  <div className="w-[100px] font-bold">Qty</div>
-                  <div className="w-[100px] font-bold">Price</div>
-                </div>
-                <div className="w-full h-[400px] overflow-auto border-b-2">
-                  <div className="w-full h-fit">
-                    {selectedPayment.orders?.map((order: any) => (
-                      <div
-                        key={order.id}
-                        className="w-full h-[50px] flex py-5 px-2"
-                      >
-                        <div className="grow">{order.item.name}</div>
-                        <div className="w-[100px]">{order.quantity}</div>
-                        <div className="w-[100px]">
+                  <div className="w-full h-[50px] flex py-5 px-2">
+                    <div className="grow font-bold">Name</div>
+                    <div className="w-[100px] font-bold">Qty</div>
+                    <div className="w-[100px] font-bold">Price</div>
+                  </div>
+                  <div className="w-full h-[400px] overflow-auto border-b-2">
+                    <div className="w-full h-fit">
+                      {selectedPayment.orders?.map((order: any) => (
+                        <div
+                          key={order.id}
+                          className="w-full h-[50px] flex py-5 px-2"
+                        >
+                          <div className="grow">{order.item.name}</div>
+                          <div className="w-[100px]">{order.quantity}</div>
+                          <div className="w-[100px]">
+                            <NumericFormat
+                              style={{ width: '100%', textAlign: 'left' }}
+                              className="mb-2 px-1 bg-transparent grow text-end"
+                              value={order.item.selling_price}
+                              prefix="₱ "
+                              thousandSeparator
+                              valueIsNumericString
+                              decimalSeparator="."
+                              decimalScale={2}
+                              fixedDecimalScale
+                              disabled
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="w-full flex justify-end mt-5">
+                    <div className="w-[350px] h-fit">
+                      <div className="w-full flex justify-between">
+                        <div className="font-bold">Sub-total:</div>
+                        <div>
                           <NumericFormat
-                            style={{ width: '100%', textAlign: 'left' }}
+                            style={{ width: '150px', textAlign: 'center' }}
                             className="mb-2 px-1 bg-transparent grow text-end"
-                            value={order.item.selling_price}
+                            value={subTotal}
                             prefix="₱ "
                             thousandSeparator
                             valueIsNumericString
@@ -346,66 +511,45 @@ export default function Logs() {
                           />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="w-full flex justify-end mt-5">
-                  <div className="w-[350px] h-fit">
-                    <div className="w-full flex justify-between">
-                      <div className="font-bold">Sub-total:</div>
-                      <div>
-                        <NumericFormat
-                          style={{ width: '150px', textAlign: 'center' }}
-                          className="mb-2 px-1 bg-transparent grow text-end"
-                          value={subTotal}
-                          prefix="₱ "
-                          thousandSeparator
-                          valueIsNumericString
-                          decimalSeparator="."
-                          decimalScale={2}
-                          fixedDecimalScale
-                          disabled
-                        />
+                      <div className="w-full flex justify-between">
+                        <div className="font-bold">{`Tax ${`${computedTax}%`} (VAT included):`}</div>
+                        <div>
+                          <NumericFormat
+                            style={{ width: '150px', textAlign: 'center' }}
+                            className="mb-2 px-1 bg-transparent grow text-end"
+                            value={tax}
+                            prefix="₱ "
+                            thousandSeparator
+                            valueIsNumericString
+                            disabled
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="w-full flex justify-between">
-                      <div className="font-bold">{`Tax ${`${computedTax}%`} (VAT included):`}</div>
-                      <div>
-                        <NumericFormat
-                          style={{ width: '150px', textAlign: 'center' }}
-                          className="mb-2 px-1 bg-transparent grow text-end"
-                          value={tax}
-                          prefix="₱ "
-                          thousandSeparator
-                          valueIsNumericString
-                          disabled
-                        />
-                      </div>
-                    </div>
-                    <div className="w-full flex justify-between">
-                      <div className="font-bold">Total:</div>
-                      <div>
-                        <NumericFormat
-                          style={{ width: '150px', textAlign: 'center' }}
-                          className="mb-2 px-1 bg-transparent grow text-end"
-                          value={selectedPayment.total}
-                          prefix="₱ "
-                          thousandSeparator
-                          valueIsNumericString
-                          decimalSeparator="."
-                          decimalScale={2}
-                          fixedDecimalScale
-                          disabled
-                        />
+                      <div className="w-full flex justify-between">
+                        <div className="font-bold">Total:</div>
+                        <div>
+                          <NumericFormat
+                            style={{ width: '150px', textAlign: 'center' }}
+                            className="mb-2 px-1 bg-transparent grow text-end"
+                            value={selectedPayment.total}
+                            prefix="₱ "
+                            thousandSeparator
+                            valueIsNumericString
+                            decimalSeparator="."
+                            decimalScale={2}
+                            fixedDecimalScale
+                            disabled
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ) : null}
-        </Dialog>
+            ) : null}
+          </Dialog>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
