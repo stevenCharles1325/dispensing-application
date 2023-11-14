@@ -15,6 +15,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Button,
+  Chip,
 } from '@mui/material';
 import itemStatuses from 'UI/data/defaults/statuses/item';
 import measurements from 'UI/data/defaults/unit-of-measurements';
@@ -521,7 +522,6 @@ export default function InventoryForm({
             />
             <TextField
               label="Description"
-              required
               value={form.description}
               onChange={(event) => {
                 dispatch({
@@ -671,7 +671,10 @@ export default function InventoryForm({
         <div className="grow">
           <div className="flex gap-14 flex-col">
             <div>
-              <h3>Item Image</h3>
+              <div className='flex flex-row gap-2 items-center'>
+                <p className='p-0 m-0'>Item Image</p>
+                <Chip label="Optional" size="small" variant="outlined" sx={{ color: 'var(--info-text-color)' }} />
+              </div>
               <br />
               <div className="flex flex-row gap-4">
                 <div className="border border-gray-300 hover:border-gray-950 rounded h-[170px] w-[170px] relative">
@@ -726,32 +729,35 @@ export default function InventoryForm({
 
             {/* SUPPLIER INFORMATION */}
             <div className="flex flex-col gap-5">
-              <ToggleButtonGroup
-                size="small"
-                color="secondary"
-                value={supplierToggle}
-                exclusive
-                onChange={(_, supplierAction) => {
-                  if (supplierAction === 'add-existing' && !suppliers.length) {
-                    return displayAlert?.(
-                      'No existing supplier is available',
-                      'error'
-                    );
-                  }
+              <div className="flex flex-row gap-2 items-center">
+                <ToggleButtonGroup
+                  size="small"
+                  color="secondary"
+                  value={supplierToggle}
+                  exclusive
+                  onChange={(_, supplierAction) => {
+                    if (supplierAction === 'add-existing' && !suppliers.length) {
+                      return displayAlert?.(
+                        'No existing supplier is available',
+                        'error'
+                      );
+                    }
 
-                  if (supplierAction) {
-                    handleSupplierToggle(supplierAction);
-                  }
-                }}
-                aria-label="Supplier-action-toggle"
-              >
-                <ToggleButton className="shadow-md" value="add-existing">
-                  Add Existing Supplier
-                </ToggleButton>
-                <ToggleButton className="shadow-md" value="add-new">
-                  Add New Supplier
-                </ToggleButton>
-              </ToggleButtonGroup>
+                    if (supplierAction) {
+                      handleSupplierToggle(supplierAction);
+                    }
+                  }}
+                  aria-label="Supplier-action-toggle"
+                >
+                  <ToggleButton className="shadow-md" value="add-existing">
+                    Add Existing Supplier
+                  </ToggleButton>
+                  <ToggleButton className="shadow-md" value="add-new">
+                    Add New Supplier
+                  </ToggleButton>
+                </ToggleButtonGroup>
+                <Chip label="Optional" size="small" variant="outlined" sx={{ color: 'var(--info-text-color)' }} />
+              </div>
               {supplierToggle === 'add-existing' ? (
                 <div className="flex flex-col gap-5">
                   <h5>Select Existing Supplier</h5>
@@ -804,7 +810,6 @@ export default function InventoryForm({
             Close
           </Button>
           <Button
-            disabled={!isReady}
             variant="contained"
             onClick={action === 'create' ? handleCreateItem : handleUpdateItem}
           >

@@ -5,6 +5,7 @@ import {
   CategoryHandler,
   ImageHandler,
   ItemHandler,
+  MainHandler,
   NotifHandler,
   PaymentHandler,
   PeerHandler,
@@ -17,6 +18,7 @@ import {
 declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
+    main: MainHandler;
     auth: AuthHandler;
     peer: PeerHandler;
     user: UserHandler;

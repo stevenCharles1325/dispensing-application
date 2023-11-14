@@ -45,7 +45,7 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'supplier_id',
             type: 'varchar',
-            isNullable: false,
+            isNullable: true,
             foreignKeyConstraintName: 'supplier',
           },
           {
@@ -63,7 +63,7 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'description',
             type: 'varchar',
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: 'cost_price',

@@ -20,7 +20,7 @@ import { Chip } from '@mui/material';
 import useSearch from 'UI/hooks/useSearch';
 import formatCurrency from 'UI/helpers/formatCurrency';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import { ReactECharts } from 'UI/components/Charts/ReactECharts';
+import LiquidFillChart from 'UI/components/Charts/LiquidFillChart';
 
 const colorsPalette = ['#9C27B0', '#B02780', '#5727B0'];
 
@@ -176,7 +176,7 @@ export default function Report() {
                       arcLabelMinAngle: 45,
                       data: trendSales.map(({ category_name, frequency }) => ({
                         label: category_name,
-                        value: frequency,
+                        value: frequency ?? 0,
                       })),
                       innerRadius: 200,
                     },
@@ -187,9 +187,9 @@ export default function Report() {
               )}
             </div>
             <div className="grow h-[570px] p-5 border shadow-lg rounded">
-              <div className="w-fit h-full">
+              <div className="w-full h-full">
                 <Chip
-                  label="Database Space"
+                  label="Device Space"
                   color="secondary"
                   variant="outlined"
                   size="medium"
@@ -197,31 +197,15 @@ export default function Report() {
                 {
                   dbAvailableSpace
                   ? (
-                    <ReactECharts
-                      option={{
-                        series: {
-                            type: 'liquidFill',
-                            data: [dbAvailableSpace.percentage ?? 0]
-                          }
-                      }}
-                    />
+                    <div className='w-full h-full flex justify-center items-center'>
+                      <LiquidFillChart
+                        value={dbAvailableSpace.percentage * 100 ?? 0}
+                      />
+                    </div>
                   )
                   : null
                 }
               </div>
-              {/* <BarChart
-                dataset={[]}
-                yAxis={[{ scaleType: 'band', dataKey: 'month' }]}
-                series={[{ dataKey: 'seoul', label: 'Seoul rainfall', valueFormatter }]}
-                layout="horizontal"
-                xAxis={[
-                  {
-                    label: 'rainfall (mm)',
-                  },
-                ]}
-                width={500}
-                height={400}
-              /> */}
             </div>
           </div>
         </div>

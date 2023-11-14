@@ -68,9 +68,6 @@ export class Item {
   system_id: number;
 
   @Column()
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
-  })
   supplier_id: string;
 
   @Column({
@@ -105,6 +102,7 @@ export class Item {
   name: string;
 
   @Column()
+  @ValidateIf((item: ItemDTO) => Boolean(item.description.length))
   @Length(5, 1000, {
     message: ValidationMessage.maxLength,
   })

@@ -24,6 +24,24 @@ export type Channels = 'ipc-pos';
 
 /* ================================
 +
++         MAIN EVENT HANDLER
++
++ ================================ */
+const mainHandler = {
+  mainMessage: (
+    callback: (
+      event: any,
+      payload: {
+        channel: string,
+        data: any
+      }
+    ) => void
+  ) => ipcRenderer.on('main-message', callback),
+}
+
+
+/* ================================
++
 +   USER VALIDATION EVENT HANDLER
 +
 + ================================ */
@@ -373,6 +391,7 @@ const notifHandler = {
 };
 
 // EXPOSING HANDLERS
+contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
 contextBridge.exposeInMainWorld('user', userHandler);
@@ -387,6 +406,7 @@ contextBridge.exposeInMainWorld('report', reportHandler);
 contextBridge.exposeInMainWorld('notif', notifHandler);
 contextBridge.exposeInMainWorld('validation', validationHandler);
 
+export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
 export type UserHandler = typeof userHandler;

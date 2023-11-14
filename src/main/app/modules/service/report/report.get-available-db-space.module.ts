@@ -6,7 +6,9 @@ const convertBytesToMegabytes = (bytes: any) => {
 }
 
 const getAvailableDBSpace = async () => {
-  const { free, size } = await checkDiskSpace(app.getAppPath())
+  const IS_PROD = process.env.NODE_ENV === 'production';
+  const DB_PATH = IS_PROD ? app.getPath('userData') : __dirname;
+  const { free, size } = await checkDiskSpace(`${DB_PATH}/database/db.sqlite`)
 
   return {
     free: Number(convertBytesToMegabytes(free).toFixed(2)),

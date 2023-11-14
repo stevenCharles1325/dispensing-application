@@ -7,6 +7,7 @@ declare global {
     binaries: Record<string, ChildProcessWithoutNullStreams | undefined>;
     killAll(): void;
   };
+  function emitToRenderer(channel: string, data: any ): void;
 }
 
 export {}

@@ -85,10 +85,11 @@ export const navigationRoutes: INavButtonprops[] = [
 ];
 
 const getNotifs = async (
+  payload: Record<string, any> | string = 'all',
   page = 1,
   total: number | 'max' = 'max'
 ): Promise<IPagination<NotificationDTO>> => {
-  const res = await window.notif.getNotifs('all', page, total);
+  const res = await window.notif.getNotifs(payload, page, total);
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
@@ -129,6 +130,8 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     image_url: '',
   });
 
+  const [unseenNotifs, setUnseenNotifs] = useState<Array<NotificationDTO>>([]);
+
   // Profile menu variables
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] =
     useState<null | HTMLElement>(null);
@@ -154,7 +157,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   });
 
   const notifs = (data?.data as NotificationDTO[]) ?? [];
-  const unseenNotifs = notifs?.filter?.(({ status }) => status === 'UNSEEN');
 
   const handleDebouncedSearching = useCallback(
     (txt: string) => debouncedSearch(txt),
@@ -181,6 +183,8 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           const errorMessage = res.errors?.[0] as unknown as string;
           throw new Error(errorMessage);
         }
+
+        setUnseenNotifs([]);
       }
     }
   }, [unseenNotifs]);
@@ -374,15 +378,22 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     fetchFreshUser();
   }, []);
 
-  // useEffect(() => {
-  //   const notifRefresh = setInterval(() => {
-  //     if (refetchNotifs) {
-  //       refetchNotifs();
-  //     }
-  //   }, 5000);
+  // For real time notification count update.
+  useEffect(() => {
+    window.main.mainMessage((_, payload) => {
+      if (payload.channel === 'NOTIF:UNSEEN') {
+        setUnseenNotifs(payload.data as NotificationDTO[]);
+      }
+    });
 
-  //   return () => clearInterval(notifRefresh);
-  // }, [refetchNotifs]);
+    const getInitialUnseenNotifs = async () => {
+      const res = await getNotifs({ status: 'UNSEEN' });
+
+      setUnseenNotifs(res.data);
+    }
+
+    getInitialUnseenNotifs();
+  }, []);
 
   const notifRowRenderer: ListRowRenderer = ({ index, key, style }) => {
     const notif = notifs[index];

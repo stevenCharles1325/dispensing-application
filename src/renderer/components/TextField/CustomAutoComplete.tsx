@@ -34,6 +34,7 @@ export default function CustomAutoComplete({
   error = false,
   sx,
 }: CustomAutoCompleteProps) {
+  const [tempValue, setTempValue] = useState('');
   const [value, setValue] = useState<OptionType | null>(providedValue);
 
   useEffect(() => {
@@ -46,7 +47,14 @@ export default function CustomAutoComplete({
     <Autocomplete
       options={options}
       value={value}
+      onKeyDown={(e) => {
+        if (e.code === 'Enter') {
+          console.log(tempValue);
+          onAdd?.(tempValue);
+        }
+      }}
       onChange={(event, newValue) => {
+        console.log(newValue);
         if (typeof newValue === 'string') {
           onChange?.(newValue);
 
@@ -107,6 +115,11 @@ export default function CustomAutoComplete({
           size="small"
           label={label}
           helperText={helperText}
+          onChange={(e) => {
+            if (!options.length && !options.find(({ name }) => name === e.target.value)) {
+              setTempValue(e.target.value);
+            }
+          }}
           error={error}
         />
       )}

@@ -149,6 +149,10 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
+  global.emitToRenderer = (channel, data) => {
+    mainWindow?.webContents.send('main-message', { channel, data });
+  }
+
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
