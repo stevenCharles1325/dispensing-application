@@ -11,6 +11,7 @@ export interface INavButtonprops {
   onClick?: () => void;
   redirectPath?: string;
   disabled?: boolean;
+  parentCollapsed?: boolean;
 }
 
 export default function NavButton({
@@ -21,6 +22,7 @@ export default function NavButton({
   redirectPath,
   onClick,
   disabled = false,
+  parentCollapsed = false,
 }: INavButtonprops) {
   const navigate = useNavigate();
   const color = active ? 'var(--text-color)' : 'white';
@@ -49,7 +51,11 @@ export default function NavButton({
             onClick={handleClick}
           >
             <div>{icon}</div>
-            <b className="leading-relaxed break-word">{label}</b>
+            {
+              parentCollapsed
+              ? null
+              : <b className="leading-relaxed break-word">{label}</b>
+            }
           </div>
           <div className="nav-btn-anch-rev w-[30px] h-[30px]">
             <div />
@@ -63,7 +69,11 @@ export default function NavButton({
           onClick={!disabled ? handleClick : undefined}
         >
           <div>{icon}</div>
-          <p className="leading-relaxed break-word">{label}</p>
+          {
+            parentCollapsed
+            ? null
+            : <p className="leading-relaxed break-word">{label}</p>
+          }
         </div>
       )}
     </div>

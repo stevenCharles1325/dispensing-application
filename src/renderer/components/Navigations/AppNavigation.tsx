@@ -56,6 +56,8 @@ import { useQuery } from '@tanstack/react-query';
 import DraftsOutlinedIcon from '@mui/icons-material/DraftsOutlined';
 import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import ChevronLeftOutlinedIcon from '@mui/icons-material/ChevronLeftOutlined';
+import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -115,6 +117,9 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   ) ?? 0;
   const [text, setText] = useState(searchText ?? '');
   const [imageFile, setImageFile] = useState<any>();
+
+  // Collapse side-nav
+  const [isSideNavCollapsed, setIsSideNavCollapsed] = useState(false);
 
   // User form
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -451,13 +456,27 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   return (
     <>
       <div className="w-screen h-screen bg-transparent flex flex-row leading-normal">
-        <div className="w-[30%] min-w-[300px] max-w-[310px] h-full bg-transparent pt-5">
+        <div className={`${isSideNavCollapsed ? 'min-w-[120px] w-[120px]' : 'min-w-[300px] w-[300px]'} h-full flex flex-col bg-transparent pt-5`}>
           <div className="w-full h-[60px] flex justify-center items-center">
-            <AppLogo size={30} withName color="light" />
+            <div className="ml-5 mt-5 w-fit flex flex-wrap justify-center items-center">
+              <div className='flex justify-center' style={{ width: isSideNavCollapsed ? '100px' : '190px' }}>
+                <AppLogo size={30} color="light" withName={!isSideNavCollapsed} />
+              </div>
+              <div className='w-fit'>
+                <IconButton onClick={() => setIsSideNavCollapsed((isCollapsed) => !isCollapsed)}>
+                  {
+                    isSideNavCollapsed
+                    ? <ChevronRightOutlinedIcon sx={{ color: 'white' }} />
+                    : <ChevronLeftOutlinedIcon sx={{ color: 'white' }} />
+                  }
+                </IconButton>
+            </div>
+            </div>
           </div>
           {navigationRoutes.map((data, index) => (
             <NavButton
               key={index}
+              parentCollapsed={isSideNavCollapsed}
               active={data.id === activeRouteId}
               onClick={() => {
                 setText('');

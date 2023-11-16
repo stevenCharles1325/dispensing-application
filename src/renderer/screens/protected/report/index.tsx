@@ -126,7 +126,7 @@ export default function Report() {
                 series={[
                   {
                     data: currSalesReport?.map?.(({ count }) => count),
-                    label: 'Current Sales Report',
+                    label: 'Today Sales Report',
                     area: true,
                     showMark: false,
                     color: '#9c27b0',
