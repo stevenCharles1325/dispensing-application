@@ -111,10 +111,12 @@ export default function Report() {
         </div>
       </div>
       <div className="grow w-full mt-5">
+        {/* SALES */}
         <div className="p-3 text-gray-500">
           <p className="text-lg font-bold">Sales Graphs</p>
         </div>
         <div className="flex flex-col px-3 gap-5">
+          {/*Current sales report*/}
           <div className="border p-2 rounded shadow">
             {isLoading ? (
               <div className="w-[1000px] h-[500px]">
@@ -147,65 +149,216 @@ export default function Report() {
               />
             )}
           </div>
-          <div className="grow flex flex-row justify-between items-center gap-5">
-            <div className="w-fit h-fit p-5 border shadow-lg rounded">
+
+          {/*Daily sales report*/}
+          <div className="border p-2 rounded shadow">
+            {isLoading ? (
+              <div className="w-[1000px] h-[500px]">
+                <Loading />
+              </div>
+            ) : (
+              <LineChart
+                height={500}
+                series={[
+                  {
+                    data: currSalesReport?.map?.(({ count }) => count),
+                    label: 'Daily Sales Report',
+                    area: true,
+                    showMark: false,
+                    color: '#9c27b0',
+                  },
+                ]}
+                xAxis={[
+                  {
+                    scaleType: 'point',
+                    label: 'Time',
+                    data: currSalesReport?.map?.(({ hour }) => `${hour}:00`),
+                  },
+                ]}
+                sx={{
+                  '.MuiLineElement-root': {
+                    display: 'none',
+                  },
+                }}
+              />
+            )}
+          </div>
+
+          {/*Monthly sales report*/}
+          <div className="border p-2 rounded shadow">
+            {isLoading ? (
+              <div className="w-[1000px] h-[500px]">
+                <Loading />
+              </div>
+            ) : (
+              <LineChart
+                height={500}
+                series={[
+                  {
+                    data: currSalesReport?.map?.(({ count }) => count),
+                    label: 'Monthly Sales Report',
+                    area: true,
+                    showMark: false,
+                    color: '#9c27b0',
+                  },
+                ]}
+                xAxis={[
+                  {
+                    scaleType: 'point',
+                    label: 'Time',
+                    data: currSalesReport?.map?.(({ hour }) => `${hour}:00`),
+                  },
+                ]}
+                sx={{
+                  '.MuiLineElement-root': {
+                    display: 'none',
+                  },
+                }}
+              />
+            )}
+          </div>
+
+          {/*Annual sales report*/}
+          <div className="border p-2 rounded shadow">
+            {isLoading ? (
+              <div className="w-[1000px] h-[500px]">
+                <Loading />
+              </div>
+            ) : (
+              <LineChart
+                height={500}
+                series={[
+                  {
+                    data: currSalesReport?.map?.(({ count }) => count),
+                    label: 'Annual Sales Report',
+                    area: true,
+                    showMark: false,
+                    color: '#9c27b0',
+                  },
+                ]}
+                xAxis={[
+                  {
+                    scaleType: 'point',
+                    label: 'Time',
+                    data: currSalesReport?.map?.(({ hour }) => `${hour}:00`),
+                  },
+                ]}
+                sx={{
+                  '.MuiLineElement-root': {
+                    display: 'none',
+                  },
+                }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* TRENDS */}
+        <div className="p-3 text-gray-500">
+          <p className="text-lg mt-[40px] font-bold">Trend Graphs</p>
+        </div>
+        <div className="px-3 grow flex flex-wrap justify-between items-center gap-5">
+          <div className="w-fit h-fit p-5 border shadow-lg rounded">
+            <Chip
+              label="Trend Categories"
+              color="secondary"
+              variant="outlined"
+              size="medium"
+            />
+            {isLoading ? (
+              <Loading />
+            ) : (
+              <PieChart
+                colors={colorsPalette}
+                sx={{
+                  [`& .${pieArcLabelClasses.root}`]: {
+                    fill: 'rgba(0, 0, 0, 0.7)',
+                    fontWeight: 'bold',
+                  },
+                }}
+                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                width={720}
+                height={500}
+                series={[
+                  {
+                    cornerRadius: 15,
+                    arcLabel: (item) => `${item.label} (${item.value})`,
+                    arcLabelMinAngle: 45,
+                    data: trendSales.map(({ category_name, frequency }) => ({
+                      label: category_name,
+                      value: frequency ?? 0,
+                    })),
+                    innerRadius: 200,
+                  },
+                ]}
+              >
+                <PieCenterLabel> Trend Category </PieCenterLabel>
+              </PieChart>
+            )}
+          </div>
+          <div className="w-fit h-fit p-5 border shadow-lg rounded">
+            <Chip
+              label="Trend Products"
+              color="secondary"
+              variant="outlined"
+              size="medium"
+            />
+            {isLoading ? (
+              <Loading />
+            ) : (
+              <PieChart
+                colors={colorsPalette}
+                sx={{
+                  [`& .${pieArcLabelClasses.root}`]: {
+                    fill: 'rgba(0, 0, 0, 0.7)',
+                    fontWeight: 'bold',
+                  },
+                }}
+                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                width={720}
+                height={500}
+                series={[
+                  {
+                    cornerRadius: 15,
+                    arcLabel: (item) => `${item.label} (${item.value})`,
+                    arcLabelMinAngle: 45,
+                    data: trendSales.map(({ category_name, frequency }) => ({
+                      label: category_name,
+                      value: frequency ?? 0,
+                    })),
+                    innerRadius: 200,
+                  },
+                ]}
+              >
+                <PieCenterLabel> Trend Category </PieCenterLabel>
+              </PieChart>
+            )}
+          </div>
+        </div>
+
+        <div className="p-3 text-gray-500">
+          <p className="text-lg mt-[40px] font-bold">System Info</p>
+        </div>
+        <div className="px-3 gap-5">
+          <div className="grow h-[570px] p-5 border shadow-lg rounded">
+            <div className="w-full h-full">
               <Chip
-                label="Trend Categories"
+                label="Device Space"
                 color="secondary"
                 variant="outlined"
                 size="medium"
               />
-              {isLoading ? (
-                <Loading />
-              ) : (
-                <PieChart
-                  colors={colorsPalette}
-                  sx={{
-                    [`& .${pieArcLabelClasses.root}`]: {
-                      fill: 'rgba(0, 0, 0, 0.7)',
-                      fontWeight: 'bold',
-                    },
-                  }}
-                  margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                  width={800}
-                  height={500}
-                  series={[
-                    {
-                      cornerRadius: 15,
-                      arcLabel: (item) => `${item.label} (${item.value})`,
-                      arcLabelMinAngle: 45,
-                      data: trendSales.map(({ category_name, frequency }) => ({
-                        label: category_name,
-                        value: frequency ?? 0,
-                      })),
-                      innerRadius: 200,
-                    },
-                  ]}
-                >
-                  <PieCenterLabel> Trend Category </PieCenterLabel>
-                </PieChart>
-              )}
-            </div>
-            <div className="grow h-[570px] p-5 border shadow-lg rounded">
-              <div className="w-full h-full">
-                <Chip
-                  label="Device Space"
-                  color="secondary"
-                  variant="outlined"
-                  size="medium"
-                />
-                {
-                  dbAvailableSpace
-                  ? (
-                    <div className='w-full h-full flex justify-center items-center'>
-                      <LiquidFillChart
-                        value={dbAvailableSpace.percentage * 100 ?? 0}
-                      />
-                    </div>
-                  )
-                  : null
-                }
-              </div>
+              {
+                dbAvailableSpace
+                ? (
+                  <div className='w-full h-full flex justify-center items-center'>
+                    <LiquidFillChart
+                      value={dbAvailableSpace.percentage * 100 ?? 0}
+                    />
+                  </div>
+                )
+                : null
+              }
             </div>
           </div>
         </div>

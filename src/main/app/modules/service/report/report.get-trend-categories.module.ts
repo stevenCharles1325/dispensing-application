@@ -1,6 +1,6 @@
 import CategoryRepository from 'App/repositories/category.repository';
 
-const getTrendSales = async (): Promise<
+const getTrendCategories = async (): Promise<
   Array<{ category_name: string; frequency: number }>
 > => {
   const result = await CategoryRepository.createQueryBuilder('category')
@@ -19,4 +19,4 @@ const getTrendSales = async (): Promise<
   return result;
 };
 
-export default getTrendSales;
+export default getTrendCategories;

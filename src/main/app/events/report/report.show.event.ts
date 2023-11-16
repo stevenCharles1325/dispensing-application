@@ -15,7 +15,8 @@ import getOrders from 'App/modules/service/report/report.get-orders.module';
 import getRevenue from 'App/modules/service/report/report.get-revenue.module';
 import getSalesReport from 'App/modules/service/report/report.get-sales-report.module';
 import getSoldItems from 'App/modules/service/report/report.get-sold-items.module';
-import getTrendSales from 'App/modules/service/report/report.get-trend-sales.module';
+import getTrendCategories from 'App/modules/service/report/report.get-trend-categories.module';
+import getTrendProducts from 'App/modules/service/report/report.get-trend-products.module';
 
 export default class RoleShowEvent implements IEvent {
   public channel: string = 'report:show';
@@ -50,7 +51,8 @@ export default class RoleShowEvent implements IEvent {
               has_increased: false,
             },
           },
-          trend_sales: [],
+          trend_categories: [],
+          trend_products: [],
           current_sale_reports: [],
           pos_sale_reports: {
             daily: [],
@@ -64,12 +66,20 @@ export default class RoleShowEvent implements IEvent {
           }
         };
 
+        // Overview
         reports.daily_overview_reports.revenue = await getRevenue();
         reports.daily_overview_reports.orders = await getOrders();
         reports.daily_overview_reports.sold_items = await getSoldItems();
+
+        // Sales reports
         reports.current_sale_reports = await getCurrentSalesReport();
         reports.pos_sale_reports = await getSalesReport();
-        reports.trend_sales = await getTrendSales();
+
+        // Trend reports
+        reports.trend_categories = await getTrendCategories();
+        reports.trend_products = await getTrendProducts();
+
+        // Device reports
         reports.space_report = await getAvailableDBSpace();
 
         return {

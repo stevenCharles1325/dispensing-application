@@ -16,12 +16,13 @@ export default interface IReport {
       has_increased: boolean;
     };
   };
-  trend_sales: Array<{ category_name: string; frequency: number }>;
+  trend_categories: Array<{ category_name: string; frequency: number }>;
+  trend_products: Array<{ product_name: string; frequency: number }>;
   current_sale_reports: Array<{ hour: string; count: number }>;
   pos_sale_reports: {
-    daily: Array<any>;
-    monthly: Array<any>;
-    yearly: Array<any>;
+    daily: Array<{ date: string; count: number }>;
+    monthly: Array<{ date: string; count: number }>;
+    yearly: Array<{ date: string; count: number }>;
   };
   space_report: {
     free: any;
