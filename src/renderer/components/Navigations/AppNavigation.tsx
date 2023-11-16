@@ -457,7 +457,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     <>
       <div className="w-screen h-screen bg-transparent flex flex-row leading-normal">
         <div className={`${isSideNavCollapsed ? 'min-w-[120px] w-[120px]' : 'min-w-[300px] w-[300px]'} h-full flex flex-col bg-transparent pt-5`}>
-          <div className="w-full h-[60px] flex justify-center items-center">
+          <div className="w-full h-[60px] flex justify-center items-center mb-5">
             <div className="ml-5 mt-5 w-fit flex flex-wrap justify-center items-center">
               <div className='flex justify-center' style={{ width: isSideNavCollapsed ? '100px' : '190px' }}>
                 <AppLogo size={30} color="light" withName={!isSideNavCollapsed} />
