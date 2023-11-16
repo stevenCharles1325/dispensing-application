@@ -611,7 +611,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         <div
           className="w-[400px] h-[450px] flex flex-col px-2"
           style={{
-            backgroundColor: 'white',r
+            backgroundColor: 'white',
           }}
         >
           <div className='grow overflow-auto'>

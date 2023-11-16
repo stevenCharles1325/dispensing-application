@@ -150,7 +150,7 @@ export default function Report() {
           <div className="grow flex flex-row justify-between items-center gap-5">
             <div className="w-fit h-fit p-5 border shadow-lg rounded">
               <Chip
-                label="Trends"
+                label="Trend Categories"
                 color="secondary"
                 variant="outlined"
                 size="medium"
