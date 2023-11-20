@@ -12,8 +12,10 @@ const getTrendCategories = async (): Promise<
         .where('item.category_id = category.id')
         .innerJoin('orders', 'order', 'order.item_id = item.id');
     }, 'frequency')
+    .having('frequency >= 1')
     .groupBy('category.name')
     .orderBy('frequency', 'DESC')
+    .limit(5)
     .getRawMany();
 
   return result;

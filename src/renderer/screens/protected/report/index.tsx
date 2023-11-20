@@ -2,9 +2,8 @@
 import TotalDifferenceWidget from 'UI/components/Widgets/TotalDifferenceWidget';
 import PaidTwoToneIcon from '@mui/icons-material/PaidTwoTone';
 import TableRestaurantTwoToneIcon from '@mui/icons-material/TableRestaurantTwoTone';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  BarChart,
   LineChart,
   PieChart,
   pieArcLabelClasses,
@@ -21,6 +20,7 @@ import useSearch from 'UI/hooks/useSearch';
 import formatCurrency from 'UI/helpers/formatCurrency';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import LiquidFillChart from 'UI/components/Charts/LiquidFillChart';
+import GraphWithDate from 'UI/components/Graphs/GraphWithDate';
 
 const colorsPalette = ['#9C27B0', '#B02780', '#5727B0'];
 
@@ -48,8 +48,32 @@ const getReport = async (): Promise<
   return res;
 };
 
+const getReportHistory = async (
+  startDate: string | null = null,
+  endDate: string = new Date().toString(),
+  groupBy: 'DAILY' | 'MONTHLY' | 'YEARLY' = 'DAILY'
+): Promise<
+  IResponse<IReport | IPOSError[] | string[]>
+> => {
+  const res = await window.report.getReportHistory(
+    startDate,
+    endDate,
+    groupBy,
+  );
+
+  return res;
+};
+
+const UNITS_TO_SUBTRACT = 20;
+const DATE = new Date();
+DATE.setDate(DATE.getDate() - UNITS_TO_SUBTRACT);
+
 export default function Report() {
   const { setPlaceHolder, setDisabled } = useSearch();
+  const [startDate, setStartDate] = useState(DATE.toString());
+  const [endDate, setEndDate] = useState(new Date().toString());
+  const [groupBy, setGroupBy] = useState<'DAILY' | 'MONTHLY' | 'YEARLY'>('DAILY');
+
   const {
     data,
     isLoading,
@@ -63,18 +87,39 @@ export default function Report() {
     },
   });
 
+  const {
+    data: reportHistory,
+    isLoading: isRepHistoryLoading,
+  } = useQuery({
+    queryKey: ['report-history', startDate, endDate, groupBy],
+    queryFn: async () => {
+      const res = await getReportHistory(
+        startDate.toString(),
+        endDate.toString(),
+        groupBy
+      );
+
+      return res;
+    },
+  });
+
+  console.log(startDate, endDate, groupBy);
   const report: IReport = data?.data as IReport;
   const revenue = report?.daily_overview_reports.revenue;
   const orders = report?.daily_overview_reports.orders;
   const soldItems = report?.daily_overview_reports.sold_items;
   const currSalesReport = report?.current_sale_reports;
-  const trendSales = report?.trend_sales;
+  const trendCategories = report?.trend_categories;
+  const trendProducts = report?.trend_products;
   const dbAvailableSpace = report?.space_report;
 
   useEffect(() => {
     setPlaceHolder?.('Search is disabled here');
     setDisabled?.(true);
   }, [setDisabled, setPlaceHolder]);
+
+  const dataReportHistory = useMemo(() => reportHistory?.data, [reportHistory]);
+  console.log('REPORT HISTORY: ', reportHistory);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -150,8 +195,25 @@ export default function Report() {
             )}
           </div>
 
+          {
+            dataReportHistory
+            ? (
+              <GraphWithDate
+                loading={isRepHistoryLoading}
+                title="Report History"
+                data={dataReportHistory}
+                onChange={(start, end, groupBy) => {
+                  console.log(start, end);
+                  setStartDate(() => start.toString());
+                  setEndDate(() => end.toString());
+                  setGroupBy(() => groupBy);
+                }}
+              />
+            )
+            : null
+          }
           {/*Daily sales report*/}
-          <div className="border p-2 rounded shadow">
+          {/* <div className="border p-2 rounded shadow">
             {isLoading ? (
               <div className="w-[1000px] h-[500px]">
                 <Loading />
@@ -182,10 +244,10 @@ export default function Report() {
                 }}
               />
             )}
-          </div>
+          </div> */}
 
           {/*Monthly sales report*/}
-          <div className="border p-2 rounded shadow">
+          {/* <div className="border p-2 rounded shadow">
             {isLoading ? (
               <div className="w-[1000px] h-[500px]">
                 <Loading />
@@ -216,10 +278,10 @@ export default function Report() {
                 }}
               />
             )}
-          </div>
+          </div> */}
 
           {/*Annual sales report*/}
-          <div className="border p-2 rounded shadow">
+          {/* <div className="border p-2 rounded shadow">
             {isLoading ? (
               <div className="w-[1000px] h-[500px]">
                 <Loading />
@@ -250,7 +312,7 @@ export default function Report() {
                 }}
               />
             )}
-          </div>
+          </div> */}
         </div>
 
         {/* TRENDS */}
@@ -258,7 +320,7 @@ export default function Report() {
           <p className="text-lg mt-[40px] font-bold">Trend Graphs</p>
         </div>
         <div className="px-3 grow flex flex-wrap justify-between items-center gap-5">
-          <div className="w-fit h-fit p-5 border shadow-lg rounded">
+          <div className="grow h-fit p-5 border shadow-lg rounded">
             <Chip
               label="Trend Categories"
               color="secondary"
@@ -284,7 +346,7 @@ export default function Report() {
                     cornerRadius: 15,
                     arcLabel: (item) => `${item.label} (${item.value})`,
                     arcLabelMinAngle: 45,
-                    data: trendSales.map(({ category_name, frequency }) => ({
+                    data: trendCategories.map(({ category_name, frequency }) => ({
                       label: category_name,
                       value: frequency ?? 0,
                     })),
@@ -296,7 +358,7 @@ export default function Report() {
               </PieChart>
             )}
           </div>
-          <div className="w-fit h-fit p-5 border shadow-lg rounded">
+          <div className="grow h-fit p-5 border shadow-lg rounded">
             <Chip
               label="Trend Products"
               color="secondary"
@@ -322,8 +384,8 @@ export default function Report() {
                     cornerRadius: 15,
                     arcLabel: (item) => `${item.label} (${item.value})`,
                     arcLabelMinAngle: 45,
-                    data: trendSales.map(({ category_name, frequency }) => ({
-                      label: category_name,
+                    data: trendProducts.map(({ product_name, frequency }) => ({
+                      label: product_name,
                       value: frequency ?? 0,
                     })),
                     innerRadius: 200,
@@ -336,6 +398,7 @@ export default function Report() {
           </div>
         </div>
 
+        {/* SYSTEM INFO */}
         <div className="p-3 text-gray-500">
           <p className="text-lg mt-[40px] font-bold">System Info</p>
         </div>

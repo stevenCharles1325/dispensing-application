@@ -7,8 +7,10 @@ const getTrendProducts = async (): Promise<
     .select('item.name', 'product_name')
     .addSelect('SUM(order.quantity)', 'frequency')
     .innerJoin('order.item', 'item')
+    .having('frequency >= 1')
     .groupBy('item.name')
     .orderBy('frequency', 'DESC')
+    .limit(5)
     .getRawMany();
 
   return result;

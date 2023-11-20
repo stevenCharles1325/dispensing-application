@@ -13,12 +13,11 @@ import getAvailableDBSpace from 'App/modules/service/report/report.get-available
 import getCurrentSalesReport from 'App/modules/service/report/report.get-current-sales-report.module';
 import getOrders from 'App/modules/service/report/report.get-orders.module';
 import getRevenue from 'App/modules/service/report/report.get-revenue.module';
-import getSalesReport from 'App/modules/service/report/report.get-sales-report.module';
 import getSoldItems from 'App/modules/service/report/report.get-sold-items.module';
 import getTrendCategories from 'App/modules/service/report/report.get-trend-categories.module';
 import getTrendProducts from 'App/modules/service/report/report.get-trend-products.module';
 
-export default class RoleShowEvent implements IEvent {
+export default class ReportShowEvent implements IEvent {
   public channel: string = 'report:show';
 
   public middlewares = ['auth.middleware'];
@@ -54,11 +53,6 @@ export default class RoleShowEvent implements IEvent {
           trend_categories: [],
           trend_products: [],
           current_sale_reports: [],
-          pos_sale_reports: {
-            daily: [],
-            monthly: [],
-            yearly: [],
-          },
           space_report: {
             free: 0,
             size: 0,
@@ -73,7 +67,6 @@ export default class RoleShowEvent implements IEvent {
 
         // Sales reports
         reports.current_sale_reports = await getCurrentSalesReport();
-        reports.pos_sale_reports = await getSalesReport();
 
         // Trend reports
         reports.trend_categories = await getTrendCategories();
@@ -89,7 +82,7 @@ export default class RoleShowEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to view a Role'],
+        errors: ['You are not allowed to view reports'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

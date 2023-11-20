@@ -363,6 +363,13 @@ const auditTrailHandler = {
 const reportHandler = {
   getReport: async (): Promise<IResponse<string[] | IPOSError[] | IReport>> =>
     ipcRenderer.invoke('report:show'),
+
+  getReportHistory: async (
+    startDate: string | null = null,
+    endDate: string | null = null,
+    groupBy: 'DAILY' | 'MONTHLY' | 'YEARLY' = 'DAILY',
+  ): Promise<IResponse<string[] | IPOSError[] | IReport>> =>
+    ipcRenderer.invoke('report-history:show', startDate, endDate, groupBy),
 };
 
 /* ================================
