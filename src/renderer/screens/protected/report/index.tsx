@@ -48,31 +48,8 @@ const getReport = async (): Promise<
   return res;
 };
 
-const getReportHistory = async (
-  startDate: string | null = null,
-  endDate: string = new Date().toString(),
-  groupBy: 'DAILY' | 'MONTHLY' | 'YEARLY' = 'DAILY'
-): Promise<
-  IResponse<IReport | IPOSError[] | string[]>
-> => {
-  const res = await window.report.getReportHistory(
-    startDate,
-    endDate,
-    groupBy,
-  );
-
-  return res;
-};
-
-const UNITS_TO_SUBTRACT = 20;
-const DATE = new Date();
-DATE.setDate(DATE.getDate() - UNITS_TO_SUBTRACT);
-
 export default function Report() {
   const { setPlaceHolder, setDisabled } = useSearch();
-  const [startDate, setStartDate] = useState(DATE.toString());
-  const [endDate, setEndDate] = useState(new Date().toString());
-  const [groupBy, setGroupBy] = useState<'DAILY' | 'MONTHLY' | 'YEARLY'>('DAILY');
 
   const {
     data,
@@ -87,23 +64,6 @@ export default function Report() {
     },
   });
 
-  const {
-    data: reportHistory,
-    isLoading: isRepHistoryLoading,
-  } = useQuery({
-    queryKey: ['report-history', startDate, endDate, groupBy],
-    queryFn: async () => {
-      const res = await getReportHistory(
-        startDate.toString(),
-        endDate.toString(),
-        groupBy
-      );
-
-      return res;
-    },
-  });
-
-  console.log(startDate, endDate, groupBy);
   const report: IReport = data?.data as IReport;
   const revenue = report?.daily_overview_reports.revenue;
   const orders = report?.daily_overview_reports.orders;
@@ -118,8 +78,6 @@ export default function Report() {
     setDisabled?.(true);
   }, [setDisabled, setPlaceHolder]);
 
-  const dataReportHistory = useMemo(() => reportHistory?.data, [reportHistory]);
-  console.log('REPORT HISTORY: ', reportHistory);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -195,124 +153,7 @@ export default function Report() {
             )}
           </div>
 
-          {
-            dataReportHistory
-            ? (
-              <GraphWithDate
-                loading={isRepHistoryLoading}
-                title="Report History"
-                data={dataReportHistory}
-                onChange={(start, end, groupBy) => {
-                  console.log(start, end);
-                  setStartDate(() => start.toString());
-                  setEndDate(() => end.toString());
-                  setGroupBy(() => groupBy);
-                }}
-              />
-            )
-            : null
-          }
-          {/*Daily sales report*/}
-          {/* <div className="border p-2 rounded shadow">
-            {isLoading ? (
-              <div className="w-[1000px] h-[500px]">
-                <Loading />
-              </div>
-            ) : (
-              <LineChart
-                height={500}
-                series={[
-                  {
-                    data: currSalesReport?.map?.(({ count }) => count),
-                    label: 'Daily Sales Report',
-                    area: true,
-                    showMark: false,
-                    color: '#9c27b0',
-                  },
-                ]}
-                xAxis={[
-                  {
-                    scaleType: 'point',
-                    label: 'Time',
-                    data: currSalesReport?.map?.(({ hour }) => `${hour}:00`),
-                  },
-                ]}
-                sx={{
-                  '.MuiLineElement-root': {
-                    display: 'none',
-                  },
-                }}
-              />
-            )}
-          </div> */}
-
-          {/*Monthly sales report*/}
-          {/* <div className="border p-2 rounded shadow">
-            {isLoading ? (
-              <div className="w-[1000px] h-[500px]">
-                <Loading />
-              </div>
-            ) : (
-              <LineChart
-                height={500}
-                series={[
-                  {
-                    data: currSalesReport?.map?.(({ count }) => count),
-                    label: 'Monthly Sales Report',
-                    area: true,
-                    showMark: false,
-                    color: '#9c27b0',
-                  },
-                ]}
-                xAxis={[
-                  {
-                    scaleType: 'point',
-                    label: 'Time',
-                    data: currSalesReport?.map?.(({ hour }) => `${hour}:00`),
-                  },
-                ]}
-                sx={{
-                  '.MuiLineElement-root': {
-                    display: 'none',
-                  },
-                }}
-              />
-            )}
-          </div> */}
-
-          {/*Annual sales report*/}
-          {/* <div className="border p-2 rounded shadow">
-            {isLoading ? (
-              <div className="w-[1000px] h-[500px]">
-                <Loading />
-              </div>
-            ) : (
-              <LineChart
-                height={500}
-                series={[
-                  {
-                    data: currSalesReport?.map?.(({ count }) => count),
-                    label: 'Annual Sales Report',
-                    area: true,
-                    showMark: false,
-                    color: '#9c27b0',
-                  },
-                ]}
-                xAxis={[
-                  {
-                    scaleType: 'point',
-                    label: 'Time',
-                    data: currSalesReport?.map?.(({ hour }) => `${hour}:00`),
-                  },
-                ]}
-                sx={{
-                  '.MuiLineElement-root': {
-                    display: 'none',
-                  },
-                }}
-              />
-            )}
-          </div> */}
+          <GraphWithDate title="Report History" />
         </div>
 
         {/* TRENDS */}

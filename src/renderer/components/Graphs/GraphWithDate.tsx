@@ -3,21 +3,43 @@ import { LineChart } from "@mui/x-charts";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Chip, IconButton, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import IPOSError from "App/interfaces/pos/pos.error.interface";
+import IResponse from "App/interfaces/pos/pos.response.interface";
+import IReport from "App/interfaces/report/report.interface";
+import { useQuery } from "@tanstack/react-query";
+
+const UNITS_TO_SUBTRACT = 20;
 
 const views = ['DAILY', 'MONTHLY', 'YEARLY'] as const;
 
+type GraphData = { period: string; count: number };
+
 interface GrapWithDateProps {
-  data: { period: string, count: number }[];
   title: string;
-  loading: boolean;
+  loading?: boolean;
   height?: number;
   onChange?: (startDate: Date, endDate: Date, groupBy: (typeof views)[number]) => void
 }
 
+const getReportHistory = async (
+  startDate: string | null = null,
+  endDate: string = new Date().toString(),
+  groupBy: 'DAILY' | 'MONTHLY' | 'YEARLY' = 'DAILY'
+): Promise<
+  IResponse<IReport | IPOSError[] | string[]>
+> => {
+  const res = await window.report.getReportHistory(
+    startDate,
+    endDate,
+    groupBy,
+  );
+
+  return res;
+};
+
 const GraphWithDate = (props: GrapWithDateProps) => {
   const {
     loading,
-    data,
     title,
     height,
     onChange,
@@ -30,30 +52,30 @@ const GraphWithDate = (props: GrapWithDateProps) => {
 
   const generateStartDate = useCallback(() => {
     const date = new Date(endingDate);
-    const unitsToSubtract = 20;
 
     switch (view) {
       case 'DAILY':
-        date.setDate(date.getDate() - unitsToSubtract);
+        date.setDate(date.getDate() - UNITS_TO_SUBTRACT);
         return date;
 
       case 'MONTHLY':
-        date.setMonth(date.getMonth() - unitsToSubtract);
+        date.setMonth(date.getMonth() - (UNITS_TO_SUBTRACT - 1));
         return date;
 
       case 'YEARLY':
-        date.setFullYear(date.getFullYear() - unitsToSubtract);
+        date.setFullYear(date.getFullYear() - UNITS_TO_SUBTRACT);
         return date;
 
       default:
-        date.setDate(date.getDate() - unitsToSubtract);
+        date.setDate(date.getDate() - UNITS_TO_SUBTRACT);
         return date;
     }
   }, [view, endingDate]);
 
   const dateArray = useMemo(() => {
-    const arrayOfDates = Array.from({ length: 20 }, (_, index) => {
-      if (!startingDate) return null;
+    if (!startingDate) return [];
+
+    const arrayOfDates = Array.from({ length: UNITS_TO_SUBTRACT }, (_, index) => {
       const date = new Date(startingDate);
 
       switch (view) {
@@ -76,16 +98,59 @@ const GraphWithDate = (props: GrapWithDateProps) => {
     });
 
     return arrayOfDates;
-  }, [view, startingDate, endingDate]);
+  }, [view, startingDate]);
+
+  const {
+    data: reportHistory,
+    isLoading: isRepHistoryLoading,
+  } = useQuery({
+    queryKey: ['report-history', startingDate, endingDate, view],
+    queryFn: async () => {
+      if (startingDate) {
+        const res = await getReportHistory(
+          startingDate.toString(),
+          endingDate.toString(),
+          view
+        );
+
+        return res;
+      }
+
+      return null;
+    },
+  });
+
+  const dataReportHistory: GraphData[] | null = useMemo(() =>
+    (reportHistory?.data as unknown as GraphData[]) ?? [],
+    [reportHistory]
+  );
 
   const filledReports = useMemo(() => {
-    if (!dateArray?.length || !data?.length) return [];
+    if (!dateArray || !dateArray?.length) return [];
 
     return dateArray.map((date) => {
-      const existingReport = data.find((report) => {
+      const existingReport = dataReportHistory?.find?.((report) => {
         if (!date) return false;
 
-        return new Date(report.period).toLocaleDateString() === date.toLocaleDateString();
+        const dataDate = new Date(report.period).toLocaleDateString(
+          'default',
+          {
+            month: view !== 'YEARLY' ? 'short' : undefined,
+            day: view === 'DAILY' ? 'numeric' : undefined,
+            year: 'numeric'
+          }
+        )
+
+        const labelDate = date.toLocaleDateString(
+          'default',
+          {
+            month: view !== 'YEARLY' ? 'short' : undefined,
+            day: view === 'DAILY' ? 'numeric' : undefined,
+            year: 'numeric'
+          }
+        )
+
+        return dataDate === labelDate;
       });
 
       return existingReport
@@ -94,88 +159,146 @@ const GraphWithDate = (props: GrapWithDateProps) => {
           count: existingReport.count,
         }
         : { period: date?.toLocaleDateString(), count: 0 };
-    });
-  }, [data, dateArray]);
+    }) ?? [];
+  }, [dataReportHistory, dateArray, view]);
 
   useEffect(() => {
     setStartingDate(generateStartDate());
-  }, [generateStartDate, view]);
+  }, [view]);
 
   const handleReset = useCallback(() => {
-    const startDate = generateStartDate();
     const endDate = new Date();
+    const startDate = new Date();
+    setEndingDate(endDate);
 
-    setEndingDate(startDate);
-    setStartingDate(endDate);
+    switch (view) {
+      case 'DAILY':
+        startDate.setDate(startDate.getDate() - UNITS_TO_SUBTRACT);
+        break;
 
-    onChange?.(startDate, endDate, view);
-  }, [view, onChange, generateStartDate]);
+      case 'MONTHLY':
+        startDate.setMonth(startDate.getMonth() - (UNITS_TO_SUBTRACT - 1));
+        break;
+
+      case 'YEARLY':
+        startDate.setFullYear(startDate.getFullYear() - UNITS_TO_SUBTRACT);
+        break;
+
+      default:
+        startDate.setDate(startDate.getDate() - UNITS_TO_SUBTRACT);
+        break;
+    }
+
+    setStartingDate(startDate);
+  }, [view, onChange]);
 
   const handleIncreaseDate = useCallback(() => {
     if (startingDate && endingDate) {
-      const startDate = new Date(startingDate);
-      const endDate = new Date(endingDate);
+      setStartingDate((date) => {
+        if (!date) return date;
+        const startDate = new Date(date);
 
-      switch (view) {
-        case 'DAILY':
-          startDate.setDate(startDate.getDate() + 1);
-          endDate.setDate(endDate.getDate() + 1);
-          break;
+        switch (view) {
+          case 'DAILY':
+            startDate.setDate(startDate.getDate() + 1);
+            break;
 
-        case 'MONTHLY':
-          startDate.setMonth(startDate.getMonth() + 1);
-          endDate.setMonth(endDate.getMonth() + 1);
-          break;
+          case 'MONTHLY':
+            startDate.setMonth(startDate.getMonth() + 1);
+            break;
 
-        case 'YEARLY':
-          startDate.setFullYear(startDate.getFullYear() + 1);
-          endDate.setFullYear(endDate.getFullYear() + 1);
-          break;
+          case 'YEARLY':
+            startDate.setFullYear(startDate.getFullYear() + 1);
+            break;
 
-        default:
-          startDate.setDate(startDate.getDate() + 1);
-          endDate.setDate(endDate.getDate() + 1);
-          break;
-      }
+          default:
+            startDate.setDate(startDate.getDate() + 1);
+            break;
+        }
 
-      setStartingDate(startDate);
-      setEndingDate(endDate);
-      onChange?.(startDate, endDate, view);
+        return startDate;
+      });
+
+      setEndingDate((date) => {
+        if (!date) return date;
+        const endDate = new Date(date);
+
+        switch (view) {
+          case 'DAILY':
+            endDate.setDate(endDate.getDate() + 1);
+            break;
+
+          case 'MONTHLY':
+            endDate.setMonth(endDate.getMonth() + 1);
+            break;
+
+          case 'YEARLY':
+            endDate.setFullYear(endDate.getFullYear() + 1);
+            break;
+
+          default:
+            endDate.setDate(endDate.getDate() + 1);
+            break;
+        }
+
+        return endDate;
+      });
     }
-  }, [startingDate, endingDate, view, onChange]);
+  }, [startingDate, endingDate, view]);
 
   const handleDecreaseDate = useCallback(() => {
     if (startingDate && endingDate) {
-      const startDate = new Date(startingDate);
-      const endDate = new Date(endingDate);
+      setStartingDate((date) => {
+        if (!date) return date;
+        const startDate = new Date(date);
 
-      switch (view) {
-        case 'DAILY':
-          startDate.setDate(startDate.getDate() - 1);
-          endDate.setDate(endDate.getDate() - 1);
-          break;
+        switch (view) {
+          case 'DAILY':
+            startDate.setDate(startDate.getDate() - 1);
+            break;
 
-        case 'MONTHLY':
-          startDate.setMonth(startDate.getMonth() - 1);
-          endDate.setMonth(endDate.getMonth() - 1);
-          break;
+          case 'MONTHLY':
+            startDate.setMonth(startDate.getMonth() - 1);
+            break;
 
-        case 'YEARLY':
-          startDate.setFullYear(startDate.getFullYear() - 1);
-          endDate.setFullYear(endDate.getFullYear() - 1);
-          break;
+          case 'YEARLY':
+            startDate.setFullYear(startDate.getFullYear() - 1);
+            break;
 
-        default:
-          startDate.setDate(startDate.getDate() - 1);
-          endDate.setDate(endDate.getDate() - 1);
-          break;
-      }
+          default:
+            startDate.setDate(startDate.getDate() - 1);
+            break;
+        }
 
-      setStartingDate(startDate);
-      setEndingDate(endDate);
-      onChange?.(startDate, endDate, view);
+        return startDate;
+      });
+
+      setEndingDate((date) => {
+        if (!date) return date;
+        const endDate = new Date(date);
+
+        switch (view) {
+          case 'DAILY':
+            endDate.setDate(endDate.getDate() - 1);
+            break;
+
+          case 'MONTHLY':
+            endDate.setMonth(endDate.getMonth() - 1);
+            break;
+
+          case 'YEARLY':
+            endDate.setFullYear(endDate.getFullYear() - 1);
+            break;
+
+          default:
+            endDate.setDate(endDate.getDate() - 1);
+            break;
+        }
+
+        return endDate;
+      });
     }
-  }, [startingDate, endingDate, view, onChange]);
+  }, [startingDate, endingDate, view]);
 
   return (
     <div className="border p-2 rounded shadow">
@@ -187,7 +310,21 @@ const GraphWithDate = (props: GrapWithDateProps) => {
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center gap-5 pl-3">
             <Chip
-              label={`From: ${startingDate?.toDateString()} To: ${endingDate?.toDateString()}`}
+              label={`From: ${startingDate?.toLocaleDateString(
+                'default',
+                {
+                  month: view !== 'YEARLY' ? 'short' : undefined,
+                  day: view === 'DAILY' ? 'numeric' : undefined,
+                  year: 'numeric'
+                })
+              } To: ${endingDate?.toLocaleDateString(
+                'default',
+                {
+                  month: view !== 'YEARLY' ? 'short' : undefined,
+                  day: view === 'DAILY' ? 'numeric' : undefined,
+                  year: 'numeric'
+                })
+              }`}
               color="secondary"
               variant="outlined"
             />
@@ -217,10 +354,10 @@ const GraphWithDate = (props: GrapWithDateProps) => {
                 <ToggleButton value="YEARLY">Yearly</ToggleButton>
               </ToggleButtonGroup>
               <div>
-                <IconButton onClick={handleDecreaseDate}>
+                <IconButton onClick={handleDecreaseDate} onTouchEnd={handleDecreaseDate}>
                   <ChevronLeft/>
                 </IconButton>
-                <IconButton onClick={handleIncreaseDate}>
+                <IconButton onClick={handleIncreaseDate} onTouchEnd={handleIncreaseDate}>
                   <ChevronRight/>
                 </IconButton>
               </div>
@@ -228,10 +365,10 @@ const GraphWithDate = (props: GrapWithDateProps) => {
           </div>
           <div className="w-full h-full">
             {
-              filledReports?.length && dateArray?.length
+              !isRepHistoryLoading && dateArray.length
               ? (
                 <LineChart
-                  height={500}
+                  height={height ?? 500}
                   series={[
                     {
                       data: filledReports?.map?.(({ count }) => count),
@@ -245,7 +382,7 @@ const GraphWithDate = (props: GrapWithDateProps) => {
                     {
                       scaleType: 'point',
                       label: 'Date',
-                      data: dateArray.map((date) => date?.toLocaleDateString(
+                      data: dateArray?.map?.((date) => date?.toLocaleDateString(
                         'default',
                         {
                           month: view !== 'YEARLY' ? 'short' : undefined,
@@ -262,7 +399,11 @@ const GraphWithDate = (props: GrapWithDateProps) => {
                   }}
                 />
               )
-              : null
+              : (
+                <div className="w-full h-[500px]">
+                  <Loading />
+                </div>
+              )
             }
           </div>
         </div>
