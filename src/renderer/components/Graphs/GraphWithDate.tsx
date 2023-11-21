@@ -335,7 +335,7 @@ const GraphWithDate = (props: GrapWithDateProps) => {
                 variant="outlined"
                 onClick={handleReset}
               >
-                Current Year
+                Current
               </Button>
               <ToggleButtonGroup
                 exclusive

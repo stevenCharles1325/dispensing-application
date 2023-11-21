@@ -175,8 +175,9 @@ export default function Report() {
                 colors={colorsPalette}
                 sx={{
                   [`& .${pieArcLabelClasses.root}`]: {
-                    fill: 'rgba(0, 0, 0, 0.7)',
+                    fill: 'rgba(0, 0, 0, 0.6)',
                     fontWeight: 'bold',
+                    position: 'relative',
                   },
                 }}
                 margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
@@ -184,7 +185,7 @@ export default function Report() {
                 height={500}
                 series={[
                   {
-                    cornerRadius: 15,
+                    cornerRadius: 7,
                     arcLabel: (item) => `${item.label} (${item.value})`,
                     arcLabelMinAngle: 45,
                     data: trendCategories.map(({ category_name, frequency }) => ({
@@ -213,7 +214,7 @@ export default function Report() {
                 colors={colorsPalette}
                 sx={{
                   [`& .${pieArcLabelClasses.root}`]: {
-                    fill: 'rgba(0, 0, 0, 0.7)',
+                    fill: 'rgba(0, 0, 0, 0.6)',
                     fontWeight: 'bold',
                   },
                 }}
@@ -222,7 +223,7 @@ export default function Report() {
                 height={500}
                 series={[
                   {
-                    cornerRadius: 15,
+                    cornerRadius: 7,
                     arcLabel: (item) => `${item.label} (${item.value})`,
                     arcLabelMinAngle: 45,
                     data: trendProducts.map(({ product_name, frequency }) => ({
