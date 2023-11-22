@@ -19,6 +19,7 @@ import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IReport from 'App/interfaces/report/report.interface';
 import NotificationDTO from 'App/data-transfer-objects/notification.dto';
+import RoleDTO from 'App/data-transfer-objects/role.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -117,9 +118,24 @@ const userHandler = {
   archiveUser: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('user:archive', id),
 
-  deleteUser: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteUser: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('user:delete', id),
 };
+
+/* ================================
++
++         ROLE EVENT HANDLER
++
++ ================================ */
+const roleHandler = {
+  getRoles: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<RoleDTO>>> =>
+    ipcRenderer.invoke('role:show', payload, page, total),
+};
+
 
 /* ================================
 +
@@ -409,6 +425,7 @@ contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
 contextBridge.exposeInMainWorld('user', userHandler);
+contextBridge.exposeInMainWorld('role', roleHandler);
 contextBridge.exposeInMainWorld('item', itemHandler);
 contextBridge.exposeInMainWorld('brand', brandHandler);
 contextBridge.exposeInMainWorld('image', imageHandler);
@@ -425,6 +442,7 @@ export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
 export type UserHandler = typeof userHandler;
+export type RoleHandler = typeof roleHandler;
 export type ItemHandler = typeof itemHandler;
 export type ImageHandler = typeof imageHandler;
 export type BrandHandler = typeof brandHandler;

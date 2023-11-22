@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Autocomplete, TextField, createFilterOptions } from '@mui/material';
 
 interface CustomAutoCompleteProps {
+  disableAdd?: boolean;
   options: any[];
   label: string;
   value?: any;
@@ -24,6 +25,7 @@ interface OptionType {
 const filter = createFilterOptions<OptionType>();
 
 export default function CustomAutoComplete({
+  disableAdd = false,
   label,
   value: providedValue = null,
   options,
@@ -52,7 +54,9 @@ export default function CustomAutoComplete({
           if (
             !options.find(({ name }) => name === newValue)
           ) {
-            onAdd?.(newValue);
+            if (!disableAdd) {
+              onAdd?.(newValue);
+            }
           } else {
             onChange?.(newValue);
           }
@@ -61,7 +65,9 @@ export default function CustomAutoComplete({
             name: newValue,
           });
         } else if (newValue && newValue.inputValue) {
-          onAdd?.(newValue.inputValue);
+          if (!disableAdd) {
+            onAdd?.(newValue.inputValue);
+          }
 
           // Create a new value from the user input
           setValue({

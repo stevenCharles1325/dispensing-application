@@ -65,6 +65,12 @@ export class User1692175684026 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: 'phone_number',
+            type: 'varchar',
+            isUnique: false,
+            isNullable: false,
+          },
+          {
             name: 'birth_date',
             type: 'datetime',
             isNullable: false,
@@ -75,8 +81,10 @@ export class User1692175684026 implements MigrationInterface {
             isNullable: false,
           },
           {
-            name: 'phone_number',
+            name: 'status',
             type: 'varchar',
+            enum: ['active', 'deactivated'],
+            default: "'active'",
             isNullable: false,
           },
           {

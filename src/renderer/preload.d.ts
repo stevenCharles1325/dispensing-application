@@ -11,6 +11,7 @@ import {
   PaymentHandler,
   PeerHandler,
   ReportHandler,
+  RoleHandler,
   SupplierHandler,
   UserHandler,
   ValidationHandler,
@@ -34,6 +35,7 @@ declare global {
     notif: NotifHandler;
     validation: ValidationHandler;
     export: ExportHandler;
+    role: RoleHandler;
   }
 }
 

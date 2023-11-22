@@ -94,6 +94,7 @@ export default class MainSeeder implements Seeder {
         address: 'sample address 123',
         phone_number: '+639123123123',
         notification_status: 'on',
+        status: 'active',
       });
 
       user.role = ownerRole;

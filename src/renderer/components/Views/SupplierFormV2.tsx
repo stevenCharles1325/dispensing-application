@@ -1,15 +1,15 @@
 import { AddCircleOutline, Close, DeleteOutlineOutlined, EditOutlined } from "@mui/icons-material";
-import { Autocomplete, Button, Chip, Dialog, DialogTitle, IconButton, TextField } from "@mui/material";
+import { Autocomplete, Button, Chip, Dialog, DialogTitle, IconButton, Slide, TextField } from "@mui/material";
+import { TransitionProps } from "@mui/material/transitions";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useQuery } from "@tanstack/react-query";
-import BrandDTO from "App/data-transfer-objects/brand.dto";
-import CategoryDTO from "App/data-transfer-objects/category.dto";
 import SupplierDTO from "App/data-transfer-objects/supplier.dto";
 import IPagination from "App/interfaces/pagination/pagination.interface";
 import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IPOSValidationError from "App/interfaces/pos/pos.validation-error.interface";
 import supplierStatuses from "Main/data/defaults/statuses/supplier";
 import useAlert from "UI/hooks/useAlert";
+import React from "react";
 import { useCallback, useState } from "react";
 
 const columns: Array<GridColDef> = [
@@ -50,6 +50,15 @@ const columns: Array<GridColDef> = [
     ),
   },
 ];
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const getSuppliers = async (
   page = 1,
@@ -240,6 +249,7 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
         open={Boolean(modalAction)}
         onClose={handleCloseModal}
         maxWidth="xl"
+        TransitionComponent={Transition}
       >
         <div className="w-fit h-fit p-5 flex flex-col gap-5">
           <DialogTitle style={{ paddingLeft: 5 }}>

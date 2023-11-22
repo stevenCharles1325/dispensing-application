@@ -37,7 +37,7 @@ export default class RoleShowEvent implements IEvent {
         }
 
         if (payload === 'all') {
-          return await usePagination(RoleRepository, page);
+          return await usePagination(roleQuery, page);
         }
 
         if (payload instanceof Object && !(payload instanceof Array)) {

@@ -8,6 +8,7 @@ import {
   IconButton,
   FormHelperText,
   InputProps,
+  InputBasePropsSizeOverrides,
 } from '@mui/material';
 import React, { useState } from 'react';
 
@@ -23,6 +24,7 @@ interface PasswordInputProps extends InputProps {
 }
 
 export default function PasswordInput({
+  size,
   label,
   error,
   value,
@@ -43,6 +45,7 @@ export default function PasswordInput({
   return (
     <FormControl fullWidth color="secondary" variant="outlined">
       <InputLabel
+        size={size === 'medium' ? 'normal' : size}
         htmlFor="outlined-adornment-password"
         color={error ? 'error' : 'secondary'}
         sx={{
@@ -54,6 +57,7 @@ export default function PasswordInput({
         {label}
       </InputLabel>
       <OutlinedInput
+        size={size as ('small' | 'medium') ?? 'medium'}
         color="secondary"
         id="outlined-adornment-password"
         type={showPassword ? 'text' : 'password'}
@@ -76,7 +80,7 @@ export default function PasswordInput({
         onKeyDown={onKeyDown}
       />
       {helperText?.length ? (
-        <FormHelperText error>{helperText}</FormHelperText>
+        <FormHelperText error={error}>{helperText}</FormHelperText>
       ) : null}
     </FormControl>
   );

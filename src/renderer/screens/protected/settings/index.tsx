@@ -5,7 +5,8 @@ import {
   Divider,
   Dialog,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Slide
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import useAlert from "UI/hooks/useAlert";
@@ -13,6 +14,8 @@ import useSearch from "UI/hooks/useSearch";
 import useAppDrive from "UI/hooks/useAppDrive";
 import ProductDetailsForm from "UI/components/Views/ProductDetailsForm";
 import SupplierFormV2 from "UI/components/Views/SupplierFormV2";
+import { TransitionProps } from "@mui/material/transitions";
+import React from "react";
 
 type ModalNames =
   | 'CATEGORIES'
@@ -20,6 +23,15 @@ type ModalNames =
   | 'SUPPLIERS'
   | 'BUSINESS DETAILS'
   | null;
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export default function Settings () {
   const theme = useTheme();
@@ -163,6 +175,7 @@ export default function Settings () {
         open={isModalOpen}
         onClose={handleCloseModal}
         maxWidth="xl"
+        TransitionComponent={Transition}
       >
         <div className="w-fit h-fit">
           {

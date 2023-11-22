@@ -31,6 +31,14 @@ import type { Role } from './role.model';
 
 @Entity('users')
 export class User {
+  @AfterLoad()
+  async getRole() {
+    const RoleRepository = global.datasource.getRepository('roles');
+    const role = await RoleRepository.findOneByOrFail({ id: this.role_id });
+
+    this.role = role as Role;
+  }
+
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -50,6 +58,9 @@ export class User {
 
   @Column({ default: 'on', nullable: false })
   notification_status: string;
+
+  @Column({ default: 'active', nullable: false })
+  status: string;
 
   @Column({
     transformer: {

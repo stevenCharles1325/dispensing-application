@@ -7,6 +7,7 @@ export default interface UserDTO {
   system_id: number;
   role_id: number;
   notification_status?: 'on' | 'off';
+  status?: 'active' | 'deactivated';
   first_name: string;
   last_name: string;
   birth_date: Date;
