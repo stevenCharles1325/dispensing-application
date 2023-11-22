@@ -58,6 +58,8 @@ import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import ChevronLeftOutlinedIcon from '@mui/icons-material/ChevronLeftOutlined';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -83,6 +85,18 @@ export const navigationRoutes: INavButtonprops[] = [
     label: 'Reports',
     redirectPath: '/reports',
     icon: <AssessmentOutlinedIcon />,
+  },
+  {
+    id: 4,
+    label: 'Employee-management',
+    redirectPath: '/employee-management',
+    icon: <PeopleOutlineOutlinedIcon />,
+  },
+  {
+    id: 5,
+    label: 'Settings',
+    redirectPath: '/settings',
+    icon: <SettingsOutlinedIcon />,
   },
 ];
 

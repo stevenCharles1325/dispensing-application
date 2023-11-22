@@ -78,7 +78,7 @@ export default class ItemDeleteEvent implements IEvent {
 
       if (error?.code === 19) {
         return {
-          errors: ['cannot delete item(s) that has/have orders'],
+          errors: ['cannot delete product(s) that has/have orders'],
           code: 'SYS_ERR',
           status: 'ERROR',
         } as unknown as IResponse<IPOSError[]>;

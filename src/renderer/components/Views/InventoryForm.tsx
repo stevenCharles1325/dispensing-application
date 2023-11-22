@@ -415,6 +415,7 @@ export default function InventoryForm({
           <br />
           <div className="w-full flex flex-wrap gap-7">
             <TextField
+              color="secondary"
               label="Item name"
               required
               value={form.name}
@@ -433,6 +434,7 @@ export default function InventoryForm({
               label="Stock Keeping Unit (SKU)"
               required
               value={form.sku}
+              color="secondary"
               onChange={(event) => {
                 dispatch({
                   type: 'sku',
@@ -449,6 +451,7 @@ export default function InventoryForm({
             />
             <TextField
               label="Barcode"
+              color="secondary"
               value={form.barcode}
               onChange={(event) => {
                 dispatch({ type: 'barcode', payload: event.target.value });
@@ -500,7 +503,7 @@ export default function InventoryForm({
             <Autocomplete
               size="small"
               options={itemStatuses}
-              required
+              color="secondary"
               value={form.status}
               onChange={(_, value) => {
                 dispatch({
@@ -514,6 +517,8 @@ export default function InventoryForm({
               renderInput={(params) => (
                 <TextField
                   {...params}
+                  required
+                  color="secondary"
                   label="Status"
                   helperText={errors.status}
                   error={Boolean(errors.status)}
@@ -522,6 +527,7 @@ export default function InventoryForm({
             />
             <TextField
               label="Description"
+              color="secondary"
               value={form.description}
               onChange={(event) => {
                 dispatch({
@@ -549,6 +555,7 @@ export default function InventoryForm({
           <div className="w-full flex flex-wrap gap-5">
             <TextField
               required
+              color="secondary"
               label="Cost Price (Peso)"
               value={form.cost_price}
               onChange={(event) => {
@@ -570,6 +577,7 @@ export default function InventoryForm({
             />
             <TextField
               required
+              color="secondary"
               label="Selling Price (Peso)"
               value={form.selling_price}
               onChange={(event) => {
@@ -590,6 +598,7 @@ export default function InventoryForm({
               error={Boolean(errors.selling_price)}
             />
             <TextField
+              color="secondary"
               label="Tax Rate"
               value={form.tax_rate}
               type="number"
@@ -620,6 +629,7 @@ export default function InventoryForm({
           <div className="w-full flex flex-wrap gap-5">
             <TextField
               required
+              color="secondary"
               label="Stock Quantity"
               value={form.stock_quantity}
               type="number"
@@ -642,6 +652,7 @@ export default function InventoryForm({
             />
             <Autocomplete
               size="small"
+              color="secondary"
               options={measurements}
               value={form.unit_of_measurement}
               onChange={(_, value) => {
@@ -657,6 +668,7 @@ export default function InventoryForm({
                 <TextField
                   {...params}
                   required
+                  color="secondary"
                   label="Unit of measurement"
                   helperText={errors.unit_of_measurement}
                   error={Boolean(errors.unit_of_measurement)}
@@ -736,13 +748,6 @@ export default function InventoryForm({
                   value={supplierToggle}
                   exclusive
                   onChange={(_, supplierAction) => {
-                    if (supplierAction === 'add-existing' && !suppliers.length) {
-                      return displayAlert?.(
-                        'No existing supplier is available',
-                        'error'
-                      );
-                    }
-
                     if (supplierAction) {
                       handleSupplierToggle(supplierAction);
                     }
@@ -763,8 +768,13 @@ export default function InventoryForm({
                   <h5>Select Existing Supplier</h5>
                   <Autocomplete
                     size="small"
-                    required
                     options={suppliers}
+                    getOptionDisabled={(option) => option.status !== 'active'}
+                    renderOption={(props, option) => (
+                      <li {...props}>
+                        {`${option.email} ${option.status !== 'active' ? `(${option.status})` : ''}`}
+                      </li>
+                    )}
                     getOptionLabel={(option) => option.email}
                     value={
                       suppliers.find(({ id }) => id === form.supplier_id) ??
@@ -783,6 +793,7 @@ export default function InventoryForm({
                     renderInput={(params) => (
                       <TextField
                         {...params}
+                        color="secondary"
                         label="Supplier"
                         helperText={errors.supplier_id}
                         error={Boolean(errors.supplier_id)}
@@ -806,11 +817,11 @@ export default function InventoryForm({
           </div>
         </div>
         <div className="grow h-[50px] flex items-end justify-end gap-5">
-          <Button variant="outlined" onClick={onClose}>
+          <Button variant="text" color="error" onClick={onClose}>
             Close
           </Button>
           <Button
-            variant="contained"
+            variant="outlined"
             onClick={action === 'create' ? handleCreateItem : handleUpdateItem}
           >
             {action}

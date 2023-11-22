@@ -42,6 +42,13 @@ export class User1692175684026 implements MigrationInterface {
             isNullable: true,
           },
           {
+            name: 'notification_status',
+            type: 'varchar',
+            enum: ['on', 'off'],
+            default: "'on'",
+            isNullable: true,
+          },
+          {
             name: 'first_name',
             type: 'varchar',
             isNullable: false,

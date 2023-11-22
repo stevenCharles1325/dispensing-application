@@ -38,6 +38,7 @@ export default async function authenticate(
           first_name: user.first_name,
           last_name: user.last_name,
           full_name: user.fullName(),
+          notification_status: user.notification_status,
           phone_number: user.phone_number,
           role: user.role,
         };

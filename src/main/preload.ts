@@ -289,18 +289,18 @@ const supplierHandler = {
   > => ipcRenderer.invoke('supplier:create', payload),
 
   updateSupplier: async (
-    id: number,
+    id: string,
     payload: Partial<SupplierDTO>
   ): Promise<IResponse<string[] | IPOSError[] | SupplierDTO>> =>
     ipcRenderer.invoke('supplier:update', id, payload),
 
   archiveSupplier: async (
-    id: number
+    id: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('supplier:archive', id),
 
   deleteSupplier: async (
-    id: number | number[]
+    id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('supplier:delete', id),
 };

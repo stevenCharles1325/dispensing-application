@@ -18,8 +18,8 @@ export default function Validate() {
   }, [navigate, value]);
 
   return (
-    <div className="w-screen h-screen bg-transparent flex justify-center items-center shadow-inner">
-      <div className="w-[300px] h-fit p-5 bg-transparent border rounded flex flex-col gap-5 items-center shadow-lg">
+    <div className="w-screen h-screen flex justify-center items-center shadow-inner">
+      <div className="w-[300px] h-fit p-5 bg-white border border-fuchsia-500 rounded flex flex-col gap-5 items-center shadow-lg">
         <TextField
           required
           value={value}

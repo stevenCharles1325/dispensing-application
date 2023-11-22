@@ -10,7 +10,7 @@ type Callback = (callback: (data: ImageDTO[]) => void) => void
 
 interface IAppDriveContext {
   subscribe: (id: string | number) => [
-    open: () => void,
+    open: (editMode?: boolean) => void,
     listener: Callback,
   ];
   setMultiple: (value: boolean) => void;
@@ -26,10 +26,12 @@ export default function AppDriveProvider({
   const [requestingId, setRequestingId] = useState<number | string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [multiple, setMultiple] = useState<boolean>(true);
+  const [editMode, setEditMode] = useState(false);
 
-  const open = (id: number | string) => {
+  const open = (id: number | string, editMode: boolean = false) => {
     setRequestingId(id);
     setIsOpen(true);
+    setEditMode(editMode);
   };
   const close = () => {
     setRequestingId(null);
@@ -76,6 +78,7 @@ export default function AppDriveProvider({
         multiple={multiple}
         open={isOpen}
         onClose={close}
+        editMode={editMode}
         onSelect={(object) => {
           if (requestingId) {
             eventEmitter.emit(requestingId.toString(), object);

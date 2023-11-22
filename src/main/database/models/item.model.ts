@@ -7,7 +7,6 @@ import {
   ManyToOne,
   JoinColumn,
   BeforeUpdate,
-  AfterUpdate,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,

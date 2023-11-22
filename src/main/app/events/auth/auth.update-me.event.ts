@@ -92,6 +92,7 @@ export default class AuthUpdateMeEvent implements IEvent {
           last_name: data.last_name,
           full_name: data.fullName(),
           phone_number: data.phone_number,
+          notification_status: data.notification_status,
           role: data.role,
         };
 

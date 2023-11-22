@@ -6,6 +6,7 @@ export default interface UserDTO {
   lead_id: number | null;
   system_id: number;
   role_id: number;
+  notification_status?: 'on' | 'off';
   first_name: string;
   last_name: string;
   birth_date: Date;

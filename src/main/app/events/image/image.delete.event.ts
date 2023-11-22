@@ -74,6 +74,14 @@ export default class ImageDeleteEvent implements IEvent {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
+      if (error?.code === 19) {
+        return {
+          errors: ['cannot delete an image that has attached product or user'],
+          code: 'SYS_ERR',
+          status: 'ERROR',
+        } as unknown as IResponse<IPOSError[]>;
+      }
+
       return {
         errors: [error],
         code: 'SYS_ERR',

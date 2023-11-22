@@ -45,6 +45,7 @@ export default function CustomAutoComplete({
   return (
     <Autocomplete
       options={options}
+      color="secondary"
       value={value}
       onChange={(event, newValue) => {
         if (typeof newValue === 'string') {
@@ -110,6 +111,7 @@ export default function CustomAutoComplete({
         <TextField
           {...params}
           required={required}
+          color="secondary"
           size="small"
           label={label}
           helperText={helperText}

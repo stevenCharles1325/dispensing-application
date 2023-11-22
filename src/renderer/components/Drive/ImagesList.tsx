@@ -20,6 +20,7 @@ import Loading from '../Loading';
 import useAlert from 'UI/hooks/useAlert';
 
 interface MainMansoryProps {
+  editMode: boolean;
   images: ImageDTO[];
   totalSize: number;
   selectedIds: number[];
@@ -42,6 +43,7 @@ const defaultHeight = 370;
 const defaultWidth = columnWidth;
 
 function MainMansory({
+  editMode,
   multiple,
   selectedIds,
   onPreviewImage,
@@ -122,23 +124,27 @@ function MainMansory({
                 'Please try again'
               }`}
               actionIcon={
-                <IconButton
-                  sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
-                  aria-label={`info about ${image.name}`}
-                  onClick={() => onSelectImage?.(image.id)}
-                  disabled={Boolean(
-                    !multiple &&
-                      selectedIds.length >= 1 &&
-                      selectedIds[0] !== image.id
-                  )}
-                  title={selectedIds[0] !== image.id ? 'Select' : 'Deselect'}
-                >
-                  {selectedIds.includes(image.id) ? (
-                    <CheckBoxIcon />
-                  ) : (
-                    <CheckBoxOutlineBlankIcon />
-                  )}
-                </IconButton>
+                editMode
+                ? null
+                : (
+                  <IconButton
+                    sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
+                    aria-label={`info about ${image.name}`}
+                    onClick={() => onSelectImage?.(image.id)}
+                    disabled={Boolean(
+                      !multiple &&
+                        selectedIds.length >= 1 &&
+                        selectedIds[0] !== image.id
+                    )}
+                    title={selectedIds[0] !== image.id ? 'Select' : 'Deselect'}
+                  >
+                    {selectedIds.includes(image.id) ? (
+                      <CheckBoxIcon />
+                    ) : (
+                      <CheckBoxOutlineBlankIcon />
+                    )}
+                  </IconButton>
+                )
               }
             />
           </div>
@@ -171,6 +177,7 @@ function MainMansory({
 }
 
 export default function AppImageList({
+  editMode,
   images,
   loading,
   multiple,
@@ -194,6 +201,7 @@ export default function AppImageList({
   return (
     <div className="overflow-auto" style={{ height: '70vh' }}>
       <MainMansory
+        editMode={editMode}
         images={images}
         totalSize={images.length}
         onLoad={(count) =>

@@ -17,6 +17,8 @@ import Logs from './screens/protected/history';
 import Report from './screens/protected/report';
 import ValidatorLayout from './components/Layouts/ValidatorLayout';
 import Validate from './screens/gate/validate';
+import EmployeeManagement from './screens/protected/employee-management';
+import Settings from './screens/protected/settings';
 
 const router = createHashRouter(
   createRoutesFromElements(
@@ -38,6 +40,8 @@ const router = createHashRouter(
           <Route path="inventory" element={<Inventory />} />
           <Route path="logs" element={<Logs />} />
           <Route path="reports" element={<Report />} />
+          <Route path="employee-management" element={<EmployeeManagement />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         <Route path="/sign-in" element={<SignIn />} />

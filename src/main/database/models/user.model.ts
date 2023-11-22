@@ -48,6 +48,9 @@ export class User {
   @Column({ nullable: true })
   image_url: string;
 
+  @Column({ nullable: true })
+  notification_status: string;
+
   @Column({
     transformer: {
       to: (value: string) => value.toLowerCase(),

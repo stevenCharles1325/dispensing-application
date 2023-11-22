@@ -43,6 +43,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 
 interface AppDriveProps {
   multiple: boolean;
+  editMode: boolean;
   open: boolean;
   onClose: () => void;
   onSelect: (objects: Array<Record<string, any>>) => void;
@@ -91,6 +92,7 @@ const getAllImages = async (
 
 export default function AppDrive({
   multiple = true,
+  editMode = false,
   open,
   onClose,
   onSelect,
@@ -242,6 +244,7 @@ export default function AppDrive({
               currentTab === 0 ? (
                 <>
                   <AppImageList
+                    editMode={editMode}
                     images={images}
                     selectedIds={selectedIds}
                     loading={isLoading}
@@ -294,16 +297,22 @@ export default function AppDrive({
           <Button onClick={handleOnClose} color="error">
             Close
           </Button>
-          <Button
-            disabled={!selectedImages.length}
-            onClick={() => {
-              onSelect(selectedImages);
-              handleOnClose();
-            }}
-            color="primary"
-          >
-            {multiple ? `Select (${selectedImages.length})` : 'Select'}
-          </Button>
+          {
+            editMode
+            ? null
+            : (
+              <Button
+                disabled={!selectedImages.length}
+                onClick={() => {
+                  onSelect(selectedImages);
+                  handleOnClose();
+                }}
+                color="primary"
+              >
+                {multiple ? `Select (${selectedImages.length})` : 'Select'}
+              </Button>
+            )
+          }
         </DialogActions>
       </Dialog>
 
