@@ -46,7 +46,7 @@ export class User1692175684026 implements MigrationInterface {
             type: 'varchar',
             enum: ['on', 'off'],
             default: "'on'",
-            isNullable: true,
+            isNullable: false,
           },
           {
             name: 'first_name',

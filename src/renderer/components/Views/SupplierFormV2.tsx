@@ -92,6 +92,7 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
     setSelectedIds([]);
     setModalAction(null);
     setForm({ status: 'active' });
+    setErrors({});
   }
 
   const { data, refetch } = useQuery({
@@ -280,6 +281,7 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
               required
               size="small"
               label="Phone number"
+              placeholder="+639123456798"
               value={form.phone_number}
               color="secondary"
               onChange={handleUpdateForm('phone_number')}
@@ -312,6 +314,7 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
               required
               size="small"
               label="Contact Phone number"
+              placeholder="+639123456798"
               value={form.contact_phone_number}
               color="secondary"
               onChange={handleUpdateForm('contact_phone_number')}

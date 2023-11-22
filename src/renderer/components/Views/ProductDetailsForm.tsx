@@ -75,6 +75,7 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
     setModalAction(null);
     setName('');
     setDescription('');
+    setError(null);
   }
 
   const { data, refetch } = useQuery({

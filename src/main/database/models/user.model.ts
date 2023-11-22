@@ -48,7 +48,7 @@ export class User {
   @Column({ nullable: true })
   image_url: string;
 
-  @Column({ nullable: true })
+  @Column({ default: 'on', nullable: false })
   notification_status: string;
 
   @Column({

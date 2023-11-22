@@ -93,6 +93,7 @@ export default class MainSeeder implements Seeder {
         birth_date: new Date(),
         address: 'sample address 123',
         phone_number: '+639123123123',
+        notification_status: 'on',
       });
 
       user.role = ownerRole;
