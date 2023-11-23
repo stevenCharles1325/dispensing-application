@@ -38,7 +38,10 @@ export default class PermissionShowEvent implements IEvent {
         }
 
         if (payload === 'all') {
-          return await usePagination(permissionQuery, page);
+          return await usePagination(permissionQuery, page, take, {
+            fieldName: 'group_name',
+            order: 'ASC',
+          });
         }
 
         if (payload instanceof Object && !(payload instanceof Array)) {
@@ -57,7 +60,10 @@ export default class PermissionShowEvent implements IEvent {
             }
           }
 
-          return await usePagination<PermissionDTO>(permissionQuery, page);
+          return await usePagination<PermissionDTO>(permissionQuery, page, take, {
+            fieldName: 'group_name',
+            order: 'ASC',
+          });
         }
 
         return {

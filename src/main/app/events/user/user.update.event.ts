@@ -7,6 +7,7 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
+import RoleRepository from 'App/repositories/role.repository';
 import UserRepository from 'App/repositories/user.repository';
 import { User } from 'Main/database/models/user.model';
 import { Bull } from 'Main/jobs';
@@ -33,6 +34,9 @@ export default class UserDeleteEvent implements IEvent {
         const _user = await UserRepository.findOneByOrFail({
           id,
         });
+        const role = await RoleRepository.findOneByOrFail({
+          id: userUpdate.role_id,
+        });
         const updatedUser = UserRepository.merge(_user, userUpdate);
         const errors = await validator(updatedUser);
 
@@ -44,6 +48,7 @@ export default class UserDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
+        updatedUser.role = role;
         const data: User = await UserRepository.save(updatedUser);
 
         await Bull('AUDIT_JOB', {

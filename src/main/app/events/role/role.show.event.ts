@@ -37,7 +37,9 @@ export default class RoleShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const roleQuery = RoleRepository.createQueryBuilder();
+        const roleQuery = RoleRepository.createQueryBuilder(
+          'role'
+        ).leftJoinAndSelect('role.permissions', 'permissions');;
 
         if (take !== 'max') {
           roleQuery.take(take).skip(skip);
@@ -58,11 +60,11 @@ export default class RoleShowEvent implements IEvent {
 
             if (propertyFind instanceof Array) {
               roleQuery
-                .where(`${propertyName} IN (:...${propertyName})`)
+                .where(`role.${propertyName} IN (:...${propertyName})`)
                 .setParameter(propertyName, propertyFind);
             } else {
               roleQuery
-                .where(`${propertyName} LIKE :${propertyName}`)
+                .where(`role.${propertyName} LIKE :${propertyName}`)
                 .setParameter(propertyName, `%${propertyFind}%`);
             }
           }

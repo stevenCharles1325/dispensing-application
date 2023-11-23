@@ -86,7 +86,16 @@ const getUsers = async (
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
-    throw new Error(errorMessage);
+    console.log(errorMessage);
+
+    return {
+      data: [],
+      total: 0,
+      totalPage: 0,
+      currentPage: 0,
+      previousPage: 0,
+      nextPage: 0,
+    }
   }
 
   return res.data as IPagination<UserDTO>;
@@ -100,7 +109,16 @@ const getRoles = async (
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
-    throw new Error(errorMessage);
+    console.log(errorMessage);
+
+    return {
+      data: [],
+      total: 0,
+      totalPage: 0,
+      currentPage: 0,
+      previousPage: 0,
+      nextPage: 0,
+    }
   }
 
   return res.data as IPagination<RoleDTO>;
@@ -153,15 +171,6 @@ export default function EmployeeManagement () {
       }));
     }
   });
-
-  const handleDateFormat = (date: string | Date | undefined) => {
-    if (!date) return '';
-
-    const jsDate = new Date(date);
-
-    console.log(`${jsDate.getFullYear()}-${jsDate.getMonth() + 1}-${jsDate.getDate().toString().padStart(2, '0')}`);
-    return `${jsDate.getFullYear()}-${jsDate.getMonth() + 1}-${jsDate.getDate().toString().padStart(2, '0')}`;
-  }
 
   const handleUpdateForm =
     (key: string) =>
@@ -266,8 +275,6 @@ export default function EmployeeManagement () {
   useEffect(() => {
     setPlaceHolder?.('Search for employee name');
   }, [setPlaceHolder]);
-
-  console.log(form);
 
   return (
     <>

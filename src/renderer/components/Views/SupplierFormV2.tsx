@@ -68,7 +68,16 @@ const getSuppliers = async (
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
-    throw new Error(errorMessage);
+    console.log(errorMessage);
+
+    return {
+      data: [],
+      total: 0,
+      totalPage: 0,
+      currentPage: 0,
+      previousPage: 0,
+      nextPage: 0,
+    }
   }
 
   return res.data as IPagination<SupplierDTO>;
@@ -117,12 +126,12 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
   const selectedItem = items?.find(({ id }) => id === selectedIds?.[0]) ?? null;
 
   const handleAddNewItem = () => {
-    console.log('Adding new item');
+    console.log('Adding new supplier');
     setModalAction('create');
   };
 
   const handleEditSelectedItem = useCallback(() => {
-    console.log('Updating item');
+    console.log('Updating supplier');
     setModalAction('update');
 
     console.log(selectedItem);

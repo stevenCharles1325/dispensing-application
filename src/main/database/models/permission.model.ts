@@ -28,6 +28,9 @@ export class Permission {
   @MinLength(5, { message: ValidationMessage.minLength })
   kebab: string;
 
+  @Column()
+  group_name: string;
+
   @Column({ nullable: true })
   description: string;
 

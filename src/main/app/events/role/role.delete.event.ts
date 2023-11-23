@@ -26,6 +26,18 @@ export default class RoleDeleteEvent implements IEvent {
       const requesterHasPermission =
         eventData.user.hasPermission?.('delete-role');
 
+      const defaultRoleIds = [1, 2, 3, 4];
+      if (
+        (typeof payload === 'number' && defaultRoleIds.includes(payload)) ||
+        (Array.isArray(payload) && payload.some((id ) => defaultRoleIds.includes(id)))
+       ) {
+        return {
+          errors: ['You are not allowed to delete a default Role.'],
+          code: 'SYS_ERR',
+          status: 'ERROR',
+        } as unknown as IResponse<string[]>;
+      }
+
       if (requesterHasPermission) {
         const roleRepo = SqliteDataSource.getRepository(Role);
         const data = await roleRepo.delete(payload);
@@ -77,6 +89,14 @@ export default class RoleDeleteEvent implements IEvent {
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
+
+      if (error?.code === 19) {
+        return {
+          errors: ['cannot delete a brand that has attached employee'],
+          code: 'SYS_ERR',
+          status: 'ERROR',
+        } as unknown as IResponse<IPOSError[]>;
+      }
 
       return {
         errors: [error],

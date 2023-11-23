@@ -10,8 +10,10 @@ import {
   NotifHandler,
   PaymentHandler,
   PeerHandler,
+  PermissionHandler,
   ReportHandler,
   RoleHandler,
+  StorageHandler,
   SupplierHandler,
   UserHandler,
   ValidationHandler,
@@ -20,6 +22,7 @@ import {
 declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
+    storage: StorageHandler;
     main: MainHandler;
     auth: AuthHandler;
     peer: PeerHandler;
@@ -36,6 +39,7 @@ declare global {
     validation: ValidationHandler;
     export: ExportHandler;
     role: RoleHandler;
+    permission: PermissionHandler;
   }
 }
 

@@ -6,9 +6,11 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
+import PermissionRepository from 'App/repositories/permission.repository';
 import RoleRepository from 'App/repositories/role.repository';
 import { Role } from 'Main/database/models/role.model';
 import { Bull } from 'Main/jobs';
+import { In } from "typeorm"
 
 export default class UserDeleteEvent implements IEvent {
   public channel: string = 'role:update';
@@ -24,6 +26,7 @@ export default class UserDeleteEvent implements IEvent {
       const { user } = eventData;
       const id = eventData.payload[0];
       const roleUpdate: Role = eventData.payload[1];
+      const permissionIds: number[] = eventData.payload[2] ?? [];
 
       const requesterHasPermission = user.hasPermission?.('update-role');
 
@@ -40,6 +43,13 @@ export default class UserDeleteEvent implements IEvent {
             code: 'VALIDATION_ERR',
             status: 'ERROR',
           } as unknown as IResponse<IPOSValidationError[]>;
+        }
+
+        if (permissionIds.length) {
+          const permissions = await PermissionRepository.findBy({
+            id: In(permissionIds),
+          });
+          updatedRole.permissions = permissions;
         }
 
         await Bull('AUDIT_JOB', {

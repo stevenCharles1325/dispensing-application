@@ -34,7 +34,16 @@ const getBrands = async (
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
-    throw new Error(errorMessage);
+    console.log(errorMessage);
+
+    return {
+      data: [],
+      total: 0,
+      totalPage: 0,
+      currentPage: 0,
+      previousPage: 0,
+      nextPage: 0,
+    }
   }
 
   return res.data as IPagination<BrandDTO>;
@@ -48,7 +57,16 @@ const getCategories = async (
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
-    throw new Error(errorMessage);
+    console.log(errorMessage);
+
+    return {
+      data: [],
+      total: 0,
+      totalPage: 0,
+      currentPage: 0,
+      previousPage: 0,
+      nextPage: 0,
+    }
   }
 
   return res.data as IPagination<CategoryDTO>;

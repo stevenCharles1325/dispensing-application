@@ -20,8 +20,24 @@ import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IReport from 'App/interfaces/report/report.interface';
 import NotificationDTO from 'App/data-transfer-objects/notification.dto';
 import RoleDTO from 'App/data-transfer-objects/role.dto';
+import PermissionDTO from 'App/data-transfer-objects/permission.dto';
+import { PermissionsKebabType } from './data/defaults/permissions';
 
 export type Channels = 'ipc-pos';
+
+
+/* ================================
++
++         MAIN EVENT HANDLER
++
++ ================================ */
+const storageHandler = {
+  get: (key: string): any => ipcRenderer.sendSync('storage:get', key),
+  set: (key: string, value: any): any => ipcRenderer.sendSync('storage:set', key, value),
+  remove: (key: string): any => ipcRenderer.sendSync('storage:remove', key),
+  clear: (): any => ipcRenderer.sendSync('storage:clear'),
+};
+
 
 /* ================================
 +
@@ -134,8 +150,46 @@ const roleHandler = {
     total: number | 'max' = 15
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<RoleDTO>>> =>
     ipcRenderer.invoke('role:show', payload, page, total),
+
+  createRole: async (
+    payload: RoleDTO,
+    permissionIds: number[],
+  ): Promise<
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | RoleDTO[]>
+  > => ipcRenderer.invoke('role:create', payload, permissionIds),
+
+  updateRole: async (
+    id: number,
+    payload: Partial<RoleDTO>,
+    permissionIds: number[],
+  ): Promise<IResponse<string[] | IPOSError[] | UserDTO>> =>
+    ipcRenderer.invoke('role:update', id, payload, permissionIds),
+
+  archiveRole: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('role:archive', id),
+
+  deleteRole: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('role:delete', id),
 };
 
+/* ================================
++
++     PERMISSIONS EVENT HANDLER
++
++ ================================ */
+const permissionHandler = {
+  getPermissions: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<PermissionDTO>>> =>
+    ipcRenderer.invoke('permission:show', payload, page, total),
+
+  hasPermission: (
+    ...permissions: PermissionsKebabType[]
+  ): Promise<IResponse<string[] | IPOSError[] | Boolean>> =>
+    ipcRenderer.invoke('permission:user-check', ...permissions),
+};
 
 /* ================================
 +
@@ -421,11 +475,13 @@ const exportHandler = {
 };
 
 // EXPOSING HANDLERS
+contextBridge.exposeInMainWorld('storage', storageHandler);
 contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
 contextBridge.exposeInMainWorld('user', userHandler);
 contextBridge.exposeInMainWorld('role', roleHandler);
+contextBridge.exposeInMainWorld('permission', permissionHandler);
 contextBridge.exposeInMainWorld('item', itemHandler);
 contextBridge.exposeInMainWorld('brand', brandHandler);
 contextBridge.exposeInMainWorld('image', imageHandler);
@@ -438,11 +494,13 @@ contextBridge.exposeInMainWorld('notif', notifHandler);
 contextBridge.exposeInMainWorld('validation', validationHandler);
 contextBridge.exposeInMainWorld('export', exportHandler);
 
+export type StorageHandler = typeof storageHandler;
 export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
 export type UserHandler = typeof userHandler;
 export type RoleHandler = typeof roleHandler;
+export type PermissionHandler = typeof permissionHandler;
 export type ItemHandler = typeof itemHandler;
 export type ImageHandler = typeof imageHandler;
 export type BrandHandler = typeof brandHandler;

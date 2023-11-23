@@ -35,6 +35,12 @@ export class Permission1692778618800 implements MigrationInterface {
             comment: 'The kebab-case version of the name',
           },
           {
+            name: 'group_name',
+            type: 'varchar',
+            isUnique: false,
+            isNullable: false,
+          },
+          {
             name: 'description',
             type: 'varchar',
             isNullable: true,

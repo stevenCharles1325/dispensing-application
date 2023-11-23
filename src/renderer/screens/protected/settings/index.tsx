@@ -16,12 +16,14 @@ import ProductDetailsForm from "UI/components/Views/ProductDetailsForm";
 import SupplierFormV2 from "UI/components/Views/SupplierFormV2";
 import { TransitionProps } from "@mui/material/transitions";
 import React from "react";
+import RolesAndPermissionsForm from "UI/components/Views/RolesAndPermissionsForm";
 
 type ModalNames =
   | 'CATEGORIES'
   | 'BRANDS'
   | 'SUPPLIERS'
   | 'BUSINESS DETAILS'
+  | 'ROLES AND PERMISSIONS'
   | null;
 
 const Transition = React.forwardRef(function Transition(
@@ -116,6 +118,17 @@ export default function Settings () {
                 <Switch color="secondary" checked={notificationStatus} onChange={handleToggleNotification} />
               </div>
             </div>
+
+            {/* Roles and Permissions */}
+            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+              <Chip label="Roles & Permissions" variant="outlined" color="secondary" />
+              <p className="py-5 px-2 text-gray-400">
+                Edit system's roles and permissions?
+              </p>
+              <div className="w-full flex flex-row-reverse">
+                <Button color="secondary" onClick={handleOpenModal('ROLES AND PERMISSIONS')}>Edit</Button>
+              </div>
+            </div>
           </div>
 
           <Divider>
@@ -186,6 +199,11 @@ export default function Settings () {
           {
             modal === 'SUPPLIERS'
             ? <SupplierFormV2 onClose={handleCloseModal} />
+            : null
+          }
+          {
+            modal === 'ROLES AND PERMISSIONS'
+            ? <RolesAndPermissionsForm onClose={handleCloseModal} />
             : null
           }
         </div>

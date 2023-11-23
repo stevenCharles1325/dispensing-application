@@ -26,7 +26,7 @@ import { runSeeders } from 'typeorm-extension';
 import runEvents from './events';
 import Provider from '@IOC:Provider';
 import requireAll from 'App/modules/require-all.module';
-import stores from './stores';
+import stores, { GlobalStorage } from './stores';
 import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
@@ -179,6 +179,7 @@ app
   .then(async () => {
     // Initialize database
     try {
+      const storage = GlobalStorage();
       const datasource = await SqliteDataSource.initialize();
       console.log('[DB]: Initialized Successfully');
 
@@ -261,6 +262,55 @@ app
           }
         }, 5000);
 
+        // STORAGE HANDLERS
+        ipcMain.on('storage:set', (event, ...payload: any[]) => {
+          const key = payload[0];
+          const value = payload[1];
+
+          try {
+            storage.set(key, value);
+            event.returnValue = null;
+          } catch (err: any) {
+            console.log('STORAGE:SET:ERROR: ', err);
+            event.returnValue = err?.message ?? 'Error occured in Storage-set';
+          }
+        });
+
+        ipcMain.on('storage:get', (event, ...payload: any[]) => {
+          const key = payload[0];
+
+          try {
+            event.returnValue = storage.get(key);
+          } catch (err: any) {
+            console.log('STORAGE:GET:ERROR: ', err);
+            event.returnValue = err?.message ?? 'Error occured in Storage-set';
+          }
+        });
+
+        ipcMain.on('storage:remove', (event, ...payload: any[]) => {
+          const key = payload[0];
+
+          try {
+            storage.delete(key);
+            event.returnValue = null;
+          } catch (err: any) {
+            console.log('STORAGE:DELETE:ERROR: ', err);
+            event.returnValue = err?.message ?? 'Error occured in Storage-set';
+          }
+        });
+
+        ipcMain.on('storage:clear', (event) => {
+          try {
+            storage.clear();
+            event.returnValue = null;
+          }  catch (err: any) {
+            console.log('STORAGE:CLEAR:ERROR: ', err);
+            event.returnValue = err?.message ?? 'Error occured in Storage-set';
+          }
+        });
+
+
+        // VALIDATOR HANDLERS
         ipcMain.handle('get:master-key', async () => {
           const system = await SqliteDataSource.createEntityManager().query(
             'SELECT * FROM systems WHERE is_branch = 0'

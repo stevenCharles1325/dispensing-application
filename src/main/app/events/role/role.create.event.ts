@@ -9,6 +9,8 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import { Role } from 'Main/database/models/role.model';
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 import { Bull } from 'Main/jobs';
+import PermissionRepository from 'App/repositories/permission.repository';
+import { In } from "typeorm"
 
 export default class RoleCreateEvent implements IEvent {
   public channel: string = 'role:create';
@@ -23,13 +25,13 @@ export default class RoleCreateEvent implements IEvent {
     try {
       const { user } = eventData;
       const payload: Role = eventData.payload[0];
+      const permissionIds: number[] = eventData.payload[1] ?? [];
       const requesterHasPermission = user.hasPermission?.('create-role');
 
       if (requesterHasPermission) {
         const role = RoleRepository.create(payload);
         const errors = await validator(role);
 
-        console.log(errors);
         if (errors && errors.length) {
           return {
             errors,
@@ -38,6 +40,10 @@ export default class RoleCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
+        const permissions = await PermissionRepository.findBy({
+          id: In(permissionIds),
+        });
+        role.permissions = permissions;
         const data: Role = await RoleRepository.save(role);
 
         await Bull('AUDIT_JOB', {

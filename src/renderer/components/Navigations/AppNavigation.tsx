@@ -60,6 +60,7 @@ import ChevronLeftOutlinedIcon from '@mui/icons-material/ChevronLeftOutlined';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined';
+import usePermission from 'UI/hooks/usePermission';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -109,13 +110,24 @@ const getNotifs = async (
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
-    throw new Error(errorMessage);
+    console.log(errorMessage);
+
+    return {
+      data: [],
+      total: 0,
+      totalPage: 0,
+      currentPage: 0,
+      previousPage: 0,
+      nextPage: 0,
+    }
   }
 
   return res.data as IPagination<NotificationDTO>;
 };
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
+  const hasPermission = usePermission();
+
   const drive = useAppDrive();
   const [openDrive, driveListener] =
     drive?.subscribe?.('APP_NAVIGATION') ?? [];
@@ -200,7 +212,8 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         if (res.status === 'ERROR') {
           console.log(res.errors);
           const errorMessage = res.errors?.[0] as unknown as string;
-          throw new Error(errorMessage);
+
+          return console.log(errorMessage);
         }
 
         setUnseenNotifs([]);
@@ -214,7 +227,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     if (res.status === 'ERROR') {
       console.log(res.errors);
       const errorMessage = res.errors?.[0] as unknown as string;
-      throw new Error(errorMessage);
+      return console.log(errorMessage);
     }
   }
 
@@ -224,7 +237,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     if (res.status === 'ERROR') {
       console.log(res.errors);
       const errorMessage = res.errors?.[0] as unknown as string;
-      throw new Error(errorMessage);
+      return console.log(errorMessage);
     }
 
     refetchNotifs();
@@ -238,7 +251,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
       if (res.status === 'ERROR') {
         console.log(res.errors);
         const errorMessage = res.errors?.[0] as unknown as string;
-        throw new Error(errorMessage);
+        return console.log(errorMessage);
       }
 
       refetchNotifs();
@@ -532,12 +545,17 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               }}
             />
             <div className="w-[100px] flex justify-between items-center">
-              <IconButton onClick={handleOpenNotifMenu}>
-                <Badge badgeContent={unseenNotifs?.length ?? 0} color="secondary">
-                  <NotificationsNoneOutlinedIcon />
-                </Badge>
-              </IconButton>
-
+              {
+                hasPermission('view-notification')
+                ? (
+                  <IconButton onClick={handleOpenNotifMenu}>
+                    <Badge badgeContent={unseenNotifs?.length ?? 0} color="secondary">
+                      <NotificationsNoneOutlinedIcon />
+                    </Badge>
+                  </IconButton>
+                )
+                : null
+              }
               <IconButton onClick={handleOpenProfileMenu}>
                 <PersonOutlinedIcon />
               </IconButton>

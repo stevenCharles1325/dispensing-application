@@ -42,6 +42,7 @@ export class Role {
 
   @ManyToMany('Permission', (permission: Permission) => permission.roles, {
     eager: true,
+    cascade: ["insert", "update"]
   })
   @JoinTable({
     name: 'role_permissions',
