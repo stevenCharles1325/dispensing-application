@@ -30,11 +30,16 @@ export default class UserShowEvent implements IEvent {
         const take = eventData.payload[2] || 15; // Total
         const skip = (page - 1) * take;
 
-        const userQuery = UserRepository.createQueryBuilder('user');
+        const userQuery = UserRepository.createQueryBuilder(
+          'user'
+        ).leftJoinAndSelect('user.role', 'role');
 
         if (take !== 'max') {
           userQuery.take(take).skip(skip);
         }
+
+        // Excluding the owner
+        userQuery.where(`role.name != 'Owner'`);
 
         if (payload === 'all') {
           return await usePagination(userQuery, page);

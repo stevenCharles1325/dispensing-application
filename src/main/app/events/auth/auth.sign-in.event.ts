@@ -25,6 +25,24 @@ export default class AuthSignIn implements IEvent {
       if (res.status === 'SUCCESS') {
         const { user } = res.data as IAuth<UserDTO>;
 
+        if (user?.status === 'deactivated') {
+          await Bull('AUDIT_JOB', {
+            user_id: user.id as number,
+            resource_id: user.id.toString() as string,
+            resource_table: 'users',
+            resource_id_type: 'integer',
+            action: 'sign-in',
+            status: 'FAILED',
+            description: `Deactivated user ${user.first_name} ${user.last_name} has tried signing-in`,
+          });
+
+          return {
+            errors: ['Your account has been deactivated'],
+            code: 'AUTH_ERR',
+            status: 'ERROR',
+          } as unknown as IResponse<IPOSError[]>;
+        }
+
         await Bull('AUDIT_JOB', {
           user_id: user.id as number,
           resource_id: user.id.toString() as string,

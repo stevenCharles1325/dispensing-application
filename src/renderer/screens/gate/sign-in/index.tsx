@@ -27,9 +27,13 @@ export default function SignIn() {
 
     if (res.status === 'ERROR') {
       const type = 'error';
-      const message = (res.errors as unknown as IPOSError[])[0]?.message;
+      const error = (res.errors as unknown as IPOSError[])[0];
 
-      displayAlert?.(message as string, type);
+      if (typeof error === 'string') {
+        return displayAlert?.(error, type);
+      }
+
+      return displayAlert?.(error.message as string, type);
     } else {
       const data = res.data as unknown as IAuth<UserDTO>;
 

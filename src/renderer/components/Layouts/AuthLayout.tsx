@@ -9,6 +9,8 @@ import useUser from 'UI/stores/user';
 import SearchProvider from 'UI/providers/SearchProvider';
 import AppDriveProvider from 'UI/providers/AppDriveProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const queryClient = new QueryClient();
 
@@ -37,13 +39,15 @@ export default function AuthLayout() {
         // eslint-disable-next-line react/no-children-prop
         children={() => (
           <QueryClientProvider client={queryClient}>
-            <AuthProvider userData={userData} setUserData={setUserData}>
-              <SearchProvider>
-                <AlertProvider>
-                  <AppDriveProvider>{outlet}</AppDriveProvider>
-                </AlertProvider>
-              </SearchProvider>
-            </AuthProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <AuthProvider userData={userData} setUserData={setUserData}>
+                <SearchProvider>
+                  <AlertProvider>
+                    <AppDriveProvider>{outlet}</AppDriveProvider>
+                  </AlertProvider>
+                </SearchProvider>
+              </AuthProvider>
+            </LocalizationProvider>
           </QueryClientProvider>
         )}
       />

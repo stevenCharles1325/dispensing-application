@@ -17,6 +17,8 @@ import { AddCircleOutline, DeleteOutlineOutlined, EditOutlined, Landscape } from
 import useAppDrive from "UI/hooks/useAppDrive";
 import RoleDTO from "App/data-transfer-objects/role.dto";
 import PasswordInput from "UI/components/TextField/PasswordInput";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 
 const columns: Array<GridColDef> = [
   {
@@ -152,7 +154,15 @@ export default function EmployeeManagement () {
     }
   });
 
-  // console.log(roleList);
+  const handleDateFormat = (date: string | Date | undefined) => {
+    if (!date) return '';
+
+    const jsDate = new Date(date);
+
+    console.log(`${jsDate.getFullYear()}-${jsDate.getMonth() + 1}-${jsDate.getDate().toString().padStart(2, '0')}`);
+    return `${jsDate.getFullYear()}-${jsDate.getMonth() + 1}-${jsDate.getDate().toString().padStart(2, '0')}`;
+  }
+
   const handleUpdateForm =
     (key: string) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -178,9 +188,10 @@ export default function EmployeeManagement () {
     console.log('Updating item');
     setModalAction('update');
 
-    console.log(selectedItem);
     if (selectedItem) {
-      setForm({ ...selectedItem });
+      setForm({
+        ...selectedItem,
+      });
     }
   }, [selectedItem]);
 
@@ -387,15 +398,36 @@ export default function EmployeeManagement () {
               helperText={errors['last_name']}
             />
           </div>
-          <TextField
+          <DatePicker
+            label="Birth-date"
+            views={['year', 'month', 'day']}
+            value={dayjs(form.birth_date)}
+            onChange={(value) => {
+              if (!value) return;
+
+              setForm((form) => ({
+                ...form,
+                birth_date: new Date(value.toString()),
+              }))
+            }}
+            slotProps={{
+              textField: {
+                helperText: errors['birth_date'] ?? 'Birth-date',
+                error: Boolean(errors['birth_date']),
+                size: 'small',
+                color: 'secondary'
+              }
+            }}
+          />
+          {/* <TextField
             size="small"
             type="date"
-            value={form.birth_date ?? ''}
+            value={handleDateFormat(form.birth_date) ?? ''}
             color="secondary"
             onChange={handleUpdateForm('birth_date')}
             error={Boolean(errors['birth_date'])}
             helperText={errors['birth_date'] ?? 'Birth-date'}
-          />
+          /> */}
           <TextField
             size="small"
             label="Phone number"
@@ -439,41 +471,74 @@ export default function EmployeeManagement () {
             )
             : null
           }
-          <Autocomplete
-            size="small"
-            options={roleList.map(({ id }) => id)}
-            color="secondary"
-            value={form.role_id ?? 3}
-            onChange={(_, value) => {
-              setForm((form) => ({
-                ...form,
-                role_id: value ?? 3,
-              }));
-            }}
-            sx={{
-              width: 350,
-            }}
-            getOptionLabel={(option) => {
-              return roleDictionary[option];
-            }}
-            renderOption={(props, option) => (
-              <li {...props}>
-               <p>{roleDictionary[option]}</p>
-              </li>
-            )}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                required
-                color="secondary"
-                label="Role"
-                helperText={errors.role_id}
-                error={Boolean(errors.role_id)}
-              />
-            )}
-          />
+          <div className="flex flex-row gap-5">
+            <Autocomplete
+              size="small"
+              options={roleList.map(({ id }) => id)}
+              color="secondary"
+              value={form.role_id ?? 3}
+              onChange={(_, value) => {
+                setForm((form) => ({
+                  ...form,
+                  role_id: value ?? 3,
+                }));
+              }}
+              sx={{
+                width: 350,
+              }}
+              getOptionLabel={(option) => {
+                return roleDictionary[option];
+              }}
+              renderOption={(props, option) => (
+                <li {...props}>
+                <p>{roleDictionary[option]}</p>
+                </li>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  color="secondary"
+                  label="Role"
+                  helperText={errors.role_id}
+                  error={Boolean(errors.role_id)}
+                />
+              )}
+            />
+            {
+              modalAction === 'update'
+              ? (
+                <Autocomplete
+                  size="small"
+                  options={['active', 'deactivated']}
+                  color="secondary"
+                  value={form.status}
+                  onChange={(_, value) => {
+                    setForm((form) => ({
+                      ...form,
+                      status: value as any ?? 'active',
+                    }));
+                  }}
+                  sx={{
+                    width: 350,
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      color="secondary"
+                      label="Status"
+                      helperText={errors.status}
+                      error={Boolean(errors.status)}
+                    />
+                  )}
+                />
+              )
+              : null
+            }
+          </div>
           <div className="w-full flex flex-row-reverse gap-5">
-            <Button variant="outlined" onClick={handleAddNew}>
+            <Button variant="outlined" onClick={modalAction === 'create' ? handleAddNew : handleUpdate}>
               Save
             </Button>
             <Button color="error" onClick={handleCloseModal}>

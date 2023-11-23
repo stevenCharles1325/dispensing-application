@@ -1,12 +1,15 @@
 /* eslint-disable no-continue */
 /* eslint-disable react-hooks/rules-of-hooks */
+import Provider from '@IOC:Provider';
 import RoleDTO from 'App/data-transfer-objects/role.dto';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 import usePagination from 'App/hooks/pagination.hook';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 import handleError from 'App/modules/error-handler.module';
 import RoleRepository from 'App/repositories/role.repository';
 
@@ -21,8 +24,12 @@ export default class RoleShowEvent implements IEvent {
     IResponse<string[] | IPagination<RoleDTO> | IPOSError[] | any>
   > {
     try {
+      const authService = Provider.ioc<IAuthService>('AuthProvider');
       const requesterHasPermission =
         eventData.user.hasPermission?.('view-role');
+
+      const authRes = authService.verifyToken(eventData.user.token);
+      const user = authRes.data as UserDTO;
 
       if (requesterHasPermission) {
         const payload = eventData.payload[0] ?? 'all';
@@ -34,6 +41,10 @@ export default class RoleShowEvent implements IEvent {
 
         if (take !== 'max') {
           roleQuery.take(take).skip(skip);
+        }
+
+        if (user.role.name !== 'Owner') {
+          roleQuery.where(`role.name != 'Owner'`);
         }
 
         if (payload === 'all') {
