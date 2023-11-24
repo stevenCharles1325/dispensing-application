@@ -218,14 +218,14 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
             className="shadow-lg"
             color="primary"
             icon={<AddCircleOutline />}
-            label="Add new item"
+            label="Add new Supplier"
             onClick={handleAddNewItem}
           />
           <Chip
             className="shadow-lg"
             color="secondary"
             icon={<EditOutlined />}
-            label="Edit selected item"
+            label="Edit selected Supplier"
             onClick={handleEditSelectedItem}
             disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
@@ -233,7 +233,7 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
             className="shadow-lg"
             color="error"
             icon={<DeleteOutlineOutlined />}
-            label="Delete selected item"
+            label="Delete selected Supplier"
             onClick={handleDeleteSelectedItem}
             disabled={selectedIds.length === 0}
           />

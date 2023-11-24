@@ -443,7 +443,7 @@ export default function Home() {
                 <div className="flex flex-row justify-between">
                   <div>
                     <p>Payment Method:</p>
-                    <div className="flex flex-row justify-start items-center">
+                    {/* <div className="flex flex-row justify-start items-center">
                       <p className="text-sm text-gray-600">Cash</p>
                       <PaymentUISwitch
                         checked={checked}
@@ -459,7 +459,7 @@ export default function Home() {
                         }}
                       />
                       <p className="text-sm text-gray-600">Card</p>
-                    </div>
+                    </div> */}
                   </div>
                   <div>
                     <p className="capitalize">{selectedPaymentMethod}</p>

@@ -94,11 +94,11 @@ export default function Settings () {
       <div className="w-full h-full flex justify-start">
         <div className="min-w-[800px] w-[70%] max-w-[1300px] h-fit p-5">
           <Divider>
-            <p className="text-gray-500">Business and System</p>
+            <p className="text-gray-500">System</p>
           </Divider>
 
           <div className="w-full h-fit my-5 flex flex-wrap gap-5">
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            {/* <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Business Details" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Want to edit your business details?
@@ -106,7 +106,7 @@ export default function Settings () {
               <div className="w-full flex flex-row-reverse">
                 <Button color="secondary" onClick={handleOpenModal('BUSINESS DETAILS')}>Edit</Button>
               </div>
-            </div>
+            </div> */}
 
             {/* NOTIFICATION */}
             <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">

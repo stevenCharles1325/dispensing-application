@@ -82,7 +82,7 @@ const getUsers = async (
   page = 1,
   total: number | 'max' = 'max'
 ): Promise<IPagination<UserDTO>> => {
-  const res = await window.user.getUsers({ name: searchText }, page, total);
+  const res = await window.user.getUsers({ last_name: searchText }, page, total);
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
@@ -292,14 +292,14 @@ export default function EmployeeManagement () {
               className="shadow-lg"
               color="primary"
               icon={<AddCircleOutline />}
-              label="Add new item"
+              label="Add new Employee"
               onClick={handleAddNewItem}
             />
             <Chip
               className="shadow-lg"
               color="secondary"
               icon={<EditOutlined />}
-              label="Edit selected item"
+              label="Edit selected Employee"
               onClick={handleEditSelectedItem}
               disabled={selectedIds.length === 0 || selectedIds.length > 1}
             />
@@ -307,7 +307,7 @@ export default function EmployeeManagement () {
               className="shadow-lg"
               color="error"
               icon={<DeleteOutlineOutlined />}
-              label="Delete selected item"
+              label="Delete selected Employee"
               onClick={handleDeleteSelectedUser}
               disabled={selectedIds.length === 0}
             />

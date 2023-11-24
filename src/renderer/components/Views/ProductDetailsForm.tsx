@@ -223,14 +223,14 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
             className="shadow-lg"
             color="primary"
             icon={<AddCircleOutline />}
-            label="Add new item"
+            label="Add new"
             onClick={handleAddNewItem}
           />
           <Chip
             className="shadow-lg"
             color="secondary"
             icon={<EditOutlined />}
-            label="Edit selected item"
+            label="Edit selected"
             onClick={handleEditSelectedItem}
             disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
@@ -238,7 +238,7 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
             className="shadow-lg"
             color="error"
             icon={<DeleteOutlineOutlined />}
-            label="Delete selected item"
+            label="Delete selected"
             onClick={handleDeleteSelectedItem}
             disabled={selectedIds.length === 0}
           />
