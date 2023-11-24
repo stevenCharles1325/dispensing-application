@@ -24,10 +24,19 @@ export default function AuthLayout() {
 
   useEffect(() => {
     if (userData && setUser) {
-      setUser('token', userData.token);
-      setUser('refresh_token', userData.refresh_token);
+      if (userData.token) {
+        setUser('token', userData.token);
+      }
 
-      setUser(userData.user);
+      if (userData.refresh_token) {
+        setUser('refresh_token', userData.refresh_token);
+      }
+
+      if (userData.user) {
+        setUser(userData.user);
+      } else {
+        setUser(userData as any);
+      }
     }
   }, [setUser, userData]);
 

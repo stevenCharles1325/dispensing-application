@@ -370,7 +370,6 @@ export default function InventoryForm({
 
   useEffect(() => {
     if (action === 'update' && selectedItem) {
-      console.log('SELECTED ITEM: ', selectedItem);
       const item = selectedItem as Record<string, any>;
       for (const [key, value] of Object.entries(item)) {
         dispatch({

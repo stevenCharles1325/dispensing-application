@@ -3,6 +3,7 @@ import UserDTO from 'App/data-transfer-objects/user.dto';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import handleError from 'App/modules/error-handler.module';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
+import IAuth from 'App/interfaces/auth/auth.interface';
 
 export default function verifyToken(
   this: any,

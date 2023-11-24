@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware'
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import RoleDTO from 'App/data-transfer-objects/role.dto';
+import deepMerge from 'UI/helpers/deepMerge';
 
 type PartialUserDTO = Omit<
   UserDTO,
@@ -19,10 +20,11 @@ export interface AppUserState extends PartialUserDTO {
   token: string;
   role: RoleDTO | null;
   refresh_token: string;
-  setUser: (
+  setRole(role: RoleDTO): void;
+  setUser(
     keyOrUser: string | Partial<UserDTO>,
     value?: string | undefined
-  ) => void;
+  ): void;
 }
 
 class LocalStorage {
@@ -58,6 +60,9 @@ const useUser = create(
       token: '',
       role: null,
       refresh_token: '',
+      setRole(role: RoleDTO) {
+        set({ ...get(), role: { ...role }});
+      },
       setUser(keyOrUser: string | Partial<UserDTO>, value?: any) {
         if (!keyOrUser) return;
 
@@ -79,6 +84,20 @@ const useUser = create(
     {
       name: 'user-storage', // name of the item in the storage (must be unique)
       storage: new LocalStorage(), // (optional) by default, 'localStorage' is used
+      merge: (persistedState, currentState) =>
+        deepMerge(currentState, persistedState),
+      onRehydrateStorage: (state) => {
+        console.log('hydration starts')
+
+        // optional
+        return (state, error) => {
+          if (error) {
+            console.log('an error happened during hydration', error)
+          } else {
+            console.log('hydration finished')
+          }
+        }
+      },
     },
   )
 );

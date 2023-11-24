@@ -36,7 +36,6 @@ export default function SignIn() {
       return displayAlert?.(error.message as string, type);
     } else {
       const data = res.data as unknown as IAuth<UserDTO>;
-
       setUserData?.(data);
 
       displayAlert?.('Login success', 'success');

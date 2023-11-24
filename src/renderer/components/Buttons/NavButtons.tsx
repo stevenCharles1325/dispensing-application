@@ -1,5 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
+import { PermissionsKebabType } from 'Main/data/defaults/permissions';
+import usePermission from 'UI/hooks/usePermission';
 import { useNavigate } from 'react-router-dom';
 
 /* eslint-disable react/require-default-props */
@@ -11,6 +13,7 @@ export interface INavButtonprops {
   onClick?: () => void;
   redirectPath?: string;
   disabled?: boolean;
+  permissions?: PermissionsKebabType[];
   parentCollapsed?: boolean;
 }
 
@@ -19,11 +22,13 @@ export default function NavButton({
   icon,
   active,
   label,
+  permissions,
   redirectPath,
   onClick,
   disabled = false,
   parentCollapsed = false,
 }: INavButtonprops) {
+  const hasPermission = usePermission();
   const navigate = useNavigate();
   const color = active ? 'var(--text-color)' : 'white';
   const fontWeight = active ? 'font-extrabold' : 'font-thin';
@@ -34,6 +39,10 @@ export default function NavButton({
       return navigate(redirectPath);
     }
   };
+
+  if (permissions && !hasPermission(...permissions)) {
+    return null;
+  }
 
   return (
     <div

@@ -88,7 +88,6 @@ const paymentsColumns: Array<GridColDef> = [
     width: 250,
     type: 'number',
     renderCell: (params) => {
-      console.log(params.value);
       return (
         <NumericFormat
           className="mb-2 px-1 bg-transparent grow text-end"

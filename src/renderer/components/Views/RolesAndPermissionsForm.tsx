@@ -10,6 +10,7 @@ import useAlert from "UI/hooks/useAlert";
 import useErrorHandler from "UI/hooks/useErrorHandler";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import PermissionRenderer from "./PermissionsRenderer";
+import useFreshUser from "UI/hooks/useFreshUser";
 
 const steps = ['Set Role name and description', 'Adding Permissions'];
 
@@ -103,6 +104,7 @@ export interface RolesAndPermissionsFormProps {
 export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermissionsFormProps) {
   const { displayAlert } = useAlert();
   const errorHandler = useErrorHandler();
+  const getFreshUser = useFreshUser();
 
   // Stepper
   const [activeStep, setActiveStep] = React.useState(0);
@@ -271,6 +273,7 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
     }
 
     await refetch();
+    getFreshUser();
     handleCloseModal();
   }, [selectedIds, form, permissionIds]);
 
@@ -471,7 +474,12 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
                 )
                 : null
               }
-              <Button onClick={handleBack}>Back</Button>
+              <Button
+                disabled={activeStep === 0}
+                onClick={handleBack}
+              >
+                Back
+              </Button>
               <Button color="error" onClick={handleCloseModal}>Cancel</Button>
             </div>
           </DialogActions>

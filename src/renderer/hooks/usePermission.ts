@@ -1,13 +1,10 @@
 import { PermissionsKebabType } from "Main/data/defaults/permissions";
-import useErrorHandler from "./useErrorHandler";
 import useUser from "UI/stores/user";
-
-
+import { useCallback } from "react";
 
 const usePermission = () => {
   const { role } = useUser((store) => store);
-
-  const hasPermission = (...permissions: PermissionsKebabType[]): Boolean => {
+  const hasPermission = useCallback((...permissions: PermissionsKebabType[]): Boolean => {
     try {
       return role?.permissions!.some(({ kebab }) =>
         permissions.includes(kebab as PermissionsKebabType)
@@ -16,7 +13,7 @@ const usePermission = () => {
       console.log(error);
       return false;
     }
-  }
+  }, [role]);
 
   return hasPermission;
 }

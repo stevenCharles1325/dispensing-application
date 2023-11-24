@@ -131,7 +131,7 @@ export default function EmployeeManagement () {
   const drive = useAppDrive?.();
   const [openDrive, driveListener] = drive?.subscribe?.('EMPLOYEE_MANAGEMENT') ?? [];
 
-  const [form, setForm] = useState<Partial<UserDTO>>({ status: 'active' });
+  const [form, setForm] = useState<Partial<UserDTO>>({ birth_date: new Date(), status: 'active', role_id: 2 });
   const [errors, setErrors] = useState<Record<string, any>>({});
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -184,7 +184,7 @@ export default function EmployeeManagement () {
   const handleCloseModal = () => {
     setSelectedIds([]);
     setModalAction(null);
-    setForm({ status: 'active' });
+    setForm({ birth_date: new Date(), status: 'active', role_id: 2 });
     setErrors({});
   }
 
@@ -483,7 +483,7 @@ export default function EmployeeManagement () {
               size="small"
               options={roleList.map(({ id }) => id)}
               color="secondary"
-              value={form.role_id ?? 3}
+              value={form.role_id}
               onChange={(_, value) => {
                 setForm((form) => ({
                   ...form,

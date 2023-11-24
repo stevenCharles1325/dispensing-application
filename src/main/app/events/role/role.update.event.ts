@@ -1,13 +1,18 @@
+import Provider from '@IOC:Provider';
 import RoleDTO from 'App/data-transfer-objects/role.dto';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 import handleError from 'App/modules/error-handler.module';
+import parseTimeExpression from 'App/modules/parse-time-expression.module';
 import validator from 'App/modules/validator.module';
 import PermissionRepository from 'App/repositories/permission.repository';
 import RoleRepository from 'App/repositories/role.repository';
+import UserRepository from 'App/repositories/user.repository';
 import { Role } from 'Main/database/models/role.model';
 import { Bull } from 'Main/jobs';
 import { In } from "typeorm"
@@ -28,6 +33,7 @@ export default class UserDeleteEvent implements IEvent {
       const roleUpdate: Role = eventData.payload[1];
       const permissionIds: number[] = eventData.payload[2] ?? [];
 
+      const authService = Provider.ioc<IAuthService>('AuthProvider');
       const requesterHasPermission = user.hasPermission?.('update-role');
 
       if (requesterHasPermission) {
@@ -63,6 +69,39 @@ export default class UserDeleteEvent implements IEvent {
         });
 
         const data: Role = await RoleRepository.save(updatedRole);
+        const authUser = await UserRepository.findOneBy({ id: user!.id as number });
+
+        if (authUser && data.id === authUser.role_id) {
+          authUser.role = data;
+          const userUpdated = await UserRepository.save(authUser);
+
+          const user_data = {
+            id: userUpdated.id,
+            email: userUpdated.email,
+            image_url: userUpdated.image_url,
+            first_name: userUpdated.first_name,
+            last_name: userUpdated.last_name,
+            full_name: userUpdated.fullName(),
+            phone_number: userUpdated.phone_number,
+            notification_status: userUpdated.notification_status,
+            role: userUpdated.role,
+          };
+
+          const [token, refresh_token] = authService.generateToken(user_data);
+          const payload = {
+            token,
+            refresh_token,
+            user: userUpdated.serialize('password') as UserDTO,
+            token_expires_at: parseTimeExpression(
+              authService.config.token_expires_at
+            ),
+            refresh_token_expires_at: parseTimeExpression(
+              authService.config.refresh_token_expires_at
+            ),
+          };
+
+          authService.setAuthUser(payload);
+        }
 
         return {
           data,

@@ -73,29 +73,34 @@ export const navigationRoutes: INavButtonprops[] = [
     id: 1,
     label: 'Inventory',
     redirectPath: '/inventory',
+    permissions: ['view-item'],
     icon: <Inventory2OutlinedIcon />,
   },
   {
     id: 2,
     label: 'Logs & History',
     redirectPath: '/logs',
+    permissions: ['view-audit-trail'],
     icon: <ArticleOutlinedIcon />,
   },
   {
     id: 3,
     label: 'Reports',
     redirectPath: '/reports',
+    permissions: ['view-report'],
     icon: <AssessmentOutlinedIcon />,
   },
   {
     id: 4,
     label: 'Employee-management',
+    permissions: ['view-user'],
     redirectPath: '/employee-management',
     icon: <PeopleOutlineOutlinedIcon />,
   },
   {
     id: 5,
     label: 'Settings',
+    permissions: ['view-settings'],
     redirectPath: '/settings',
     icon: <SettingsOutlinedIcon />,
   },
@@ -544,7 +549,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                 handleDebouncedSearching(e.target.value);
               }}
             />
-            <div className="w-[100px] flex justify-between items-center">
+            <div className="w-[100px] flex justify-end gap-5 items-center">
               {
                 hasPermission('view-notification')
                 ? (
