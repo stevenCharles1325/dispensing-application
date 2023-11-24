@@ -234,7 +234,7 @@ export default function Report() {
                   },
                 ]}
               >
-                <PieCenterLabel> Trend Category </PieCenterLabel>
+                <PieCenterLabel> Trend Products </PieCenterLabel>
               </PieChart>
             )}
           </div>

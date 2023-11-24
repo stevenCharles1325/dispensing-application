@@ -31,6 +31,15 @@ import useSearch from 'UI/hooks/useSearch';
 
 const columns: Array<GridColDef> = [
   {
+    field: 'barcode',
+    headerName: 'Barcode',
+    flex: 1,
+    type: 'string',
+    align: 'left',
+    headerAlign: 'left',
+    renderCell: ({ value }) => `${value?.length ? value : '—'}`
+  },
+  {
     field: 'sku',
     headerName: 'SKU (Stock Keeping Unit)',
     width: 220,

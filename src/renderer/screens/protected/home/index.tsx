@@ -282,13 +282,13 @@ export default function Home() {
               onClick={handleFilterClick}
               className="shadow-md border"
             />
-            <Chip
+            {/* <Chip
               label="Barcode scanning"
               color="secondary"
               variant="outlined"
               onClick={() => displayAlert?.('feature coming soon', 'info')}
               className="shadow-md border"
-            />
+            /> */}
           </div>
           <div className="grow">
             {items?.length ? (

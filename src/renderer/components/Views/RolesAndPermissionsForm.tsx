@@ -319,14 +319,14 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
             className="shadow-lg"
             color="primary"
             icon={<AddCircleOutline />}
-            label="Add new item"
+            label="Add new Role"
             onClick={handleAddNewItem}
           />
           <Chip
             className="shadow-lg"
             color="secondary"
             icon={<EditOutlined />}
-            label="Edit selected item"
+            label="Edit selected Role"
             onClick={handleEditSelectedItem}
             disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
@@ -334,7 +334,7 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
             className="shadow-lg"
             color="error"
             icon={<DeleteOutlineOutlined />}
-            label="Delete selected item"
+            label="Delete selected Role"
             onClick={handleDeleteSelectedItem}
             disabled={selectedIds.length === 0}
           />
