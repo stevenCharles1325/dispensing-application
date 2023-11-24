@@ -19,6 +19,7 @@ import RoleDTO from "App/data-transfer-objects/role.dto";
 import PasswordInput from "UI/components/TextField/PasswordInput";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import useErrorHandler from "UI/hooks/useErrorHandler";
 
 const columns: Array<GridColDef> = [
   {
@@ -127,6 +128,7 @@ const getRoles = async (
 export default function EmployeeManagement () {
   const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
+  const errorHandler = useErrorHandler();
 
   const drive = useAppDrive?.();
   const [openDrive, driveListener] = drive?.subscribe?.('EMPLOYEE_MANAGEMENT') ?? [];
@@ -182,7 +184,7 @@ export default function EmployeeManagement () {
   }
 
   const handleCloseModal = () => {
-    setSelectedIds([]);
+    // setSelectedIds([]);
     setModalAction(null);
     setForm({ birth_date: new Date(), status: 'active', role_id: 2 });
     setErrors({});
@@ -212,15 +214,17 @@ export default function EmployeeManagement () {
     const res = await window.user.createUser(form as UserDTO);
 
     if (res.status === 'ERROR') {
-      if (typeof res.errors?.[0] === 'string') {
-        return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+      const errors: Record<string, any> = {};
+      const onError = (field: string | null, message: string) => {
+        if (field) {
+          errors[field] = message;
+        }
       }
 
-      const errors: Record<string, any> = {};
-      const resErrors = res.errors as unknown as IPOSValidationError[];
-      for (const error of resErrors) {
-        errors[error.field] = error.message;
-      }
+      errorHandler({
+        errors: res.errors,
+        onError,
+      });
 
       return setErrors(errors);
     }
@@ -236,15 +240,17 @@ export default function EmployeeManagement () {
     );
 
     if (res.status === 'ERROR') {
-      if (typeof res.errors?.[0] === 'string') {
-        return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+      const errors: Record<string, any> = {};
+      const onError = (field: string | null, message: string) => {
+        if (field) {
+          errors[field] = message;
+        }
       }
 
-      const errors: Record<string, any> = {};
-      const resErrors = res.errors as unknown as IPOSValidationError[];
-      for (const error of resErrors) {
-        errors[error.field] = error.message;
-      }
+      errorHandler({
+        errors: res.errors,
+        onError,
+      });
 
       return setErrors(errors);
     }
@@ -257,15 +263,9 @@ export default function EmployeeManagement () {
     const res = await window.user.deleteUser(selectedIds);
 
     if (res.status === 'ERROR') {
-      if (typeof res.errors?.[0] === 'string') {
-        return displayAlert?.(
-          (res.errors?.[0] as string) ?? 'Please try again',
-          'error'
-        );
-      }
-
-      const resErrors = res.errors as unknown as IPOSError[];
-      return displayAlert?.(resErrors[0] as unknown as string, 'error');
+      return errorHandler({
+        errors: res.errors,
+      });
     }
 
     await refetch();

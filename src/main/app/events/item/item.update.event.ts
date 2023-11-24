@@ -35,7 +35,6 @@ export default class ItemDeleteEvent implements IEvent {
           id,
         });
 
-        console.log('ITEM UPDATE: ', itemUpdate);
         const updatedItem = ItemRepository.merge(item, itemUpdate);
         const errors = await validator(updatedItem);
 
@@ -69,8 +68,6 @@ export default class ItemDeleteEvent implements IEvent {
         updatedItem.category = await CategoryRepository.findOneByOrFail({
           id: itemUpdate.category_id,
         });
-
-        console.log('ITEM UPDATED: ', updatedItem);
 
         const data = await ItemRepository.save(updatedItem);
 

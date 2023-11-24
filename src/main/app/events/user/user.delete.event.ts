@@ -75,6 +75,14 @@ export default class UserDeleteEvent implements IEvent {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
+      if (error?.code === 19) {
+        return {
+          errors: ['cannot delete a user that has logs'],
+          code: 'SYS_ERR',
+          status: 'ERROR',
+        } as unknown as IResponse<IPOSError[]>;
+      }
+
       return {
         errors: [error],
         code: 'SYS_ERR',

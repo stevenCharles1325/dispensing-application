@@ -179,7 +179,7 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
   const handleCloseModal = () => {
     setForm({});
     setErrors({});
-    setSelectedIds([]);
+    // setSelectedIds([]);
     setModalAction(null);
     setActiveStep(0);
     setSelectedPermissions({});

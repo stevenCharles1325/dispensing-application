@@ -236,7 +236,7 @@ export default function Inventory() {
 
   const handleOnClose = () => {
     setSearchParams({ id: '' });
-    setSelectedIds([]);
+    // setSelectedIds([]);
     setModalAction(null);
   }
 

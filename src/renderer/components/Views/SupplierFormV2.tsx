@@ -107,7 +107,7 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
   }
 
   const handleCloseModal = () => {
-    setSelectedIds([]);
+    // setSelectedIds([]);
     setModalAction(null);
     setForm({ status: 'active' });
     setErrors({});

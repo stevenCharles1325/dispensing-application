@@ -89,7 +89,7 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>();
 
   const handleCloseModal = () => {
-    setSelectedIds([]);
+    // setSelectedIds([]);
     setModalAction(null);
     setName('');
     setDescription('');
