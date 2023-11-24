@@ -783,7 +783,7 @@ export default function InventoryForm({
                       dispatch({
                         type: 'supplier_id',
                         payload: suppliers.find(({ id }) => id === value?.id)
-                          ?.id,
+                          ?.id ?? null,
                       });
                     }}
                     sx={{

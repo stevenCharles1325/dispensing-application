@@ -66,7 +66,7 @@ export class Item {
   @Column()
   system_id: number;
 
-  @Column()
+  @Column({ nullable: true })
   supplier_id: string;
 
   @Column({
@@ -160,9 +160,10 @@ export class Item {
   @OneToOne('Image', {
     eager: true,
     cascade: true,
+    nullable: true,
   })
   @JoinColumn({ name: 'image_id', referencedColumnName: 'id' })
-  image: Relation<Image>;
+  image?: Relation<Image>;
 
   @OneToOne('Brand', { eager: true, cascade: true })
   @JoinColumn({ name: 'brand_id', referencedColumnName: 'id' })
@@ -175,9 +176,9 @@ export class Item {
   @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
   category: Relation<Category>;
 
-  @OneToOne('Supplier', { eager: true, cascade: true })
+  @OneToOne('Supplier', { eager: true, cascade: true, nullable: true })
   @JoinColumn({ name: 'supplier_id', referencedColumnName: 'id' })
-  supplier: Relation<Supplier>;
+  supplier?: Relation<Supplier>;
 
   @OneToOne('System', { eager: true })
   @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })

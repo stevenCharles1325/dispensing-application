@@ -35,6 +35,7 @@ export default class ItemDeleteEvent implements IEvent {
           id,
         });
 
+        console.log('ITEM UPDATE: ', itemUpdate);
         const updatedItem = ItemRepository.merge(item, itemUpdate);
         const errors = await validator(updatedItem);
 
@@ -46,10 +47,20 @@ export default class ItemDeleteEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        if (itemUpdate.image_id) {
+        if (itemUpdate?.image_id) {
           updatedItem.image = await ImageRepository.findOneByOrFail({
             id: itemUpdate.image_id,
           });
+        } else {
+          updatedItem.image = undefined;
+        }
+
+        if (itemUpdate?.supplier_id) {
+          updatedItem.supplier = await SupplierRepository.findOneByOrFail({
+            id: itemUpdate.supplier_id,
+          });
+        } else {
+          updatedItem.supplier = undefined;
         }
 
         updatedItem.brand = await BrandRepository.findOneByOrFail({
@@ -58,9 +69,8 @@ export default class ItemDeleteEvent implements IEvent {
         updatedItem.category = await CategoryRepository.findOneByOrFail({
           id: itemUpdate.category_id,
         });
-        updatedItem.supplier = await SupplierRepository.findOneByOrFail({
-          id: itemUpdate.supplier_id,
-        });
+
+        console.log('ITEM UPDATED: ', updatedItem);
 
         const data = await ItemRepository.save(updatedItem);
 
