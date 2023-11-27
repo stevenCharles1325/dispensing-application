@@ -1,6 +1,7 @@
 import {
   AuditTrailHandler,
   AuthHandler,
+  BarcodeHandler,
   BrandHandler,
   CategoryHandler,
   ExportHandler,
@@ -23,6 +24,7 @@ declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
     storage: StorageHandler;
+    barcode: BarcodeHandler;
     main: MainHandler;
     auth: AuthHandler;
     peer: PeerHandler;

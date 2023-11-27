@@ -22,6 +22,7 @@ import NotificationDTO from 'App/data-transfer-objects/notification.dto';
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 import PermissionDTO from 'App/data-transfer-objects/permission.dto';
 import { PermissionsKebabType } from './data/defaults/permissions';
+import HidDTO from 'App/data-transfer-objects/hid.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -55,6 +56,19 @@ const mainHandler = {
     ) => void
   ) => ipcRenderer.on('main-message', callback),
 }
+
+/* ================================
++
++       BARCODE EVENT HANDLER
++
++ ================================ */
+const barcodeHandler = {
+  devices: async (): Promise<IResponse<string[] | IPOSError[] | HidDTO[]>> =>
+    ipcRenderer.invoke('barcode:devices'),
+  select: async (device: HidDTO): Promise<IResponse<string[] | IPOSError[] | void>> =>
+    ipcRenderer.invoke('barcode:select', device),
+};
+
 
 
 /* ================================
@@ -476,6 +490,7 @@ const exportHandler = {
 
 // EXPOSING HANDLERS
 contextBridge.exposeInMainWorld('storage', storageHandler);
+contextBridge.exposeInMainWorld('barcode', barcodeHandler);
 contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
@@ -495,6 +510,7 @@ contextBridge.exposeInMainWorld('validation', validationHandler);
 contextBridge.exposeInMainWorld('export', exportHandler);
 
 export type StorageHandler = typeof storageHandler;
+export type BarcodeHandler = typeof barcodeHandler;
 export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;

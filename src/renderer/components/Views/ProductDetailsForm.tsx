@@ -269,6 +269,7 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
             {`Add new ${type === 'BRANDS' ? 'brand' : 'category'}`}
           </DialogTitle>
           <TextField
+            autoFocus
             size="small"
             required
             label="Name"

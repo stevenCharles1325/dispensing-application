@@ -414,6 +414,7 @@ export default function InventoryForm({
           <br />
           <div className="w-full flex flex-wrap gap-7">
             <TextField
+              autoFocus
               color="secondary"
               label="Item name"
               required

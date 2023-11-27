@@ -266,6 +266,7 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
           </DialogTitle>
           <div className="flex flex-wrap gap-2">
             <TextField
+              autoFocus
               size="small"
               label="Tax ID"
               value={form.tax_id}

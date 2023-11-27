@@ -395,6 +395,7 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
             ? (
               <div className="flex flex-wrap gap-2 mb-[100px]">
                 <TextField
+                  autoFocus
                   required
                   sx={{
                     width: 350,

@@ -133,6 +133,7 @@ export default function SupplierForm({
       <br />
       <div className="w-full flex flex-wrap gap-7">
         <TextField
+          autoFocus
           label="Tax ID"
           value={form.tax_id}
           onChange={(event) => {
