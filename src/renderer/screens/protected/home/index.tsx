@@ -182,6 +182,7 @@ export default function Home() {
     }
 
     setSelectedItemIds([]);
+    setOrders({});
     refetchItems();
     displayAlert?.('Purchased successfully', 'success');
     return res.data as unknown as IPagination<PaymentDTO>;
@@ -189,7 +190,14 @@ export default function Home() {
 
   const handleSelectItem = useCallback(
     (id: string) => {
-      if (selectedItemIds.includes(id)) return;
+      if (selectedItemIds.includes(id)) {
+        setOrders((userOrders) => ({
+          ...userOrders,
+          [id]: userOrders[id] + 1,
+        }));
+
+        return;
+      };
 
       setOrders((userOrders) => ({
         ...userOrders,
@@ -275,7 +283,11 @@ export default function Home() {
 
         cards.push(
           <div key={i}>
-            <ItemCard cardInfo={card} onSelect={handleSelectItem} />
+            <ItemCard
+              cardInfo={card}
+              orderNumber={orders[card.id] ?? 0}
+              onSelect={handleSelectItem}
+            />
           </div>
         );
       }
@@ -286,7 +298,7 @@ export default function Home() {
         </div>
       );
     },
-    [handleSelectItem, items]
+    [handleSelectItem, items, orders]
   );
 
   const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {

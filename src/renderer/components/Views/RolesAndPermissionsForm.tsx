@@ -11,6 +11,7 @@ import useErrorHandler from "UI/hooks/useErrorHandler";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import PermissionRenderer from "./PermissionsRenderer";
 import useFreshUser from "UI/hooks/useFreshUser";
+import useConfirm from "UI/hooks/useConfirm";
 
 const steps = ['Set Role name and description', 'Adding Permissions'];
 
@@ -102,6 +103,7 @@ export interface RolesAndPermissionsFormProps {
 }
 
 export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermissionsFormProps) {
+  const confirm = useConfirm();
   const { displayAlert } = useAlert();
   const errorHandler = useErrorHandler();
   const getFreshUser = useFreshUser();
@@ -277,15 +279,21 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
     handleCloseModal();
   }, [selectedIds, form, permissionIds]);
 
-  const handleDeleteSelectedItem = useCallback(async () => {
-    const res = await window.role.deleteRole(selectedIds)
+  const handleDeleteSelectedItem = useCallback(() => {
+    confirm?.('Are you sure you want to delete this role(s)?', async (agreed) => {
+      if (agreed) {
+        const res = await window.role.deleteRole(selectedIds)
 
-    if (res.status === 'ERROR') {
-      return errorHandler({ errors: res.errors });
-    }
+        if (res.status === 'ERROR') {
+          errorHandler({ errors: res.errors });
 
-    await refetch();
-    displayAlert?.('Successfully deleted selected supplier(s)', 'success');
+          return;
+        }
+
+        await refetch();
+        displayAlert?.('Successfully deleted selected supplier(s)', 'success');
+      }
+    });
   }, [displayAlert, selectedIds]);
 
   const memoizedPermissionRenderer = useMemo(() => {

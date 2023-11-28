@@ -1,17 +1,20 @@
-import { Chip, IconButton } from '@mui/material';
+import { Badge, Chip, IconButton } from '@mui/material';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import { NumericFormat } from 'react-number-format';
+
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 
 interface ItemCardParams {
   cardInfo: ItemDTO;
+  orderNumber: number;
   onSelect: (id: string) => void;
 }
 
-export default function ItemCard({ cardInfo, onSelect }: ItemCardParams) {
+export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCardParams) {
   return (
     <div className="w-[325px] h-[460px] py-2">
-      <div className="w-full h-full rounded border shadow flex flex-col overflow-hidden">
+      <div className="w-full h-full rounded border shadow flex flex-col overflow-hidden hover:border-fuchsia-500 hover:shadow-lg">
         <div className="w-full h-[255px] bg-gray-300 relative">
           <img
             src={cardInfo.image?.url}
@@ -24,10 +27,20 @@ export default function ItemCard({ cardInfo, onSelect }: ItemCardParams) {
             }}
           />
           {cardInfo.status !== 'available' ? (
-            <div className="absolute top-0 w-full h-full flex justify-center items-center bg-slate-800/50">
+            <div className="absolute top-0 right-0 bg-slate-800/50">
               <div>
                 <Chip label={cardInfo.status} color="error" size="medium" />
               </div>
+            </div>
+          ) : null}
+          {orderNumber > 0 ? (
+            <div className="absolute top-0 right-0 flex justify-center items-center p-5">
+              <Badge
+                badgeContent={orderNumber}
+                color="success"
+              >
+                <ShoppingCartOutlinedIcon color="success" />
+              </Badge>
             </div>
           ) : null}
         </div>

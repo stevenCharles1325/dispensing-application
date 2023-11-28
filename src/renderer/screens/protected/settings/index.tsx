@@ -226,7 +226,7 @@ export default function Settings () {
             ? <RolesAndPermissionsForm onClose={handleCloseModal} />
             : null
           }
-        </div>scannerDialogOpen
+        </div>
       </Dialog>
       <DeviceDialog
         open={modal === 'BARCODE'}

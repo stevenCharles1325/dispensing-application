@@ -29,6 +29,7 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
+import useConfirm from 'UI/hooks/useConfirm';
 
 const columns: Array<GridColDef> = [
   {
@@ -138,6 +139,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Inventory() {
+  const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
@@ -215,24 +217,27 @@ export default function Inventory() {
     setModalAction('update');
   };
 
-  const handleDeleteSelectedItem = async () => {
-    console.log('Deleting item');
-    const res = await window.item.deleteItem(selectedIds);
+  const handleDeleteSelectedItem = () => {
+    confirm?.('Are you sure you want to delete selected item(s)?', async (agreed) => {
+      if (agreed) {
+        const res = await window.item.deleteItem(selectedIds);
 
-    if (res.status === 'ERROR') {
-      if (typeof res.errors?.[0] === 'string') {
-        return displayAlert?.(
-          (res.errors?.[0] as string) ?? 'Please try again',
-          'error'
-        );
+        if (res.status === 'ERROR') {
+          if (typeof res.errors?.[0] === 'string') {
+            return displayAlert?.(
+              (res.errors?.[0] as string) ?? 'Please try again',
+              'error'
+            );
+          }
+
+          const resErrors = res.errors as unknown as IPOSError[];
+          return displayAlert?.(resErrors[0] as unknown as string, 'error');
+        }
+
+        refetchItems();
+        displayAlert?.('Successfully deleted selected item(s)', 'success');
       }
-
-      const resErrors = res.errors as unknown as IPOSError[];
-      return displayAlert?.(resErrors[0] as unknown as string, 'error');
-    }
-
-    refetchItems();
-    displayAlert?.('Successfully deleted selected item(s)', 'success');
+    });
   };
 
   const handleOnClose = () => {

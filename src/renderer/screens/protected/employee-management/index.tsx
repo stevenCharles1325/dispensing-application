@@ -20,6 +20,7 @@ import PasswordInput from "UI/components/TextField/PasswordInput";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import useErrorHandler from "UI/hooks/useErrorHandler";
+import useConfirm from "UI/hooks/useConfirm";
 
 const columns: Array<GridColDef> = [
   {
@@ -126,6 +127,7 @@ const getRoles = async (
 };
 
 export default function EmployeeManagement () {
+  const confirm = useConfirm();
   const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
   const errorHandler = useErrorHandler();
@@ -259,18 +261,24 @@ export default function EmployeeManagement () {
     handleCloseModal();
   }, [selectedIds, form]);
 
-  const handleDeleteSelectedUser = useCallback(async () => {
-    const res = await window.user.deleteUser(selectedIds);
+  const handleDeleteSelectedUser = useCallback(() => {
+    confirm?.('Are you sure you want to delete selected user(s)?', async (agreed) => {
+      if (agreed) {
+        const res = await window.user.deleteUser(selectedIds);
 
-    if (res.status === 'ERROR') {
-      return errorHandler({
-        errors: res.errors,
-      });
-    }
+        if (res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
 
-    await refetch();
-    displayAlert?.('Successfully deleted selected supplier(s)', 'success');
-  }, [displayAlert, selectedIds]);
+          return;
+        }
+
+        await refetch();
+        displayAlert?.('Successfully deleted selected supplier(s)', 'success');
+      }
+    });
+  }, [displayAlert, selectedIds, confirm]);
 
   useEffect(() => {
     setPlaceHolder?.('Search for employee name');

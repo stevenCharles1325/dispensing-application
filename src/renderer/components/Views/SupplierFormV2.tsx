@@ -9,6 +9,8 @@ import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IPOSValidationError from "App/interfaces/pos/pos.validation-error.interface";
 import supplierStatuses from "Main/data/defaults/statuses/supplier";
 import useAlert from "UI/hooks/useAlert";
+import useConfirm from "UI/hooks/useConfirm";
+import useErrorHandler from "UI/hooks/useErrorHandler";
 import React from "react";
 import { useCallback, useState } from "react";
 
@@ -89,6 +91,8 @@ export interface ProductDetailsFormProps {
 }
 
 export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
+  const confirm = useConfirm();
+  const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
 
   const [form, setForm] = useState<Partial<SupplierDTO>>({ status: 'active' });
@@ -185,24 +189,24 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
     handleCloseModal();
   }, [selectedIds, form]);
 
-  const handleDeleteSelectedItem = useCallback(async () => {
-    const res = await window.supplier.deleteSupplier(selectedIds)
+  const handleDeleteSelectedItem = useCallback(() => {
+    confirm?.('Are you sure you want to delete selected supplier(s)?', async (agreed) => {
+      if (agreed) {
+        const res = await window.supplier.deleteSupplier(selectedIds)
 
-    if (res.status === 'ERROR') {
-      if (typeof res.errors?.[0] === 'string') {
-        return displayAlert?.(
-          (res.errors?.[0] as string) ?? 'Please try again',
-          'error'
-        );
+        if (res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
+
+          return;
+        }
+
+        await refetch();
+        displayAlert?.('Successfully deleted selected supplier(s)', 'success');
       }
-
-      const resErrors = res.errors as unknown as IPOSError[];
-      return displayAlert?.(resErrors[0] as unknown as string, 'error');
-    }
-
-    await refetch();
-    displayAlert?.('Successfully deleted selected supplier(s)', 'success');
-  }, [displayAlert, selectedIds]);
+    });
+  }, [displayAlert, selectedIds, confirm]);
 
   return (
     <>

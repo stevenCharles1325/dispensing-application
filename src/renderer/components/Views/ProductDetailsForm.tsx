@@ -8,6 +8,8 @@ import IPagination from "App/interfaces/pagination/pagination.interface";
 import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IPOSValidationError from "App/interfaces/pos/pos.validation-error.interface";
 import useAlert from "UI/hooks/useAlert";
+import useConfirm from "UI/hooks/useConfirm";
+import useErrorHandler from "UI/hooks/useErrorHandler";
 import { useCallback, useState } from "react";
 
 const columns: Array<GridColDef> = [
@@ -79,6 +81,8 @@ export interface ProductDetailsFormProps {
 }
 
 export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFormProps) {
+  const confirm = useConfirm();
+  const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
 
   const [name, setName] = useState('');
@@ -188,25 +192,25 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
     handleCloseModal();
   }, [selectedIds, name, description]);
 
-  const handleDeleteSelectedItem = useCallback(async () => {
-    const res = type === 'BRANDS'
-      ? await window.brand.deleteBrand(selectedIds)
-      : await window.category.deleteCategory(selectedIds)
+  const handleDeleteSelectedItem = useCallback(() => {
+    confirm?.('Are you sure you want to delete the selecteds?', async (agreed) => {
+      if (agreed) {
+        const res = type === 'BRANDS'
+          ? await window.brand.deleteBrand(selectedIds)
+          : await window.category.deleteCategory(selectedIds)
 
-    if (res.status === 'ERROR') {
-      if (typeof res.errors?.[0] === 'string') {
-        return displayAlert?.(
-          (res.errors?.[0] as string) ?? 'Please try again',
-          'error'
-        );
+        if (res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
+
+          return;
+        }
+
+        refetch();
+        displayAlert?.('Successfully deleted', 'success');
       }
-
-      const resErrors = res.errors as unknown as IPOSError[];
-      return displayAlert?.(resErrors[0] as unknown as string, 'error');
-    }
-
-    refetch();
-    displayAlert?.('Successfully deleted', 'success');
+    });
   }, [type, displayAlert, selectedIds]);
 
   return (
