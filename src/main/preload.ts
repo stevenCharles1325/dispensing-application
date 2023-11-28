@@ -23,6 +23,7 @@ import RoleDTO from 'App/data-transfer-objects/role.dto';
 import PermissionDTO from 'App/data-transfer-objects/permission.dto';
 import { PermissionsKebabType } from './data/defaults/permissions';
 import HidDTO from 'App/data-transfer-objects/hid.dto';
+import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 
 export type Channels = 'ipc-pos';
 
@@ -63,6 +64,8 @@ const mainHandler = {
 +
 + ================================ */
 const barcodeHandler = {
+  status: async (): Promise<IResponse<string[] | IPOSError[] | IDeviceInfo>> =>
+    ipcRenderer.invoke('barcode:status'),
   devices: async (): Promise<IResponse<string[] | IPOSError[] | HidDTO[]>> =>
     ipcRenderer.invoke('barcode:devices'),
   select: async (device: HidDTO): Promise<IResponse<string[] | IPOSError[] | void>> =>

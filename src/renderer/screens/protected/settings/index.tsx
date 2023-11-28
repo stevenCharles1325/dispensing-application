@@ -17,6 +17,8 @@ import SupplierFormV2 from "UI/components/Views/SupplierFormV2";
 import { TransitionProps } from "@mui/material/transitions";
 import React from "react";
 import RolesAndPermissionsForm from "UI/components/Views/RolesAndPermissionsForm";
+import useBarcode from "UI/hooks/useBarcode";
+import DeviceDialog from "UI/components/Dialogs/DevicesDialog";
 
 type ModalNames =
   | 'CATEGORIES'
@@ -24,6 +26,7 @@ type ModalNames =
   | 'SUPPLIERS'
   | 'BUSINESS DETAILS'
   | 'ROLES AND PERMISSIONS'
+  | 'BARCODE'
   | null;
 
 const Transition = React.forwardRef(function Transition(
@@ -36,6 +39,12 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Settings () {
+  const {
+    devices,
+    isLoading,
+    refetch,
+    handleSelect,
+  } = useBarcode();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -129,6 +138,17 @@ export default function Settings () {
                 <Button color="secondary" onClick={handleOpenModal('ROLES AND PERMISSIONS')}>Edit</Button>
               </div>
             </div>
+
+            {/* Barcode select device */}
+            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+              <Chip label="Barcode" variant="outlined" color="secondary" />
+              <p className="py-5 px-2 text-gray-400">
+                Select a device for scanning
+              </p>
+              <div className="w-full flex flex-row-reverse">
+                <Button color="secondary" onClick={handleOpenModal('BARCODE')}>Open</Button>
+              </div>
+            </div>
           </div>
 
           <Divider>
@@ -206,8 +226,16 @@ export default function Settings () {
             ? <RolesAndPermissionsForm onClose={handleCloseModal} />
             : null
           }
-        </div>
+        </div>scannerDialogOpen
       </Dialog>
+      <DeviceDialog
+        open={modal === 'BARCODE'}
+        refresh={refetch}
+        devices={devices}
+        loading={isLoading}
+        onChange={handleSelect}
+        onClose={handleCloseModal}
+      />
     </>
   );
 }

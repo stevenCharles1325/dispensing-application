@@ -22,6 +22,7 @@ import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import { IOrderDetails } from 'App/interfaces/pos/pos.order-details.interface';
 import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import PaymentUISwitch from 'UI/components/Switches/PaymentSwitch';
+import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -282,13 +283,7 @@ export default function Home() {
               onClick={handleFilterClick}
               className="shadow-md border"
             />
-            {/* <Chip
-              label="Barcode scanning"
-              color="secondary"
-              variant="outlined"
-              onClick={() => displayAlert?.('feature coming soon', 'info')}
-              className="shadow-md border"
-            /> */}
+            <BarcodeIndicator />
           </div>
           <div className="grow">
             {items?.length ? (

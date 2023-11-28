@@ -1,28 +1,23 @@
-import HID from "node-hid";
 import IEvent from "App/interfaces/event/event.interface";
 import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IResponse from "App/interfaces/pos/pos.response.interface";
 import handleError from "App/modules/error-handler.module";
-import HidDTO from "App/data-transfer-objects/hid.dto";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
+import IDeviceInfo from "App/interfaces/barcode/barcode.device-info.interface";
 
-export default class BarcodeDevicesEvent implements IEvent {
-  public channel: string = 'barcode:devices';
+export default class BarcodeStatusEvent implements IEvent {
+  public channel: string = 'barcode:status';
 
   public async listener({
     globalStorage,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | HidDTO[] | any>
+    IResponse<string[] | IPOSError[] | IDeviceInfo | any>
   > {
     try {
-      const selectedDevice = globalStorage.get('HID:SELECTED');
-      const devices = HID.devices().map(device => ({
-        ...device,
-        selected: selectedDevice?.id === `${device.vendorId}${device.productId}`
-      }));
+      const selectedDevice: IDeviceInfo = globalStorage.get('HID:SELECTED');
 
       return {
-        data: devices,
+        data: selectedDevice,
         code: 'REQ_OK',
         status: 'SUCCESS',
       };

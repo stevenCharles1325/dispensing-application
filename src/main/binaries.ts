@@ -1,5 +1,4 @@
 /* eslint-disable consistent-return */
-
 import executeMinioBinary from "./data/binaries/minio";
 
 const executeBinaries = () => {
@@ -7,7 +6,7 @@ const executeBinaries = () => {
 
   const binaries = {
     minio,
-  }
+  };
 
   const killAll = () => {
     const list = Object.values(binaries);

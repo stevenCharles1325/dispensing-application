@@ -32,7 +32,16 @@ const useErrorHandler = () => {
 
         for (const error of resErrors) {
           console.log('POS ERROR HANDLER: ', error.message);
-          onError?.(error.field, (error.message as string) ?? 'Invalid input');
+
+          if (!error.field) {
+            const message =
+              (error?.message as string) ??
+              'Something went wrong. Please try again later.';
+
+            displayAlert?.(message, 'error');
+          } else {
+            onError?.(error.field, (error.message as string) ?? 'Invalid input');
+          }
         }
 
         return resErrors[0].message
