@@ -203,6 +203,33 @@ export default function Home() {
     [selectedItemIds]
   );
 
+  const handleSelectItemByBarcode = useCallback(
+    (itemBarcode: string) => {
+      const item = items.find(({ barcode }) => barcode === itemBarcode);
+
+      if (item) {
+        if (selectedItemIds.includes(item.id)) {
+          setOrders((userOrders) => ({
+            ...userOrders,
+            [item.id]: userOrders[item.id] += 1,
+          }));
+        } else {
+          setSelectedItemIds((selectedIds) =>
+            [...selectedIds, item.id]
+          );
+
+          setOrders((userOrders) => ({
+            ...userOrders,
+            [item.id]: 1,
+          }));
+        }
+      } else {
+        displayAlert?.(`Unable to find item with code ${itemBarcode}`, 'error');
+      }
+    },
+    [items, selectedItemIds, displayAlert]
+  );
+
   const handleIterateOrderQuantity = (
     action: 'add' | 'minus' = 'add',
     id: string
@@ -269,6 +296,18 @@ export default function Home() {
   useEffect(() => {
     setPlaceHolder?.('Search for product name');
   }, [setPlaceHolder]);
+
+  useEffect(() => {
+    window.main.mainMessage((_, payload) => {
+      if (payload.channel === 'BARCODE:DATA') {
+        handleSelectItemByBarcode(payload.data);
+      }
+
+      if (payload.channel === 'BARCODE:ERROR') {
+        displayAlert?.(payload.data, 'error');
+      }
+    })
+  }, [displayAlert, handleSelectItemByBarcode]);
 
   return (
     <>

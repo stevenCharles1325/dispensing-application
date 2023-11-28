@@ -4,7 +4,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Chip, Dialog, Slide } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
@@ -28,6 +28,7 @@ import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
+import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 
 const columns: Array<GridColDef> = [
   {
@@ -240,6 +241,19 @@ export default function Inventory() {
     setModalAction(null);
   }
 
+  const handleSelectItemByBarcode = useCallback(
+    (itemBarcode: string) => {
+      const item = items.find(({ barcode }) => barcode === itemBarcode);
+
+      if (item) {
+        setSelectedIds([item.id]);
+      } else {
+        displayAlert?.(`Unable to find item with code ${itemBarcode}`, 'error');
+      }
+    },
+    [items, selectedIds, displayAlert]
+  );
+
   useEffect(() => {
     const id = searchParams.get('id');
 
@@ -248,6 +262,18 @@ export default function Inventory() {
       setModalAction('update');
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    window.main.mainMessage((_, payload) => {
+      if (payload.channel === 'BARCODE:DATA') {
+        handleSelectItemByBarcode(payload.data);
+      }
+
+      if (payload.channel === 'BARCODE:ERROR') {
+        displayAlert?.(payload.data, 'error');
+      }
+    })
+  }, [displayAlert, handleSelectItemByBarcode]);
 
   return (
     <div className="w-full h-full flex flex-col justify-around">
@@ -301,6 +327,7 @@ export default function Inventory() {
             onClick={handleDeleteSelectedItem}
             disabled={selectedIds.length === 0}
           />
+          <BarcodeIndicator />
         </div>
         {data ? (
           <DataGrid
