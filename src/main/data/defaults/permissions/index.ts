@@ -123,6 +123,23 @@ const permissions = [
     group_name: 'products',
   },
 
+  // Inventory-record permissions
+  {
+    name: 'View Stock Record',
+    kebab: 'view-stock-record',
+    group_name: 'stocks',
+  },
+  {
+    name: 'Create Stock Record',
+    kebab: 'create-stock-record',
+    group_name: 'stocks',
+  },
+  // {
+  //   name: 'Archive Item',
+  //   kebab: 'archive-item',
+  //   group_name: 'products',
+  // },
+
   // Category management permissions
   {
     name: 'View Category',

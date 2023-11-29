@@ -23,6 +23,7 @@ import { IOrderDetails } from 'App/interfaces/pos/pos.order-details.interface';
 import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import PaymentUISwitch from 'UI/components/Switches/PaymentSwitch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
+import useErrorHandler from 'UI/hooks/useErrorHandler';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -75,6 +76,7 @@ const getCategories = async (): Promise<IPagination<CategoryDTO>> => {
 };
 
 export default function Home() {
+  const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
   const [selectedItemIds, setSelectedItemIds] = useState<Array<string>>([]);
@@ -177,8 +179,9 @@ export default function Home() {
     const res = await window.payment.createPayment(orderDetails);
 
     if (res.status === 'ERROR') {
-      const errorMessage = res.errors?.[0] as unknown as string;
-      return displayAlert?.(errorMessage, 'error');
+      return errorHandler({
+        errors: res.errors,
+      });
     }
 
     setSelectedItemIds([]);

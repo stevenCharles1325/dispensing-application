@@ -24,6 +24,7 @@ import PermissionDTO from 'App/data-transfer-objects/permission.dto';
 import { PermissionsKebabType } from './data/defaults/permissions';
 import HidDTO from 'App/data-transfer-objects/hid.dto';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
+import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -242,6 +243,26 @@ const itemHandler = {
     id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('item:delete', id),
+};
+
+/* ================================
++
++   INVENTORY-RECORD/STOCKS EVENT HANDLER
++
++ ================================ */
+const inventoryRecordHandler = {
+  getRecords: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<InventoryRecordDTO>>> =>
+    ipcRenderer.invoke('inventory-record:show', payload, page, total),
+
+  createRecord: async (
+    payload: InventoryRecordDTO
+  ): Promise<
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | InventoryRecordDTO[]>
+  > => ipcRenderer.invoke('inventory-record:create', payload),
 };
 
 /* ================================
@@ -501,6 +522,7 @@ contextBridge.exposeInMainWorld('user', userHandler);
 contextBridge.exposeInMainWorld('role', roleHandler);
 contextBridge.exposeInMainWorld('permission', permissionHandler);
 contextBridge.exposeInMainWorld('item', itemHandler);
+contextBridge.exposeInMainWorld('inventory-record', inventoryRecordHandler);
 contextBridge.exposeInMainWorld('brand', brandHandler);
 contextBridge.exposeInMainWorld('image', imageHandler);
 contextBridge.exposeInMainWorld('category', categoryHandler);
@@ -521,6 +543,7 @@ export type UserHandler = typeof userHandler;
 export type RoleHandler = typeof roleHandler;
 export type PermissionHandler = typeof permissionHandler;
 export type ItemHandler = typeof itemHandler;
+export type InventoryRecordHandler = typeof inventoryRecordHandler;
 export type ImageHandler = typeof imageHandler;
 export type BrandHandler = typeof brandHandler;
 export type CategoryHandler = typeof categoryHandler;

@@ -4,8 +4,11 @@ import {
   Entity,
   OneToOne,
   Relation,
+  OneToMany,
   ManyToOne,
   JoinColumn,
+  BeforeInsert,
+  AfterInsert,
   BeforeUpdate,
   CreateDateColumn,
   UpdateDateColumn,
@@ -31,6 +34,7 @@ import type { Image } from './image.model';
 import type { Supplier } from './supplier.model';
 import type { Brand } from './brand.model';
 import type { Category } from './category.model';
+import type { InventoryRecord } from './inventory-record.model';
 
 @Entity('items')
 export class Item {
@@ -59,6 +63,32 @@ export class Item {
       this.status = 'available';
     }
   }
+
+  @AfterInsert()
+  async addStockInInitialRecord() {
+    await Bull(
+      'STOCK_JOB',
+      {
+        item_id: this.id,
+        purpose: 'initial-stock',
+        quantity: this.stock_quantity,
+        type: 'stock-in',
+      }
+    );
+  }
+
+  // @AfterInsert()
+  // async addStockInInitialRecord() {
+  //   Bull(
+  //     'STOCK_JOB',
+  //     {
+  //       item_id: this.id,
+  //       purpose: 'initial-stock',
+  //       quantity: this.stock_quantity,
+  //       type: 'stock-in',
+  //     }
+  //   )
+  // }
 
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -184,9 +214,25 @@ export class Item {
   @JoinColumn({ name: 'system_id', referencedColumnName: 'id' })
   system: Relation<System>;
 
+  @OneToMany('InventoryRecord', (record: InventoryRecord) => record.item, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'id', referencedColumnName: 'item_id' })
+  records: Relation<InventoryRecord>[];
+
   // Custom functions
   async purchase(quantity: number = 1) {
     this.stock_quantity -= quantity;
+
+    await Bull(
+      'STOCK_JOB',
+      {
+        item_id: this.id,
+        purpose: 'sold',
+        quantity,
+        type: 'stock-out',
+      }
+    );
 
     if (this.stock_quantity > 15 && this.stock_quantity <= 20) {
       await Bull(

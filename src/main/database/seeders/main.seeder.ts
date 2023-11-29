@@ -40,7 +40,6 @@ export default class MainSeeder implements Seeder {
       });
 
       const system = await SystemRepo.save(_system);
-      console.log(system);
       await SystemRepo.save({
         ...system,
         main_branch_id: system.uuid,
@@ -69,8 +68,6 @@ export default class MainSeeder implements Seeder {
               name: role!.name,
               kebab: role!.kebab,
             };
-
-            console.log(perms);
 
             _role['permissions'] = perms;
             return _role;

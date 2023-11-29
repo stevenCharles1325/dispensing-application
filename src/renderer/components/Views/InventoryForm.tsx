@@ -34,6 +34,7 @@ import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interfa
 import useAppDrive from 'UI/hooks/useAppDrive';
 import useFieldRequired from 'UI/hooks/useFieldRequired';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
+import useErrorHandler from 'UI/hooks/useErrorHandler';
 
 interface InventoryFormProps {
   action: 'create' | 'update' | null;
@@ -111,6 +112,7 @@ export default function InventoryForm({
   getSuppliers,
   onClose,
 }: InventoryFormProps) {
+  const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
   const drive = useAppDrive?.();
   const [openDrive, driveListener] = drive?.subscribe?.('INVENTORY_FORM') ?? [];
@@ -337,18 +339,18 @@ export default function InventoryForm({
     );
 
     if (res.status === 'ERROR') {
-      if (typeof res.errors?.[0] === 'string') {
-        return displayAlert?.(
-          (res.errors?.[0] as string) ?? 'Please try again',
-          'error'
-        );
+      const errors: Record<string, any> = {};
+
+      const onError = (field: string | null, message: string) => {
+        if (field) {
+          errors[field] = message;
+        }
       }
 
-      const errors: Record<string, any> = {};
-      const resErrors = res.errors as unknown as IPOSValidationError[];
-      for (const error of resErrors) {
-        errors[error.field] = error.message;
-      }
+      errorHandler({
+        errors: res.errors,
+        onError,
+      });
 
       return setErrors(errors);
     }
@@ -629,6 +631,7 @@ export default function InventoryForm({
           <div className="w-full flex flex-wrap gap-5">
             <TextField
               required
+              disabled={action === 'update'}
               color="secondary"
               label="Stock Quantity"
               value={form.stock_quantity}

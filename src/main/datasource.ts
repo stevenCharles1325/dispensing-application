@@ -15,6 +15,7 @@ import { Token } from './database/models/token.model';
 import { Transaction } from './database/models/transaction.model';
 import { User } from './database/models/user.model';
 import { Notification } from './database/models/notification.model';
+import { InventoryRecord } from './database/models/inventory-record.model';
 import MainSeeder from './database/seeders/main.seeder';
 
 type DataSourceWithSeederOption = DataSourceOptions & SeederOptions;
@@ -40,7 +41,8 @@ export const options: DataSourceWithSeederOption = {
     Token,
     Transaction,
     User,
-    Notification
+    Notification,
+    InventoryRecord,
   ],
   migrations: [
     `${MIGRATION_PATH}/database/migrations/*`,

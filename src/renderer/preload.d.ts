@@ -6,6 +6,7 @@ import {
   CategoryHandler,
   ExportHandler,
   ImageHandler,
+  InventoryRecordHandler,
   ItemHandler,
   MainHandler,
   NotifHandler,
@@ -31,6 +32,7 @@ declare global {
     user: UserHandler;
     image: ImageHandler;
     item: ItemHandler;
+    inventoryRecord: InventoryRecordHandler;
     brand: BrandHandler;
     category: CategoryHandler;
     supplier: SupplierHandler;
