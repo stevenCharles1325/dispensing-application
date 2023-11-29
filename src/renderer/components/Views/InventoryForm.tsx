@@ -16,6 +16,8 @@ import {
   ToggleButtonGroup,
   Button,
   Chip,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import itemStatuses from 'UI/data/defaults/statuses/item';
 import measurements from 'UI/data/defaults/unit-of-measurements';
@@ -35,6 +37,50 @@ import useAppDrive from 'UI/hooks/useAppDrive';
 import useFieldRequired from 'UI/hooks/useFieldRequired';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
+import { GridColDef } from '@mui/x-data-grid';
+
+
+const columns: Array<GridColDef> = [
+  {
+    field: 'item',
+    headerName: 'Product name',
+    flex: 1,
+    type: 'string',
+    valueFormatter(params) {
+      return `${params.value.name}`;
+    },
+  },
+  {
+    field: 'purpose',
+    headerName: 'Purpose',
+    flex: 1,
+    type: 'string',
+  },
+  {
+    field: 'quantity',
+    headerName: 'Quantity',
+    flex: 1,
+    type: 'number',
+  },
+  {
+    field: 'type',
+    headerName: 'Stock-action',
+    width: 170,
+    type: 'string',
+    renderCell: (params) => (
+      <Chip
+        label={params.value}
+        color={
+          params.value === 'stock-in'
+            ? 'success'
+            : params.value === 'stock-out'
+            ? 'error'
+            : 'warning'
+        }
+      />
+    ),
+  },
+];
 
 interface InventoryFormProps {
   action: 'create' | 'update' | null;
@@ -99,6 +145,13 @@ const NumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
     );
   }
 );
+
+function allyProps(index: number) {
+  return {
+    id: `inventory-tab-${index}`,
+    'aria-controls': `inventory-tabpanel-${index}`,
+  }
+}
 
 export default function InventoryForm({
   action,
@@ -407,387 +460,133 @@ export default function InventoryForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action, selectedItem]);
 
+  const [tab, setTab] = useState(0);
+
+  const handleOnChangeTab = (_, newValue: number) => {
+    setTab(newValue);
+  }
+
   return (
-    <div className="w-full h-full flex p-5">
-      <div className="grow w-[50%] p-5 h-full flex flex-col gap-14 overflow-auto">
-        {/* PRODUCT INFORMATION */}
-        <div className="w-full h-fit">
-          <h3>Product Information</h3>
-          <br />
-          <div className="w-full flex flex-wrap gap-7">
-            <TextField
-              autoFocus
-              color="secondary"
-              label="Item name"
-              required
-              value={form.name}
-              onChange={(event) => {
-                dispatch({ type: 'name', payload: event.target.value });
-              }}
-              variant="outlined"
-              size="small"
-              sx={{
-                width: 300,
-              }}
-              helperText={errors.name}
-              error={Boolean(errors.name)}
-            />
-            <TextField
-              label="Stock Keeping Unit (SKU)"
-              required
-              value={form.sku}
-              color="secondary"
-              onChange={(event) => {
-                dispatch({
-                  type: 'sku',
-                  payload: event.target.value?.toUpperCase(),
-                });
-              }}
-              variant="outlined"
-              size="small"
-              sx={{
-                width: 300,
-              }}
-              helperText={errors.sku}
-              error={Boolean(errors.sku)}
-            />
-            <TextField
-              label="Barcode"
-              color="secondary"
-              value={form.barcode}
-              onChange={(event) => {
-                dispatch({ type: 'barcode', payload: event.target.value });
-              }}
-              variant="outlined"
-              size="small"
-              sx={{
-                width: 300,
-              }}
-              helperText={errors.barcode}
-              error={Boolean(errors.barcode)}
-            />
-            <CustomAutoComplete
-              value={brands.find(({ id }) => id === form.brand_id)?.name}
-              required
-              options={brands}
-              onAdd={handleAddNewBrand}
-              onChange={({ name }) => {
-                dispatch({
-                  type: 'brand_id',
-                  payload:
-                    brands.find(({ name: brandName }) => brandName === name)
-                      ?.id ?? null,
-                });
-              }}
-              sx={{ width: 300 }}
-              label="Brands"
-              helperText={errors.brand_id}
-              error={Boolean(errors.brand_id)}
-            />
-            <CustomAutoComplete
-              options={categories}
-              required
-              value={categories.find(({ id }) => id === form.category_id)?.name}
-              onAdd={handleAddNewCategory}
-              onChange={({ name }) => {
-                dispatch({
-                  type: 'category_id',
-                  payload:
-                    categories.find(({ name: categName }) => categName === name)
-                      ?.id ?? null,
-                });
-              }}
-              sx={{ width: 300 }}
-              label="Categories"
-              helperText={errors.category_id}
-              error={Boolean(errors.category_id)}
-            />
-            <Autocomplete
-              size="small"
-              options={itemStatuses}
-              color="secondary"
-              value={form.status}
-              onChange={(_, value) => {
-                dispatch({
-                  type: 'status',
-                  payload: value,
-                });
-              }}
-              sx={{
-                width: 300,
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  color="secondary"
-                  label="Status"
-                  helperText={errors.status}
-                  error={Boolean(errors.status)}
-                />
-              )}
-            />
-            <TextField
-              label="Description"
-              color="secondary"
-              value={form.description}
-              onChange={(event) => {
-                dispatch({
-                  type: 'description',
-                  payload: event.target.value,
-                });
-              }}
-              variant="outlined"
-              size="small"
-              rows={5}
-              multiline
-              sx={{
-                width: 630,
-              }}
-              helperText={errors.description}
-              error={Boolean(errors.description)}
-            />
-          </div>
-        </div>
-
-        {/* PRICING INFORMATION */}
-        <div className="w-full h-fit">
-          <h3>Pricing Information</h3>
-          <br />
-          <div className="w-full flex flex-wrap gap-5">
-            <TextField
-              required
-              color="secondary"
-              label="Cost Price (Peso)"
-              value={form.cost_price}
-              onChange={(event) => {
-                dispatch({
-                  type: 'cost_price',
-                  payload: Number(event.target.value),
-                });
-              }}
-              variant="outlined"
-              size="small"
-              InputProps={{
-                inputComponent: PesoNumberFormat as any,
-              }}
-              sx={{
-                width: 300,
-              }}
-              helperText={errors.cost_price}
-              error={Boolean(errors.cost_price)}
-            />
-            <TextField
-              required
-              color="secondary"
-              label="Selling Price (Peso)"
-              value={form.selling_price}
-              onChange={(event) => {
-                dispatch({
-                  type: 'selling_price',
-                  payload: Number(event.target.value),
-                });
-              }}
-              variant="outlined"
-              size="small"
-              InputProps={{
-                inputComponent: PesoNumberFormat as any,
-              }}
-              sx={{
-                width: 300,
-              }}
-              helperText={errors.selling_price}
-              error={Boolean(errors.selling_price)}
-            />
-            <TextField
-              color="secondary"
-              label="Tax Rate"
-              value={form.tax_rate}
-              type="number"
-              onChange={(event) => {
-                dispatch({
-                  type: 'tax_rate',
-                  payload: Number(event.target.value),
-                });
-              }}
-              InputProps={{
-                inputComponent: NumberFormat as any,
-              }}
-              variant="outlined"
-              size="small"
-              sx={{
-                width: 300,
-              }}
-              helperText={errors.tax_rate ?? 'Input value will be automatically converted into percentage.'}
-              error={Boolean(errors.tax_rate)}
-            />
-          </div>
-        </div>
-
-        {/* INVENTORY INFORMATION */}
-        <div className="w-full h-fit">
-          <h3>Inventory Information</h3>
-          <br />
-          <div className="w-full flex flex-wrap gap-5">
-            <TextField
-              required
-              disabled={action === 'update'}
-              color="secondary"
-              label="Stock Quantity"
-              value={form.stock_quantity}
-              type="number"
-              onChange={(event) => {
-                dispatch({
-                  type: 'stock_quantity',
-                  payload: Number(event.target.value),
-                });
-              }}
-              InputProps={{
-                inputComponent: NumberFormat as any,
-              }}
-              variant="outlined"
-              size="small"
-              sx={{
-                width: 300,
-              }}
-              helperText={errors.stock_quantity}
-              error={Boolean(errors.stock_quantity)}
-            />
-            <Autocomplete
-              size="small"
-              color="secondary"
-              options={measurements}
-              value={form.unit_of_measurement}
-              onChange={(_, value) => {
-                dispatch({
-                  type: 'unit_of_measurement',
-                  payload: value,
-                });
-              }}
-              sx={{
-                width: 300,
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  color="secondary"
-                  label="Unit of measurement"
-                  helperText={errors.unit_of_measurement}
-                  error={Boolean(errors.unit_of_measurement)}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <Divider orientation="vertical" variant="middle" flexItem />
-      <div className="grow w-[50%] p-5 overflow-auto flex flex-col justify-between">
-        <div className="grow">
-          <div className="flex gap-14 flex-col">
-            <div>
-              <div className='flex flex-row gap-2 items-center'>
-                <p className='p-0 m-0'>Item Image</p>
-                <Chip label="Optional" size="small" variant="outlined" sx={{ color: 'var(--info-text-color)' }} />
-              </div>
-              <br />
-              <div className="flex flex-row gap-4">
-                <div className="border border-gray-300 hover:border-gray-950 rounded h-[170px] w-[170px] relative">
-                  <div
-                    className="relative border rounded opacity-0 w-full h-full"
-                    onClick={() => {
-                      drive.setMultiple?.(false);
-                      openDrive?.();
+    <div className='p-2'>
+      {
+        action === 'update'
+        ? (
+          <>
+            <Tabs value={tab} onChange={handleOnChangeTab} aria-label='inventory-tabs'>
+              <Tab label="Product Details" {...allyProps(0)} />
+              <Tab label="Stocks" {...allyProps(0)} />
+            </Tabs>
+            <Divider />
+          </>
+        )
+        : null
+      }
+      {
+        tab === 0
+        ? (
+          <div className="w-full h-full flex p-3">
+            <div className="grow w-[50%] p-5 h-full flex flex-col gap-14 overflow-auto">
+              {/* PRODUCT INFORMATION */}
+              <div className="w-full h-fit">
+                <h3>Product Information</h3>
+                <br />
+                <div className="w-full flex flex-wrap gap-7">
+                  <TextField
+                    autoFocus
+                    color="secondary"
+                    label="Item name"
+                    required
+                    value={form.name}
+                    onChange={(event) => {
+                      dispatch({ type: 'name', payload: event.target.value });
                     }}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.name}
+                    error={Boolean(errors.name)}
                   />
-                  <div
-                    className="absolute inset-0 flex flex-col justify-center items-center select-none pointer-events-none"
-                    style={{ color: 'var(--info-text-color) ' }}
-                  >
-                    {imageFile ? (
-                      <img
-                        className="w-full h-full"
-                        style={{
-                          objectFit: 'cover',
-                        }}
-                        src={imageFile?.url}
-                        alt={imageFile?.name}
-                      />
-                    ) : (
-                      <>
-                        <LandscapeIcon fontSize="large" />
-                        <p className="text-center">170 x 170</p>
-                        <p className="text-center">Click to upload</p>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-col justify-between">
-                  <div style={{ color: 'var(--info-text-color)' }}>
-                    <p>
-                      File name: <b>{imageFile?.name}</b>
-                    </p>
-                  </div>
-                  <div className="flex gap-4">
-                    <Button
-                      disabled={Boolean(!imageFile)}
-                      variant="outlined"
-                      color="error"
-                      onClick={handleRemoveSelectedImage}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* SUPPLIER INFORMATION */}
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-row gap-2 items-center">
-                <ToggleButtonGroup
-                  size="small"
-                  color="secondary"
-                  value={supplierToggle}
-                  exclusive
-                  onChange={(_, supplierAction) => {
-                    if (supplierAction) {
-                      handleSupplierToggle(supplierAction);
-                    }
-                  }}
-                  aria-label="Supplier-action-toggle"
-                >
-                  <ToggleButton className="shadow-md" value="add-existing">
-                    Add Existing Supplier
-                  </ToggleButton>
-                  <ToggleButton className="shadow-md" value="add-new">
-                    Add New Supplier
-                  </ToggleButton>
-                </ToggleButtonGroup>
-                <Chip label="Optional" size="small" variant="outlined" sx={{ color: 'var(--info-text-color)' }} />
-              </div>
-              {supplierToggle === 'add-existing' ? (
-                <div className="flex flex-col gap-5">
-                  <h5>Select Existing Supplier</h5>
+                  <TextField
+                    label="Stock Keeping Unit (SKU)"
+                    required
+                    value={form.sku}
+                    color="secondary"
+                    onChange={(event) => {
+                      dispatch({
+                        type: 'sku',
+                        payload: event.target.value?.toUpperCase(),
+                      });
+                    }}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.sku}
+                    error={Boolean(errors.sku)}
+                  />
+                  <TextField
+                    label="Barcode"
+                    color="secondary"
+                    value={form.barcode}
+                    onChange={(event) => {
+                      dispatch({ type: 'barcode', payload: event.target.value });
+                    }}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.barcode}
+                    error={Boolean(errors.barcode)}
+                  />
+                  <CustomAutoComplete
+                    value={brands.find(({ id }) => id === form.brand_id)?.name}
+                    required
+                    options={brands}
+                    onAdd={handleAddNewBrand}
+                    onChange={({ name }) => {
+                      dispatch({
+                        type: 'brand_id',
+                        payload:
+                          brands.find(({ name: brandName }) => brandName === name)
+                            ?.id ?? null,
+                      });
+                    }}
+                    sx={{ width: 300 }}
+                    label="Brands"
+                    helperText={errors.brand_id}
+                    error={Boolean(errors.brand_id)}
+                  />
+                  <CustomAutoComplete
+                    options={categories}
+                    required
+                    value={categories.find(({ id }) => id === form.category_id)?.name}
+                    onAdd={handleAddNewCategory}
+                    onChange={({ name }) => {
+                      dispatch({
+                        type: 'category_id',
+                        payload:
+                          categories.find(({ name: categName }) => categName === name)
+                            ?.id ?? null,
+                      });
+                    }}
+                    sx={{ width: 300 }}
+                    label="Categories"
+                    helperText={errors.category_id}
+                    error={Boolean(errors.category_id)}
+                  />
                   <Autocomplete
                     size="small"
-                    options={suppliers}
-                    getOptionDisabled={(option) => option.status !== 'active'}
-                    renderOption={(props, option) => (
-                      <li {...props}>
-                        {`${option.email} ${option.status !== 'active' ? `(${option.status})` : ''}`}
-                      </li>
-                    )}
-                    getOptionLabel={(option) => option.email}
-                    value={
-                      suppliers.find(({ id }) => id === form.supplier_id) ??
-                      null
-                    }
+                    options={itemStatuses}
+                    color="secondary"
+                    value={form.status}
                     onChange={(_, value) => {
                       dispatch({
-                        type: 'supplier_id',
-                        payload: suppliers.find(({ id }) => id === value?.id)
-                          ?.id ?? null,
+                        type: 'status',
+                        payload: value,
                       });
                     }}
                     sx={{
@@ -796,41 +595,329 @@ export default function InventoryForm({
                     renderInput={(params) => (
                       <TextField
                         {...params}
+                        required
                         color="secondary"
-                        label="Supplier"
-                        helperText={errors.supplier_id}
-                        error={Boolean(errors.supplier_id)}
+                        label="Status"
+                        helperText={errors.status}
+                        error={Boolean(errors.status)}
+                      />
+                    )}
+                  />
+                  <TextField
+                    label="Description"
+                    color="secondary"
+                    value={form.description}
+                    onChange={(event) => {
+                      dispatch({
+                        type: 'description',
+                        payload: event.target.value,
+                      });
+                    }}
+                    variant="outlined"
+                    size="small"
+                    rows={5}
+                    multiline
+                    sx={{
+                      width: 630,
+                    }}
+                    helperText={errors.description}
+                    error={Boolean(errors.description)}
+                  />
+                </div>
+              </div>
+
+              {/* PRICING INFORMATION */}
+              <div className="w-full h-fit">
+                <h3>Pricing Information</h3>
+                <br />
+                <div className="w-full flex flex-wrap gap-5">
+                  <TextField
+                    required
+                    color="secondary"
+                    label="Cost Price (Peso)"
+                    value={form.cost_price}
+                    onChange={(event) => {
+                      dispatch({
+                        type: 'cost_price',
+                        payload: Number(event.target.value),
+                      });
+                    }}
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      inputComponent: PesoNumberFormat as any,
+                    }}
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.cost_price}
+                    error={Boolean(errors.cost_price)}
+                  />
+                  <TextField
+                    required
+                    color="secondary"
+                    label="Selling Price (Peso)"
+                    value={form.selling_price}
+                    onChange={(event) => {
+                      dispatch({
+                        type: 'selling_price',
+                        payload: Number(event.target.value),
+                      });
+                    }}
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      inputComponent: PesoNumberFormat as any,
+                    }}
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.selling_price}
+                    error={Boolean(errors.selling_price)}
+                  />
+                  <TextField
+                    color="secondary"
+                    label="Tax Rate"
+                    value={form.tax_rate}
+                    type="number"
+                    onChange={(event) => {
+                      dispatch({
+                        type: 'tax_rate',
+                        payload: Number(event.target.value),
+                      });
+                    }}
+                    InputProps={{
+                      inputComponent: NumberFormat as any,
+                    }}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.tax_rate ?? 'Input value will be automatically converted into percentage.'}
+                    error={Boolean(errors.tax_rate)}
+                  />
+                </div>
+              </div>
+
+              {/* INVENTORY INFORMATION */}
+              <div className="w-full h-fit">
+                <h3>Inventory Information</h3>
+                <br />
+                <div className="w-full flex flex-wrap gap-5">
+                  <TextField
+                    required
+                    disabled={action === 'update'}
+                    color="secondary"
+                    label="Stock Quantity"
+                    value={form.stock_quantity}
+                    type="number"
+                    onChange={(event) => {
+                      dispatch({
+                        type: 'stock_quantity',
+                        payload: Number(event.target.value),
+                      });
+                    }}
+                    InputProps={{
+                      inputComponent: NumberFormat as any,
+                    }}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.stock_quantity}
+                    error={Boolean(errors.stock_quantity)}
+                  />
+                  <Autocomplete
+                    size="small"
+                    color="secondary"
+                    options={measurements}
+                    value={form.unit_of_measurement}
+                    onChange={(_, value) => {
+                      dispatch({
+                        type: 'unit_of_measurement',
+                        payload: value,
+                      });
+                    }}
+                    sx={{
+                      width: 300,
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        color="secondary"
+                        label="Unit of measurement"
+                        helperText={errors.unit_of_measurement}
+                        error={Boolean(errors.unit_of_measurement)}
                       />
                     )}
                   />
                 </div>
-              ) : (
-                <SupplierForm
-                  getSuppliers={getSuppliers}
-                  onAdd={(supplierId) => {
-                    handleSupplierToggle('add-existing');
-                    dispatch({
-                      type: 'supplier_id',
-                      payload: supplierId,
-                    });
-                  }}
-                />
-              )}
+              </div>
+            </div>
+            <Divider orientation="vertical" variant="middle" flexItem />
+            <div className="grow w-[50%] p-5 overflow-auto flex flex-col justify-between">
+              <div className="grow">
+                <div className="flex gap-14 flex-col">
+                  <div>
+                    <div className='flex flex-row gap-2 items-center'>
+                      <p className='p-0 m-0'>Item Image</p>
+                      <Chip label="Optional" size="small" variant="outlined" sx={{ color: 'var(--info-text-color)' }} />
+                    </div>
+                    <br />
+                    <div className="flex flex-row gap-4">
+                      <div className="border border-gray-300 hover:border-gray-950 rounded h-[170px] w-[170px] relative">
+                        <div
+                          className="relative border rounded opacity-0 w-full h-full"
+                          onClick={() => {
+                            drive.setMultiple?.(false);
+                            openDrive?.();
+                          }}
+                        />
+                        <div
+                          className="absolute inset-0 flex flex-col justify-center items-center select-none pointer-events-none"
+                          style={{ color: 'var(--info-text-color) ' }}
+                        >
+                          {imageFile ? (
+                            <img
+                              className="w-full h-full"
+                              style={{
+                                objectFit: 'cover',
+                              }}
+                              src={imageFile?.url}
+                              alt={imageFile?.name}
+                            />
+                          ) : (
+                            <>
+                              <LandscapeIcon fontSize="large" />
+                              <p className="text-center">170 x 170</p>
+                              <p className="text-center">Click to upload</p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col justify-between">
+                        <div style={{ color: 'var(--info-text-color)' }}>
+                          <p>
+                            File name: <b>{imageFile?.name}</b>
+                          </p>
+                        </div>
+                        <div className="flex gap-4">
+                          <Button
+                            disabled={Boolean(!imageFile)}
+                            variant="outlined"
+                            color="error"
+                            onClick={handleRemoveSelectedImage}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SUPPLIER INFORMATION */}
+                  <div className="flex flex-col gap-5">
+                    <div className="flex flex-row gap-2 items-center">
+                      <ToggleButtonGroup
+                        size="small"
+                        color="secondary"
+                        value={supplierToggle}
+                        exclusive
+                        onChange={(_, supplierAction) => {
+                          if (supplierAction) {
+                            handleSupplierToggle(supplierAction);
+                          }
+                        }}
+                        aria-label="Supplier-action-toggle"
+                      >
+                        <ToggleButton className="shadow-md" value="add-existing">
+                          Add Existing Supplier
+                        </ToggleButton>
+                        <ToggleButton className="shadow-md" value="add-new">
+                          Add New Supplier
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                      <Chip label="Optional" size="small" variant="outlined" sx={{ color: 'var(--info-text-color)' }} />
+                    </div>
+                    {supplierToggle === 'add-existing' ? (
+                      <div className="flex flex-col gap-5">
+                        <h5>Select Existing Supplier</h5>
+                        <Autocomplete
+                          size="small"
+                          options={suppliers}
+                          getOptionDisabled={(option) => option.status !== 'active'}
+                          renderOption={(props, option) => (
+                            <li {...props}>
+                              {`${option.email} ${option.status !== 'active' ? `(${option.status})` : ''}`}
+                            </li>
+                          )}
+                          getOptionLabel={(option) => option.email}
+                          value={
+                            suppliers.find(({ id }) => id === form.supplier_id) ??
+                            null
+                          }
+                          onChange={(_, value) => {
+                            dispatch({
+                              type: 'supplier_id',
+                              payload: suppliers.find(({ id }) => id === value?.id)
+                                ?.id ?? null,
+                            });
+                          }}
+                          sx={{
+                            width: 300,
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              color="secondary"
+                              label="Supplier"
+                              helperText={errors.supplier_id}
+                              error={Boolean(errors.supplier_id)}
+                            />
+                          )}
+                        />
+                      </div>
+                    ) : (
+                      <SupplierForm
+                        getSuppliers={getSuppliers}
+                        onAdd={(supplierId) => {
+                          handleSupplierToggle('add-existing');
+                          dispatch({
+                            type: 'supplier_id',
+                            payload: supplierId,
+                          });
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="grow h-[50px] flex items-end justify-end gap-5">
+                <Button variant="text" color="error" onClick={onClose}>
+                  Close
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={action === 'create' ? handleCreateItem : handleUpdateItem}
+                >
+                  {action}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="grow h-[50px] flex items-end justify-end gap-5">
-          <Button variant="text" color="error" onClick={onClose}>
-            Close
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={action === 'create' ? handleCreateItem : handleUpdateItem}
-          >
-            {action}
-          </Button>
-        </div>
-      </div>
+        )
+        : null
+      }
+      {
+        tab === 1
+        ? (
+
+        )
+        : null
+      }
     </div>
   );
 }
