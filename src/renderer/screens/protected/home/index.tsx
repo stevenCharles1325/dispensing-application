@@ -335,7 +335,6 @@ export default function Home() {
               color="secondary"
               variant="outlined"
               onClick={handleFilterClick}
-              className="shadow-md border"
             />
             <BarcodeIndicator />
           </div>

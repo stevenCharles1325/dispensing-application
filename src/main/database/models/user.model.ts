@@ -28,6 +28,7 @@ import {
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 import { ValidationMessage } from '../../app/validators/message/message';
 import type { Role } from './role.model';
+import { InventoryRecord } from './inventory-record.model';
 
 @Entity('users')
 export class User {
@@ -153,6 +154,10 @@ export class User {
   @ManyToOne('User', (user: User) => user.subordinates)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
   lead: Relation<User>;
+
+  @OneToMany('InventoryRecord', (record: InventoryRecord) => record.creator)
+  @JoinColumn({ name: 'id', referencedColumnName: 'creator_id' })
+  stockRecords: Relation<InventoryRecord>[];
 
   @AfterLoad()
   fullName() {

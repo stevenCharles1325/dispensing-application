@@ -5,6 +5,7 @@ import {
   Relation,
   JoinColumn,
   ManyToOne,
+  AfterLoad,
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -16,16 +17,35 @@ import {
 } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import type { Item } from './item.model';
+import type { User } from './user.model';
 
 @Entity('inventory_records')
 export class InventoryRecord {
+  @AfterLoad()
+  async getUser() {
+    if (!this.creator) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'users' WHERE id = ${this.creator_id}`
+      );
+
+      // To-filter-out all unnecessary properties
+      this.creator = rawData[0] as User;
+    }
+  }
+
   @PrimaryGeneratedColumn('increment')
   id: number;
 
   @Column({
-    nullable: true,
+    nullable: false,
   })
   item_id: string;
+
+  @Column({
+    nullable: false,
+  })
+  creator_id: number;
 
   @Column()
   @MinLength(3, { message: ValidationMessage.minLength })
@@ -57,4 +77,8 @@ export class InventoryRecord {
   @ManyToOne('Item', (item: Item) => item.records)
   @JoinColumn({ name: 'item_id', referencedColumnName: 'id' })
   item: Relation<Item>;
+
+  @ManyToOne('User', (creator: User) => creator.stockRecords)
+  @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
+  creator: Relation<User>;
 }

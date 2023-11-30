@@ -18,7 +18,17 @@ import {
   Chip,
   Tabs,
   Tab,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
 } from '@mui/material';
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import itemStatuses from 'UI/data/defaults/statuses/item';
 import measurements from 'UI/data/defaults/unit-of-measurements';
 import BrandDTO from 'App/data-transfer-objects/brand.dto';
@@ -29,15 +39,23 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import SupplierForm from './SupplierForm';
+import { DateTimeField } from '@mui/x-date-pickers';
+import { useQuery } from '@tanstack/react-query';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
+import dayjs from "dayjs";
 
 import LandscapeIcon from '@mui/icons-material/Landscape';
-import ItemDTO from 'App/data-transfer-objects/item.dto';
-import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import useAppDrive from 'UI/hooks/useAppDrive';
 import useFieldRequired from 'UI/hooks/useFieldRequired';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
-import { GridColDef } from '@mui/x-data-grid';
+import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
+import Loading from '../Loading';
+import {
+  AddCircleOutline,
+  VisibilityOutlined
+} from '@mui/icons-material';
 
 
 const columns: Array<GridColDef> = [
@@ -64,12 +82,13 @@ const columns: Array<GridColDef> = [
   },
   {
     field: 'type',
-    headerName: 'Stock-action',
+    headerName: 'Record Type',
     width: 170,
     type: 'string',
     renderCell: (params) => (
       <Chip
         label={params.value}
+        variant="outlined"
         color={
           params.value === 'stock-in'
             ? 'success'
@@ -79,6 +98,37 @@ const columns: Array<GridColDef> = [
         }
       />
     ),
+  },
+  {
+    field: 'created_at',
+    headerName: 'Date Created',
+    width: 200,
+    type: 'string',
+    valueFormatter(params) {
+      return new Date(params.value).toLocaleString();
+    },
+    sortingOrder: ['desc', 'asc']
+  },
+  {
+    field: '',
+    headerName: 'Actions',
+    width: 100,
+    type: 'string',
+    renderCell: (params) => (
+      <>
+        <IconButton
+          onClick={() => params.api.setRowSelectionModel([params.id])}
+        >
+          <VisibilityOutlined />
+        </IconButton>
+        {/* <IconButton onClick={() => params.api.setRowSelectionModel([params.id])}>
+          <DownloadOutlinedIcon />
+        </IconButton> */}
+      </>
+    ),
+    sortable: false,
+    filterable: false,
+    hideable: false,
   },
 ];
 
@@ -460,11 +510,109 @@ export default function InventoryForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action, selectedItem]);
 
+  const [selectedRecordIds, setSelectedRecordIds] = useState<number[]>([]);
+  const [recordFormErrors, setRecordFormErrors] = useState<Record<string, string>>({
+  });
+  const [recordForm, setRecordForm] = useState<Partial<InventoryRecordDTO>>({
+    item_id: selectedItem?.id,
+    type: 'stock-in'
+  });
+  const [recordAction, setRecordAction] = useState<'create' | 'view' | null>();
   const [tab, setTab] = useState(0);
+
+  const openRecordDialog = Boolean(recordAction);
+
+  const handleCloseRecordDialog = useCallback(() => {
+    if (selectedItem) {
+      setRecordForm({
+        item_id: selectedItem.id,
+      });
+    }
+    setRecordAction(null);
+    setRecordFormErrors({});
+    setSelectedRecordIds([]);
+  }, [selectedItem]);
+
+  const handleRecordFormUpdate =
+    (key: string) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
+
+    if (key === 'quantity') {
+      setRecordForm((record) => ({
+        ...record,
+        [key]: Number(e.target.value),
+      }));
+    } else {
+      setRecordForm((record) => ({
+        ...record,
+        [key]: e.target.value,
+      }));
+    }
+  }
 
   const handleOnChangeTab = (_, newValue: number) => {
     setTab(newValue);
   }
+
+  const handleSaveRecord = useCallback(async () => {
+    const res = await window.inventoryRecord.createRecord(recordForm);
+
+    if (res.status === 'ERROR') {
+      const errors: Record<string, string> = {};
+
+      const onError = (field: string | null, message: string) => {
+        if (field) {
+          errors[field] = message;
+        }
+      }
+
+      errorHandler({
+        errors: res.errors,
+        onError,
+      });
+
+      return;
+    }
+
+    displayAlert?.('Successfully saved record', 'success');
+    handleCloseRecordDialog();
+  }, [recordForm, displayAlert]);
+
+  const getStocksRecords = useCallback(async (): Promise<IPagination<InventoryRecordDTO>> => {
+    if (selectedItem) {
+      const res = await window.inventoryRecord.getRecords({
+        item_id : [selectedItem.id]
+      });
+
+      console.log(res);
+      if (res.errors) {
+        errorHandler({
+          errors: res.errors,
+        });
+
+        return [] as unknown as IPagination<InventoryRecordDTO>;
+      }
+
+      return res.data as IPagination<InventoryRecordDTO>;
+    }
+
+    return [] as unknown as IPagination<InventoryRecordDTO>;
+  }, [selectedItem]);
+
+  const { data: stocksRecords, isLoading: isStockRecordsLoading } = useQuery({
+    queryKey: ['stocks-records'],
+    queryFn: getStocksRecords,
+  });
+
+  const records = (stocksRecords?.data as InventoryRecordDTO[]) ?? [];
+  const selectedRecord = records.find(({ id }) => selectedRecordIds?.[0] === id);
+
+  useEffect(() => {
+    if (selectedRecord) {
+      setRecordForm(selectedRecord);
+      setRecordAction('view');
+    }
+  }, [selectedRecord]);
 
   return (
     <div className='p-2'>
@@ -726,7 +874,9 @@ export default function InventoryForm({
                     sx={{
                       width: 300,
                     }}
-                    helperText={errors.stock_quantity}
+                    helperText={errors.stock_quantity ?? (
+                      action === 'update' ? 'You can edit this in Stocks tab' : null
+                    )}
                     error={Boolean(errors.stock_quantity)}
                   />
                   <Autocomplete
@@ -895,16 +1045,30 @@ export default function InventoryForm({
                   </div>
                 </div>
               </div>
-              <div className="grow h-[50px] flex items-end justify-end gap-5">
-                <Button variant="text" color="error" onClick={onClose}>
-                  Close
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={action === 'create' ? handleCreateItem : handleUpdateItem}
-                >
-                  {action}
-                </Button>
+              <div className="grow h-[50px] flex items-end justify-between gap-5">
+                <div className='text-gray-500 text-xs'>
+                  {
+                    selectedItem && action === 'update'
+                    ? (
+                      <p>
+                        <b>Last update:</b> {new Date(selectedItem.updated_at).toLocaleString()}
+                      </p>
+                    )
+                    : null
+                  }
+
+                </div>
+                <div>
+                  <Button variant="text" color="error" onClick={onClose}>
+                    Close
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={action === 'create' ? handleCreateItem : handleUpdateItem}
+                  >
+                    {action}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -914,7 +1078,165 @@ export default function InventoryForm({
       {
         tab === 1
         ? (
+          <div className='min-w-[1000px] w-fit h-[800px] p-3'>
+            {
+              isStockRecordsLoading
+              ? <Loading />
+              : (
+                <>
+                  <div className="w-full flex flex-row py-4 gap-3">
+                    <Chip
+                      color="primary"
+                      variant="outlined"
+                      icon={<AddCircleOutline />}
+                      label="Add new record"
+                      onClick={() => setRecordAction('create')}
+                    />
+                  </div>
+                  <DataGrid
+                    sx={{
+                      height: 700,
+                    }}
+                    columns={columns}
+                    rows={records}
+                    rowCount={stocksRecords?.total}
+                    disableRowSelectionOnClick
+                    onRowSelectionModelChange={(recordIds) =>
+                      setSelectedRecordIds(recordIds as number[])
+                    }
+                  />
+                </>
+              )
+            }
+            <Dialog
+              open={openRecordDialog}
+              onClose={handleCloseRecordDialog}
+              maxWidth="md"
+            >
+              {
+                selectedRecord
+                ? (
+                  <>
+                    <DialogTitle>
+                      {`Product Name: ${
+                        selectedRecord?.item.name.toLocaleUpperCase()
+                      }`}
+                    </DialogTitle>
+                    <Divider />
+                  </>
+                )
+                : (
+                  <p className='p-5 pb-1'>Record Information</p>
+                )
+              }
+              <div className='w-[500px] h-[600px] p-5 flex flex-col gap-3'>
+                <TextField
+                  disabled={recordAction === 'view'}
+                  fullWidth
+                  label="Purpose"
+                  size="small"
+                  value={recordForm?.purpose ?? ''}
+                  onChange={handleRecordFormUpdate('purpose')}
+                  error={Boolean(recordFormErrors['purpose'])}
+                  helperText={recordFormErrors['purpose']}
+                />
 
+                <TextField
+                  disabled={recordAction === 'view'}
+                  fullWidth
+                  label="Quantity"
+                  type="number"
+                  error={Boolean(recordFormErrors['quantity'])}
+                  helperText={
+                    recordFormErrors['quantity'] ??
+                    recordAction === 'create'
+                    ? `Current product quantity: ${selectedItem?.stock_quantity}`
+                    : null
+                  }
+                  size="small"
+                  InputProps={{
+                    inputComponent: NumberFormat as any,
+                  }}
+                  value={recordForm?.quantity ?? 0}
+                  onChange={handleRecordFormUpdate('quantity')}
+                />
+                <FormControl
+                  fullWidth
+                  size='small'
+                >
+                  <InputLabel id="demo-simple-select-label">Record Type</InputLabel>
+                  <Select
+                    disabled={recordAction === 'view'}
+                    labelId="record-type-select"
+                    id="record-type"
+                    value={recordForm?.type ?? 'stock-in'}
+                    label="Record Type"
+                    onChange={handleRecordFormUpdate('type')}
+                  >
+                    <MenuItem value="stock-in">Stock-in</MenuItem>
+                    <MenuItem value="stock-out">Stock-out</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  disabled={recordAction === 'view'}
+                  multiline
+                  minRows={5}
+                  fullWidth
+                  label="Note"
+                  size="small"
+                  value={selectedRecord?.note ?? ''}
+                  error={Boolean(recordFormErrors['note'])}
+                  helperText={recordFormErrors['note']}
+                />
+                {
+                  recordAction === 'view'
+                  ? (
+                    <>
+                      <DateTimeField
+                        disabled
+                        size='small'
+                        label="Date Created"
+                        value={dayjs(selectedRecord?.created_at)}
+                      />
+                      <TextField
+                        disabled
+                        fullWidth
+                        label="Creator"
+                        size="small"
+                        defaultValue={
+                          `${
+                            selectedRecord?.creator.first_name
+                          } ${
+                            selectedRecord?.creator.last_name
+                          }`
+                        }
+                      />
+                    </>
+                  )
+                  : null
+                }
+              </div>
+              <DialogActions>
+                <Button
+                  color="error"
+                  onClick={handleCloseRecordDialog}
+                >
+                  Close
+                </Button>
+                {
+                  recordAction === 'create'
+                  ? (
+                    <Button
+                      onClick={handleSaveRecord}
+                    >
+                      Save
+                    </Button>
+                  )
+                  : null
+                }
+              </DialogActions>
+            </Dialog>
+          </div>
         )
         : null
       }

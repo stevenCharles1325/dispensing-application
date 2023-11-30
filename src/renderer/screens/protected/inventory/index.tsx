@@ -44,7 +44,7 @@ const columns: Array<GridColDef> = [
   {
     field: 'sku',
     headerName: 'SKU (Stock Keeping Unit)',
-    width: 220,
+    flex: 1,
     type: 'number',
     align: 'left',
     headerAlign: 'left',
@@ -58,32 +58,20 @@ const columns: Array<GridColDef> = [
   {
     field: 'stock_quantity',
     headerName: 'Quantity',
-    width: 100,
+    flex: 1,
     type: 'string',
   },
   {
     field: 'cost_price',
     headerName: 'Cost Price (Peso)',
-    width: 190,
+    flex: 1,
     type: 'number',
   },
   {
     field: 'selling_price',
     headerName: 'Selling Price (Peso)',
-    width: 190,
+    flex: 1,
     type: 'number',
-  },
-  {
-    field: 'tax_rate',
-    headerName: 'Tax Rate',
-    width: 120,
-    type: 'number',
-  },
-  {
-    field: 'unit_of_measurement',
-    headerName: 'Unit of Measurement',
-    width: 190,
-    type: 'string',
   },
   {
     field: 'status',
@@ -92,6 +80,7 @@ const columns: Array<GridColDef> = [
     type: 'string',
     renderCell: (params) => (
       <Chip
+        variant="outlined"
         label={params.value}
         color={
           params.value === 'available'
@@ -103,6 +92,15 @@ const columns: Array<GridColDef> = [
       />
     ),
   },
+  {
+    field: 'created_at',
+    headerName: 'Date Created',
+    width: 200,
+    type: 'string',
+    valueFormatter(params) {
+      return new Date(params.value).toLocaleString();
+    },
+  }
 ];
 
 const getItems = async (
@@ -310,14 +308,14 @@ export default function Inventory() {
       <div className="w-full h-[650px]">
         <div className="w-full flex flex-row py-4 gap-3">
           <Chip
-            className="shadow-lg"
             color="primary"
+            variant="outlined"
             icon={<AddCircleOutlineIcon />}
             label="Add new item"
             onClick={handleAddNewItem}
           />
           <Chip
-            className="shadow-lg"
+            variant="outlined"
             color="secondary"
             icon={<EditOutlinedIcon />}
             label="Edit selected item"
@@ -325,7 +323,7 @@ export default function Inventory() {
             disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
           <Chip
-            className="shadow-lg"
+            variant="outlined"
             color="error"
             icon={<DeleteOutlineOutlinedIcon />}
             label="Delete selected item"

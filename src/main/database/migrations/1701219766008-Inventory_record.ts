@@ -27,6 +27,14 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
               foreignKeyConstraintName: 'item',
             },
             {
+              name: 'creator_id',
+              type: 'int',
+              isPrimary: false,
+              isUnique: false,
+              isNullable: false,
+              foreignKeyConstraintName: 'creator',
+            },
+            {
               name: 'purpose',
               type: 'varchar',
               isNullable: false,
@@ -68,9 +76,21 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
           onDelete: 'CASCADE',
         })
       );
+
+      await queryRunner.createForeignKey(
+        'inventory_records',
+        new TableForeignKey({
+          name: 'creator',
+          columnNames: ['creator_id'],
+          referencedColumnNames: ['id'],
+          referencedTableName: 'users',
+          onDelete: 'CASCADE',
+        })
+      );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
+      await queryRunner.dropForeignKey('inventory_records', 'creator');
       await queryRunner.dropForeignKey('inventory_records', 'item');
       await queryRunner.dropTable('inventory_records');
     }

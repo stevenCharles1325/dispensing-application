@@ -40,7 +40,10 @@ export default class InventoryRecordEvent implements IEvent {
         }
 
         if (payload === 'all') {
-          return await usePagination(recordQuery, page);
+          return await usePagination(recordQuery, page, take, {
+            fieldName: 'record.created_at',
+            order: 'DESC',
+          });
         }
 
         if (payload instanceof Object && !(payload instanceof Array)) {
@@ -59,7 +62,10 @@ export default class InventoryRecordEvent implements IEvent {
             }
           }
 
-          return await usePagination(recordQuery, page);
+          return await usePagination(recordQuery, page, take, {
+            fieldName: 'record.created_at',
+            order: 'DESC',
+          });
         }
 
         return {

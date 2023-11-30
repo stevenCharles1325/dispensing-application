@@ -50,6 +50,7 @@ const logsColumns: Array<GridColDef> = [
     type: 'string',
     renderCell: (params) => (
       <Chip
+        variant="outlined"
         label={params.value}
         color={params.value === 'SUCCEEDED' ? 'success' : 'error'}
       />
@@ -108,7 +109,12 @@ const paymentsColumns: Array<GridColDef> = [
     headerName: 'Mode of payment',
     width: 200,
     type: 'string',
-    renderCell: (params) => <Chip label={params.value} />,
+    renderCell: (params) => (
+      <Chip
+        variant="outlined"
+        label={params.value}
+      />
+    ),
   },
   {
     field: 'created_at',
@@ -123,7 +129,7 @@ const paymentsColumns: Array<GridColDef> = [
   {
     field: '',
     headerName: 'Actions',
-    width: 200,
+    width: 100,
     type: 'string',
     renderCell: (params) => (
       <>
@@ -137,6 +143,9 @@ const paymentsColumns: Array<GridColDef> = [
         </IconButton> */}
       </>
     ),
+    sortable: false,
+    filterable: false,
+    hideable: false,
   },
 ];
 

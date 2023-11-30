@@ -9,6 +9,8 @@ import { Bull } from 'Main/jobs';
 import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 import InventoryRecordRepository from 'App/repositories/inventory-record.repository';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
+import ItemRepository from 'App/repositories/item.repository';
+import UserRepository from 'App/repositories/user.repository';
 
 export default class InventoryRecordCreateEvent implements IEvent {
   public channel: string = 'inventory-record:create';
@@ -25,11 +27,14 @@ export default class InventoryRecordCreateEvent implements IEvent {
       const payload: InventoryRecord = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('create-stock-record');
 
-      if (requesterHasPermission) {
+      if (requesterHasPermission && user.id) {
+        payload['creator_id'] = user.id;
+        const item = await ItemRepository.findOneByOrFail({ id: payload.item_id });
+        const creator = await UserRepository.findOneByOrFail({ id: user.id });
+
         const record = InventoryRecordRepository.create(payload);
         const errors = await validator(record);
 
-        console.log(errors);
         if (errors && errors.length) {
           return {
             errors,
@@ -38,9 +43,39 @@ export default class InventoryRecordCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
+        if (record.type === 'stock-out' && item.stock_quantity - record.quantity < 0) {
+          return {
+            errors: [
+              {
+                field: 'quantity',
+                message: 'Product quantity will be negative',
+              }
+            ],
+            code: 'VALIDATION_ERR',
+            status: 'ERROR',
+          } as unknown as IResponse<IPOSValidationError[]>;
+        }
+
         const data = (
           await InventoryRecordRepository.save(record)
         ) as unknown as InventoryRecordDTO;
+
+        console.log(data);
+
+        data.item = item as any;
+        data.creator = creator as any;
+
+        await InventoryRecordRepository.save(data as any);
+
+        if (data.type === 'stock-in') {
+          item.stock_quantity += data.quantity;
+        }
+
+        if (data.type === 'stock-out') {
+          item.stock_quantity -= data.quantity;
+        }
+
+        await ItemRepository.save(item);
 
         await Bull('AUDIT_JOB', {
           user_id: user.id as number,

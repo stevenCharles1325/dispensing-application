@@ -224,14 +224,14 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
         </div>
         <div className="w-full flex flex-row py-4 gap-3">
           <Chip
-            className="shadow-lg"
+            variant="outlined"
             color="primary"
             icon={<AddCircleOutline />}
             label="Add new"
             onClick={handleAddNewItem}
           />
           <Chip
-            className="shadow-lg"
+            variant="outlined"
             color="secondary"
             icon={<EditOutlined />}
             label="Edit selected"
@@ -239,7 +239,7 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
             disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
           <Chip
-            className="shadow-lg"
+            variant="outlined"
             color="error"
             icon={<DeleteOutlineOutlined />}
             label="Delete selected"

@@ -63,6 +63,7 @@ const columns: Array<GridColDef> = [
     type: 'string',
     renderCell: (params) => (
       <Chip
+        variant="outlined"
         label={params.value}
         color={params.value === 'active' ? 'success' : 'error'}
       />
@@ -297,14 +298,14 @@ export default function EmployeeManagement () {
         <div className="w-full h-[650px]">
           <div className="w-full flex flex-row py-4 gap-3">
             <Chip
-              className="shadow-lg"
+              variant="outlined"
               color="primary"
               icon={<AddCircleOutline />}
               label="Add new Employee"
               onClick={handleAddNewItem}
             />
             <Chip
-              className="shadow-lg"
+              variant="outlined"
               color="secondary"
               icon={<EditOutlined />}
               label="Edit selected Employee"
@@ -312,7 +313,7 @@ export default function EmployeeManagement () {
               disabled={selectedIds.length === 0 || selectedIds.length > 1}
             />
             <Chip
-              className="shadow-lg"
+              variant="outlined"
               color="error"
               icon={<DeleteOutlineOutlined />}
               label="Delete selected Employee"

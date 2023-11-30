@@ -14,7 +14,7 @@ interface ItemCardParams {
 export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCardParams) {
   return (
     <div className="w-[325px] h-[460px] py-2">
-      <div className="w-full h-full rounded border shadow flex flex-col overflow-hidden hover:border-fuchsia-500 hover:shadow-lg">
+      <div className="w-full h-full rounded-md border shadow flex flex-col overflow-hidden hover:border-fuchsia-500 hover:shadow-lg">
         <div className="w-full h-[255px] bg-gray-300 relative">
           <img
             src={cardInfo.image?.url}
@@ -27,7 +27,7 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
             }}
           />
           {cardInfo.status !== 'available' ? (
-            <div className="absolute top-0 right-0 bg-slate-800/50">
+            <div className="w-full h-full absolute top-0 right-0 flex justify-center items-center bg-slate-800/50">
               <div>
                 <Chip label={cardInfo.status} color="error" size="medium" />
               </div>
@@ -73,7 +73,7 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
           </div>
           <div className="w-[70px] flex flex-col justify-end items-end">
             <IconButton
-              disabled={cardInfo.status !== 'available'}
+              disabled={cardInfo.status !== 'available' || orderNumber >= cardInfo.stock_quantity}
               onClick={() => onSelect(cardInfo.id)}
             >
               <AddCircleOutlineOutlinedIcon color="secondary" />

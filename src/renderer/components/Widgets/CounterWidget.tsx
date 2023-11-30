@@ -13,7 +13,7 @@ export default function CounterWidget({
   count,
 }: CounterWidgetProps) {
   return (
-    <div className="p-5 min-w-[200px] w-fit h-[150px] flex flex-col justify-around rounded border shadow hover:shadow-md">
+    <div className="p-5 min-w-[200px] w-fit h-[150px] flex flex-col justify-around rounded-md border shadow hover:shadow-md">
       <div className="w-full">
         <div className="gap-2 flex flex-row justify-start items-center">
           <h1 className="text-7xl" style={{ color: 'var(--text-color)' }}>

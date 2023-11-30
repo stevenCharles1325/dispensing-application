@@ -76,7 +76,6 @@ export default function BarcodeIndicator () {
             ? <CircularProgress size={20} />
             : undefined
       }
-      className="shadow-md border"
       onClick={handleRefresh}
     />
   )

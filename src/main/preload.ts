@@ -259,7 +259,7 @@ const inventoryRecordHandler = {
     ipcRenderer.invoke('inventory-record:show', payload, page, total),
 
   createRecord: async (
-    payload: InventoryRecordDTO
+    payload: Partial<InventoryRecordDTO>
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | InventoryRecordDTO[]>
   > => ipcRenderer.invoke('inventory-record:create', payload),
@@ -522,7 +522,7 @@ contextBridge.exposeInMainWorld('user', userHandler);
 contextBridge.exposeInMainWorld('role', roleHandler);
 contextBridge.exposeInMainWorld('permission', permissionHandler);
 contextBridge.exposeInMainWorld('item', itemHandler);
-contextBridge.exposeInMainWorld('inventory-record', inventoryRecordHandler);
+contextBridge.exposeInMainWorld('inventoryRecord', inventoryRecordHandler);
 contextBridge.exposeInMainWorld('brand', brandHandler);
 contextBridge.exposeInMainWorld('image', imageHandler);
 contextBridge.exposeInMainWorld('category', categoryHandler);

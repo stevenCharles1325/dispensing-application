@@ -46,6 +46,7 @@ const columns: Array<GridColDef> = [
     type: 'string',
     renderCell: (params) => (
       <Chip
+        variant="outlined"
         label={params.value}
         color={params.value === 'active' ? 'success' : 'error'}
       />
@@ -219,14 +220,14 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
         </div>
         <div className="w-full flex flex-row py-4 gap-3">
           <Chip
-            className="shadow-lg"
+            variant="outlined"
             color="primary"
             icon={<AddCircleOutline />}
             label="Add new Supplier"
             onClick={handleAddNewItem}
           />
           <Chip
-            className="shadow-lg"
+            variant="outlined"
             color="secondary"
             icon={<EditOutlined />}
             label="Edit selected Supplier"
@@ -234,7 +235,7 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
             disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
           <Chip
-            className="shadow-lg"
+            variant="outlined"
             color="error"
             icon={<DeleteOutlineOutlined />}
             label="Delete selected Supplier"
