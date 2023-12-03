@@ -523,11 +523,10 @@ export default function InventoryForm({
   const openRecordDialog = Boolean(recordAction);
 
   const handleCloseRecordDialog = useCallback(() => {
-    if (selectedItem) {
-      setRecordForm({
-        item_id: selectedItem.id,
-      });
-    }
+    setRecordForm({
+      type: 'stock-in',
+      item_id: selectedItem?.id ?? undefined,
+    });
     setRecordAction(null);
     setRecordFormErrors({});
     setSelectedRecordIds([]);
@@ -554,30 +553,6 @@ export default function InventoryForm({
     setTab(newValue);
   }
 
-  const handleSaveRecord = useCallback(async () => {
-    const res = await window.inventoryRecord.createRecord(recordForm);
-
-    if (res.status === 'ERROR') {
-      const errors: Record<string, string> = {};
-
-      const onError = (field: string | null, message: string) => {
-        if (field) {
-          errors[field] = message;
-        }
-      }
-
-      errorHandler({
-        errors: res.errors,
-        onError,
-      });
-
-      return;
-    }
-
-    displayAlert?.('Successfully saved record', 'success');
-    handleCloseRecordDialog();
-  }, [recordForm, displayAlert]);
-
   const getStocksRecords = useCallback(async (): Promise<IPagination<InventoryRecordDTO>> => {
     if (selectedItem) {
       const res = await window.inventoryRecord.getRecords({
@@ -599,13 +574,40 @@ export default function InventoryForm({
     return [] as unknown as IPagination<InventoryRecordDTO>;
   }, [selectedItem]);
 
-  const { data: stocksRecords, isLoading: isStockRecordsLoading } = useQuery({
+  const { data: stocksRecords, isLoading: isStockRecordsLoading, refetch } = useQuery({
     queryKey: ['stocks-records'],
     queryFn: getStocksRecords,
   });
 
   const records = (stocksRecords?.data as InventoryRecordDTO[]) ?? [];
   const selectedRecord = records.find(({ id }) => selectedRecordIds?.[0] === id);
+
+  const handleSaveRecord = useCallback(async () => {
+    const res = await window.inventoryRecord.createRecord(recordForm);
+
+    if (res.status === 'ERROR') {
+      const errors: Record<string, string> = {};
+
+      const onError = (field: string | null, message: string) => {
+        if (field) {
+          errors[field] = message;
+        }
+      }
+
+      errorHandler({
+        errors: res.errors,
+        onError,
+      });
+
+      setRecordFormErrors(errors);
+      return;
+    }
+
+    refetch();
+    getItems();
+    displayAlert?.('Successfully saved record', 'success');
+    handleCloseRecordDialog();
+  }, [recordForm, displayAlert, getItems]);
 
   useEffect(() => {
     if (selectedRecord) {
@@ -1148,10 +1150,9 @@ export default function InventoryForm({
                   type="number"
                   error={Boolean(recordFormErrors['quantity'])}
                   helperText={
-                    recordFormErrors['quantity'] ??
-                    recordAction === 'create'
+                    recordFormErrors['quantity'] ?? (recordAction === 'create'
                     ? `Current product quantity: ${selectedItem?.stock_quantity}`
-                    : null
+                    : null)
                   }
                   size="small"
                   InputProps={{

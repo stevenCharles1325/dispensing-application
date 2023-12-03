@@ -28,7 +28,7 @@ export default class InventoryRecordCreateEvent implements IEvent {
       const requesterHasPermission = user.hasPermission?.('create-stock-record');
 
       if (requesterHasPermission && user.id) {
-        payload['creator_id'] = user.id;
+        console.log(payload);
         const item = await ItemRepository.findOneByOrFail({ id: payload.item_id });
         const creator = await UserRepository.findOneByOrFail({ id: user.id });
 
@@ -56,26 +56,22 @@ export default class InventoryRecordCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const data = (
-          await InventoryRecordRepository.save(record)
-        ) as unknown as InventoryRecordDTO;
+        record.item = item as any;
+        record.creator = creator as any;
 
-        console.log(data);
-
-        data.item = item as any;
-        data.creator = creator as any;
-
-        await InventoryRecordRepository.save(data as any);
-
-        if (data.type === 'stock-in') {
-          item.stock_quantity += data.quantity;
+        if (record.type === 'stock-in') {
+          item.stock_quantity += record.quantity;
         }
 
-        if (data.type === 'stock-out') {
-          item.stock_quantity -= data.quantity;
+        if (record.type === 'stock-out') {
+          item.stock_quantity -= record.quantity;
         }
 
         await ItemRepository.save(item);
+
+        const data = (
+          await InventoryRecordRepository.save(record)
+        ) as unknown as InventoryRecordDTO;
 
         await Bull('AUDIT_JOB', {
           user_id: user.id as number,
