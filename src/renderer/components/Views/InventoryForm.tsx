@@ -510,6 +510,7 @@ export default function InventoryForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action, selectedItem]);
 
+  // Records states
   const [selectedRecordIds, setSelectedRecordIds] = useState<number[]>([]);
   const [recordFormErrors, setRecordFormErrors] = useState<Record<string, string>>({
   });
