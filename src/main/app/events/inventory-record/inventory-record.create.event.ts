@@ -28,7 +28,6 @@ export default class InventoryRecordCreateEvent implements IEvent {
       const requesterHasPermission = user.hasPermission?.('create-stock-record');
 
       if (requesterHasPermission && user.id) {
-        console.log(payload);
         const item = await ItemRepository.findOneByOrFail({ id: payload.item_id });
         const creator = await UserRepository.findOneByOrFail({ id: user.id });
 
