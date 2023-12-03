@@ -134,6 +134,7 @@ export default function SupplierForm({
       <div className="w-full flex flex-wrap gap-7">
         <TextField
           autoFocus
+          color="secondary"
           label="Tax ID"
           value={form.tax_id}
           onChange={(event) => {
@@ -149,6 +150,7 @@ export default function SupplierForm({
         />
         <TextField
           label="Name"
+          color="secondary"
           required
           value={form.name}
           onChange={(event) => {
@@ -164,6 +166,7 @@ export default function SupplierForm({
         />
         <TextField
           label="Email"
+          color="secondary"
           required
           value={form.email}
           onChange={(event) => {
@@ -179,6 +182,7 @@ export default function SupplierForm({
         />
         <TextField
           required
+          color="secondary"
           label="Phone Number"
           inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           value={form.phone_number}
@@ -196,6 +200,7 @@ export default function SupplierForm({
         />
         <TextField
           required
+          color="secondary"
           label="Contact Name"
           value={form.contact_name}
           onChange={(event) => {
@@ -211,6 +216,7 @@ export default function SupplierForm({
         />
         <TextField
           required
+          color="secondary"
           label="Contact Email"
           value={form.contact_email}
           onChange={(event) => {
@@ -226,6 +232,7 @@ export default function SupplierForm({
         />
         <TextField
           required
+          color="secondary"
           label="Contact Phone Number"
           placeholder="+63912345689"
           value={form.contact_phone_number}
@@ -246,6 +253,7 @@ export default function SupplierForm({
         />
         <TextField
           required
+          color="secondary"
           label="Address"
           value={form.address}
           onChange={(event) => {

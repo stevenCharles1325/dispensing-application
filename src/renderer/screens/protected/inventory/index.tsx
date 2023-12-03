@@ -201,7 +201,7 @@ export default function Inventory() {
     getCategories();
     getSuppliers();
 
-    setPlaceHolder?.('Search for item name');
+    setPlaceHolder?.('Search for product name');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setPlaceHolder]);
 
@@ -284,7 +284,7 @@ export default function Inventory() {
         <CounterWidget
           icon={<CategoryOutlinedIcon color="info" fontSize="large" />}
           count={data?.total}
-          label="total items"
+          label="total products"
         />
         <CounterWidget
           icon={<LocalOfferOutlinedIcon color="secondary" fontSize="large" />}
@@ -311,14 +311,14 @@ export default function Inventory() {
             color="primary"
             variant="outlined"
             icon={<AddCircleOutlineIcon />}
-            label="Add new item"
+            label="Add new Product"
             onClick={handleAddNewItem}
           />
           <Chip
             variant="outlined"
             color="secondary"
             icon={<EditOutlinedIcon />}
-            label="Edit selected item"
+            label="Edit selected Product"
             onClick={handleEditSelectedItem}
             disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
@@ -326,7 +326,7 @@ export default function Inventory() {
             variant="outlined"
             color="error"
             icon={<DeleteOutlineOutlinedIcon />}
-            label="Delete selected item"
+            label="Delete selected Product"
             onClick={handleDeleteSelectedItem}
             disabled={selectedIds.length === 0}
           />

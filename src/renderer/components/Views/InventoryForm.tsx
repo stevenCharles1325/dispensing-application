@@ -645,7 +645,7 @@ export default function InventoryForm({
                   <TextField
                     autoFocus
                     color="secondary"
-                    label="Item name"
+                    label="Product name"
                     required
                     value={form.name}
                     onChange={(event) => {
@@ -916,7 +916,7 @@ export default function InventoryForm({
                 <div className="flex gap-14 flex-col">
                   <div>
                     <div className='flex flex-row gap-2 items-center'>
-                      <p className='p-0 m-0'>Item Image</p>
+                      <p className='p-0 m-0'>Product Image</p>
                       <Chip label="Optional" size="small" variant="outlined" sx={{ color: 'var(--info-text-color)' }} />
                     </div>
                     <br />
@@ -1081,7 +1081,7 @@ export default function InventoryForm({
       {
         tab === 1
         ? (
-          <div className='min-w-[1000px] w-fit h-[800px] p-3'>
+          <div className='min-w-[1000px] w-fit h-[860px] p-3'>
             {
               isStockRecordsLoading
               ? <Loading />
@@ -1111,6 +1111,11 @@ export default function InventoryForm({
                 </>
               )
             }
+            <div className='w-full my-5 flex flex-row-reverse'>
+              <Button variant='outlined' color="error" onClick={onClose}>
+                Close
+              </Button>
+            </div>
             <Dialog
               open={openRecordDialog}
               onClose={handleCloseRecordDialog}
@@ -1134,6 +1139,7 @@ export default function InventoryForm({
               }
               <div className='w-[500px] h-[600px] p-5 flex flex-col gap-3'>
                 <TextField
+                  color="secondary"
                   disabled={recordAction === 'view'}
                   fullWidth
                   label="Purpose"
@@ -1145,6 +1151,7 @@ export default function InventoryForm({
                 />
 
                 <TextField
+                  color="secondary"
                   disabled={recordAction === 'view'}
                   fullWidth
                   label="Quantity"
@@ -1166,8 +1173,14 @@ export default function InventoryForm({
                   fullWidth
                   size='small'
                 >
-                  <InputLabel id="demo-simple-select-label">Record Type</InputLabel>
+                  <InputLabel
+                    color="secondary"
+                    id="record-type-select-label"
+                  >
+                    Record Type
+                  </InputLabel>
                   <Select
+                    color="secondary"
                     disabled={recordAction === 'view'}
                     labelId="record-type-select"
                     id="record-type"
@@ -1180,26 +1193,22 @@ export default function InventoryForm({
                   </Select>
                 </FormControl>
                 <TextField
+                  color="secondary"
                   disabled={recordAction === 'view'}
                   multiline
                   minRows={5}
                   fullWidth
                   label="Note"
                   size="small"
-                  value={selectedRecord?.note ?? ''}
+                  value={recordForm?.note ?? ''}
                   error={Boolean(recordFormErrors['note'])}
                   helperText={recordFormErrors['note']}
+                  onChange={handleRecordFormUpdate('note')}
                 />
                 {
                   recordAction === 'view'
                   ? (
                     <>
-                      <DateTimeField
-                        disabled
-                        size='small'
-                        label="Date Created"
-                        value={dayjs(selectedRecord?.created_at)}
-                      />
                       <TextField
                         disabled
                         fullWidth
@@ -1212,6 +1221,12 @@ export default function InventoryForm({
                             selectedRecord?.creator.last_name
                           }`
                         }
+                      />
+                      <DateTimeField
+                        disabled
+                        size='small'
+                        label="Date Created"
+                        value={dayjs(selectedRecord?.created_at)}
                       />
                     </>
                   )
