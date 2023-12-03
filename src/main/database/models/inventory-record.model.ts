@@ -18,6 +18,7 @@ import {
 import { ValidationMessage } from '../../app/validators/message/message';
 import type { Item } from './item.model';
 import type { User } from './user.model';
+import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 
 @Entity('inventory_records')
 export class InventoryRecord {
@@ -52,7 +53,7 @@ export class InventoryRecord {
   purpose: string;
 
   @Column({ nullable: true })
-  @ValidateIf((inventoryRecord) => Boolean(inventoryRecord.note?.length))
+  @ValidateIf((inventoryRecord: InventoryRecordDTO) => Boolean(inventoryRecord.note?.length))
   @MinLength(5, { message: ValidationMessage.minLength })
   note: string;
 

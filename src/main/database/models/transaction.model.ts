@@ -13,7 +13,7 @@ import {
   AfterLoad,
   Relation,
 } from 'typeorm';
-import { IsIn, IsPositive, IsNotEmpty } from 'class-validator';
+import { IsIn, IsPositive, IsNotEmpty, ValidateIf } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import { GlobalStorage } from 'Main/stores';
 import transactionCategories from 'Main/data/defaults/categories/transaction';
@@ -23,6 +23,7 @@ import paymentTypes from 'Main/data/defaults/types/payment';
 import type { Order } from './order.model';
 import type { System } from './system.model';
 import type { User } from './user.model';
+import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 
 @Entity('transactions')
 export class Transaction {
@@ -91,6 +92,40 @@ export class Transaction {
     message: ValidationMessage.isIn,
   })
   method: string;
+
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
+  @ValidateIf((transaction: TransactionDTO) =>
+    transaction.type === 'customer-payment'
+  )
+  @IsPositive({
+    message: ValidationMessage.positive,
+  })
+  amount_received: number;
+
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
+  @ValidateIf((transaction: TransactionDTO) =>
+    Boolean(transaction.type === 'customer-payment' && transaction.amount_received)
+  )
+  @IsPositive({
+    message: ValidationMessage.positive,
+  })
+  change: number;
 
   @Column('numeric', {
     precision: 7,

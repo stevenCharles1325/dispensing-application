@@ -137,19 +137,43 @@ export class Item {
   })
   description: string;
 
-  @Column()
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
   @IsPositive({
     message: ValidationMessage.positive,
   })
   cost_price: number;
 
-  @Column()
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
   @IsPositive({
     message: ValidationMessage.positive,
   })
   selling_price: number;
 
-  @Column()
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
   tax_rate: number;
 
   @Column()

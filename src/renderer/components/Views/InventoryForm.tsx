@@ -436,6 +436,8 @@ export default function InventoryForm({
   const handleUpdateItem = useCallback(async () => {
     if (!selectedItem) return;
 
+    console.log(form);
+
     const res = await window.item.updateItem(
       selectedItem.id,
       form as unknown as ItemDTO
@@ -560,7 +562,6 @@ export default function InventoryForm({
         item_id : [selectedItem.id]
       });
 
-      console.log(res);
       if (res.errors) {
         errorHandler({
           errors: res.errors,

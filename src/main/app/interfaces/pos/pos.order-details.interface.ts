@@ -1,4 +1,3 @@
-import { Item } from 'Main/database/models/item.model';
 import { IPaymentTypes } from '../transaction/payment/payment.methods.interface';
 
 export interface IDesiredItems {
@@ -13,4 +12,6 @@ export interface IOrderDetails {
   total: number;
   payment_method: IPaymentTypes;
   discount: number;
+  amount_received: number;
+  change: number;
 }

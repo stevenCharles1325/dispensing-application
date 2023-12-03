@@ -292,7 +292,7 @@ export default function EmployeeManagement () {
           <CounterWidget
             icon={<PeopleAltOutlinedIcon color="info" fontSize="large" />}
             count={data?.total}
-            label="Total Employees"
+            label="Total Displayed Employees"
           />
         </div>
         <div className="w-full h-[650px]">
@@ -482,7 +482,7 @@ export default function EmployeeManagement () {
                 color="secondary"
                 onChange={handleUpdateForm('password')}
                 error={Boolean(errors['password'])}
-                helperText={errors['password'] ?? 'You can only set this right now'}
+                helperText={errors['password'] ?? 'You can only set this once'}
               />
             )
             : null

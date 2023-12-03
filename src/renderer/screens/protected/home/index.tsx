@@ -4,7 +4,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable react/function-component-definition */
 /* eslint-disable react/no-unstable-nested-components */
-import { Button, Chip, IconButton } from '@mui/material';
+import { Button, Chip, Dialog, DialogActions, IconButton, TextField } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
@@ -12,7 +12,7 @@ import ItemCard from 'UI/components/Cards/ItemCard';
 import useAlert from 'UI/hooks/useAlert';
 import useSearch from 'UI/hooks/useSearch';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NumericFormat } from 'react-number-format';
+import { NumericFormat, NumericFormatProps } from 'react-number-format';
 import { AutoSizer, List } from 'react-virtualized';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -24,6 +24,7 @@ import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import PaymentUISwitch from 'UI/components/Switches/PaymentSwitch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
+import useConfirm from 'UI/hooks/useConfirm';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -75,11 +76,44 @@ const getCategories = async (): Promise<IPagination<CategoryDTO>> => {
   return res.data as unknown as IPagination<CategoryDTO>;
 };
 
+interface CustomProps {
+  onChange: (event: { target: { name: string; value: string } }) => void;
+  name: string;
+}
+
+const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
+  function PesoNumberFormat(props, ref) {
+    const { onChange, ...other } = props;
+
+    return (
+      <NumericFormat
+        {...other}
+        getInputRef={ref}
+        onValueChange={(values) => {
+          onChange({
+            target: {
+              name: props.name,
+              value: values.value,
+            },
+          });
+        }}
+        accept="enter"
+        thousandSeparator
+        valueIsNumericString
+        prefix="₱"
+      />
+    );
+  }
+);
+
 export default function Home() {
+  const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
   const [selectedItemIds, setSelectedItemIds] = useState<Array<string>>([]);
+  const [payment, setPayment] = useState<number>(0);
+  const [addPayment, setAddPayment] = useState<boolean>(false);
   const [orders, setOrders] = useState<Record<string, number>>({});
   const [posMenuAnchorEl, setPosMenuAnchorEl] = useState<HTMLElement | null>();
   const [categoryIds, setCategoryIds] = useState<Array<number>>([]);
@@ -87,6 +121,8 @@ export default function Home() {
   // Payment switch
   const [checked, setChecked] = useState(false);
   const selectedPaymentMethod = checked ? 'card' : 'cash';
+
+  const hasOrders = Boolean(selectedItemIds.length);
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, categoryIds],
@@ -156,6 +192,8 @@ export default function Home() {
 
   const total = subTotal + tax;
 
+  const change = payment - total > 0 ? payment - total : 0;
+
   const orderDetails: IOrderDetails = useMemo(
     () => ({
       items: selectedItems.map(({ id, tax_rate, selling_price }) => ({
@@ -166,10 +204,24 @@ export default function Home() {
       })),
       total,
       payment_method: selectedPaymentMethod,
+      amount_received: payment,
+      change,
       discount: 0, // To be included soon
     }),
-    [selectedItems, total, selectedPaymentMethod, orders]
+    [selectedItems, total, selectedPaymentMethod, payment, change, orders]
   );
+
+  const handleCancelOrder = () => {
+    confirm?.('Are you sure you want to cancel the orders?', async (agreed) => {
+      if (agreed) {
+        setPayment(0);
+        setSelectedItemIds([]);
+        setOrders({});
+
+        displayAlert?.('Successfully cancelled order', 'success');
+      }
+    });
+  }
 
   const handlePurchaseItem = useCallback(async () => {
     if (!orderDetails.items.length) {
@@ -184,6 +236,7 @@ export default function Home() {
       });
     }
 
+    setPayment(0);
     setSelectedItemIds([]);
     setOrders({});
     refetchItems();
@@ -443,7 +496,7 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            <div className="w-full h-[350px] flex flex-col text-white">
+            <div className="w-full h-fit flex flex-col text-white">
               <br />
               <b style={{ color: 'white' }}>BILL</b>
               <div className="flex flex-row justify-between">
@@ -473,13 +526,40 @@ export default function Home() {
                 </div>
               </div>
               <br />
-              <div className="grow w-full border-dashed border-t-4 py-3 flex flex-col justify-between">
+              <div className="grow w-full border-dashed border-t-4 pt-3 flex flex-col justify-between">
                 <div className="flex flex-row justify-between">
                   <p>Total:</p>
                   <div>
                     <NumericFormat
                       className="mb-2 px-1 bg-transparent grow text-end"
                       value={total}
+                      prefix="₱ "
+                      thousandSeparator
+                      valueIsNumericString
+                      disabled
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-row justify-between">
+                  <p>Amount Received:</p>
+                  <div>
+                    <NumericFormat
+                      className="mb-2 px-1 bg-transparent grow text-end"
+                      value={payment}
+                      prefix="₱ "
+                      thousandSeparator
+                      valueIsNumericString
+                      disabled
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-row justify-between">
+                  <p>Change:</p>
+                  <div>
+                    <NumericFormat
+                      className="mb-2 px-1 bg-transparent grow text-end"
+                      value={change}
                       prefix="₱ "
                       thousandSeparator
                       valueIsNumericString
@@ -513,20 +593,106 @@ export default function Home() {
                     <p className="capitalize">{selectedPaymentMethod}</p>
                   </div>
                 </div>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="inherit"
-                  sx={{ color: 'black' }}
-                  onClick={() => handlePurchaseItem()}
-                >
-                  Place Order
-                </Button>
+                <div className='w-full mt-5 flex flex-col gap-2'>
+                  <Button
+                    fullWidth
+                    disabled={payment === 0}
+                    variant="contained"
+                    color="inherit"
+                    sx={{ color: 'black' }}
+                    onClick={() => handlePurchaseItem()}
+                  >
+                    Place order
+                  </Button>
+                  <Button
+                    fullWidth
+                    disabled={!hasOrders}
+                    variant="outlined"
+                    color="inherit"
+                    sx={{ color: 'white' }}
+                    onClick={() => setAddPayment(true)}
+                  >
+                    {`${payment === 0 ? 'Add Payment' : 'Edit Payment'}`}
+                  </Button>
+                  <Button
+                    disabled={!hasOrders}
+                    fullWidth
+                    variant="text"
+                    color="inherit"
+                    sx={{ color: 'var(--info-text)' }}
+                    onClick={handleCancelOrder}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <Dialog
+        open={addPayment}
+        onClose={() => setAddPayment(false)}
+      >
+        <div className='p-5'>
+          <p className="text-gray-500 text-lg mb-5">Payment</p>
+          <div className='flex flex-col gap-5'>
+            <TextField
+              required
+              color="secondary"
+              label="Received Amount (Peso)"
+              value={payment}
+              onChange={(event) => {
+                setPayment(Number(event.target.value));
+              }}
+              variant="outlined"
+              size="small"
+              InputProps={{
+                inputComponent: PesoNumberFormat as any,
+              }}
+              sx={{
+                width: 300,
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setAddPayment(false);
+                  e.stopPropagation();
+                  e.preventDefault();
+                }
+              }}
+              // helperText={errors.cost_price}
+              // error={Boolean(errors.cost_price)}
+            />
+            <TextField
+              disabled
+              color="secondary"
+              label="Change (Peso)"
+              value={payment}
+              onChange={(event) => {
+                setPayment(Number(event.target.value));
+              }}
+              variant="outlined"
+              size="small"
+              InputProps={{
+                inputComponent: PesoNumberFormat as any,
+              }}
+              sx={{
+                width: 300,
+              }}
+              // helperText={errors.cost_price}
+              // error={Boolean(errors.cost_price)}
+            />
+          </div>
+        </div>
+        <DialogActions>
+          <Button
+            color="error"
+            onClick={() => setAddPayment(false)}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       <POSMenu
         list={categories}
         anchorEl={posMenuAnchorEl}

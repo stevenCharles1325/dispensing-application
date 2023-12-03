@@ -68,6 +68,17 @@ export class Transaction1697785919714 implements MigrationInterface {
             default: "'cash'",
           },
           {
+            name: 'amount_received',
+            type: 'real',
+            isNullable: true,
+          },
+          {
+            name: 'change',
+            type: 'real',
+            isNullable: true,
+            default: 0,
+          },
+          {
             name: 'total',
             type: 'real',
             isNullable: false,

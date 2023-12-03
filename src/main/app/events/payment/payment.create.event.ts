@@ -14,8 +14,6 @@ import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interfa
 import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import { Bull } from 'Main/jobs';
 import OrderRepository from 'App/repositories/order.repository';
-import { Order } from 'Main/database/models/order.model';
-import OrderDTO from 'App/data-transfer-objects/order.dto';
 import { Transaction } from 'Main/database/models/transaction.model';
 
 export default class PaymentCreateEvent implements IEvent {
@@ -54,7 +52,17 @@ export default class PaymentCreateEvent implements IEvent {
             type: 'customer-payment',
             method: 'cash',
             total: order.total,
+            amount_received: order.amount_received,
+            change: order.change,
           };
+
+          if (orderTransaction.amount_received < orderTransaction.total) {
+            return {
+              errors: ['Amount received is lower than the total'],
+              code: 'REQ_INVALID',
+              status: 'ERROR',
+            } as unknown as IResponse<string[]>;
+          }
 
           const transaction = TransactionRepository.create(
             orderTransaction as any

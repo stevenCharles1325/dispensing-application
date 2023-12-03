@@ -62,12 +62,6 @@ const columns: Array<GridColDef> = [
     type: 'string',
   },
   {
-    field: 'cost_price',
-    headerName: 'Cost Price (Peso)',
-    flex: 1,
-    type: 'number',
-  },
-  {
     field: 'selling_price',
     headerName: 'Selling Price (Peso)',
     flex: 1,
@@ -284,25 +278,25 @@ export default function Inventory() {
         <CounterWidget
           icon={<CategoryOutlinedIcon color="info" fontSize="large" />}
           count={data?.total}
-          label="total products"
+          label="total products displayed"
         />
         <CounterWidget
           icon={<LocalOfferOutlinedIcon color="secondary" fontSize="large" />}
           count={
             formatCurrency(
-              items.reduce((prev, curr) => prev + curr.selling_price, 0) ?? 0
+              items.reduce((prev, curr) => prev + (curr.selling_price * curr.stock_quantity), 0) ?? 0
             )
           }
-          label="total selling price"
+          label="total selling price displayed"
         />
         <CounterWidget
           icon={<MonetizationOnOutlinedIcon color="warning" fontSize="large" />}
           count={
             formatCurrency(
-              items.reduce((prev, curr) => prev + curr.cost_price, 0) ?? 0
+              items.reduce((prev, curr) => prev + (curr.cost_price * curr.stock_quantity), 0) ?? 0
             )
           }
-          label="Total cost price"
+          label="total cost price displayed"
         />
       </div>
       <div className="w-full h-[650px]">

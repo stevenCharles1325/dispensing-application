@@ -35,9 +35,7 @@ export default function ConfirmationProvider ({ children }: React.PropsWithChild
       <Dialog
         open={open}
       >
-        <DialogTitle>
-          <p className="text-gray-500">{message}</p>
-        </DialogTitle>
+        <p className="text-gray-500 text-lg p-5">{message}</p>
         <DialogActions>
           <Button
             variant="text"
@@ -50,7 +48,7 @@ export default function ConfirmationProvider ({ children }: React.PropsWithChild
             No
           </Button>
           <Button
-            variant="outlined"
+            variant="text"
             color="error"
             size="small"
             onClick={() => {

@@ -484,7 +484,7 @@ export default function Logs() {
                     </div>
                   </div>
                   <div className="w-full bg-gray-200 h-[60px] p-5 font-bold">
-                    <p>Item Description</p>
+                    <p>Product Description</p>
                   </div>
                   <div className="w-full h-[50px] flex py-5 px-2">
                     <div className="grow font-bold">Name</div>
@@ -558,6 +558,40 @@ export default function Logs() {
                             style={{ width: '150px', textAlign: 'center' }}
                             className="mb-2 px-1 bg-transparent grow text-end"
                             value={selectedPayment.total}
+                            prefix="₱ "
+                            thousandSeparator
+                            valueIsNumericString
+                            decimalSeparator="."
+                            decimalScale={2}
+                            fixedDecimalScale
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full flex justify-between">
+                        <div className="font-bold">Amount Received:</div>
+                        <div>
+                          <NumericFormat
+                            style={{ width: '150px', textAlign: 'center' }}
+                            className="mb-2 px-1 bg-transparent grow text-end"
+                            value={selectedPayment.amount_received}
+                            prefix="₱ "
+                            thousandSeparator
+                            valueIsNumericString
+                            decimalSeparator="."
+                            decimalScale={2}
+                            fixedDecimalScale
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full flex justify-between">
+                        <div className="font-bold">Change:</div>
+                        <div>
+                          <NumericFormat
+                            style={{ width: '150px', textAlign: 'center' }}
+                            className="mb-2 px-1 bg-transparent grow text-end"
+                            value={selectedPayment.change}
                             prefix="₱ "
                             thousandSeparator
                             valueIsNumericString

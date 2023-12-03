@@ -20,6 +20,10 @@ export interface IncomeDTO {
 
   method: IPaymentTypes;
 
+  amount_received: number;
+
+  change: number;
+
   total: number;
 
   created_at: Date;
