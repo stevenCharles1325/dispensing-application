@@ -21,4 +21,5 @@ export default interface UserDTO {
   created_at: Date;
   updated_at: Date;
   deleted_at: Date | null;
+  shortcut_keys?: [];
 }

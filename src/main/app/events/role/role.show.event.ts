@@ -39,7 +39,7 @@ export default class RoleShowEvent implements IEvent {
 
         const roleQuery = RoleRepository.createQueryBuilder(
           'role'
-        ).leftJoinAndSelect('role.permissions', 'permissions');;
+        ).leftJoinAndSelect('role.permissions', 'permissions');
 
         if (take !== 'max') {
           roleQuery.take(take).skip(skip);

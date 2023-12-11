@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/require-default-props */
-import React, { useState } from 'react';
+import React, { LegacyRef, forwardRef, useState } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { IconButton } from '@mui/material';
@@ -20,7 +20,9 @@ interface InputProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function Input(props: InputProps) {
+export type InputRef = any;
+
+const Input = forwardRef<InputRef, InputProps>(function (props, ref) {
   const {
     width = 100,
     height = 60,
@@ -73,6 +75,7 @@ export default function Input(props: InputProps) {
           </div>
         ) : null}
         <input
+          ref={ref}
           value={value}
           placeholder={placeholder}
           className={`grow-[2] outline-none bg-transparent p-3 pr-1 ${
@@ -102,4 +105,6 @@ export default function Input(props: InputProps) {
       </div>
     </>
   );
-}
+});
+
+export default Input;

@@ -25,6 +25,7 @@ import PaymentUISwitch from 'UI/components/Switches/PaymentSwitch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
+import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -108,6 +109,7 @@ const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
 
 export default function Home() {
   const confirm = useConfirm();
+  const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
@@ -210,6 +212,12 @@ export default function Home() {
     }),
     [selectedItems, total, selectedPaymentMethod, payment, change, orders]
   );
+
+  const handleAddPayment = useCallback(() => {
+    if (hasOrders) {
+      setAddPayment(true);
+    }
+  }, [hasOrders]);
 
   const handleCancelOrder = () => {
     confirm?.('Are you sure you want to cancel the orders?', async (agreed) => {
@@ -376,6 +384,36 @@ export default function Home() {
       }
     })
   }, [displayAlert, handleSelectItemByBarcode]);
+
+  useEffect(() => {
+    if (addListener) {
+      addListener([
+        {
+          key: 'add-payment',
+          handler: () => {
+            if (hasOrders) handleAddPayment();
+          },
+        },
+        {
+          key: 'place-order',
+          handler: () => {
+            if (hasOrders) handlePurchaseItem();
+          },
+        },
+        {
+          key: 'cancel-order',
+          handler: () => {
+            if (hasOrders) handleCancelOrder();
+          },
+        },
+      ]);
+    }
+  },
+  [
+    hasOrders,
+    handleAddPayment,
+    handlePurchaseItem,
+  ]);
 
   return (
     <>
@@ -602,7 +640,7 @@ export default function Home() {
                     sx={{ color: 'black' }}
                     onClick={() => handlePurchaseItem()}
                   >
-                    Place order
+                    {`Place order (${getCommand?.('place-order')})`}
                   </Button>
                   <Button
                     fullWidth
@@ -610,9 +648,11 @@ export default function Home() {
                     variant="outlined"
                     color="inherit"
                     sx={{ color: 'white' }}
-                    onClick={() => setAddPayment(true)}
+                    onClick={handleAddPayment}
                   >
-                    {`${payment === 0 ? 'Add Payment' : 'Edit Payment'}`}
+                    {`${payment === 0
+                      ? `Add Payment (${getCommand?.('add-payment')})`
+                      : `Edit Payment (${getCommand?.('add-payment')})`}`}
                   </Button>
                   <Button
                     disabled={!hasOrders}
@@ -622,7 +662,7 @@ export default function Home() {
                     sx={{ color: 'var(--info-text)' }}
                     onClick={handleCancelOrder}
                   >
-                    Cancel
+                    {`Cancel (${getCommand?.('cancel-order')})`}
                   </Button>
                 </div>
               </div>
@@ -639,6 +679,7 @@ export default function Home() {
           <div className='flex flex-col gap-5'>
             <TextField
               required
+              autoFocus
               color="secondary"
               label="Received Amount (Peso)"
               value={payment}

@@ -19,6 +19,8 @@ import React from "react";
 import RolesAndPermissionsForm from "UI/components/Views/RolesAndPermissionsForm";
 import useBarcode from "UI/hooks/useBarcode";
 import DeviceDialog from "UI/components/Dialogs/DevicesDialog";
+import ShortcutKeysForm from "UI/components/Views/ShortcutKeysForm";
+import hotkeys from "hotkeys-js";
 
 type ModalNames =
   | 'CATEGORIES'
@@ -27,6 +29,7 @@ type ModalNames =
   | 'BUSINESS DETAILS'
   | 'ROLES AND PERMISSIONS'
   | 'BARCODE'
+  | 'SHORTCUT-KEYS'
   | null;
 
 const Transition = React.forwardRef(function Transition(
@@ -149,6 +152,17 @@ export default function Settings () {
                 <Button color="secondary" onClick={handleOpenModal('BARCODE')}>Open</Button>
               </div>
             </div>
+
+            {/* Shortcut keys */}
+            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+              <Chip label="Shortcut-keys" variant="outlined" color="secondary" />
+              <p className="py-5 px-2 text-gray-400">
+                Update your own custom shortcut-keys
+              </p>
+              <div className="w-full flex flex-row-reverse">
+                <Button color="secondary" onClick={handleOpenModal('SHORTCUT-KEYS')}>Open</Button>
+              </div>
+            </div>
           </div>
 
           <Divider>
@@ -224,6 +238,11 @@ export default function Settings () {
           {
             modal === 'ROLES AND PERMISSIONS'
             ? <RolesAndPermissionsForm onClose={handleCloseModal} />
+            : null
+          }
+          {
+            modal === 'SHORTCUT-KEYS'
+            ? <ShortcutKeysForm onClose={handleCloseModal} />
             : null
           }
         </div>

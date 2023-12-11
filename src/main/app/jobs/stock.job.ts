@@ -16,9 +16,6 @@ export default class StockJob implements IJob {
       const authService = Provider.ioc<IAuthService>('AuthProvider');
       const authUser = authService.getAuthUser();
 
-      const ItemRepository = global.datasource.getRepository('items');
-      const item = await ItemRepository.findOneBy({ id: data.item_id }) as Item;
-
       const UserRepository = global.datasource.getRepository('users');
       const user = await UserRepository.findOneBy({ id: authUser.id }) as User;
 
@@ -31,7 +28,6 @@ export default class StockJob implements IJob {
       }
 
       record.creator = user;
-      record.item = item;
       return await InventoryRecordRepository.save(record);
     } catch (error) {
       return Promise.reject(error);

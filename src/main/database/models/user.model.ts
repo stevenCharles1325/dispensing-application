@@ -28,7 +28,8 @@ import {
 import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 import { ValidationMessage } from '../../app/validators/message/message';
 import type { Role } from './role.model';
-import { InventoryRecord } from './inventory-record.model';
+import type { InventoryRecord } from './inventory-record.model';
+import type { ShortcutKey } from './shortcut-key.model';
 
 @Entity('users')
 export class User {
@@ -151,13 +152,17 @@ export class User {
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
   subordinates: Relation<User>[];
 
+  @OneToMany('ShortcutKey', (shortcutKey: ShortcutKey) => shortcutKey.user)
+  @JoinColumn({ name: 'id', referencedColumnName: 'user_id' })
+  shortcut_keys: Relation<ShortcutKey>[];
+
   @ManyToOne('User', (user: User) => user.subordinates)
   @JoinColumn({ name: 'lead_id', referencedColumnName: 'id' })
   lead: Relation<User>;
 
   @OneToMany('InventoryRecord', (record: InventoryRecord) => record.creator)
   @JoinColumn({ name: 'id', referencedColumnName: 'creator_id' })
-  stockRecords: Relation<InventoryRecord>[];
+  stock_records: Relation<InventoryRecord>[];
 
   @AfterLoad()
   fullName() {

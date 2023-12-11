@@ -10,6 +10,9 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import { User } from 'Main/database/models/user.model';
 import { Bull } from 'Main/jobs';
+import ShortcutKeyRepository from 'App/repositories/shortcut-key.repository';
+import shortcutKeys from 'Main/data/defaults/shortcut-keys';
+import { ShortcutKey } from 'Main/database/models/shortcut-key.model';
 
 export default class UserCreateEvent implements IEvent {
   public channel: string = 'user:create';
@@ -40,6 +43,16 @@ export default class UserCreateEvent implements IEvent {
         }
 
         const data: User = await UserRepository.save(_user);
+
+        const keys = ShortcutKeyRepository.create(
+          shortcutKeys.map((shortcutKey) => ({
+            ...shortcutKey,
+            user_id: user.id,
+          })) as any[]
+        );
+
+        await ShortcutKeyRepository.save(keys);
+
         await Bull('AUDIT_JOB', {
           user_id: user.id as number,
           resource_id: data.id.toString(),

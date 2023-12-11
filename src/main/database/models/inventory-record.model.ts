@@ -79,7 +79,7 @@ export class InventoryRecord {
   @JoinColumn({ name: 'item_id', referencedColumnName: 'id' })
   item: Relation<Item>;
 
-  @ManyToOne('User', (creator: User) => creator.stockRecords)
+  @ManyToOne('User', (creator: User) => creator.stock_records)
   @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
   creator: Relation<User>;
 }

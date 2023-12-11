@@ -8,7 +8,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Ref, useCallback, useEffect, useRef, useState } from 'react';
 import NavButton, { INavButtonprops } from '../Buttons/NavButtons';
 import AppLogo from '../Logo/AppLogo';
 import {
@@ -25,8 +25,9 @@ import {
   Menu,
   MenuItem,
   TextField,
+  Tooltip,
 } from '@mui/material';
-import Input from '../TextField/Input';
+import Input, { InputRef } from '../TextField/Input';
 import useSearch from 'UI/hooks/useSearch';
 import debounce from 'lodash.debounce';
 import { List, ListRowRenderer } from 'react-virtualized';
@@ -61,6 +62,7 @@ import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined';
 import usePermission from 'UI/hooks/usePermission';
+import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -131,7 +133,10 @@ const getNotifs = async (
 };
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
+  const inputRef = useRef<InputRef>(null);
+
   const hasPermission = usePermission();
+  const { addListener, getCommand } = useShortcutKeys();
 
   const drive = useAppDrive();
   const [openDrive, driveListener] =
@@ -485,6 +490,25 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     )
   }
 
+  useEffect(() => {
+    if (addListener) {
+      addListener([
+        {
+          key: 'collapse-navigation',
+          handler: () => setIsSideNavCollapsed((isCollapsed) => !isCollapsed),
+        },
+        {
+          key: 'search-bar',
+          handler: () => inputRef.current?.focus?.(),
+        },
+        {
+          key: 'log-out',
+          handler: () => handleSignOut(),
+        }
+      ]);
+    }
+  }, []);
+
   return (
     <>
       <div className="w-screen h-screen bg-transparent flex flex-row leading-normal">
@@ -495,13 +519,22 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                 <AppLogo size={30} color="light" withName={!isSideNavCollapsed} />
               </div>
               <div className='w-fit'>
-                <IconButton onClick={() => setIsSideNavCollapsed((isCollapsed) => !isCollapsed)}>
-                  {
-                    isSideNavCollapsed
-                    ? <ChevronRightOutlinedIcon sx={{ color: 'white' }} />
-                    : <ChevronLeftOutlinedIcon sx={{ color: 'white' }} />
-                  }
-                </IconButton>
+                <Tooltip
+                  title={(
+                    <p className='text-base'>
+                      {`(${getCommand?.('collapse-navigation')})`}
+                    </p>
+                  )}
+                  arrow
+                >
+                  <IconButton onClick={() => setIsSideNavCollapsed((isCollapsed) => !isCollapsed)}>
+                    {
+                      isSideNavCollapsed
+                      ? <ChevronRightOutlinedIcon sx={{ color: 'white' }} />
+                      : <ChevronLeftOutlinedIcon sx={{ color: 'white' }} />
+                    }
+                  </IconButton>
+                </Tooltip>
             </div>
             </div>
           </div>
@@ -522,6 +555,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         <div className="navigation-screen-container grow my-5 mr-5 bg-white rounded-2xl p-5 flex flex-col overflow-auto">
           <div className="w-full h-[50px] flex justify-between px-5">
             <Input
+              ref={inputRef as Ref<InputRef>}
               opacity="clear"
               disabled={disabled}
               leftIcon={
@@ -540,7 +574,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                   {text?.length ? <CloseOutlinedIcon /> : null}
                 </IconButton>
               }
-              placeholder={placeHolder}
+              placeholder={`${placeHolder} ${!disabled ? `(${getCommand?.('search-bar')?.toLocaleUpperCase()})` : '' }`}
               width={300}
               height="full"
               value={text}
@@ -644,6 +678,20 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           <MenuItem onClick={handleSignOut} style={{ gap: 10 }}>
             <LogoutOutlinedIcon />
             Logout
+            {
+              getCommand?.('log-out')
+              ? (
+                <Chip
+                  label={`${getCommand?.('log-out')?.toLocaleUpperCase()}`}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    color: 'white'
+                  }}
+                />
+              )
+              : null
+            }
           </MenuItem>
         </div>
       </Menu>

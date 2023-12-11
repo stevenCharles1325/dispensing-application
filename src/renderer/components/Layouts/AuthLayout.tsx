@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import ConfirmationProvider from 'UI/providers/ConfirmationProvider';
+import ShortcutKeysProvider from 'UI/providers/ShortcutKeysProvider';
 
 const queryClient = new QueryClient();
 
@@ -53,9 +54,11 @@ export default function AuthLayout() {
               <AuthProvider userData={userData} setUserData={setUserData}>
                 <SearchProvider>
                   <ConfirmationProvider>
-                    <AlertProvider>
-                      <AppDriveProvider>{outlet}</AppDriveProvider>
-                    </AlertProvider>
+                    <ShortcutKeysProvider>
+                      <AlertProvider>
+                        <AppDriveProvider>{outlet}</AppDriveProvider>
+                      </AlertProvider>
+                    </ShortcutKeysProvider>
                   </ConfirmationProvider>
                 </SearchProvider>
               </AuthProvider>

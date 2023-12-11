@@ -25,6 +25,7 @@ import { PermissionsKebabType } from './data/defaults/permissions';
 import HidDTO from 'App/data-transfer-objects/hid.dto';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
+import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -154,6 +155,26 @@ const userHandler = {
 
   deleteUser: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('user:delete', id),
+};
+
+/* ================================
++
++    SHORTCUT-KEY EVENT HANDLER
++
++ ================================ */
+const shortcutKeyHandler = {
+  getShortcutkeys: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<ShortcutKeyDTO>>> =>
+    ipcRenderer.invoke('shortcut-key:show', payload, page, total),
+
+  updateShortcutKey: async (
+    id: number,
+    payload: Pick<ShortcutKeyDTO, 'key' | 'key_combination'>
+  ): Promise<IResponse<string[] | IPOSError[] | ShortcutKeyDTO>> =>
+    ipcRenderer.invoke('shortcut-key:update', id, payload),
 };
 
 /* ================================
@@ -513,12 +534,14 @@ const exportHandler = {
 };
 
 // EXPOSING HANDLERS
+shortcutKeyHandler
 contextBridge.exposeInMainWorld('storage', storageHandler);
 contextBridge.exposeInMainWorld('barcode', barcodeHandler);
 contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
 contextBridge.exposeInMainWorld('user', userHandler);
+contextBridge.exposeInMainWorld('shortcutKey', shortcutKeyHandler);
 contextBridge.exposeInMainWorld('role', roleHandler);
 contextBridge.exposeInMainWorld('permission', permissionHandler);
 contextBridge.exposeInMainWorld('item', itemHandler);
@@ -540,6 +563,7 @@ export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
 export type UserHandler = typeof userHandler;
+export type ShortcutKeyHandler = typeof shortcutKeyHandler;
 export type RoleHandler = typeof roleHandler;
 export type PermissionHandler = typeof permissionHandler;
 export type ItemHandler = typeof itemHandler;

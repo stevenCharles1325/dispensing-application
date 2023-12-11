@@ -10,8 +10,10 @@ import useAuth from 'UI/hooks/useAuth';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import IAuth from 'App/interfaces/auth/auth.interface';
 import PasswordInput from 'UI/components/TextField/PasswordInput';
+import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 
 export default function SignIn() {
+  const { refresh } = useShortcutKeys();
   const navigate = useNavigate();
   const { setUserData } = useAuth();
   const { displayAlert } = useAlert();
@@ -40,6 +42,7 @@ export default function SignIn() {
 
       displayAlert?.('Login success', 'success');
 
+      refresh?.();
       return navigate('/home', { replace: true });
     }
   };
@@ -55,6 +58,7 @@ export default function SignIn() {
 
         <div className="mb-[30px] flex flex-col gap-1">
           <TextField
+            autoFocus
             label="Email"
             placeholder="Email"
             fullWidth

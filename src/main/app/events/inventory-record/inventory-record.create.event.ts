@@ -28,8 +28,8 @@ export default class InventoryRecordCreateEvent implements IEvent {
       const requesterHasPermission = user.hasPermission?.('create-stock-record');
 
       if (requesterHasPermission && user.id) {
+        payload['creator_id'] = user.id;
         const item = await ItemRepository.findOneByOrFail({ id: payload.item_id });
-        const creator = await UserRepository.findOneByOrFail({ id: user.id });
 
         const record = InventoryRecordRepository.create(payload);
         const errors = await validator(record);
@@ -54,9 +54,6 @@ export default class InventoryRecordCreateEvent implements IEvent {
             status: 'ERROR',
           } as unknown as IResponse<IPOSValidationError[]>;
         }
-
-        record.item = item as any;
-        record.creator = creator as any;
 
         if (record.type === 'stock-in') {
           item.stock_quantity += record.quantity;

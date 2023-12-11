@@ -13,6 +13,8 @@ import administrator from 'Main/data/defaults/roles/administrator';
 import cashier from 'Main/data/defaults/roles/cashier';
 import storeManager from 'Main/data/defaults/roles/store-manager';
 import owner from 'Main/data/defaults/roles/owner';
+import shortcutKeys from 'Main/data/defaults/shortcut-keys';
+import { ShortcutKey } from '../models/shortcut-key.model';
 
 const roles = {
   administrator,
@@ -28,18 +30,20 @@ export default class MainSeeder implements Seeder {
     const RoleRepo = dataSource.getRepository(Role);
     const UserRepo = dataSource.getRepository(User);
     const SystemRepo = dataSource.getRepository(System);
+    const ShortcutKeyRepo = dataSource.getRepository(ShortcutKey);
 
     const isDBHasMainSystem = await SystemRepo.findOneBy({
       store_name: 'sari-sari store',
     });
 
+    let system: System | null;
     if (!isDBHasMainSystem) {
       const _system = SystemRepo.create({
         is_branch: false,
         store_name: 'sari-sari store',
       });
 
-      const system = await SystemRepo.save(_system);
+      system = await SystemRepo.save(_system);
       await SystemRepo.save({
         ...system,
         main_branch_id: system.uuid,
@@ -50,7 +54,7 @@ export default class MainSeeder implements Seeder {
       permissions as unknown as Array<Partial<Permission>>
     );
     await PermissionRepo.save(createdPermissions);
-    console.log('[SEEDER]: Seeded Permissions successfully');
+    console.log('[SEEDER]: Seeded Permissions Successfully');
 
     if (roles) {
       const _roles = RoleRepo.create(
@@ -79,10 +83,10 @@ export default class MainSeeder implements Seeder {
 
       await RoleRepo.save(_roles);
 
-      console.log('[SEEDER]: Seeded Roles successfully');
+      console.log('[SEEDER]: Seeded Roles Successfully');
       const ownerRole = await RoleRepo.findOneByOrFail({ name: 'Owner' });
 
-      const user = UserRepo.create({
+      const _user = UserRepo.create({
         first_name: 'John',
         last_name: 'Doe',
         email: 'johndoe123@gmail.com',
@@ -94,8 +98,17 @@ export default class MainSeeder implements Seeder {
         status: 'active',
       });
 
-      user.role = ownerRole;
-      await UserRepo.save(user);
+      _user.role = ownerRole;
+      const user = await UserRepo.save(_user);
+
+      const keys = ShortcutKeyRepo.create(shortcutKeys.map((shortcutKey) => ({
+        ...shortcutKey,
+        user_id: user.id,
+        system_id: system?.id,
+      })));
+
+      await ShortcutKeyRepo.save(keys);
+      console.log('[SEEDER]: Seeded Shortcut-keys Successfully');
     }
   }
 }

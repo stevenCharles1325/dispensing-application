@@ -138,6 +138,7 @@
     "electron-router-dom": "^1.0.5",
     "electron-store": "^8.1.0",
     "electron-updater": "^5.3.0",
+    "hotkeys-js": "^3.12.2",
     "ioredis": "^5.3.2",
     "localforage": "^1.10.0",
     "lodash.debounce": "^4.0.8",

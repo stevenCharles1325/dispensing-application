@@ -17,7 +17,7 @@ import { Role } from 'Main/database/models/role.model';
 import { Bull } from 'Main/jobs';
 import { In } from "typeorm"
 
-export default class UserDeleteEvent implements IEvent {
+export default class RoleUpdateEvent implements IEvent {
   public channel: string = 'role:update';
 
   public middlewares = ['auth.middleware'];

@@ -15,6 +15,7 @@ import {
   PermissionHandler,
   ReportHandler,
   RoleHandler,
+  ShortcutKeyHandler,
   StorageHandler,
   SupplierHandler,
   UserHandler,
@@ -30,6 +31,7 @@ declare global {
     auth: AuthHandler;
     peer: PeerHandler;
     user: UserHandler;
+    shortcutKey: ShortcutKeyHandler;
     image: ImageHandler;
     item: ItemHandler;
     inventoryRecord: InventoryRecordHandler;
