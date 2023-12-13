@@ -1,3 +1,5 @@
+import { Button, TextField } from "@mui/material";
+import React from "react";
 import { useCallback, useEffect, useState } from "react";
 
 interface ShortcutKeyFieldProps {
@@ -9,6 +11,14 @@ const specialKeys = [
   'Alt',
   'Shift',
 ];
+
+const KeyButton = ({ keyPressed }: { keyPressed: string }) => {
+  return (
+    <div className="min-w-[30px] w-fit h-[28px] border border-gray-500 bg-gray-200 shadow rounded border-b-4 text-center text-xs p-1">
+      {keyPressed}
+    </div>
+  )
+}
 
 export default function ShortcutKeyField ({ onChange }: ShortcutKeyFieldProps) {
   const [pressedKeys, setPressedKeys] = useState<string[]>([]);
@@ -77,8 +87,11 @@ export default function ShortcutKeyField ({ onChange }: ShortcutKeyFieldProps) {
       combinations.push(`${combination}${key}`);
     }
 
-    onChange?.(combinations.slice(-2).join(','));
-    setPressedKeys(combinations.slice(-2));
+    if (combinations.length > 2) {
+      combinations = [combinations[combinations.length - 1]];
+    }
+    onChange?.(combinations.join(','));
+    setPressedKeys(combinations);
     return false;
   }, [pressedKeys]);
 
@@ -93,13 +106,44 @@ export default function ShortcutKeyField ({ onChange }: ShortcutKeyFieldProps) {
   }, [pressedKeys]); // Dependency array includes pressedKeys
 
   return (
-    <input
-      readOnly
-      autoFocus
-      type="text"
-      className="w-full h-[35px] border hover:border-fuchsia-500/70 focus:border-fuchsia-500 rounded px-5 outline-none"
-      value={pressedKeys.join(' ')}
-      placeholder="Enter key combination"
-    />
+    <>
+      <TextField
+        InputProps={{
+          readOnly: true,
+        }}
+        autoFocus
+        size="small"
+        color="secondary"
+        type="text"
+        variant="outlined"
+        label="Key Combination"
+        value={pressedKeys.join(' ')}
+        placeholder="Enter key combination"
+      />
+      <div className="w-full h-fit flex justify-center">
+        <div className="w-fit h-[25px] flex flex-row gap-2">
+          {pressedKeys.map((keyPressed, index) => (
+            <React.Fragment key={index}>
+              {specialKeys.includes(keyPressed)
+                ? (
+                  <>
+                    <KeyButton keyPressed={keyPressed} />
+                    <p>+</p>
+                  </>
+                )
+                : index === 0 && pressedKeys.length === 2
+                  ? (
+                    <>
+                      <KeyButton keyPressed={keyPressed} />
+                      <p>Chord to</p>
+                    </>
+                  )
+                  : <KeyButton keyPressed={keyPressed} />
+              }
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
