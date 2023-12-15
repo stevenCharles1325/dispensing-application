@@ -21,15 +21,17 @@ import useBarcode from "UI/hooks/useBarcode";
 import DeviceDialog from "UI/components/Dialogs/DevicesDialog";
 import ShortcutKeysForm from "UI/components/Views/ShortcutKeysForm";
 import hotkeys from "hotkeys-js";
+import DiscountForm from "UI/components/Views/DiscountForm";
 
 type ModalNames =
+  | 'BUSINESS DETAILS'
+  | 'ROLES AND PERMISSIONS'
+  | 'SHORTCUT-KEYS'
   | 'CATEGORIES'
   | 'BRANDS'
   | 'SUPPLIERS'
-  | 'BUSINESS DETAILS'
-  | 'ROLES AND PERMISSIONS'
+  | 'DISCOUNTS'
   | 'BARCODE'
-  | 'SHORTCUT-KEYS'
   | null;
 
 const Transition = React.forwardRef(function Transition(
@@ -212,6 +214,18 @@ export default function Settings () {
                 </Button>
               </div>
             </div>
+
+            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+              <Chip label="Discounts" variant="outlined" color="secondary" />
+              <p className="py-5 px-2 text-gray-400">
+                Want to add new discounts?
+              </p>
+              <div className="w-full flex flex-row-reverse">
+                <Button color="secondary" onClick={handleOpenModal('DISCOUNTS')}>
+                  Open
+                </Button>
+              </div>
+            </div>
           </div>
 
           <Divider />
@@ -233,6 +247,11 @@ export default function Settings () {
           {
             modal === 'SUPPLIERS'
             ? <SupplierFormV2 onClose={handleCloseModal} />
+            : null
+          }
+          {
+            modal === 'DISCOUNTS'
+            ? <DiscountForm onClose={handleCloseModal} />
             : null
           }
           {

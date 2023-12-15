@@ -18,6 +18,7 @@ import { Notification } from './database/models/notification.model';
 import { InventoryRecord } from './database/models/inventory-record.model';
 import MainSeeder from './database/seeders/main.seeder';
 import { ShortcutKey } from './database/models/shortcut-key.model';
+import { Discount } from './database/models/discount.model';
 
 type DataSourceWithSeederOption = DataSourceOptions & SeederOptions;
 
@@ -45,6 +46,7 @@ export const options: DataSourceWithSeederOption = {
     Notification,
     InventoryRecord,
     ShortcutKey,
+    Discount,
   ],
   migrations: [
     `${MIGRATION_PATH}/database/migrations/*`,

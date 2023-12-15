@@ -31,6 +31,12 @@ export class Item1695800617464 implements MigrationInterface {
             foreignKeyConstraintName: 'image',
           },
           {
+            name: 'discount_id',
+            type: 'int',
+            isNullable: true,
+            foreignKeyConstraintName: 'discount',
+          },
+          {
             name: 'category_id',
             type: 'int',
             isNullable: false,
@@ -230,6 +236,17 @@ export class Item1695800617464 implements MigrationInterface {
     await queryRunner.createForeignKey(
       'items',
       new TableForeignKey({
+        name: 'supplier',
+        columnNames: ['discount_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'discounts',
+        onDelete: 'SET NULL',
+      })
+    );
+
+    await queryRunner.createForeignKey(
+      'items',
+      new TableForeignKey({
         name: 'system',
         columnNames: ['system_id'],
         referencedColumnNames: ['id'],
@@ -241,6 +258,7 @@ export class Item1695800617464 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropForeignKey('items', 'system');
+    await queryRunner.dropForeignKey('items', 'discount');
     await queryRunner.dropForeignKey('items', 'image');
     await queryRunner.dropForeignKey('items', 'brand');
     await queryRunner.dropForeignKey('items', 'category');

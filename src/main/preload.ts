@@ -26,6 +26,7 @@ import HidDTO from 'App/data-transfer-objects/hid.dto';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
+import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -264,6 +265,29 @@ const itemHandler = {
     id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('item:delete', id),
+};
+
+/* ================================
++
++         DISCOUNT EVENT HANDLER
++
++ ================================ */
+const discountHandler = {
+  getDiscounts: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<DiscountDTO>>> =>
+    ipcRenderer.invoke('discount:show', payload, page, total),
+
+  createDiscount: async (
+    payload: Partial<DiscountDTO>,
+  ): Promise<
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | DiscountDTO[]>
+  > => ipcRenderer.invoke('discount:create', payload),
+
+  deleteDiscount: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('discount:delete', id),
 };
 
 /* ================================
@@ -534,7 +558,6 @@ const exportHandler = {
 };
 
 // EXPOSING HANDLERS
-shortcutKeyHandler
 contextBridge.exposeInMainWorld('storage', storageHandler);
 contextBridge.exposeInMainWorld('barcode', barcodeHandler);
 contextBridge.exposeInMainWorld('main', mainHandler);
@@ -545,6 +568,7 @@ contextBridge.exposeInMainWorld('shortcutKey', shortcutKeyHandler);
 contextBridge.exposeInMainWorld('role', roleHandler);
 contextBridge.exposeInMainWorld('permission', permissionHandler);
 contextBridge.exposeInMainWorld('item', itemHandler);
+contextBridge.exposeInMainWorld('discount', discountHandler);
 contextBridge.exposeInMainWorld('inventoryRecord', inventoryRecordHandler);
 contextBridge.exposeInMainWorld('brand', brandHandler);
 contextBridge.exposeInMainWorld('image', imageHandler);
@@ -567,6 +591,7 @@ export type ShortcutKeyHandler = typeof shortcutKeyHandler;
 export type RoleHandler = typeof roleHandler;
 export type PermissionHandler = typeof permissionHandler;
 export type ItemHandler = typeof itemHandler;
+export type DiscountHandler = typeof discountHandler;
 export type InventoryRecordHandler = typeof inventoryRecordHandler;
 export type ImageHandler = typeof imageHandler;
 export type BrandHandler = typeof brandHandler;

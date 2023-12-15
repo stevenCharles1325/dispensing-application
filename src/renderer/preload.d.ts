@@ -4,6 +4,7 @@ import {
   BarcodeHandler,
   BrandHandler,
   CategoryHandler,
+  DiscountHandler,
   ExportHandler,
   ImageHandler,
   InventoryRecordHandler,
@@ -34,6 +35,7 @@ declare global {
     shortcutKey: ShortcutKeyHandler;
     image: ImageHandler;
     item: ItemHandler;
+    discount: DiscountHandler;
     inventoryRecord: InventoryRecordHandler;
     brand: BrandHandler;
     category: CategoryHandler;

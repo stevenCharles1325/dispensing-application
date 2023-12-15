@@ -87,11 +87,11 @@ const getSuppliers = async (
 };
 
 
-export interface ProductDetailsFormProps {
+export interface SupplierFormProps {
   onClose: () => void;
 }
 
-export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
+export default function SupplierFormV2 ({ onClose }: SupplierFormProps) {
   const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
