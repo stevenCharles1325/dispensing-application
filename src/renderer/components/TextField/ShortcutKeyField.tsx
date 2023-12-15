@@ -3,6 +3,8 @@ import React from "react";
 import { useCallback, useEffect, useState } from "react";
 
 interface ShortcutKeyFieldProps {
+  error?: boolean;
+  helperText?: string;
   onChange: (value: string) => void;
 };
 
@@ -20,7 +22,7 @@ const KeyButton = ({ keyPressed }: { keyPressed: string }) => {
   )
 }
 
-export default function ShortcutKeyField ({ onChange }: ShortcutKeyFieldProps) {
+export default function ShortcutKeyField ({ error, helperText, onChange }: ShortcutKeyFieldProps) {
   const [pressedKeys, setPressedKeys] = useState<string[]>([]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
@@ -119,6 +121,8 @@ export default function ShortcutKeyField ({ onChange }: ShortcutKeyFieldProps) {
         label="Key Combination"
         value={pressedKeys.join(' ')}
         placeholder="Enter key combination"
+        error={error}
+        helperText={helperText}
       />
       <div className="w-full h-fit flex justify-center">
         <div className="w-fit h-[25px] flex flex-row gap-2">

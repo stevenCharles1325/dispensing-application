@@ -6,7 +6,6 @@ import ShortcutKeyDTO from "App/data-transfer-objects/shortcut-key.dto";
 import IPagination from "App/interfaces/pagination/pagination.interface";
 import IPOSValidationError from "App/interfaces/pos/pos.validation-error.interface";
 import useAlert from "UI/hooks/useAlert";
-import useConfirm from "UI/hooks/useConfirm";
 import useErrorHandler from "UI/hooks/useErrorHandler";
 import hotkeys from "hotkeys-js";
 import { useCallback, useState } from "react";
@@ -60,10 +59,12 @@ export interface ShortcutKeyFormProps {
 export default function ShortcutKeysForm ({ onClose }: ShortcutKeyFormProps) {
   const { displayAlert } = useAlert();
   const { refresh } = useShortcutKeys();
+  const errorHandler = useErrorHandler();
 
   const [key, setKey] = useState('');
   const [keyCombination, setKeyCombination] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [newKeyCombination, setNewKeyCombination] = useState('');
+  const [error, setError] = useState<Record<string, any>>({});
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>();
@@ -73,7 +74,8 @@ export default function ShortcutKeysForm ({ onClose }: ShortcutKeyFormProps) {
     setModalAction(null);
     setKey('');
     setKeyCombination('');
-    setError(null);
+    setNewKeyCombination('');
+    setError({});
   }
 
   const { data, refetch } = useQuery({
@@ -92,7 +94,6 @@ export default function ShortcutKeysForm ({ onClose }: ShortcutKeyFormProps) {
     console.log('Updating item');
     setModalAction('update');
 
-    console.log(selectedItem);
     if (selectedItem) {
       setKey(selectedItem.key);
       setKeyCombination(selectedItem?.key_combination);
@@ -104,24 +105,40 @@ export default function ShortcutKeysForm ({ onClose }: ShortcutKeyFormProps) {
       selectedIds[0],
       {
         key,
-        key_combination: keyCombination,
+        key_combination: newKeyCombination,
       }
     )
 
     if (res.status === 'ERROR') {
-      if (typeof res.errors?.[0] === 'string') {
-        return displayAlert?.(res.errors?.[0] as unknown as string, 'error');
+      const error: Record<string, any> = {};
+
+      const onError = (field: string | null, message: string) => {
+        if (field) {
+          error[field] = message;
+        }
       }
 
-      const resErrors = res.errors as unknown as IPOSValidationError[];
+      errorHandler({
+        errors: res.errors,
+        onError,
+      });
 
-      return setError(resErrors[0].message as unknown as string);
+      setError(error);
+      return;
     }
 
+    hotkeys.unbind(keyCombination);
     refresh?.();
     await refetch();
+    displayAlert?.(`Successfully updated ${key}`, 'success');
     handleCloseModal();
-  }, [selectedIds, key, keyCombination]);
+  }, [
+    selectedIds,
+    key,
+    keyCombination,
+    newKeyCombination,
+    displayAlert
+  ]);
 
   return (
     <>
@@ -169,8 +186,10 @@ export default function ShortcutKeysForm ({ onClose }: ShortcutKeyFormProps) {
           </DialogTitle>
           <ShortcutKeyField
             onChange={(combination) =>
-              setKeyCombination(combination)
+              setNewKeyCombination(combination)
             }
+            error={Boolean(error['key_combination'])}
+            helperText={error['key_combination']}
           />
           <div className="w-full flex flex-row-reverse">
             <Button
