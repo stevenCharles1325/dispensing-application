@@ -269,7 +269,7 @@ const itemHandler = {
 
 /* ================================
 +
-+         DISCOUNT EVENT HANDLER
++      DISCOUNT EVENT HANDLER
 +
 + ================================ */
 const discountHandler = {
@@ -285,6 +285,12 @@ const discountHandler = {
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | DiscountDTO[]>
   > => ipcRenderer.invoke('discount:create', payload),
+
+  updateDiscount: async (
+    id: number,
+    payload: ItemDTO['id'][],
+  ): Promise<IResponse<string[] | IPOSError[] | DiscountDTO>> =>
+    ipcRenderer.invoke('discount:update', id, payload),
 
   deleteDiscount: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('discount:delete', id),

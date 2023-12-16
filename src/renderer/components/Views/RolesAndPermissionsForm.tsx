@@ -170,7 +170,6 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
     (key: string) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 
-    console.log(e.target.value);
     setForm((form) => ({
       ...form,
       [key]: e.target.value,
@@ -290,6 +289,7 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
           return;
         }
 
+        setSelectedIds([]);
         await refetch();
         displayAlert?.('Successfully deleted selected supplier(s)', 'success');
       }

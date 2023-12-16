@@ -240,7 +240,7 @@ export class Item {
     cascade: true,
   })
   @JoinColumn({ name: 'discount_id', referencedColumnName: 'id' })
-  discount?: Relation<Discount>;
+  discount?: Relation<Discount> | null;
 
   // Custom functions
   async purchase(quantity: number = 1) {

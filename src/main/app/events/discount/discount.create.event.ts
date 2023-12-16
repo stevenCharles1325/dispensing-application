@@ -9,6 +9,9 @@ import { Bull } from 'Main/jobs';
 import { Discount } from 'Main/database/models/discount.model';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 import DiscountRepository from 'App/repositories/discount.repository';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
+import ItemRepository from 'App/repositories/item.repository';
+import { In } from "typeorm"
 
 export default class DiscountCreateEvent implements IEvent {
   public channel: string = 'discount:create';
@@ -23,11 +26,17 @@ export default class DiscountCreateEvent implements IEvent {
     try {
       const { user } = eventData;
       const payload: Discount = eventData.payload[0];
+      const itemIds: ItemDTO['id'][] = eventData.payload[1];
       const requesterHasPermission = user.hasPermission?.('create-discount');
 
       if (requesterHasPermission) {
         payload.creator_id = user.id as number;
         const discount = DiscountRepository.create(payload);
+        const items = await ItemRepository.createQueryBuilder()
+          .where({
+            id: In(itemIds),
+          })
+          .getMany();
         const errors = await validator(discount);
 
         if (errors && errors.length) {
@@ -36,6 +45,13 @@ export default class DiscountCreateEvent implements IEvent {
             code: 'VALIDATION_ERR',
             status: 'ERROR',
           } as unknown as IResponse<IPOSValidationError[]>;
+        }
+
+        if (items?.length) {
+          await ItemRepository.save(items.map((item) => {
+            item.discount = discount;
+            return item;
+          }));
         }
 
         const data: Discount = await DiscountRepository.save(discount);

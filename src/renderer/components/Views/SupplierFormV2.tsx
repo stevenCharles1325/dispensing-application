@@ -128,7 +128,9 @@ export default function SupplierFormV2 ({ onClose }: SupplierFormProps) {
   });
 
   const items = (data?.data as SupplierDTO[]) ?? [];
-  const selectedItem = items?.find(({ id }) => id === selectedIds?.[0]) ?? null;
+  const selectedItem = items?.find(({ id }) =>
+    id === selectedIds?.[0]
+  ) ?? null;
 
   const handleAddNewItem = () => {
     console.log('Adding new supplier');
@@ -139,7 +141,6 @@ export default function SupplierFormV2 ({ onClose }: SupplierFormProps) {
     console.log('Updating supplier');
     setModalAction('update');
 
-    console.log(selectedItem);
     if (selectedItem) {
       setForm({ ...selectedItem });
     }

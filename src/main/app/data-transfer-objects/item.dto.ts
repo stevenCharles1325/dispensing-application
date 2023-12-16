@@ -3,7 +3,7 @@ import { IItemStatus } from 'App/interfaces/item/item.status.interface';
 import ImageDTO from './image.dto';
 import { Image } from 'Main/database/models/image.model';
 import InventoryRecordsDTO from './inventory-record.dto';
-import { InventoryRecords } from 'Main/database/models/inventory-records.model';
+import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 
 export default interface ItemDTO {
   id: string;
@@ -29,5 +29,5 @@ export default interface ItemDTO {
   deleted_at?: Date;
 
   image?: ImageDTO | Image;
-  records: InventoryRecordsDTO[] | InventoryRecords[];
+  records: InventoryRecordsDTO[] | InventoryRecord[];
 }

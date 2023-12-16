@@ -17,12 +17,16 @@ import { ValidationMessage } from '../../app/validators/message/message';
 
 @Entity('discounts')
 export class Discount {
-  items: Item[];
+  items: any[];
 
   @AfterLoad()
   async getItemsRelated() {
     const ItemRepository = global.datasource.getRepository('items');
-    const items = await ItemRepository.findBy({ discount_id: this.id });
+    const items = await ItemRepository.createQueryBuilder()
+      .where({
+        discount_id: this.id,
+      })
+      .getMany();
 
     this.items = items as Item[];
   }
