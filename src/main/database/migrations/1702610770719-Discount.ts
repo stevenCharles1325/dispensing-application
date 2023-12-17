@@ -32,11 +32,13 @@ export class Discount1702610770719 implements MigrationInterface {
             name: 'coupon_code',
             type: 'varchar',
             isNullable: true,
+            isUnique: true,
           },
           {
             name: 'title',
             type: 'varchar',
             isNullable: false,
+            isUnique: true,
           },
           {
             name: 'description',

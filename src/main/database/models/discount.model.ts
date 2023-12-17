@@ -40,13 +40,13 @@ export class Discount {
   @Column()
   creator_id: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   @MinLength(5, {
     message: ValidationMessage.minLength,
   })
   coupon_code: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   @MinLength(2, {
     message: ValidationMessage.minLength,
   })

@@ -27,7 +27,7 @@ export default class DiscountUpdateEvent implements IEvent {
       const requesterHasPermission = user.hasPermission?.('update-discount');
 
       if (requesterHasPermission) {
-        const discount = await DiscountRepository.findOneByOrFail(id);
+        const discount = await DiscountRepository.findOneByOrFail({ id });
         const items = await ItemRepository.createQueryBuilder()
           .where({
             id: In(itemIds),
@@ -45,7 +45,6 @@ export default class DiscountUpdateEvent implements IEvent {
         });
 
         if (discount?.items?.length) {
-          console.log('HERE: ', discount.items);
           const attachedItemsId = discount.items.map(({ id }) => id);
 
           /* ===================================
@@ -55,8 +54,6 @@ export default class DiscountUpdateEvent implements IEvent {
           const toBeDetachedItemsId = attachedItemsId.filter(({ id }) => {
             return !items.includes(id);
           });
-
-          console.log('HERE: ', toBeDetachedItemsId);
 
           const toBeDetachedItems = await ItemRepository.createQueryBuilder()
             .where({

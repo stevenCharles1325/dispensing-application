@@ -1,5 +1,24 @@
-import { AddCircleOutline, Close, DeleteOutlineOutlined, EditOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Autocomplete, Button, Chip, Dialog, DialogActions, DialogTitle, Divider, IconButton, Menu, Popover, Portal, Slide, Tab, Tabs, TextField } from "@mui/material";
+import {
+  AddCircleOutline,
+  Close,
+  DeleteOutlineOutlined,
+  EditOutlined,
+} from "@mui/icons-material";
+import {
+  Autocomplete,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Popover,
+  Slide,
+  Tab,
+  Tabs,
+  TextField
+} from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { DateField, DatePicker } from "@mui/x-date-pickers";
@@ -71,6 +90,21 @@ const itemColumns: Array<GridColDef> = [
     headerName: 'Name',
     flex: 1,
     type: 'string',
+  },
+  {
+    field: 'discount',
+    headerName: 'Attached Discount',
+    flex: 1,
+    type: 'string',
+    renderCell: (params) => {
+      return (
+        <Chip
+          variant="outlined"
+          label={params?.value?.title ?? 'None'}
+          color={params?.value ? 'secondary' : 'default'}
+        />
+      )
+    },
   },
   {
     field: 'status',
@@ -281,7 +315,7 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
   };
 
   const handleAddNew = async () => {
-    const res = await window.discount.createDiscount(form);
+    const res = await window.discount.createDiscount(form, selectedItemIds);
 
     if (res.status === 'ERROR') {
       const errors: Record<string, any> = {};
@@ -302,7 +336,9 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
     }
 
     await refetch();
+    await refreshItem();
     handleCloseModal();
+    displayAlert?.('Successfully created discount', 'success');
   };
 
   const handleUpdate = useCallback(async () => {
@@ -318,7 +354,9 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
     }
 
     await refetch();
+    await refreshItem();
     handleCloseModal();
+    displayAlert?.('Successfully updated discount', 'success');
   }, [selectedIds, selectedItemIds]);
 
   const handleDeleteSelectedItem = useCallback(() => {
@@ -636,14 +674,21 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
               />
               <Autocomplete
                 size="small"
-                disabled={isFieldDisabled}
-                options={['active', 'expired', 'deactivated']}
+                disabled={modalAction === 'create'}
+                getOptionDisabled={(option) => {
+                  if (modalAction === 'create') {
+                    return option === 'deactivated';
+                  } else {
+                    return !Boolean(option);
+                  }
+                }}
+                options={['active', 'deactivated']}
                 color="secondary"
                 value={form.status ?? 'active'}
                 onChange={(_, value) => {
                   setForm((form) => ({
                     ...form,
-                    status: value as DiscountDTO['status'],
+                    status: (value as DiscountDTO['status']) ?? 'active',
                   }));
                 }}
                 renderInput={(params) => (
@@ -693,21 +738,15 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
           >
             Close
           </Button>
-          {
-            modalAction === 'create' || tab === 1
-            ? (
-              <Button
-                onClick={
-                  modalAction === 'create'
-                  ? handleAddNew
-                  : handleUpdate
-                }
-              >
-                Save
-              </Button>
-            )
-            : null
-          }
+          <Button
+            onClick={
+              modalAction === 'create'
+              ? handleAddNew
+              : handleUpdate
+            }
+          >
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </>

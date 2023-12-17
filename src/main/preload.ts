@@ -282,9 +282,10 @@ const discountHandler = {
 
   createDiscount: async (
     payload: Partial<DiscountDTO>,
+    itemIds: string[],
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | DiscountDTO[]>
-  > => ipcRenderer.invoke('discount:create', payload),
+  > => ipcRenderer.invoke('discount:create', payload, itemIds),
 
   updateDiscount: async (
     id: number,

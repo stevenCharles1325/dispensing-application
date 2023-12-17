@@ -7,7 +7,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
-  BeforeInsert,
+  AfterLoad,
   AfterInsert,
   BeforeUpdate,
   CreateDateColumn,
@@ -39,6 +39,18 @@ import type { Discount } from './discount.model';
 
 @Entity('items')
 export class Item {
+  @AfterLoad()
+  async getDiscount() {
+    if (this.discount_id) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'discounts' WHERE id = ${this.discount_id}`
+      );
+
+      this.discount = rawData[0];
+    }
+  }
+
   @BeforeUpdate()
   async notifyIfRunningOut() {
     if (this.stock_quantity <= 0) {
