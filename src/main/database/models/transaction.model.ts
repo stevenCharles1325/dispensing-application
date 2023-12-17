@@ -15,7 +15,6 @@ import {
 } from 'typeorm';
 import { IsIn, IsPositive, IsNotEmpty, ValidateIf } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
-import { GlobalStorage } from 'Main/stores';
 import transactionCategories from 'Main/data/defaults/categories/transaction';
 import transactionTypes from 'Main/data/defaults/types/transaction';
 import paymentTypes from 'Main/data/defaults/types/payment';
@@ -23,10 +22,23 @@ import paymentTypes from 'Main/data/defaults/types/payment';
 import type { Order } from './order.model';
 import type { System } from './system.model';
 import type { User } from './user.model';
+import type { Discount } from './discount.model';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 
 @Entity('transactions')
 export class Transaction {
+  @AfterLoad()
+  async getDiscount() {
+    const DiscountRepository = global.datasource.getRepository('discounts');
+    const discount = await DiscountRepository.createQueryBuilder()
+      .where({
+        id: this.discount_id,
+      })
+      .getOne();
+
+    this.discount = discount as Discount;
+  }
+
   @AfterLoad()
   async getOrdersForCustomerPayment() {
     if (this.type === 'customer-payment') {
@@ -62,6 +74,9 @@ export class Transaction {
 
   @Column()
   creator_id: number;
+
+  @Column({ nullable: true })
+  discount_id: number;
 
   @Column()
   @IsNotEmpty({
@@ -147,6 +162,10 @@ export class Transaction {
   @OneToOne('User', { eager: true })
   @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
   creator: Relation<User>;
+
+  @OneToOne('Discount', { eager: true })
+  @JoinColumn({ name: 'discount_id', referencedColumnName: 'id' })
+  discount: Relation<Discount>;
 
   @OneToMany('Order', (order: Order) => order.transaction, {
     eager: true,

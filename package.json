@@ -321,7 +321,8 @@
     "patterns": [
       "!**/**",
       "src/main/**",
-      "!**/*.sqlite"
+      "!**/*.sqlite",
+      "!**/*.sqlite-journal"
     ],
     "logLevel": "quiet"
   }

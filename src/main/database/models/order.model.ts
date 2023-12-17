@@ -16,9 +16,22 @@ import {
 } from 'typeorm';
 import type { Transaction } from './transaction.model';
 import type { Item } from './item.model';
+import type { Discount } from './discount.model';
 
 @Entity('orders')
 export class Order {
+  @AfterLoad()
+  async getDiscount() {
+    const DiscountRepository = global.datasource.getRepository('discounts');
+    const discount = await DiscountRepository.createQueryBuilder()
+      .where({
+        id: this.discount_id,
+      })
+      .getOne();
+
+    this.discount = discount as Discount;
+  }
+
   @AfterLoad()
   async getItems() {
     const ItemRepository = global.datasource.getRepository('items');
@@ -48,6 +61,9 @@ export class Order {
   item_id: string;
 
   @Column()
+  discount_id: number;
+
+  @Column()
   transaction_id: number;
 
   @Column()
@@ -69,4 +85,8 @@ export class Order {
   @ManyToOne('Transaction', (transaction: Transaction) => transaction.orders)
   @JoinColumn({ name: 'transaction_id', referencedColumnName: 'id' })
   transaction: Relation<Transaction>;
+
+  @OneToOne('Discount', { eager: true })
+  @JoinColumn({ name: 'discount_id', referencedColumnName: 'id' })
+  discount: Relation<Discount>;
 }

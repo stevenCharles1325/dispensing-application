@@ -273,7 +273,7 @@ export class Item {
         'STOCK_JOB',
         {
           item_id: this.id,
-          purpose: 'buy-one-get-one sold',
+          purpose: 'sold (buy-one-get-one)',
           quantity,
           type: 'stock-out',
         }

@@ -54,10 +54,10 @@ export default class PaymentCreateEvent implements IEvent {
             total: order.total,
             amount_received: order.amount_received,
             change: order.change,
+            discount_id: order.discount_id,
           };
 
           if (orderTransaction.amount_received < orderTransaction.total) {
-            console.log('SHEES');
             return {
               errors: ['Amount received is lower than the total'],
               code: 'REQ_INVALID',
@@ -86,6 +86,7 @@ export default class PaymentCreateEvent implements IEvent {
             transaction_id: data.id,
             tax_rate: item.tax_rate,
             price: item.selling_price,
+            discount_id: item.discount_id,
           }));
           const orders = OrderRepository.create(desiredOrder);
           await OrderRepository.save(orders);

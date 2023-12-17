@@ -9,12 +9,12 @@ export default interface DiscountDTO {
   title: string;
   description?: string;
   notes?: string;
-  discount_type?:
+  discount_type:
     | 'percentage-off'
     | 'fixed-amount-off'
     | 'buy-one-get-one';
   discount_value: number;
-  usage_limit?: number;
+  usage_limit: number;
   start_date: Date;
   end_date: Date;
   status: 'active' | 'expired' | 'deactivated';

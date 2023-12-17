@@ -13,6 +13,7 @@ export default interface ItemDTO {
   category_id: number;
   brand_id: number;
   supplier_id: string;
+  discount_id: number;
   sku: string;
   name: string;
   description: string;

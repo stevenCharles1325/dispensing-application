@@ -15,6 +15,7 @@ import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import OrderDTO from 'App/data-transfer-objects/order.dto';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -336,6 +337,7 @@ export default function Logs() {
     }
   }, [currentTab, setPlaceHolder]);
 
+  console.log(selectedPayment);
   return (
     <>
       <Menu
@@ -483,23 +485,35 @@ export default function Logs() {
                       </p>
                     </div>
                   </div>
-                  <div className="w-full bg-gray-200 h-[60px] p-5 font-bold">
+                  <div className="w-full bg-gray-200 h-[60px] p-5 font-bold border-gray-400 border-b-2">
                     <p>Product Description</p>
                   </div>
                   <div className="w-full h-[50px] flex py-5 px-2">
                     <div className="grow font-bold">Name</div>
                     <div className="w-[100px] font-bold">Qty</div>
+                    <div className="w-[100px] font-bold">Discount</div>
                     <div className="w-[100px] font-bold">Price</div>
                   </div>
                   <div className="w-full h-[400px] overflow-auto border-b-2">
                     <div className="w-full h-fit">
-                      {selectedPayment.orders?.map((order: any) => (
+                      {selectedPayment.orders?.map((order: OrderDTO) => (
                         <div
                           key={order.id}
                           className="w-full h-[50px] flex py-5 px-2"
                         >
                           <div className="grow">{order.item.name}</div>
                           <div className="w-[100px]">{order.quantity}</div>
+                          <div className="w-[100px]">
+                            {
+                              order.discount
+                              ? order.discount.discount_type === 'fixed-amount-off'
+                                ? order.discount.discount_value
+                                : order.discount.discount_type === 'percentage-off'
+                                  ? order.price * (order.discount.discount_value / 100)
+                                  : 0
+                              : 0
+                            }
+                          </div>
                           <div className="w-[100px]">
                             <NumericFormat
                               style={{ width: '100%', textAlign: 'left' }}
@@ -527,6 +541,29 @@ export default function Logs() {
                             style={{ width: '150px', textAlign: 'center' }}
                             className="mb-2 px-1 bg-transparent grow text-end"
                             value={subTotal}
+                            prefix="₱ "
+                            thousandSeparator
+                            valueIsNumericString
+                            decimalSeparator="."
+                            decimalScale={2}
+                            fixedDecimalScale
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full flex justify-between">
+                        <div className="font-bold">Discount:</div>
+                        <div>
+                          <NumericFormat
+                            style={{ width: '150px', textAlign: 'center' }}
+                            className="mb-2 px-1 bg-transparent grow text-end"
+                            value={
+                              selectedPayment?.discount?.discount_type === 'fixed-amount-off'
+                              ? selectedPayment?.discount?.discount_value
+                              : selectedPayment?.discount?.discount_type === 'percentage-off'
+                                ? subTotal * (selectedPayment?.discount?.discount_value / 100)
+                                : 0
+                            }
                             prefix="₱ "
                             thousandSeparator
                             valueIsNumericString

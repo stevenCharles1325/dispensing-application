@@ -26,6 +26,8 @@ import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
+import { ClearOutlined, CloseOutlined, DiscountOutlined } from '@mui/icons-material';
+import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -98,6 +100,7 @@ const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
             },
           });
         }}
+        decimalScale={2}
         accept="enter"
         thousandSeparator
         valueIsNumericString
@@ -120,11 +123,52 @@ export default function Home() {
   const [posMenuAnchorEl, setPosMenuAnchorEl] = useState<HTMLElement | null>();
   const [categoryIds, setCategoryIds] = useState<Array<number>>([]);
 
+  const [addCoupon, setAddCoupon] = useState<boolean>(false);
+  const [couponCode, setCouponCode] = useState<string>('');
+  const [discount, setDiscount] = useState<DiscountDTO | null>(null);
+
   // Payment switch
   const [checked, setChecked] = useState(false);
   const selectedPaymentMethod = checked ? 'card' : 'cash';
 
   const hasOrders = Boolean(selectedItemIds.length);
+
+  const handleClearDiscount = () => {
+    confirm?.('Are you sure you want to remove the coupon?', async (agreed) => {
+      if (agreed) {
+        setDiscount(null);
+        setCouponCode('');
+      }
+    });
+  }
+
+  const handleAddCoupon = useCallback(async () => {
+    const res = await window.discount.getDiscounts({
+      coupon_code: couponCode,
+    });
+
+    if (res.status === 'ERROR') {
+      errorHandler({
+        errors: res.errors,
+      });
+      setDiscount(null);
+
+      return;
+    }
+
+    const discounts = res.data as IPagination<DiscountDTO>;
+    const desiredDiscount = discounts.data[0];
+
+    if (!desiredDiscount) {
+      setDiscount(null);
+      displayAlert?.('coupon code does not exist', 'error');
+    } else {
+      setDiscount(desiredDiscount);
+      displayAlert?.('successfully applied coupon', 'success');
+
+      setAddCoupon(false);
+    }
+  }, [couponCode]);
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, categoryIds],
@@ -192,14 +236,28 @@ export default function Home() {
     return 0;
   }, [computedTax, selectedItems.length, subTotal]);
 
-  const total = subTotal + tax;
+  const total = useMemo(() => {
+    const price = subTotal + tax;
+
+    if (!discount) return price;
+    if (discount.discount_type === 'fixed-amount-off') {
+      return price - discount.discount_value;
+    }
+
+    if (discount.discount_type === 'percentage-off') {
+      return price - (price * (discount.discount_value / 100));
+    }
+
+    return price;
+  }, [discount, subTotal, tax]);
 
   const change = payment - total > 0 ? payment - total : 0;
 
   const orderDetails: IOrderDetails = useMemo(
     () => ({
-      items: selectedItems.map(({ id, tax_rate, selling_price }) => ({
+      items: selectedItems.map(({ id, tax_rate, selling_price, discount_id }) => ({
         id,
+        discount_id,
         quantity: orders[id],
         tax_rate,
         selling_price,
@@ -208,9 +266,17 @@ export default function Home() {
       payment_method: selectedPaymentMethod,
       amount_received: payment,
       change,
-      discount: 0, // To be included soon
+      discount_id: discount?.id ?? undefined, // To be included soon
     }),
-    [selectedItems, total, selectedPaymentMethod, payment, change, orders]
+    [
+      total,
+      change,
+      orders,
+      payment,
+      discount,
+      selectedItems,
+      selectedPaymentMethod,
+    ]
   );
 
   const handleAddPayment = useCallback(() => {
@@ -244,6 +310,8 @@ export default function Home() {
       });
     }
 
+    setDiscount(null);
+    setCouponCode('');
     setPayment(0);
     setSelectedItemIds([]);
     setOrders({});
@@ -467,7 +535,36 @@ export default function Home() {
             style={{ backgroundColor: 'var(--bg-color)' }}
           >
             <div className="grow overflow-auto flex flex-col gap-2">
-              <b style={{ color: 'white' }}>ORDERS</b>
+              <div className="w-full h-fit flex flex-row justify-between align-center">
+                <b style={{ color: 'white' }}>ORDERS</b>
+                <div className="w-fit h-fit">
+                  <Chip
+                    icon={<DiscountOutlined fontSize="small" sx={{ color: 'white' }} />}
+                    label={
+                      discount
+                      ? (
+                        discount.discount_type === 'fixed-amount-off'
+                        ? `${discount.coupon_code} ₱${discount.discount_value} OFF`
+                        : discount.discount_type === 'percentage-off'
+                          ? `${discount.coupon_code} ${discount.discount_value}% OFF`
+                          : ''
+                      )
+                      : "Add Coupon"
+                    }
+                    color="warning"
+                    onClick={() => setAddCoupon(true)}
+                    onDelete={discount ? handleClearDiscount : undefined}
+                    deleteIcon={(
+                      discount
+                      ? <ClearOutlined sx={{ color: 'white' }} />
+                      : undefined
+                    )}
+                    sx={{
+                      color: 'white',
+                    }}
+                  />
+                </div>
+              </div>
               <div className="flex flex-col h-fit gap-2">
                 {selectedItems.map((item) => (
                   <div
@@ -551,12 +648,33 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex flex-row justify-between">
+                <p>Discount:</p>
+                <div>
+                  <NumericFormat
+                    className="mb-2 px-1 bg-transparent grow text-end"
+                    value={
+                      discount?.discount_type === 'fixed-amount-off'
+                      ? discount.discount_value
+                      : discount?.discount_type === 'percentage-off'
+                        ? subTotal * (discount.discount_value / 100)
+                        : 0
+                    }
+                    prefix="₱ "
+                    decimalScale={2}
+                    thousandSeparator
+                    valueIsNumericString
+                    disabled
+                  />
+                </div>
+              </div>
+              <div className="flex flex-row justify-between">
                 <p>{`Tax ${tax ? `${computedTax}%` : ''} (VAT included):`}</p>
                 <div>
                   <NumericFormat
                     className="mb-2 px-1 bg-transparent grow text-end"
                     value={tax}
                     prefix="₱ "
+                    decimalScale={2}
                     thousandSeparator
                     valueIsNumericString
                     disabled
@@ -572,19 +690,7 @@ export default function Home() {
                       className="mb-2 px-1 bg-transparent grow text-end"
                       value={total}
                       prefix="₱ "
-                      thousandSeparator
-                      valueIsNumericString
-                      disabled
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-row justify-between">
-                  <p>Discount:</p>
-                  <div>
-                    <NumericFormat
-                      className="mb-2 px-1 bg-transparent grow text-end"
-                      value={total}
-                      prefix="₱ "
+                      decimalScale={2}
                       thousandSeparator
                       valueIsNumericString
                       disabled
@@ -599,6 +705,7 @@ export default function Home() {
                       value={payment}
                       prefix="₱ "
                       thousandSeparator
+                      decimalScale={2}
                       valueIsNumericString
                       disabled
                     />
@@ -613,6 +720,7 @@ export default function Home() {
                       value={change}
                       prefix="₱ "
                       thousandSeparator
+                      decimalScale={2}
                       valueIsNumericString
                       disabled
                     />
@@ -721,10 +829,7 @@ export default function Home() {
               disabled
               color="secondary"
               label="Change (Peso)"
-              value={payment}
-              onChange={(event) => {
-                setPayment(Number(event.target.value));
-              }}
+              value={change}
               variant="outlined"
               size="small"
               InputProps={{
@@ -744,6 +849,53 @@ export default function Home() {
             onClick={() => setAddPayment(false)}
           >
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={addCoupon}
+        onClose={() => setAddCoupon(false)}
+      >
+        <div className='p-5'>
+          <p className="text-gray-500 text-lg mb-5">Coupon</p>
+          <div className='flex flex-col gap-5'>
+            <TextField
+              required
+              autoFocus
+              color="secondary"
+              label="Coupon Code"
+              value={couponCode}
+              onChange={(event) => {
+                setCouponCode(event.target.value.toLocaleUpperCase());
+              }}
+              variant="outlined"
+              size="small"
+              sx={{
+                width: 300,
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddCoupon();
+                  e.stopPropagation();
+                  e.preventDefault();
+                }
+              }}
+              helperText="One coupon per transaction only"
+              // error={Boolean(errors.cost_price)}
+            />
+          </div>
+        </div>
+        <DialogActions>
+          <Button
+            color="error"
+            onClick={() => setAddCoupon(false)}
+          >
+            Close
+          </Button>
+          <Button
+            onClick={handleAddCoupon}
+          >
+            Apply
           </Button>
         </DialogActions>
       </Dialog>
