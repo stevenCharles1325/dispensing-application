@@ -57,6 +57,7 @@ export default class PaymentCreateEvent implements IEvent {
           };
 
           if (orderTransaction.amount_received < orderTransaction.total) {
+            console.log('SHEES');
             return {
               errors: ['Amount received is lower than the total'],
               code: 'REQ_INVALID',

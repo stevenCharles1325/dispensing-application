@@ -173,7 +173,7 @@ export default function Home() {
       return selectedItems.reduce((prev, curr) => {
         const quantity = orders[curr.id];
 
-        return prev + curr.selling_price * quantity;
+        return prev + (curr.discounted_selling_price ?? curr.selling_price) * quantity;
       }, 0);
     }
 
@@ -492,7 +492,7 @@ export default function Home() {
                       <br />
                       <NumericFormat
                         className="mb-2 px-1 bg-transparent"
-                        value={item.selling_price}
+                        value={item.discounted_selling_price ?? item.selling_price}
                         prefix="₱ "
                         thousandSeparator
                         valueIsNumericString
@@ -579,6 +579,19 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex flex-row justify-between">
+                  <p>Discount:</p>
+                  <div>
+                    <NumericFormat
+                      className="mb-2 px-1 bg-transparent grow text-end"
+                      value={total}
+                      prefix="₱ "
+                      thousandSeparator
+                      valueIsNumericString
+                      disabled
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-row justify-between">
                   <p>Amount Received:</p>
                   <div>
                     <NumericFormat
@@ -634,7 +647,7 @@ export default function Home() {
                 <div className='w-full mt-5 flex flex-col gap-2'>
                   <Button
                     fullWidth
-                    disabled={payment === 0}
+                    disabled={payment < total || !hasOrders}
                     variant="contained"
                     color="inherit"
                     sx={{ color: 'black' }}

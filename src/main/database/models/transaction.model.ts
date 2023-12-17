@@ -103,7 +103,7 @@ export class Transaction {
     },
   })
   @ValidateIf((transaction: TransactionDTO) =>
-    transaction.type === 'customer-payment'
+    transaction.type === 'customer-payment' && transaction.amount_received < transaction.total
   )
   @IsPositive({
     message: ValidationMessage.positive,
@@ -134,9 +134,6 @@ export class Transaction {
       to: (data: number): number => data,
       from: (data: string): number => parseFloat(data),
     },
-  })
-  @IsPositive({
-    message: ValidationMessage.positive,
   })
   total: number;
 

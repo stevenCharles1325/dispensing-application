@@ -541,7 +541,7 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
                     } as any)
                   }}
                   error={Boolean(errors['discount_value'])}
-                  helperText={errors['discount_value']}
+                  helperText={errors['discount_value'] ?? 'Not required if discount-type is buy-one-get-one'}
                 />
                 <TextField
                   fullWidth

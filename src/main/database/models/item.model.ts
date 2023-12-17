@@ -39,6 +39,8 @@ import type { Discount } from './discount.model';
 
 @Entity('items')
 export class Item {
+  discounted_selling_price: number;
+
   @AfterLoad()
   async getDiscount() {
     if (this.discount_id) {
@@ -48,6 +50,13 @@ export class Item {
       );
 
       this.discount = rawData[0];
+
+      if (this.discount?.discount_type === 'percentage-off') {
+        const discount = this.selling_price * (this.discount.discount_value / 100);
+        this.discounted_selling_price = this.selling_price - discount;
+      } else if (this.discount?.discount_type === 'fixed-amount-off') {
+        this.discounted_selling_price = this.selling_price - this.discount.discount_value;
+      }
     }
   }
 
@@ -256,17 +265,32 @@ export class Item {
 
   // Custom functions
   async purchase(quantity: number = 1) {
-    this.stock_quantity -= quantity;
+    if (this.discount?.discount_type === 'buy-one-get-one') {
+      quantity *= 2;
+      this.stock_quantity -= quantity;
 
-    await Bull(
-      'STOCK_JOB',
-      {
-        item_id: this.id,
-        purpose: 'sold',
-        quantity,
-        type: 'stock-out',
-      }
-    );
+      await Bull(
+        'STOCK_JOB',
+        {
+          item_id: this.id,
+          purpose: 'buy-one-get-one sold',
+          quantity,
+          type: 'stock-out',
+        }
+      );
+    } else {
+      this.stock_quantity -= quantity;
+
+      await Bull(
+        'STOCK_JOB',
+        {
+          item_id: this.id,
+          purpose: 'sold',
+          quantity,
+          type: 'stock-out',
+        }
+      );
+    }
 
     if (this.stock_quantity > 15 && this.stock_quantity <= 20) {
       await Bull(

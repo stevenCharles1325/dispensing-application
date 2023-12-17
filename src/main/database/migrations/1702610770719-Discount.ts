@@ -64,7 +64,8 @@ export class Discount1702610770719 implements MigrationInterface {
           {
             name: 'discount_value',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
+            default: 0,
           },
           {
             name: 'usage_limit',

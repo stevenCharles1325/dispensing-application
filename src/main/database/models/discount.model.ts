@@ -12,8 +12,9 @@ import {
 } from 'typeorm';
 import type { User } from './user.model';
 import type { Item } from 'electron';
-import { MinLength, IsIn, IsPositive } from 'class-validator';
+import { MinLength, IsIn, IsPositive, ValidateIf } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
+import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 
 @Entity('discounts')
 export class Discount {
@@ -77,6 +78,9 @@ export class Discount {
       from: (data: string): number => parseFloat(data),
     },
   })
+  @ValidateIf((discount: DiscountDTO) =>
+    discount.discount_type !== 'buy-one-get-one'
+  )
   @IsPositive({
     message: ValidationMessage.positive,
   })
