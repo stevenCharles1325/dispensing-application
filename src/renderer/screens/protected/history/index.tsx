@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Tabs, Tab, Chip, IconButton, Dialog, Button, Menu, ListItem, ListItemButton, ListItemText, CircularProgress } from '@mui/material';
+import { Tabs, Tab, Chip, IconButton, Dialog, Button, Menu, ListItem, ListItemButton, ListItemText, CircularProgress, DialogActions } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
@@ -468,7 +468,7 @@ export default function Logs() {
             open={Boolean(receiptDialogOpen && selectedPayment)}
           >
             {selectedPayment ? (
-              <div className="w-[500px] h-[800px] overflow-auto">
+              <div className="w-[500px] h-[850px] overflow-auto">
                 <div
                   className="w-full min-h-[800px] h-fit p-5"
                   style={{ color: 'var(--info-text-color)' }}
@@ -644,6 +644,14 @@ export default function Logs() {
                 </div>
               </div>
             ) : null}
+            <DialogActions>
+              <Button
+                color="error"
+                onClick={handleCloseReceiptDialog}
+              >
+                Close
+              </Button>
+            </DialogActions>
           </Dialog>
         </div>
       </div>

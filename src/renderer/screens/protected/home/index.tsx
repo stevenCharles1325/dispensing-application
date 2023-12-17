@@ -26,7 +26,7 @@ import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
-import { ClearOutlined, CloseOutlined, DiscountOutlined } from '@mui/icons-material';
+import { ClearOutlined, CloseOutlined, DeleteOutline, DiscountOutlined } from '@mui/icons-material';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 
 const CARD_WIDTH = 325;
@@ -569,10 +569,10 @@ export default function Home() {
                 {selectedItems.map((item) => (
                   <div
                     key={item.id}
-                    className="w-full w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden"
+                    className="w-full w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden border border-transparent"
                     style={{ backgroundColor: 'white' }}
                   >
-                    <div className="min-w-[80px] w-[80px] h-full">
+                    <div className="min-w-[80px] w-[80px] h-full relative">
                       <img
                         src={item.image?.url}
                         alt={item.image?.name}
@@ -583,6 +583,33 @@ export default function Home() {
                           height: '80px',
                         }}
                       />
+                      <div className="absolute top-0 right-0 w-full h-full flex justify-center items-center bg-black/50">
+                        <IconButton
+                          onClick={() => {
+                            confirm?.('Are you sure you want to remove this item?', async (agreed) => {
+                              if (agreed) {
+                                const filteredOrders = Object.keys(orders)
+                                  .filter(id => id !== item.id);
+
+                                const updatedOrders: Record<string, number> = {};
+
+                                filteredOrders.forEach(id => {
+                                  updatedOrders[id] = orders[id];
+                                });
+
+                                setOrders(updatedOrders);
+                                setSelectedItemIds(
+                                  selectedItemIds.filter(id =>
+                                    id !== item.id
+                                  )
+                                );
+                              }
+                            });
+                          }}
+                        >
+                          <DeleteOutline color="error" />
+                        </IconButton>
+                      </div>
                     </div>
                     <div className="shrink min-w-[100px] p-2 capitalize">
                       <b>{item.name}</b>
@@ -641,6 +668,7 @@ export default function Home() {
                     className="mb-2 px-1 bg-transparent grow text-end"
                     value={subTotal}
                     prefix="₱ "
+                    decimalScale={2}
                     thousandSeparator
                     valueIsNumericString
                     disabled
