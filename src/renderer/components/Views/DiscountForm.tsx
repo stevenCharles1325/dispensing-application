@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { DateField, DatePicker } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers";
 import { useQuery } from "@tanstack/react-query";
 import DiscountDTO from "App/data-transfer-objects/discount.dto";
 import ItemDTO from "App/data-transfer-objects/item.dto";
@@ -51,6 +51,12 @@ const columns: Array<GridColDef> = [
   {
     field: 'discount_value',
     headerName: 'Discount Value',
+    flex: 1,
+    type: 'string',
+  },
+  {
+    field: 'discount_type',
+    headerName: 'Discount Type',
     flex: 1,
     type: 'string',
   },

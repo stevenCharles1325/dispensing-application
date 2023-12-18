@@ -6,7 +6,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
 import {
   TextField,
@@ -56,6 +56,7 @@ import {
   AddCircleOutline,
   VisibilityOutlined
 } from '@mui/icons-material';
+import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 
 
 const columns: Array<GridColDef> = [
@@ -235,6 +236,7 @@ export default function InventoryForm({
     unit_of_measurement: 'each',
     barcode: '',
     stock_quantity: 0,
+    discount_id: null,
     status: 'available',
   } as const;
 
@@ -275,6 +277,11 @@ export default function InventoryForm({
         return {
           ...state,
           brand_id: action.payload,
+        };
+      case 'discount_id':
+        return {
+          ...state,
+          discount_id: action.payload,
         };
       case 'sku':
         return {
@@ -428,6 +435,7 @@ export default function InventoryForm({
       return setErrors(errors);
     }
 
+    setTab(0);
     displayAlert?.('Succesfully created an item', 'success');
     await getItems();
     onClose();
@@ -435,8 +443,6 @@ export default function InventoryForm({
 
   const handleUpdateItem = useCallback(async () => {
     if (!selectedItem) return;
-
-    console.log(form);
 
     const res = await window.item.updateItem(
       selectedItem.id,
@@ -460,6 +466,7 @@ export default function InventoryForm({
       return setErrors(errors);
     }
 
+    setTab(0);
     displayAlert?.('Succesfully updated an item', 'success');
     await getItems();
     onClose();
@@ -618,21 +625,122 @@ export default function InventoryForm({
     }
   }, [selectedRecord]);
 
+  const getDiscounts = useCallback(async (): Promise<IPagination<DiscountDTO>> => {
+    const res = await window.discount.getDiscounts('all', 1, 'max');
+
+    console
+    if (res.errors) {
+      errorHandler({
+        errors: res.errors,
+      });
+
+      return [] as unknown as IPagination<DiscountDTO>;
+    }
+
+    return res.data as IPagination<DiscountDTO>;
+  }, []);
+
+  const [selectedDiscountId, setSelectedDiscountId] = useState<number | null>(null);
+  const { data: discountList, isLoading: isDiscountLoading, refetch: refreshDiscount } = useQuery({
+    queryKey: ['inventory-discount'],
+    queryFn: getDiscounts,
+  });
+
+  const discounts = (discountList?.data as DiscountDTO[]) ?? [];
+
+  useEffect(() => {
+    if (selectedItem && action === 'update') {
+      setSelectedDiscountId(selectedItem.discount_id);
+    }
+  }, [selectedItem, action]);
+
+  useEffect(() => {
+    dispatch({
+      type: 'discount_id',
+      payload: selectedDiscountId,
+    });
+  }, [selectedDiscountId]);
+
+  const discountColumns: Array<GridColDef> = useMemo(() => [
+    {
+      field: 'title',
+      headerName: 'Title',
+      flex: 1,
+      type: 'string',
+    },
+    {
+      field: 'coupon_code',
+      headerName: 'Coupon Code',
+      flex: 1,
+      type: 'string',
+    },
+    {
+      field: 'discount_value',
+      headerName: 'Discount Value',
+      flex: 1,
+      type: 'string',
+    },
+    {
+      field: 'discount_type',
+      headerName: 'Discount Type',
+      flex: 1,
+      type: 'string',
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      flex: 1,
+      type: 'string',
+      renderCell: (params: any) => (
+        <Chip
+          variant="outlined"
+          label={params.value}
+          color={params.value === 'active' ? 'success' : 'error'}
+        />
+      ),
+    },
+    {
+      field: '',
+      headerName: 'Actions',
+      width: 100,
+      type: 'string',
+      renderCell: (params: any) => (
+        <>
+          <Button
+            onClick={() => {
+              if (selectedDiscountId === params.id) {
+                setSelectedDiscountId(null);
+              } else {
+                setSelectedDiscountId(params.id);
+              }
+            }}
+            color={selectedDiscountId === params.id ? 'error' : 'primary'}
+          >
+            {selectedDiscountId === params.id ? 'Unused' : 'Use'}
+          </Button>
+          {/* <IconButton onClick={() => params.api.setRowSelectionModel([params.id])}>
+            <DownloadOutlinedIcon />
+          </IconButton> */}
+        </>
+      ),
+      sortable: false,
+      filterable: false,
+      hideable: false,
+    },
+  ], [selectedDiscountId]);
+
   return (
     <div className='p-2'>
-      {
-        action === 'update'
-        ? (
-          <>
-            <Tabs value={tab} onChange={handleOnChangeTab} aria-label='inventory-tabs'>
-              <Tab label="Product Details" {...allyProps(0)} />
-              <Tab label="Stocks" {...allyProps(0)} />
-            </Tabs>
-            <Divider />
-          </>
-        )
-        : null
-      }
+      <Tabs value={tab} onChange={handleOnChangeTab} aria-label='inventory-tabs'>
+        <Tab label="Product Details" {...allyProps(0)} />
+        {
+          action === 'update'
+          ? <Tab label="Stocks" {...allyProps(1)} />
+          : null
+        }
+        <Tab label="Discount" {...allyProps(2)} />
+      </Tabs>
+      <Divider />
       {
         tab === 0
         ? (
@@ -1080,9 +1188,9 @@ export default function InventoryForm({
         : null
       }
       {
-        tab === 1
+        tab === 1 && action === 'update'
         ? (
-          <div className='min-w-[1000px] w-fit h-[860px] p-3'>
+          <div className='min-w-[1000px] w-fit h-[845px] p-3'>
             {
               isStockRecordsLoading
               ? <Loading />
@@ -1254,6 +1362,42 @@ export default function InventoryForm({
                 }
               </DialogActions>
             </Dialog>
+          </div>
+        )
+        : null
+      }
+      {
+        tab === 2 || (tab === 1 && action === 'create')
+        ? (
+          <div className='min-w-[1000px] w-fit h-[780px] p-3'>
+            {
+              isDiscountLoading
+              ? <Loading />
+              : (
+                <>
+                  <DataGrid
+                    sx={{
+                      height: 700,
+                    }}
+                    columns={discountColumns}
+                    rows={discounts}
+                    rowCount={discountList?.total}
+                    disableRowSelectionOnClick
+                  />
+                </>
+              )
+            }
+            <div className='w-full my-5 flex flex-row-reverse'>
+              <Button
+                variant="outlined"
+                onClick={action === 'create' ? handleCreateItem : handleUpdateItem}
+              >
+                {action}
+              </Button>
+              <Button variant="text" color="error" onClick={onClose}>
+                Close
+              </Button>
+            </div>
           </div>
         )
         : null
