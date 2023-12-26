@@ -160,14 +160,16 @@ export default function Report() {
         <div className="p-3 text-gray-500">
           <p className="text-lg mt-[40px] font-bold">Trend Graphs</p>
         </div>
-        <div className="px-3 grow flex flex-wrap justify-between items-center gap-5">
-          <div className="grow h-fit p-5 border shadow-lg rounded">
-            <Chip
-              label="Trend Categories"
-              color="secondary"
-              variant="outlined"
-              size="medium"
-            />
+        <div className="px-3 flex flex-wrap justify-between items-center gap-5 transition-all">
+          <div className="grow min-w-[700px] h-fit p-5 border shadow-lg rounded relative flex">
+            <div className='absolute top-5 left-5'>
+              <Chip
+                label="Trend Categories"
+                color="secondary"
+                variant="outlined"
+                size="medium"
+              />
+            </div>
             {isLoading ? (
               <Loading />
             ) : (
@@ -180,19 +182,17 @@ export default function Report() {
                     position: 'relative',
                   },
                 }}
-                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                width={720}
-                height={500}
+                height={300}
                 series={[
                   {
                     cornerRadius: 7,
-                    arcLabel: (item) => `${item.label} (${item.value})`,
-                    arcLabelMinAngle: 45,
                     data: trendCategories.map(({ category_name, frequency }) => ({
                       label: category_name,
                       value: frequency ?? 0,
                     })),
-                    innerRadius: 200,
+                    highlightScope: { faded: 'global', highlighted: 'item' },
+                    faded: { innerRadius: 90, additionalRadius: -5 },
+                    innerRadius: 100,
                   },
                 ]}
               >
@@ -200,13 +200,15 @@ export default function Report() {
               </PieChart>
             )}
           </div>
-          <div className="grow h-fit p-5 border shadow-lg rounded">
-            <Chip
-              label="Trend Products"
-              color="secondary"
-              variant="outlined"
-              size="medium"
-            />
+          <div className="grow min-w-[700px] h-fit p-5 border shadow-lg rounded relative flex">
+            <div className='absolute top-5 left-5'>
+              <Chip
+                label="Trend Products"
+                color="secondary"
+                variant="outlined"
+                size="medium"
+              />
+            </div>
             {isLoading ? (
               <Loading />
             ) : (
@@ -218,19 +220,18 @@ export default function Report() {
                     fontWeight: 'bold',
                   },
                 }}
-                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                width={720}
-                height={500}
+                height={300}
                 series={[
                   {
                     cornerRadius: 7,
-                    arcLabel: (item) => `${item.label} (${item.value})`,
-                    arcLabelMinAngle: 45,
                     data: trendProducts.map(({ product_name, frequency }) => ({
                       label: product_name,
                       value: frequency ?? 0,
                     })),
-                    innerRadius: 200,
+                    arcLabelMinAngle: 10,
+                    highlightScope: { faded: 'global', highlighted: 'item' },
+                    faded: { innerRadius: 90, additionalRadius: -5 },
+                    innerRadius: 100,
                   },
                 ]}
               >
