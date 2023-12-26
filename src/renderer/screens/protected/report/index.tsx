@@ -89,7 +89,7 @@ export default function Report() {
           <div className="flex flex-row gap-5">
             <TotalDifferenceWidget
               total={formatCurrency(
-                revenue?.total ?? 0
+                Math.abs(revenue?.total) ?? 0
               )}
               hasIncreased={revenue?.has_increased}
               icon={<PaidTwoToneIcon color="secondary" />}

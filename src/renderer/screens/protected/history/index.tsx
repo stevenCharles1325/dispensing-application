@@ -504,6 +504,7 @@ export default function Logs() {
                           <div className="grow">{order.item.name}</div>
                           <div className="w-[100px]">{order.quantity}</div>
                           <div className="w-[100px]">
+                            {`₱ `}
                             {
                               order.discount
                               ? order.discount.discount_type === 'fixed-amount-off'

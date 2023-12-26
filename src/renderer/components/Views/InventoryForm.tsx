@@ -27,6 +27,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Checkbox,
 } from '@mui/material';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import itemStatuses from 'UI/data/defaults/statuses/item';
@@ -57,6 +58,7 @@ import {
   VisibilityOutlined
 } from '@mui/icons-material';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
+import CheckBox from '@mui/icons-material/CheckBox';
 
 
 const columns: Array<GridColDef> = [
@@ -700,26 +702,22 @@ export default function InventoryForm({
     },
     {
       field: '',
-      headerName: 'Actions',
+      headerName: 'Selected',
       width: 100,
       type: 'string',
       renderCell: (params: any) => (
         <>
-          <Button
-            onClick={() => {
+          <Checkbox
+            checked={selectedDiscountId === params.id}
+            onChange={() => {
               if (selectedDiscountId === params.id) {
                 setSelectedDiscountId(null);
               } else {
                 setSelectedDiscountId(params.id);
               }
             }}
-            color={selectedDiscountId === params.id ? 'error' : 'primary'}
-          >
-            {selectedDiscountId === params.id ? 'Unused' : 'Use'}
-          </Button>
-          {/* <IconButton onClick={() => params.api.setRowSelectionModel([params.id])}>
-            <DownloadOutlinedIcon />
-          </IconButton> */}
+            color={selectedDiscountId === params.id ? 'success' : 'primary'}
+          />
         </>
       ),
       sortable: false,

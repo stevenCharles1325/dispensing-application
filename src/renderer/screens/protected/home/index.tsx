@@ -255,7 +255,11 @@ export default function Home() {
     return price;
   }, [discount, subTotal, tax]);
 
-  const change = payment - total > 0 ? payment - total : 0;
+  const change = total < 0
+    ? 0
+    : payment - total > 0
+      ? payment - total
+      : 0;
 
   const orderDetails: IOrderDetails = useMemo(
     () => ({
