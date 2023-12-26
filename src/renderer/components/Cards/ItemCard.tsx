@@ -43,7 +43,7 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
               </Badge>
             </div>
           ) : null}
-          {cardInfo.discount ? (
+          {cardInfo.discount && cardInfo.discount.status === 'active' ? (
             <div className="absolute top-0 left-0 flex justify-center items-center p-3">
               {
                 cardInfo.discount.discount_type === 'buy-one-get-one'
@@ -93,7 +93,9 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
             </p>
             <Chip label="Price:" size="small" />
             {
-              cardInfo?.discount && cardInfo.discount.discount_type !== 'buy-one-get-one'
+              cardInfo?.discount &&
+              cardInfo.discount.discount_type !== 'buy-one-get-one' &&
+              cardInfo.discount.status === 'active'
               ? (
                 <div className='w-fit flex flex-row gap-2'>
                   <s>

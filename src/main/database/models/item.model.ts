@@ -51,11 +51,13 @@ export class Item {
 
       this.discount = rawData[0];
 
-      if (this.discount?.discount_type === 'percentage-off') {
-        const discount = this.selling_price * (this.discount.discount_value / 100);
-        this.discounted_selling_price = this.selling_price - discount;
-      } else if (this.discount?.discount_type === 'fixed-amount-off') {
-        this.discounted_selling_price = this.selling_price - this.discount.discount_value;
+      if (this.discount?.status === 'active') {
+        if (this.discount?.discount_type === 'percentage-off') {
+          const discount = this.selling_price * (this.discount.discount_value / 100);
+          this.discounted_selling_price = this.selling_price - discount;
+        } else if (this.discount?.discount_type === 'fixed-amount-off') {
+          this.discounted_selling_price = this.selling_price - this.discount.discount_value;
+        }
       }
     }
   }
@@ -265,7 +267,10 @@ export class Item {
 
   // Custom functions
   async purchase(quantity: number = 1) {
-    if (this.discount?.discount_type === 'buy-one-get-one') {
+    if (
+      this.discount?.discount_type === 'buy-one-get-one' &&
+      this.discount?.status === 'active'
+    ) {
       quantity *= 2;
       this.stock_quantity -= quantity;
 

@@ -132,7 +132,6 @@
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "dotenv-expand": "^5.1.0",
-    "echarts-liquidfill": "^3.1.0",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
     "electron-router-dom": "^1.0.5",

@@ -163,10 +163,14 @@ export default function Home() {
       setDiscount(null);
       displayAlert?.('coupon code does not exist', 'error');
     } else {
-      setDiscount(desiredDiscount);
-      displayAlert?.('successfully applied coupon', 'success');
+      if (desiredDiscount.status === 'active') {
+        setDiscount(desiredDiscount);
+        displayAlert?.('successfully applied coupon', 'success');
 
-      setAddCoupon(false);
+        setAddCoupon(false);
+      } else {
+        displayAlert?.(`coupon is ${desiredDiscount.status}`, 'error')
+      }
     }
   }, [couponCode]);
 

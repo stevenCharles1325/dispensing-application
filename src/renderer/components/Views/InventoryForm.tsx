@@ -628,7 +628,6 @@ export default function InventoryForm({
   const getDiscounts = useCallback(async (): Promise<IPagination<DiscountDTO>> => {
     const res = await window.discount.getDiscounts('all', 1, 'max');
 
-    console
     if (res.errors) {
       errorHandler({
         errors: res.errors,
@@ -641,7 +640,7 @@ export default function InventoryForm({
   }, []);
 
   const [selectedDiscountId, setSelectedDiscountId] = useState<number | null>(null);
-  const { data: discountList, isLoading: isDiscountLoading, refetch: refreshDiscount } = useQuery({
+  const { data: discountList, isLoading: isDiscountLoading } = useQuery({
     queryKey: ['inventory-discount'],
     queryFn: getDiscounts,
   });
