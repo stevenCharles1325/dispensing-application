@@ -691,11 +691,15 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
               />
               <Autocomplete
                 size="small"
-                disabled={modalAction === 'create'}
+                disabled={
+                  modalAction === 'create' ||
+                  Boolean(form.total_usage && form.usage_limit && form.total_usage >= form.usage_limit)
+                }
                 getOptionDisabled={(option) => {
                   if (modalAction === 'create') {
                     return option === 'deactivated';
                   } else {
+
                     return !Boolean(option);
                   }
                 }}

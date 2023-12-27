@@ -10,16 +10,45 @@ import {
   Entity,
   CreateDateColumn,
   AfterLoad,
-  AfterInsert,
   PrimaryGeneratedColumn,
   Relation,
+  AfterInsert,
 } from 'typeorm';
 import type { Transaction } from './transaction.model';
 import type { Item } from './item.model';
 import type { Discount } from './discount.model';
+import { Bull } from 'Main/jobs';
 
 @Entity('orders')
 export class Order {
+  @AfterInsert()
+  async discountTotalUsageListener() {
+    const DiscountRepository = global.datasource.getRepository('discounts');
+    const discount = await DiscountRepository.createQueryBuilder()
+      .where({
+        id: this.discount_id,
+      })
+      .getOne();
+
+    if (discount && discount.total_usage >= discount.usage_limit) {
+      discount.status = 'deactivated';
+
+      await Bull(
+        'NOTIF_JOB',
+        {
+          title: `A discount has reached usage limit`,
+          description: `A discount named ${discount.title} has reached usage limit.`,
+          link: null,
+          is_system_generated: true,
+          status: 'UNSEEN',
+          type: 'ERROR',
+        }
+      );
+
+      await DiscountRepository.save(discount);
+    }
+  }
+
   @AfterLoad()
   async getDiscount() {
     const DiscountRepository = global.datasource.getRepository('discounts');

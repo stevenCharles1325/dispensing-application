@@ -11,6 +11,7 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   AfterLoad,
+  AfterInsert,
   Relation,
 } from 'typeorm';
 import { IsIn, IsPositive, IsNotEmpty, ValidateIf } from 'class-validator';
@@ -24,9 +25,38 @@ import type { System } from './system.model';
 import type { User } from './user.model';
 import type { Discount } from './discount.model';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
+import { Bull } from 'Main/jobs';
 
 @Entity('transactions')
 export class Transaction {
+  @AfterInsert()
+  async discountTotalUsageListener() {
+    const DiscountRepository = global.datasource.getRepository('discounts');
+    const discount = await DiscountRepository.createQueryBuilder()
+      .where({
+        id: this.discount_id,
+      })
+      .getOne();
+
+    if (discount && discount.total_usage >= discount.usage_limit) {
+      discount.status = 'deactivated';
+
+      await Bull(
+        'NOTIF_JOB',
+        {
+          title: `A discount has reached its usage limit`,
+          description: `A discount named ${discount.title} has reached its usage limit now`,
+          link: null,
+          is_system_generated: true,
+          status: 'UNSEEN',
+          type: 'ERROR',
+        }
+      );
+
+      await DiscountRepository.save(discount);
+    }
+  }
+
   @AfterLoad()
   async getDiscount() {
     const DiscountRepository = global.datasource.getRepository('discounts');

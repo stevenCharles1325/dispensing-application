@@ -11,7 +11,7 @@ export interface IncomeDTO {
 
   creator_id: number;
 
-  discount_id: number;
+  discount_id?: number | null;
 
   source_name: string;
 

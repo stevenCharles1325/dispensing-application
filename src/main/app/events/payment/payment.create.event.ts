@@ -15,6 +15,9 @@ import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import { Bull } from 'Main/jobs';
 import OrderRepository from 'App/repositories/order.repository';
 import { Transaction } from 'Main/database/models/transaction.model';
+import DiscountRepository from 'App/repositories/discount.repository';
+import { In } from "typeorm";
+import getElementOccurence from 'App/modules/get-element-occurence.module';
 
 export default class PaymentCreateEvent implements IEvent {
   public channel: string = 'payment:create';
@@ -40,6 +43,36 @@ export default class PaymentCreateEvent implements IEvent {
         const order: IOrderDetails = payload;
 
         if (order.payment_method === 'cash') {
+          const discountIds: number[] = [
+            order.discount_id ?? 0,
+            ...order.items.map(({ discount_id }) => discount_id),
+          ];
+
+          if (discountIds.length) {
+            const discounts = await DiscountRepository.createQueryBuilder()
+            .where({
+              id: In(discountIds),
+            })
+            .getMany();
+
+            for await (const discount of discounts) {
+              const occurenceCount = getElementOccurence(discount.id, discountIds);
+              const currentTotalUsage = discount.total_usage + occurenceCount;
+
+              if (currentTotalUsage > discount.usage_limit) {
+                return {
+                  errors: [
+                    `Cannot apply ${
+                      discount.title
+                    } coupon as usage limit might exceed or have exceeded.`
+                  ],
+                  code: 'REQ_INVALID',
+                  status: 'ERROR',
+                } as unknown as IResponse<string[]>;
+              }
+            }
+          }
+
           const orderTransaction: Omit<
             IncomeDTO,
             'id' | 'created_at' | 'updated_at' | 'system' | 'creator'
