@@ -18,6 +18,7 @@ import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 
 @Entity('discounts')
 export class Discount {
+  total_usage: number;
   items: any[];
 
   @AfterLoad()
@@ -30,6 +31,26 @@ export class Discount {
       .getMany();
 
     this.items = items as Item[];
+  }
+
+  @AfterLoad()
+  async getDiscountUsage() {
+    const TransactionRepository = global.datasource.getRepository('transactions');
+    const OrderRepository = global.datasource.getRepository('orders');
+
+    const discountTransactionCount = await TransactionRepository.createQueryBuilder()
+      .where({
+        discount_id: this.id,
+      })
+      .getCount();
+
+    const discountOrderCount = await OrderRepository.createQueryBuilder()
+      .where({
+        discount_id: this.id,
+      })
+      .getCount();
+
+    this.total_usage = discountTransactionCount + discountOrderCount;
   }
 
   @PrimaryGeneratedColumn('increment')

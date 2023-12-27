@@ -234,11 +234,14 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   const handleVisitedNotif = async (id: string) => {
     const res = await window.notif.updateNotif(id, 'VISITED');
 
+    console.log('RES: ', res);
     if (res.status === 'ERROR') {
       console.log(res.errors);
       const errorMessage = res.errors?.[0] as unknown as string;
       return console.log(errorMessage);
     }
+
+    refetchNotifs();
   }
 
   const handleDeleteNotif = async (id: string) => {
@@ -353,7 +356,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
       isChangingPassword: Boolean(userForm.new_password?.length),
     });
 
-    console.log('UPDATE RES: ', res);
     if (res.status === 'ERROR') {
       if (typeof res.errors?.[0] === 'string') {
         return displayAlert?.(
@@ -456,12 +458,14 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         }
       >
         <ListItemButton
-          disabled={!notif.link}
           onClick={() => {
+            handleVisitedNotif(notif.id);
+
             if (notif.link) {
               handleCloseMenuNotif();
-              handleVisitedNotif(notif.id);
               navigate(notif.link, { replace: true });
+            } else {
+              displayAlert?.('This notification has no redirection', 'warning');
             }
           }}
         >

@@ -26,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import DiscountDTO from "App/data-transfer-objects/discount.dto";
 import ItemDTO from "App/data-transfer-objects/item.dto";
 import IPagination from "App/interfaces/pagination/pagination.interface";
+import addOneDay from "UI/helpers/addOneDay";
 import useAlert from "UI/hooks/useAlert";
 import useConfirm from "UI/hooks/useConfirm";
 import useErrorHandler from "UI/hooks/useErrorHandler";
@@ -221,14 +222,18 @@ export interface DiscountFormProps {
   onClose: () => void;
 }
 
+const date = new Date();
+const dateNow = date;
+const dateTomorrow = addOneDay();
+
 export default function DiscountForm ({ onClose }: DiscountFormProps) {
   const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
 
   const [form, setForm] = useState<Partial<DiscountDTO>>({
-    start_date: new Date(),
-    end_date: new Date(),
+    start_date: dateNow,
+    end_date: dateTomorrow,
     discount_type: 'percentage-off',
     status: 'active',
   });
@@ -269,8 +274,8 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
     setSelectedItemIds([]);
     setModalAction(null);
     setForm({
-      start_date: new Date(),
-      end_date: new Date(),
+      start_date: dateNow,
+      end_date: dateTomorrow,
       discount_type: 'percentage-off',
       status: 'active'
     });
@@ -568,7 +573,13 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
                     } as any)
                   }}
                   error={Boolean(errors['usage_limit'])}
-                  helperText={errors['usage_limit']}
+                  helperText={
+                    errors['usage_limit'] ?? (
+                      modalAction === 'update'
+                        ? `Total usage: ${form.total_usage}`
+                        : undefined
+                    )
+                  }
                 />
               </div>
               <div

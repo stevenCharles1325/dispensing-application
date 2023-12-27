@@ -33,6 +33,7 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs from './jobs';
 import policies from './data/defaults/object-storage/policies';
+import './scheduler';
 
 // Initializing .ENV
 const myEnv = dotenv.config();

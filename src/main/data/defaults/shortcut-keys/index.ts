@@ -35,7 +35,7 @@ const shortcutKeys: Omit<
   },
   {
     key: 'collapse-navigation',
-    key_combination: '`',
+    key_combination: 'ctrl+`',
     title: 'Collapse Navigation',
     description: '—'
   },

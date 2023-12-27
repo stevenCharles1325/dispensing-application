@@ -23,4 +23,5 @@ export default interface DiscountDTO {
   deleted_at: Date;
   creator: UserDTO;
   items: ItemDTO[];
+  total_usage: number;
 }
