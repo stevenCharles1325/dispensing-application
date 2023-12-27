@@ -47,10 +47,11 @@ export default class UserCreateEvent implements IEvent {
         const keys = ShortcutKeyRepository.create(
           shortcutKeys.map((shortcutKey) => ({
             ...shortcutKey,
-            user_id: user.id,
+            user_id: data.id,
           })) as any[]
         );
 
+        console.log(keys);
         await ShortcutKeyRepository.save(keys);
 
         await Bull('AUDIT_JOB', {

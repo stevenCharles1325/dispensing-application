@@ -15,11 +15,11 @@ const getCurrentSalesReport = async (): Promise<
     'transaction'
   )
     .select([
-      'strftime("%H", datetime(transaction.created_at, "localtime")) as hour',
-      'count(*) as count',
+      'strftime("%H", datetime(transaction.created_at)) as hour',
+      'count(*) as amount',
     ])
     .where(`transaction.type = 'customer-payment'`)
-    .where(`DATE(transaction.created_at, 'localtime') = DATE('now', 'localtime')`)
+    .where(`DATE(transaction.created_at) = DATE('now')`)
     .groupBy('hour')
     .orderBy('hour')
     .getRawMany();
@@ -28,7 +28,7 @@ const getCurrentSalesReport = async (): Promise<
     hour,
     count:
       currentSalesReport.find(({ hour: salesHour }) => salesHour === hour)
-        ?.count ?? 0,
+        ?.amount ?? 0,
   }));
 
   return hours as unknown as Array<{ hour: string; count: number }>;

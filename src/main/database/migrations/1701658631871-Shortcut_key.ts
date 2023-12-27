@@ -32,12 +32,10 @@ export class ShortcutKey1701658631871 implements MigrationInterface {
           {
             name: 'key',
             type: 'varchar',
-            isUnique: true,
           },
           {
             name: 'key_combination',
             type: 'varchar',
-            isUnique: true,
           },
           {
             name: 'title',

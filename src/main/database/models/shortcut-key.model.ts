@@ -28,11 +28,11 @@ export class ShortcutKey {
   })
   user_id: number;
 
-  @Column({ unique: true })
+  @Column()
   @MinLength(1, { message: ValidationMessage.minLength })
   key: string;
 
-  @Column({ unique: true })
+  @Column()
   @MinLength(1, { message: ValidationMessage.minLength })
   key_combination: string;
 
