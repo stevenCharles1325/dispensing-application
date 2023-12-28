@@ -15,7 +15,7 @@ const getCurrentSalesReport = async (): Promise<
     'transaction'
   )
     .select([
-      'strftime("%H", datetime(transaction.created_at)) as hour',
+      `strftime("%H", datetime(transaction.created_at, 'localtime')) as hour`,
       'count(*) as amount',
     ])
     .where(`transaction.type = 'customer-payment'`)

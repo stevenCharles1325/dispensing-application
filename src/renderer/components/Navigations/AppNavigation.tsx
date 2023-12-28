@@ -17,6 +17,7 @@ import {
   Chip,
   Dialog,
   DialogActions,
+  Divider,
   IconButton,
   ListItem,
   ListItemButton,
@@ -63,6 +64,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined';
 import usePermission from 'UI/hooks/usePermission';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
+import useDateTime from 'UI/hooks/useDateTime';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -135,6 +137,7 @@ const getNotifs = async (
 export default function AppNavigation({ children }: React.PropsWithChildren) {
   const inputRef = useRef<InputRef>(null);
 
+  const { date, time } = useDateTime();
   const hasPermission = usePermission();
   const { addListener, getCommand } = useShortcutKeys();
 
@@ -517,7 +520,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     <>
       <div className="w-screen h-screen bg-transparent flex flex-row leading-normal">
         <div className={`${isSideNavCollapsed ? 'min-w-[120px] w-[120px]' : 'min-w-[280px] w-[280px]'} h-full flex flex-col bg-transparent pt-5`}>
-          <div className="w-full h-[60px] flex justify-center items-center mb-5">
+          <div className="w-full h-[60px] flex flex-col justify-center items-center mb-5">
             <div className="ml-[25px] mt-5 w-fit flex flex-wrap justify-center items-center">
               <div className='flex justify-center' style={{ width: isSideNavCollapsed ? '100px' : '190px' }}>
                 <AppLogo size={30} color="light" withName={!isSideNavCollapsed} />
@@ -539,9 +542,31 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                     }
                   </IconButton>
                 </Tooltip>
-            </div>
+              </div>
             </div>
           </div>
+          {
+            !isSideNavCollapsed
+              ? (
+                <>
+                  <div className='mb-[20px] w-full flex justify-center items-center'>
+                    <p className='text-xs text-white'>{`${date} - ${time}`}</p>
+                  </div>
+                  <div className='w-full flex justify-center'>
+                    <div className='w-[20%]'>
+                      <Divider sx={{ bgcolor: 'white' }}/>
+                    </div>
+                  </div>
+                </>
+              )
+              : (
+                <div className='ml-3 mt-3 w-full flex justify-center'>
+                  <div className='w-[20%]'>
+                    <Divider sx={{ bgcolor: 'white' }}/>
+                  </div>
+                </div>
+              )
+          }
           {navigationRoutes.map((data, index) => (
             <NavButton
               key={index}
