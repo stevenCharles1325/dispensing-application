@@ -547,7 +547,7 @@ export default function Home() {
             className="min-w-[320px] max-w-full h-full rounded-md border p-3 shadow-lg flex flex-col overflow-auto"
             style={{ backgroundColor: 'var(--bg-color)' }}
           >
-            <div className="grow overflow-auto flex flex-col gap-2">
+            <div className="grow flex flex-col gap-2">
               <div className="w-full h-fit flex flex-row justify-between align-center">
                 <b style={{ color: 'white' }}>ORDERS</b>
                 <div className="w-fit h-fit">
@@ -578,97 +578,99 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div className="flex flex-col h-fit gap-2">
-                {selectedItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="w-full w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden border border-transparent"
-                    style={{ backgroundColor: 'white' }}
-                  >
-                    <div className="min-w-[80px] w-[80px] h-full relative">
-                      <img
-                        src={item.image?.url}
-                        alt={item.image?.name}
-                        style={{
-                          objectFit: 'cover',
-                          objectPosition: 'center',
-                          width: '80px',
-                          height: '80px',
-                        }}
-                      />
-                      <div className="absolute top-0 right-0 w-full h-full flex justify-center items-center bg-black/50">
-                        <IconButton
-                          onClick={() => {
-                            confirm?.('Are you sure you want to remove this item?', async (agreed) => {
-                              if (agreed) {
-                                const filteredOrders = Object.keys(orders)
-                                  .filter(id => id !== item.id);
-
-                                const updatedOrders: Record<string, number> = {};
-
-                                filteredOrders.forEach(id => {
-                                  updatedOrders[id] = orders[id];
-                                });
-
-                                setOrders(updatedOrders);
-                                setSelectedItemIds(
-                                  selectedItemIds.filter(id =>
-                                    id !== item.id
-                                  )
-                                );
-                              }
-                            });
+              <div className='h-[50px] grow overflow-auto'>
+                <div className="w-full h-fit flex flex-col h-fit gap-2">
+                  {selectedItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="w-[98%] w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden border border-transparent"
+                      style={{ backgroundColor: 'white' }}
+                    >
+                      <div className="min-w-[80px] w-[80px] h-full relative">
+                        <img
+                          src={item.image?.url}
+                          alt={item.image?.name}
+                          style={{
+                            objectFit: 'cover',
+                            objectPosition: 'center',
+                            width: '80px',
+                            height: '80px',
                           }}
+                        />
+                        <div className="absolute top-0 right-0 w-full h-full flex justify-center items-center bg-black/50">
+                          <IconButton
+                            onClick={() => {
+                              confirm?.('Are you sure you want to remove this item?', async (agreed) => {
+                                if (agreed) {
+                                  const filteredOrders = Object.keys(orders)
+                                    .filter(id => id !== item.id);
+
+                                  const updatedOrders: Record<string, number> = {};
+
+                                  filteredOrders.forEach(id => {
+                                    updatedOrders[id] = orders[id];
+                                  });
+
+                                  setOrders(updatedOrders);
+                                  setSelectedItemIds(
+                                    selectedItemIds.filter(id =>
+                                      id !== item.id
+                                    )
+                                  );
+                                }
+                              });
+                            }}
+                          >
+                            <DeleteOutline color="error" />
+                          </IconButton>
+                        </div>
+                      </div>
+                      <div className="shrink min-w-[100px] p-2 capitalize">
+                        <b>{item.name}</b>
+                        <br />
+                        <NumericFormat
+                          className="mb-2 px-1 bg-transparent"
+                          value={item.discounted_selling_price ?? item.selling_price}
+                          prefix="₱ "
+                          thousandSeparator
+                          valueIsNumericString
+                          disabled
+                        />
+                      </div>
+                      <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
+                        <IconButton
+                          disabled={orders[item.id] <= 0}
+                          onClick={() =>
+                            handleIterateOrderQuantity('minus', item.id)
+                          }
                         >
-                          <DeleteOutline color="error" />
+                          <ChevronLeftIcon />
+                        </IconButton>
+                        <input
+                          className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
+                          value={orders[item.id]}
+                          max={item.stock_quantity}
+                          min={0}
+                          type="number"
+                          onChange={(e) =>
+                            setOrders((userOrders) => ({
+                              ...userOrders,
+                              [item.id]: Number(e.target.value),
+                            }))
+                          }
+                        />
+                        <IconButton
+                          disabled={orders[item.id] >= item.stock_quantity}
+                          onClick={() =>
+                            handleIterateOrderQuantity('add', item.id)
+                          }
+                        >
+                          <ChevronRightIcon />
                         </IconButton>
                       </div>
                     </div>
-                    <div className="shrink min-w-[100px] p-2 capitalize">
-                      <b>{item.name}</b>
-                      <br />
-                      <NumericFormat
-                        className="mb-2 px-1 bg-transparent"
-                        value={item.discounted_selling_price ?? item.selling_price}
-                        prefix="₱ "
-                        thousandSeparator
-                        valueIsNumericString
-                        disabled
-                      />
-                    </div>
-                    <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
-                      <IconButton
-                        disabled={orders[item.id] <= 0}
-                        onClick={() =>
-                          handleIterateOrderQuantity('minus', item.id)
-                        }
-                      >
-                        <ChevronLeftIcon />
-                      </IconButton>
-                      <input
-                        className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
-                        value={orders[item.id]}
-                        max={item.stock_quantity}
-                        min={0}
-                        type="number"
-                        onChange={(e) =>
-                          setOrders((userOrders) => ({
-                            ...userOrders,
-                            [item.id]: Number(e.target.value),
-                          }))
-                        }
-                      />
-                      <IconButton
-                        disabled={orders[item.id] >= item.stock_quantity}
-                        onClick={() =>
-                          handleIterateOrderQuantity('add', item.id)
-                        }
-                      >
-                        <ChevronRightIcon />
-                      </IconButton>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
             <div className="w-full h-fit flex flex-col text-white">
