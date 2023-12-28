@@ -165,7 +165,11 @@ export class Transaction {
     },
   })
   @ValidateIf((transaction: TransactionDTO) =>
-    Boolean(transaction.type === 'customer-payment' && transaction.amount_received)
+    Boolean(
+      transaction.type === 'customer-payment' &&
+      transaction.amount_received &&
+      transaction.amount_received > transaction.total
+    )
   )
   @IsPositive({
     message: ValidationMessage.positive,

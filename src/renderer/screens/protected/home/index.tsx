@@ -310,22 +310,27 @@ export default function Home() {
       return displayAlert?.('No item to be purchased', 'error');
     }
 
-    const res = await window.payment.createPayment(orderDetails);
+    confirm?.('Are you sure you want to purchase?', async (agreed) => {
+      if (agreed) {
+        const res = await window.payment.createPayment(orderDetails);
 
-    if (res.status === 'ERROR') {
-      return errorHandler({
-        errors: res.errors,
-      });
-    }
+        if (res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
 
-    setDiscount(null);
-    setCouponCode('');
-    setPayment(0);
-    setSelectedItemIds([]);
-    setOrders({});
-    refetchItems();
-    displayAlert?.('Purchased successfully', 'success');
-    return res.data as unknown as IPagination<PaymentDTO>;
+          return;
+        }
+
+        setDiscount(null);
+        setCouponCode('');
+        setPayment(0);
+        setSelectedItemIds([]);
+        setOrders({});
+        refetchItems();
+        displayAlert?.('Purchased successfully', 'success');
+      }
+    });
   }, [orderDetails, displayAlert, refetchItems]);
 
   const handleSelectItem = useCallback(
@@ -789,38 +794,52 @@ export default function Home() {
                   </div>
                 </div>
                 <div className='w-full mt-5 flex flex-col gap-2'>
-                  <Button
-                    fullWidth
-                    disabled={payment < total || !hasOrders}
-                    variant="contained"
-                    color="inherit"
-                    sx={{ color: 'black' }}
-                    onClick={() => handlePurchaseItem()}
-                  >
-                    {`Place order (${getCommand?.('place-order')})`}
-                  </Button>
-                  <Button
-                    fullWidth
-                    disabled={!hasOrders}
-                    variant="outlined"
-                    color="inherit"
-                    sx={{ color: 'white' }}
-                    onClick={handleAddPayment}
-                  >
-                    {`${payment === 0
-                      ? `Add Payment (${getCommand?.('add-payment')})`
-                      : `Edit Payment (${getCommand?.('add-payment')})`}`}
-                  </Button>
-                  <Button
-                    disabled={!hasOrders}
-                    fullWidth
-                    variant="text"
-                    color="inherit"
-                    sx={{ color: 'var(--info-text)' }}
-                    onClick={handleCancelOrder}
-                  >
-                    {`Cancel (${getCommand?.('cancel-order')})`}
-                  </Button>
+                  {
+                    !(payment < total || !hasOrders)
+                    ? (
+                      <Button
+                        fullWidth
+                        disabled={payment < total || !hasOrders}
+                        variant="contained"
+                        color="inherit"
+                        sx={{ color: 'black' }}
+                        onClick={() => handlePurchaseItem()}
+                      >
+                        {`Place order (${getCommand?.('place-order')})`}
+                      </Button>
+                    )
+                    : null
+                  }
+                  {
+                    hasOrders
+                    ? (
+                      <>
+                        <Button
+                          fullWidth
+                          disabled={!hasOrders}
+                          variant="outlined"
+                          color="inherit"
+                          sx={{ color: 'white' }}
+                          onClick={handleAddPayment}
+                        >
+                          {`${payment === 0
+                            ? `Add Payment (${getCommand?.('add-payment')})`
+                            : `Edit Payment (${getCommand?.('add-payment')})`}`}
+                        </Button>
+                        <Button
+                          disabled={!hasOrders}
+                          fullWidth
+                          variant="text"
+                          color="inherit"
+                          sx={{ color: 'var(--info-text)' }}
+                          onClick={handleCancelOrder}
+                        >
+                          {`Cancel (${getCommand?.('cancel-order')})`}
+                        </Button>
+                      </>
+                    )
+                    : null
+                  }
                 </div>
               </div>
             </div>
