@@ -79,7 +79,7 @@ export default class DiscountDeleteEvent implements IEvent {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
-      if (error?.code === 19) {
+      if (error?.code === 19 || error.message?.includes('FOREIGN KEY')) {
         return {
           errors: ['cannot delete a discount that has attached product'],
           code: 'SYS_ERR',

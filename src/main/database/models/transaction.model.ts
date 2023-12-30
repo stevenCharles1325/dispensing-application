@@ -32,6 +32,12 @@ export class Transaction {
   @AfterInsert()
   async discountTotalUsageListener() {
     const DiscountRepository = global.datasource.getRepository('discounts');
+    const ItemRepository = global.datasource.getRepository('items');
+    const items = await ItemRepository.createQueryBuilder()
+      .where({
+        discount_id: this.discount_id,
+      })
+      .getMany();
     const discount = await DiscountRepository.createQueryBuilder()
       .where({
         id: this.discount_id,
@@ -54,6 +60,10 @@ export class Transaction {
       );
 
       await DiscountRepository.save(discount);
+      await ItemRepository.save(items.map((item) => ({
+        ...item,
+        discount_id: null,
+      })));
     }
   }
 
@@ -92,6 +102,16 @@ export class Transaction {
 
       this.creator = rawData[0] as User;
     }
+  }
+
+  @AfterLoad()
+  async getOrders() {
+    const manager = global.datasource.createEntityManager();
+    const rawData: any[] = await manager.query(
+      `SELECT * FROM 'orders' WHERE transaction_id = ${this.id}`
+    );
+
+    this.orders = rawData as Order[];
   }
 
   @PrimaryGeneratedColumn('increment')

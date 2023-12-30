@@ -27,6 +27,7 @@ import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
+import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
 
 export type Channels = 'ipc-pos';
 
@@ -560,7 +561,7 @@ const notifHandler = {
 const exportHandler = {
   exportTransactionHistory: async (
     payload: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' = 'WHOLE',
-  ): Promise<IResponse<string[] | IPOSError[] | null>> =>
+  ): Promise<IResponse<string[] | IPOSError[] | ITransactionSpreadSheet>> =>
     ipcRenderer.invoke('transaction-history:export', payload),
 };
 

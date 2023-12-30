@@ -10,12 +10,16 @@ import useSearch from 'UI/hooks/useSearch';
 import { useEffect, useMemo, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 import useAlert from 'UI/hooks/useAlert';
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
 import OrderDTO from 'App/data-transfer-objects/order.dto';
+import getDiscount from 'UI/helpers/getDiscount';
+import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -72,7 +76,7 @@ const logsColumns: Array<GridColDef> = [
 const paymentsColumns: Array<GridColDef> = [
   {
     field: 'source_name',
-    headerName: 'Receiver',
+    headerName: 'Cashier',
     width: 250,
     type: 'string',
     align: 'left',
@@ -258,7 +262,14 @@ export default function Logs() {
   const subTotal = useMemo(() => {
     if (selectedPayment) {
       return selectedPayment?.orders?.reduce?.((prev, curr) => {
-        return prev + curr.price * curr.quantity;
+        const { discount } = getDiscount(
+          curr.price,
+          curr?.discount?.discount_type,
+          curr?.discount?.discount_value
+        );
+
+        const price = curr.price - discount;
+        return prev + (price * curr.quantity);
       }, 0) ?? 0;
     }
 
@@ -320,11 +331,17 @@ export default function Logs() {
       return displayAlert?.(errorMessage, 'error');
     }
 
+    const { filePath } = res.data as ITransactionSpreadSheet;
+
     setDownLoadExportState((state) => ({
       ...state,
       [type]: 'SUCCESS',
     }));
-    return displayAlert?.('Successfully downloaded', 'success');
+
+    return displayAlert?.(
+      `Successfully! File is saved at ${filePath}`,
+      'success'
+    );
   }
 
   useEffect(() => {
@@ -337,7 +354,14 @@ export default function Logs() {
     }
   }, [currentTab, setPlaceHolder]);
 
-  console.log(selectedPayment);
+  const { discount } = useMemo(() => {
+    return getDiscount(
+      selectedPayment?.total,
+      selectedPayment?.discount?.discount_type,
+      selectedPayment?.discount?.discount_value,
+    );
+  }, [selectedPayment]);
+
   return (
     <>
       <Menu
@@ -432,18 +456,42 @@ export default function Logs() {
         <div className="w-full h-[750px]">
           {currentTab === 1
             ? (
-              <div className='w-full h-fit flex flex-row-reverse mb-3'>
+              <div className='w-full h-fit flex flex-row-reverse mb-3 gap-2'>
                 <Button
                   disabled={!selectedRows.length}
                   className="shadow shadow-md"
                   variant="outlined"
                   color="secondary"
-                  size="medium"
+                  size="small"
                   startIcon={<DownloadOutlinedIcon fontSize="small" />}
                   onClick={handleOpenExportMenu}
                 >
-                  Export
+                  Spreadsheet
                 </Button>
+                {/* <ButtonGroup size="small">
+                  <Button
+                    disabled={!selectedRows.length}
+                    className="shadow shadow-md"
+                    variant="outlined"
+                    color="secondary"
+                    size="small"
+                    startIcon={<DownloadOutlinedIcon fontSize="small" />}
+                    onClick={handleOpenExportMenu}
+                  >
+                    Export SQL
+                  </Button>
+                  <Button
+                    disabled={!selectedRows.length}
+                    className="shadow shadow-md"
+                    variant="outlined"
+                    color="secondary"
+                    size="small"
+                    startIcon={<UploadOutlinedIcon fontSize="small" />}
+                    onClick={handleOpenExportMenu}
+                  >
+                    Import SQL
+                  </Button>
+                </ButtonGroup> */}
               </div>
             )
             : null}
@@ -468,7 +516,7 @@ export default function Logs() {
             open={Boolean(receiptDialogOpen && selectedPayment)}
           >
             {selectedPayment ? (
-              <div className="w-[500px] h-[850px] overflow-auto">
+              <div className="w-[600px] h-[850px] overflow-auto">
                 <div
                   className="w-full min-h-[800px] h-fit p-5"
                   style={{ color: 'var(--info-text-color)' }}
@@ -492,45 +540,60 @@ export default function Logs() {
                     <div className="grow font-bold">Name</div>
                     <div className="w-[100px] font-bold">Qty</div>
                     <div className="w-[100px] font-bold">Discount</div>
+                    <div className="w-[100px] font-bold">Sub Price</div>
                     <div className="w-[100px] font-bold">Price</div>
                   </div>
                   <div className="w-full h-[400px] overflow-auto border-b-2">
                     <div className="w-full h-fit">
-                      {selectedPayment.orders?.map((order: OrderDTO) => (
-                        <div
-                          key={order.id}
-                          className="w-full h-[50px] flex py-5 px-2"
-                        >
-                          <div className="grow">{order.item.name}</div>
-                          <div className="w-[100px]">{order.quantity}</div>
-                          <div className="w-[100px]">
-                            {`₱ `}
-                            {
-                              order.discount
-                              ? order.discount.discount_type === 'fixed-amount-off'
-                                ? order.discount.discount_value
-                                : order.discount.discount_type === 'percentage-off'
-                                  ? order.price * (order.discount.discount_value / 100)
-                                  : 0
-                              : 0
-                            }
+                      {selectedPayment.orders?.map((order: OrderDTO) => {
+                        const {
+                          discountedPrice,
+                          formattedDiscount
+                        } = getDiscount(
+                          order.price,
+                          order?.discount?.discount_type,
+                          order?.discount?.discount_value
+                        );
+
+                        return (
+                          <div
+                            key={order.id}
+                            className="w-full h-[50px] flex py-5 px-2"
+                          >
+                            <div className="grow">{order.item.name}</div>
+                            <div className="w-[100px]">{order.quantity}</div>
+                            <div className="w-[100px]">{formattedDiscount}</div>
+                            <div className="w-[100px]">
+                              <NumericFormat
+                                style={{ width: '100%', textAlign: 'left' }}
+                                className="mb-2 px-1 bg-transparent grow text-end"
+                                value={order.price * order.quantity}
+                                prefix="₱ "
+                                thousandSeparator
+                                valueIsNumericString
+                                decimalSeparator="."
+                                decimalScale={2}
+                                fixedDecimalScale
+                                disabled
+                              />
+                            </div>
+                            <div className="w-[100px]">
+                              <NumericFormat
+                                style={{ width: '100%', textAlign: 'left' }}
+                                className="mb-2 px-1 bg-transparent grow text-end"
+                                value={discountedPrice * order.quantity}
+                                prefix="₱ "
+                                thousandSeparator
+                                valueIsNumericString
+                                decimalSeparator="."
+                                decimalScale={2}
+                                fixedDecimalScale
+                                disabled
+                              />
+                            </div>
                           </div>
-                          <div className="w-[100px]">
-                            <NumericFormat
-                              style={{ width: '100%', textAlign: 'left' }}
-                              className="mb-2 px-1 bg-transparent grow text-end"
-                              value={order.item.selling_price}
-                              prefix="₱ "
-                              thousandSeparator
-                              valueIsNumericString
-                              decimalSeparator="."
-                              decimalScale={2}
-                              fixedDecimalScale
-                              disabled
-                            />
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                   <div className="w-full flex justify-end mt-5">
@@ -558,13 +621,7 @@ export default function Logs() {
                           <NumericFormat
                             style={{ width: '150px', textAlign: 'center' }}
                             className="mb-2 px-1 bg-transparent grow text-end"
-                            value={
-                              selectedPayment?.discount?.discount_type === 'fixed-amount-off'
-                              ? selectedPayment?.discount?.discount_value
-                              : selectedPayment?.discount?.discount_type === 'percentage-off'
-                                ? subTotal * (selectedPayment?.discount?.discount_value / 100)
-                                : 0
-                            }
+                            value={discount}
                             prefix="₱ "
                             thousandSeparator
                             valueIsNumericString

@@ -49,7 +49,10 @@ export class Item {
         `SELECT * FROM 'discounts' WHERE id = ${this.discount_id}`
       );
 
-      this.discount = rawData[0];
+      const discount = rawData[0] as Discount;
+      if (discount.status === 'active') {
+        this.discount = discount;
+      }
 
       if (this.discount?.status === 'active') {
         if (this.discount?.discount_type === 'percentage-off') {
