@@ -20,7 +20,7 @@ export class Notification1699837785831 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true, // temporarily
           },
           {

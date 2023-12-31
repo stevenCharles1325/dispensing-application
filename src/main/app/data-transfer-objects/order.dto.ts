@@ -2,11 +2,11 @@ import DiscountDTO from './discount.dto';
 import ItemDTO from './item.dto';
 
 export default interface OrderDTO {
-  id: number;
-  system_id: number;
+  id: string;
+  system_id: string;
   item_id: number;
   discount_id: number;
-  transaction_id: number;
+  transaction_id: string;
   quantity: number;
   tax_rate: number;
   price: number;

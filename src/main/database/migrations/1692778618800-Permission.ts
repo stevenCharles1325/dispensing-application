@@ -20,7 +20,7 @@ export class Permission1692778618800 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
           },
           {

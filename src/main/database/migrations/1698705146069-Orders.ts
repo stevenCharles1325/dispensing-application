@@ -13,19 +13,19 @@ export class Orders1698705146069 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true, // temporarily
           },
           {
             name: 'transaction_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'transaction',
           },

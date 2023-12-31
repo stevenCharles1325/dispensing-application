@@ -3,7 +3,7 @@ import UserDTO from "./user.dto";
 
 export default interface DiscountDTO {
   id: number;
-  system_id: number
+  system_id: string
   creator_id: number;
   coupon_code: string;
   title: string;

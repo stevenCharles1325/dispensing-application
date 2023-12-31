@@ -21,7 +21,7 @@ export class Role {
   @Column({
     nullable: true,
   })
-  system_id: number;
+  system_id: string;
 
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })

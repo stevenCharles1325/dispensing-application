@@ -20,7 +20,7 @@ export class Discount1702610770719 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
           },
           {

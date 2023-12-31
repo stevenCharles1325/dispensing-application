@@ -10,8 +10,8 @@ import bcrypt from 'bcrypt';
 
 @Entity('systems')
 export class System {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ generated: 'uuid' })
   uuid: string;

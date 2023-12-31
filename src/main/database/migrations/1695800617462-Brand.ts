@@ -20,7 +20,7 @@ export class Brand1696656902853 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
           },
           {

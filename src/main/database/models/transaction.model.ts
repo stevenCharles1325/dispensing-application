@@ -84,7 +84,7 @@ export class Transaction {
     if (this.type === 'customer-payment') {
       const OrderRepository = global.datasource.getRepository('orders');
       const orders = await OrderRepository.createQueryBuilder('order')
-        .where('order.transaction_id = :transactionId')
+        .where(`order.transaction_id = ':transactionId'`)
         .setParameter('transactionId', this.id)
         .getMany();
 
@@ -108,19 +108,19 @@ export class Transaction {
   async getOrders() {
     const manager = global.datasource.createEntityManager();
     const rawData: any[] = await manager.query(
-      `SELECT * FROM 'orders' WHERE transaction_id = ${this.id}`
+      `SELECT * FROM 'orders' WHERE transaction_id = '${this.id}'`
     );
 
     this.orders = rawData as Order[];
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: true,
   })
-  system_id: number | null;
+  system_id: string | null;
 
   @Column()
   creator_id: number;

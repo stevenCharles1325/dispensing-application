@@ -21,7 +21,7 @@ export class ShortcutKey {
   @Column({
     nullable: true,
   })
-  system_id: number;
+  system_id: string;
 
   @Column({
     nullable: false,

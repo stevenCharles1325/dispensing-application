@@ -20,7 +20,7 @@ export class Role1692778668829 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
           },
           {

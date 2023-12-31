@@ -57,7 +57,7 @@ export class Discount {
   id: number;
 
   @Column()
-  system_id: number;
+  system_id: string;
 
   @Column()
   creator_id: number;

@@ -80,11 +80,11 @@ export class Order {
     await ItemRepository.save(item);
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  system_id: number;
+  system_id: string;
 
   @Column()
   item_id: string;
@@ -93,7 +93,7 @@ export class Order {
   discount_id: number;
 
   @Column()
-  transaction_id: number;
+  transaction_id: string;
 
   @Column()
   quantity: number;

@@ -468,7 +468,7 @@ export default function Logs() {
                 >
                   Spreadsheet
                 </Button>
-                {/* <ButtonGroup size="small">
+                <ButtonGroup size="small">
                   <Button
                     disabled={!selectedRows.length}
                     className="shadow shadow-md"
@@ -491,7 +491,7 @@ export default function Logs() {
                   >
                     Import SQL
                   </Button>
-                </ButtonGroup> */}
+                </ButtonGroup>
               </div>
             )
             : null}

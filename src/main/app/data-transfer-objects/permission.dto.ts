@@ -3,6 +3,6 @@ export default interface PermissionDTO {
   name: string;
   kebab: string;
   group_name: string;
-  system_id: number;
+  system_id: string;
   description?: string | undefined;
 }

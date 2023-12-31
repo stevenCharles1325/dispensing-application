@@ -4,7 +4,7 @@ export default interface UserDTO {
   id: number;
   image_url: string;
   lead_id: number | null;
-  system_id: number;
+  system_id: string;
   role_id: number;
   notification_status?: 'on' | 'off';
   status?: 'active' | 'deactivated';

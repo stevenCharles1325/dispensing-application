@@ -5,9 +5,9 @@ import OrderDTO from './order.dto';
 import DiscountDTO from './discount.dto';
 
 export interface IncomeDTO {
-  id: number;
+  id: string;
 
-  system_id?: number | null;
+  system_id?: string | null;
 
   creator_id: number;
 
@@ -43,9 +43,9 @@ export interface IncomeDTO {
 }
 
 export interface ExpenseDTO {
-  id: number;
+  id: string;
 
-  system_id?: number | null;
+  system_id?: string | null;
 
   creator_id: number;
 

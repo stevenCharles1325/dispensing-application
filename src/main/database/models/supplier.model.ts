@@ -24,7 +24,7 @@ export class Supplier {
   @Column({
     nullable: true,
   })
-  system_id: number | null;
+  system_id: string | null;
 
   @Column({
     type: Number,

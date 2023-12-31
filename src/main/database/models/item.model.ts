@@ -108,7 +108,7 @@ export class Item {
   id: string;
 
   @Column()
-  system_id: number;
+  system_id: string;
 
   @Column({ nullable: true })
   discount_id: number;

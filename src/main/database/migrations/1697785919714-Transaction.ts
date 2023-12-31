@@ -13,14 +13,14 @@ export class Transaction1697785919714 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true, // temporarily
           },
           {

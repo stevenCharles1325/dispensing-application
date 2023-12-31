@@ -20,7 +20,7 @@ export class AuditTrail1698132562574 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
           },
           {
