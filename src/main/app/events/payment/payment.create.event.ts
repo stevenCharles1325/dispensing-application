@@ -132,7 +132,7 @@ export default class PaymentCreateEvent implements IEvent {
             user_id: user.id as number,
             resource_id: data.id.toString(),
             resource_table: 'transactions',
-            resource_id_type: 'integer',
+            resource_id_type: 'uuid',
             action: 'payment',
             status: 'SUCCEEDED',
             description: `User ${user.fullName} has successfully received a customer payment`,

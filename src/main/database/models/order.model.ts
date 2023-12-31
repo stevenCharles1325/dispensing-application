@@ -50,6 +50,14 @@ export class Order {
   }
 
   @AfterLoad()
+  async getItems() {
+    const ItemRepository = global.datasource.getRepository('items');
+    const item = await ItemRepository.findOneByOrFail({ id: this.item_id });
+
+    this.item = item as Item;
+  }
+
+  @AfterLoad()
   async getDiscount() {
     const DiscountRepository = global.datasource.getRepository('discounts');
     const discount = await DiscountRepository.createQueryBuilder()
@@ -59,14 +67,6 @@ export class Order {
       .getOne();
 
     this.discount = discount as Discount;
-  }
-
-  @AfterLoad()
-  async getItems() {
-    const ItemRepository = global.datasource.getRepository('items');
-    const item = await ItemRepository.findOneByOrFail({ id: this.item_id });
-
-    this.item = item as Item;
   }
 
   @AfterInsert()

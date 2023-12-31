@@ -82,11 +82,10 @@ export class Transaction {
   @AfterLoad()
   async getOrdersForCustomerPayment() {
     if (this.type === 'customer-payment') {
-      console.log('HERE');
       const OrderRepository = global.datasource.getRepository('orders');
       const orders = await OrderRepository.createQueryBuilder('order')
         .where(`order.transaction_id = :transactionId`)
-        .setParameter('transactionId', `'${this.id}'`)
+        .setParameter('transactionId', `${this.id}`)
         .getMany();
 
       this.orders = orders as Order[];
@@ -107,12 +106,14 @@ export class Transaction {
 
   @AfterLoad()
   async getOrders() {
-    const manager = global.datasource.createEntityManager();
-    const rawData: any[] = await manager.query(
-      `SELECT * FROM 'orders' WHERE transaction_id = '${this.id}'`
-    );
+    if (this.type !== 'customer-payment') {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'orders' WHERE transaction_id = '${this.id}'`
+      );
 
-    this.orders = rawData as Order[];
+      this.orders = rawData as Order[];
+    }
   }
 
   @PrimaryGeneratedColumn('uuid')

@@ -224,7 +224,7 @@ export default function Logs() {
   const [currentTab, setCurrentTab] = useState(0);
   const [receiptDialogOpen, setReceiptDialogOpen] = useState<boolean>(false);
 
-  const [selectedId, setSelectedId] = useState<number | null>(0);
+  const [selectedId, setSelectedId] = useState<string | number | null>(0);
 
   const [exportMenuAnchorEl, setExportMenuAnchorEl] =
     useState<null | HTMLElement>(null);
