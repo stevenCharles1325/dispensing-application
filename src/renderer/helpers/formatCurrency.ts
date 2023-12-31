@@ -21,7 +21,7 @@ const formatCurrency: FormatCurrencyParams = (
 
   // Ensure amount is a number
   if (Number.isNaN(amount)) {
-    return 'Invalid amount';
+    return `${selectedCurrency}0.0`;
   }
 
   // Define the abbreviations for thousands, millions, billions, etc.
