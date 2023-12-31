@@ -82,10 +82,11 @@ export class Transaction {
   @AfterLoad()
   async getOrdersForCustomerPayment() {
     if (this.type === 'customer-payment') {
+      console.log('HERE');
       const OrderRepository = global.datasource.getRepository('orders');
       const orders = await OrderRepository.createQueryBuilder('order')
-        .where(`order.transaction_id = ':transactionId'`)
-        .setParameter('transactionId', this.id)
+        .where(`order.transaction_id = :transactionId`)
+        .setParameter('transactionId', `'${this.id}'`)
         .getMany();
 
       this.orders = orders as Order[];

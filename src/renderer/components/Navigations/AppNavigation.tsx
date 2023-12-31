@@ -742,7 +742,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         }}
       >
         <div
-          className="w-[400px] h-[450px] flex flex-col px-2"
+          className="w-[417px] h-[450px] flex flex-col px-2"
           style={{
             backgroundColor: 'white',
           }}
@@ -752,7 +752,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               {
                 notifs.length
                 ? <List
-                    width={380}
+                    width={400}
                     height={400}
                     rowHeight={100}
                     rowCount={notifs.length}

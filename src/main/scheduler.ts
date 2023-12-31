@@ -2,14 +2,14 @@ import schedule from 'node-schedule';
 import { Bull } from './jobs';
 import ICronJob from 'App/interfaces/cron/cron.jobs.interface';
 
-const atEveryDay = '0 0 * * *';
-// const atEveryMinute = '* * * * *';
+// const atEveryDay = '0 0 * * *';
+const atEveryMinute = '* * * * *';
 // const atEveryFiveSeconds = '5 * * * * *';
 
 const cronJobs: ICronJob[] = [
   {
-    label: 'CRON:EVERY-DAY',
-    schedule: atEveryDay,
+    label: 'CRON:EVERY-MINUTE',
+    schedule: atEveryMinute,
     callback: async () => {
       await Bull('DISCOUNT_JOB', {});
     }

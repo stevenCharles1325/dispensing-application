@@ -111,6 +111,7 @@ export default class PaymentCreateEvent implements IEvent {
             } as unknown as IResponse<IPOSValidationError[]>;
           }
 
+          console.log('Transaction: ', transaction);
           const data = await TransactionRepository.save(transaction);
 
           const desiredOrder: any = order.items.map((item) => ({
