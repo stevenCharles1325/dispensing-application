@@ -30,6 +30,10 @@ export default class ExportTransactionHistoryEvent implements IEvent {
         const payload: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' =
           eventData.payload[0] ?? 'WHOLE';
 
+        // const exportAs = eventData.payload[1] as 'SQL' | 'SPREADSHEET';
+
+
+
         const transactionQuery = TransactionRepository.createQueryBuilder('transaction');
         const category = payload.split(':')
           .map((word) => word.toLowerCase())
