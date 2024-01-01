@@ -22,6 +22,7 @@ import getDiscount from 'UI/helpers/getDiscount';
 import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
+import useConfirm from 'UI/hooks/useConfirm';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -221,6 +222,7 @@ function a11yProps(index: number) {
 
 export default function Logs() {
   const { displayAlert } = useAlert();
+  const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const { searchText, setPlaceHolder } = useSearch();
 
@@ -298,7 +300,7 @@ export default function Logs() {
   const selectedColumn = currentTab === 0 ? logsColumns : paymentsColumns;
 
   const handleOpenExportMenu = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     setExportMenuAnchorEl(event.currentTarget);
   };
@@ -321,40 +323,54 @@ export default function Logs() {
     inputFileRef.current?.click();
   }
 
-  const handleImportSQLFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const filePath = e.target?.files?.[0]?.path;
+  const handleImportSQLFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target?.files?.[0];
 
-    if (filePath) {
-      const res = await window.import.importTransactionHistory(filePath);
+    if (file) {
+      confirm?.(`Are you sure you want to import ${file.name}`, async (agreed) => {
+        if (agreed) {
+          const res = await window.import.importTransactionHistory(file.path);
 
-      if (res && res.status === 'ERROR') {
-        return errorHandler({
-          errors: res.errors,
-        });
-      }
+          if (res && res.status === 'ERROR') {
+            errorHandler({
+              errors: res.errors,
+            });
 
-      refreshPayments();
-      return displayAlert?.(
-        `Successfully imported SQL file`,
-        'success'
-      );
+            refreshPayments();
+            return;
+          }
+
+          refreshPayments();
+          displayAlert?.(
+            `Successfully imported SQL file`,
+            'success'
+          );
+        }
+      });
     }
   }
 
-  const handleExportTransactionHistoryAsSQL = async () => {
-    const res = await window.export.exportTransactionHistory('SQL');
+  const handleExportTransactionHistoryAsSQL = () => {
+    confirm?.("Do you really want to export the transaction as SQL?", async (agreed) => {
+      if (agreed) {
+        const res = await window.export.exportTransactionHistory('SQL');
 
-    if (res && res.status === 'ERROR') {
-      return errorHandler({
-        errors: res.errors,
-      });
-    }
+        if (res && res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
 
-    const { filePath } = res.data as ITransactionSQL;
-    return displayAlert?.(
-      `Successfully! File is saved at ${filePath}`,
-      'success'
-    );
+          return;
+        }
+
+        const { filePath } = res.data as ITransactionSQL;
+
+        displayAlert?.(
+          `Successfully! File is saved at ${filePath}`,
+          'success'
+        );
+      }
+    });
   }
 
   const handleExportTransactionHistoryAsSpreadsheet = (
@@ -509,41 +525,32 @@ export default function Logs() {
         <div className="w-full h-[750px]">
           {currentTab === 1
             ? (
-              <div className='w-full h-fit flex flex-row-reverse mb-3 gap-2'>
-                <Button
-                  disabled={!selectedRows.length}
-                  className="shadow shadow-md"
-                  variant="outlined"
+              <div className='w-full h-fit flex flex-row-reverse mb-3 gap-3'>
+                <Chip
+                  label="Excel"
                   color="secondary"
-                  size="small"
-                  startIcon={<DownloadOutlinedIcon fontSize="small" />}
+                  variant="outlined"
+                  disabled={!selectedRows.length}
+                  icon={<DownloadOutlinedIcon fontSize="small" />}
                   onClick={handleOpenExportMenu}
-                >
-                  Spreadsheet
-                </Button>
-                <ButtonGroup size="small">
-                  <Button
+                />
+                <div className='flex gap-1'>
+                  <Chip
+                    label="Export SQL"
                     disabled={!selectedRows.length}
-                    className="shadow shadow-md"
                     variant="outlined"
                     color="secondary"
-                    size="small"
-                    startIcon={<DownloadOutlinedIcon fontSize="small" />}
+                    icon={<DownloadOutlinedIcon fontSize="small" />}
                     onClick={handleExportTransactionHistoryAsSQL}
-                  >
-                    Export SQL
-                  </Button>
-                  <Button
-                    className="shadow shadow-md"
+                  />
+                  <Chip
+                    label="Import SQL"
                     variant="outlined"
                     color="secondary"
-                    size="small"
-                    startIcon={<UploadOutlinedIcon fontSize="small" />}
+                    icon={<UploadOutlinedIcon fontSize="small" />}
                     onClick={handleSelectFileToImport}
-                  >
-                    Import SQL
-                  </Button>
-                </ButtonGroup>
+                  />
+                </div>
               </div>
             )
             : null}

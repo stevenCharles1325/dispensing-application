@@ -11,8 +11,10 @@ export default async function importSQLDump (filePath: string) {
     const result = await asyncExec(command);
 
     if (result.stderr.length) {
+      const error = handleError(result.stderr);
+
       return {
-        errors: [result.stderr],
+        errors: [error],
         code: 'REQ_ERR',
         status: 'ERROR',
       };
@@ -23,11 +25,16 @@ export default async function importSQLDump (filePath: string) {
       status: 'SUCCESS',
     };
   } catch (err) {
-    console.log(err);
     const error = handleError(err);
 
     return {
-      errors: [error],
+      errors: [
+        {
+          code: 'REQ_ERR',
+          message: 'Error occurred! Might be data duplication issues. Please try again!',
+          verbose: error,
+        }
+      ],
       code: 'REQ_ERR',
       status: 'ERROR',
     };
