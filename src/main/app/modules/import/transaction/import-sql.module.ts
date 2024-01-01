@@ -31,7 +31,7 @@ export default async function importSQLDump (filePath: string) {
       errors: [
         {
           code: 'REQ_ERR',
-          message: 'Error occurred! Might be data duplication issues. Please try again!',
+          message: 'Error occurred! Might be because some data already exist.',
           verbose: error,
         }
       ],
