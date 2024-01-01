@@ -31,8 +31,9 @@ import executeBinaries from './binaries';
 import dotenvExpand from 'dotenv-expand';
 import IObjectStorageService from 'App/interfaces/service/service.object-storage.interface';
 import bucketNames from 'src/globals/object-storage/bucket-names';
-import initJobs from './jobs';
+import initJobs, { Bull } from './jobs';
 import policies from './data/defaults/object-storage/policies';
+import './scheduler';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -347,6 +348,7 @@ app
           return false;
         });
 
+        await Bull('DISCOUNT_JOB', {});
         await createWindow();
 
         app.on('activate', () => {

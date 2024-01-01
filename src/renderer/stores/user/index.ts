@@ -47,7 +47,7 @@ const useUser = create(
   persist<AppUserState>(
     (set, get) => ({
       id: 0,
-      system_id: 0,
+      system_id: '',
       role_id: 0,
       image_url: '',
       birth_date: new Date(),

@@ -2,13 +2,16 @@ import { IPaymentTypes } from 'App/interfaces/transaction/payment/payment.method
 import { System } from 'Main/database/models/system.model';
 import { User } from 'Main/database/models/user.model';
 import OrderDTO from './order.dto';
+import DiscountDTO from './discount.dto';
 
 export interface IncomeDTO {
-  id: number;
+  id: string;
 
-  system_id?: number | null;
+  system_id?: string | null;
 
   creator_id: number;
+
+  discount_id?: number | null;
 
   source_name: string;
 
@@ -35,12 +38,14 @@ export interface IncomeDTO {
   creator: User | null;
 
   orders?: OrderDTO[];
+
+  discount?: DiscountDTO;
 }
 
 export interface ExpenseDTO {
-  id: number;
+  id: string;
 
-  system_id?: number | null;
+  system_id?: string | null;
 
   creator_id: number;
 

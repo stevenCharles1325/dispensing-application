@@ -1,20 +1,28 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Tabs, Tab, Chip, IconButton, Dialog, Button, Menu, ListItem, ListItemButton, ListItemText, CircularProgress } from '@mui/material';
+import { Tabs, Tab, Chip, IconButton, Dialog, Button, Menu, ListItem, ListItemButton, ListItemText, CircularProgress, DialogActions } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
-import { useEffect, useMemo, useState } from 'react';
+import { ChangeEventHandler, useEffect, useMemo, useRef, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 import useAlert from 'UI/hooks/useAlert';
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
+import OrderDTO from 'App/data-transfer-objects/order.dto';
+import getDiscount from 'UI/helpers/getDiscount';
+import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
+import useErrorHandler from 'UI/hooks/useErrorHandler';
+import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
+import useConfirm from 'UI/hooks/useConfirm';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -71,7 +79,7 @@ const logsColumns: Array<GridColDef> = [
 const paymentsColumns: Array<GridColDef> = [
   {
     field: 'source_name',
-    headerName: 'Receiver',
+    headerName: 'Cashier',
     width: 250,
     type: 'string',
     align: 'left',
@@ -214,12 +222,14 @@ function a11yProps(index: number) {
 
 export default function Logs() {
   const { displayAlert } = useAlert();
+  const confirm = useConfirm();
+  const errorHandler = useErrorHandler();
   const { searchText, setPlaceHolder } = useSearch();
 
   const [currentTab, setCurrentTab] = useState(0);
   const [receiptDialogOpen, setReceiptDialogOpen] = useState<boolean>(false);
 
-  const [selectedId, setSelectedId] = useState<number | null>(0);
+  const [selectedId, setSelectedId] = useState<string | number | null>(0);
 
   const [exportMenuAnchorEl, setExportMenuAnchorEl] =
     useState<null | HTMLElement>(null);
@@ -228,6 +238,8 @@ export default function Logs() {
   const [exportDownloadState, setDownLoadExportState] = useState<
     Record<string, 'LOADING' | 'SUCCESS' | 'ERROR' | null>
   >({});
+
+  const inputFileRef = useRef<any>(null);
 
   const { data: auditData } = useQuery({
     queryKey: ['audits', searchText],
@@ -238,7 +250,7 @@ export default function Logs() {
     },
   });
 
-  const { data: paymentData } = useQuery({
+  const { data: paymentData, refetch: refreshPayments } = useQuery({
     queryKey: ['payments', searchText],
     queryFn: async () => {
       const res = await getPayments(searchText);
@@ -257,7 +269,14 @@ export default function Logs() {
   const subTotal = useMemo(() => {
     if (selectedPayment) {
       return selectedPayment?.orders?.reduce?.((prev, curr) => {
-        return prev + curr.price * curr.quantity;
+        const { discount } = getDiscount(
+          curr.price,
+          curr?.discount?.discount_type,
+          curr?.discount?.discount_value
+        );
+
+        const price = curr.price - discount;
+        return prev + (price * curr.quantity);
       }, 0) ?? 0;
     }
 
@@ -281,7 +300,7 @@ export default function Logs() {
   const selectedColumn = currentTab === 0 ? logsColumns : paymentsColumns;
 
   const handleOpenExportMenu = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     setExportMenuAnchorEl(event.currentTarget);
   };
@@ -300,14 +319,68 @@ export default function Logs() {
     setSelectedId(null);
   };
 
-  const handleExportTransactionHistory = (
+  const handleSelectFileToImport = () => {
+    inputFileRef.current?.click();
+  }
+
+  const handleImportSQLFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target?.files?.[0];
+
+    if (file) {
+      confirm?.(`Are you sure you want to import ${file.name}`, async (agreed) => {
+        if (agreed) {
+          const res = await window.import.importTransactionHistory(file.path);
+
+          if (res && res.status === 'ERROR') {
+            errorHandler({
+              errors: res.errors,
+            });
+
+            refreshPayments();
+            return;
+          }
+
+          refreshPayments();
+          displayAlert?.(
+            `Successfully imported SQL file`,
+            'success'
+          );
+        }
+      });
+    }
+  }
+
+  const handleExportTransactionHistoryAsSQL = () => {
+    confirm?.("Do you really want to export the transaction as SQL?", async (agreed) => {
+      if (agreed) {
+        const res = await window.export.exportTransactionHistory('SQL');
+
+        if (res && res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
+
+          return;
+        }
+
+        const { filePath } = res.data as ITransactionSQL;
+
+        displayAlert?.(
+          `Successfully! File is saved at ${filePath}`,
+          'success'
+        );
+      }
+    });
+  }
+
+  const handleExportTransactionHistoryAsSpreadsheet = (
     type: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' = 'WHOLE',
   ) => async () => {
     setDownLoadExportState((state) => ({
       ...state,
       [type]: 'LOADING',
     }));
-    const res = await window.export.exportTransactionHistory(type);
+    const res = await window.export.exportTransactionHistory('SPREADSHEET', type);
 
     if (res && res.status === 'ERROR') {
       const errorMessage = res.errors?.[0] as unknown as string;
@@ -319,11 +392,17 @@ export default function Logs() {
       return displayAlert?.(errorMessage, 'error');
     }
 
+    const { filePath } = res.data as ITransactionSpreadSheet;
+
     setDownLoadExportState((state) => ({
       ...state,
       [type]: 'SUCCESS',
     }));
-    return displayAlert?.('Successfully downloaded', 'success');
+
+    return displayAlert?.(
+      `Successfully! File is saved at ${filePath}`,
+      'success'
+    );
   }
 
   useEffect(() => {
@@ -335,6 +414,14 @@ export default function Logs() {
       }
     }
   }, [currentTab, setPlaceHolder]);
+
+  const { discount } = useMemo(() => {
+    return getDiscount(
+      selectedPayment?.total,
+      selectedPayment?.discount?.discount_type,
+      selectedPayment?.discount?.discount_value,
+    );
+  }, [selectedPayment]);
 
   return (
     <>
@@ -362,7 +449,7 @@ export default function Logs() {
             disablePadding
           >
             <ListItemButton
-              onClick={handleExportTransactionHistory('WHOLE')}
+              onClick={handleExportTransactionHistoryAsSpreadsheet('WHOLE')}
             >
               <ListItemText primary={`Whole`} />
               {exportDownloadState['WHOLE'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
@@ -376,7 +463,7 @@ export default function Logs() {
             disablePadding
           >
             <ListItemButton
-              onClick={handleExportTransactionHistory('CURRENT:DAY')}
+              onClick={handleExportTransactionHistoryAsSpreadsheet('CURRENT:DAY')}
             >
               <ListItemText primary={`Current day`} />
               {exportDownloadState['CURRENT:DAY'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
@@ -390,7 +477,7 @@ export default function Logs() {
             disablePadding
           >
             <ListItemButton
-              onClick={handleExportTransactionHistory('CURRENT:MONTH')}
+              onClick={handleExportTransactionHistoryAsSpreadsheet('CURRENT:MONTH')}
             >
               <ListItemText primary={`Current month`} />
               {exportDownloadState['CURRENT:MONTH'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
@@ -404,7 +491,7 @@ export default function Logs() {
             disablePadding
           >
             <ListItemButton
-              onClick={handleExportTransactionHistory('CURRENT:YEAR')}
+              onClick={handleExportTransactionHistoryAsSpreadsheet('CURRENT:YEAR')}
             >
               <ListItemText primary={`Current year`} />
               {exportDownloadState['CURRENT:YEAR'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
@@ -427,21 +514,43 @@ export default function Logs() {
             <Tab label="Transaction History" {...a11yProps(1)} />
           </Tabs>
         </div>
+        <div className='hidden'>
+          <input
+            ref={inputFileRef}
+            type="file"
+            accept='.sqlite'
+            onChange={handleImportSQLFile}
+          />
+        </div>
         <div className="w-full h-[750px]">
           {currentTab === 1
             ? (
-              <div className='w-full h-fit flex flex-row-reverse mb-3'>
-                <Button
-                  disabled={!selectedRows.length}
-                  className="shadow shadow-md"
-                  variant="outlined"
+              <div className='w-full h-fit flex flex-row-reverse mb-3 gap-3'>
+                <Chip
+                  label="Excel"
                   color="secondary"
-                  size="medium"
-                  startIcon={<DownloadOutlinedIcon fontSize="small" />}
+                  variant="outlined"
+                  disabled={!selectedRows.length}
+                  icon={<DownloadOutlinedIcon fontSize="small" />}
                   onClick={handleOpenExportMenu}
-                >
-                  Export
-                </Button>
+                />
+                <div className='flex gap-1'>
+                  <Chip
+                    label="Export SQL"
+                    disabled={!selectedRows.length}
+                    variant="outlined"
+                    color="secondary"
+                    icon={<DownloadOutlinedIcon fontSize="small" />}
+                    onClick={handleExportTransactionHistoryAsSQL}
+                  />
+                  <Chip
+                    label="Import SQL"
+                    variant="outlined"
+                    color="secondary"
+                    icon={<UploadOutlinedIcon fontSize="small" />}
+                    onClick={handleSelectFileToImport}
+                  />
+                </div>
               </div>
             )
             : null}
@@ -466,7 +575,7 @@ export default function Logs() {
             open={Boolean(receiptDialogOpen && selectedPayment)}
           >
             {selectedPayment ? (
-              <div className="w-[500px] h-[800px] overflow-auto">
+              <div className="w-[600px] h-[850px] overflow-auto">
                 <div
                   className="w-full min-h-[800px] h-fit p-5"
                   style={{ color: 'var(--info-text-color)' }}
@@ -483,39 +592,67 @@ export default function Logs() {
                       </p>
                     </div>
                   </div>
-                  <div className="w-full bg-gray-200 h-[60px] p-5 font-bold">
+                  <div className="w-full bg-gray-200 h-[60px] p-5 font-bold border-gray-400 border-b-2">
                     <p>Product Description</p>
                   </div>
                   <div className="w-full h-[50px] flex py-5 px-2">
                     <div className="grow font-bold">Name</div>
                     <div className="w-[100px] font-bold">Qty</div>
+                    <div className="w-[100px] font-bold">Discount</div>
+                    <div className="w-[100px] font-bold">Sub Price</div>
                     <div className="w-[100px] font-bold">Price</div>
                   </div>
                   <div className="w-full h-[400px] overflow-auto border-b-2">
                     <div className="w-full h-fit">
-                      {selectedPayment.orders?.map((order: any) => (
-                        <div
-                          key={order.id}
-                          className="w-full h-[50px] flex py-5 px-2"
-                        >
-                          <div className="grow">{order.item.name}</div>
-                          <div className="w-[100px]">{order.quantity}</div>
-                          <div className="w-[100px]">
-                            <NumericFormat
-                              style={{ width: '100%', textAlign: 'left' }}
-                              className="mb-2 px-1 bg-transparent grow text-end"
-                              value={order.item.selling_price}
-                              prefix="₱ "
-                              thousandSeparator
-                              valueIsNumericString
-                              decimalSeparator="."
-                              decimalScale={2}
-                              fixedDecimalScale
-                              disabled
-                            />
+                      {selectedPayment.orders?.map((order: OrderDTO) => {
+                        const {
+                          discountedPrice,
+                          formattedDiscount
+                        } = getDiscount(
+                          order.price,
+                          order?.discount?.discount_type,
+                          order?.discount?.discount_value
+                        );
+
+                        return (
+                          <div
+                            key={order.id}
+                            className="w-full h-[50px] flex py-5 px-2"
+                          >
+                            <div className="grow">{order.item.name}</div>
+                            <div className="w-[100px]">{order.quantity}</div>
+                            <div className="w-[100px]">{formattedDiscount}</div>
+                            <div className="w-[100px]">
+                              <NumericFormat
+                                style={{ width: '100%', textAlign: 'left' }}
+                                className="mb-2 px-1 bg-transparent grow text-end"
+                                value={order.price * order.quantity}
+                                prefix="₱ "
+                                thousandSeparator
+                                valueIsNumericString
+                                decimalSeparator="."
+                                decimalScale={2}
+                                fixedDecimalScale
+                                disabled
+                              />
+                            </div>
+                            <div className="w-[100px]">
+                              <NumericFormat
+                                style={{ width: '100%', textAlign: 'left' }}
+                                className="mb-2 px-1 bg-transparent grow text-end"
+                                value={discountedPrice * order.quantity}
+                                prefix="₱ "
+                                thousandSeparator
+                                valueIsNumericString
+                                decimalSeparator="."
+                                decimalScale={2}
+                                fixedDecimalScale
+                                disabled
+                              />
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                   <div className="w-full flex justify-end mt-5">
@@ -527,6 +664,23 @@ export default function Logs() {
                             style={{ width: '150px', textAlign: 'center' }}
                             className="mb-2 px-1 bg-transparent grow text-end"
                             value={subTotal}
+                            prefix="₱ "
+                            thousandSeparator
+                            valueIsNumericString
+                            decimalSeparator="."
+                            decimalScale={2}
+                            fixedDecimalScale
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full flex justify-between">
+                        <div className="font-bold">Discount:</div>
+                        <div>
+                          <NumericFormat
+                            style={{ width: '150px', textAlign: 'center' }}
+                            className="mb-2 px-1 bg-transparent grow text-end"
+                            value={discount}
                             prefix="₱ "
                             thousandSeparator
                             valueIsNumericString
@@ -607,6 +761,14 @@ export default function Logs() {
                 </div>
               </div>
             ) : null}
+            <DialogActions>
+              <Button
+                color="error"
+                onClick={handleCloseReceiptDialog}
+              >
+                Close
+              </Button>
+            </DialogActions>
           </Dialog>
         </div>
       </div>

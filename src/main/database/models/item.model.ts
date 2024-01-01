@@ -7,7 +7,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
-  BeforeInsert,
+  AfterLoad,
   AfterInsert,
   BeforeUpdate,
   CreateDateColumn,
@@ -35,9 +35,36 @@ import type { Supplier } from './supplier.model';
 import type { Brand } from './brand.model';
 import type { Category } from './category.model';
 import type { InventoryRecord } from './inventory-record.model';
+import type { Discount } from './discount.model';
 
 @Entity('items')
 export class Item {
+  discounted_selling_price: number;
+
+  @AfterLoad()
+  async getDiscount() {
+    if (this.discount_id) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'discounts' WHERE id = ${this.discount_id}`
+      );
+
+      const discount = rawData[0] as Discount;
+      if (discount.status === 'active') {
+        this.discount = discount;
+      }
+
+      if (this.discount?.status === 'active') {
+        if (this.discount?.discount_type === 'percentage-off') {
+          const discount = this.selling_price * (this.discount.discount_value / 100);
+          this.discounted_selling_price = this.selling_price - discount;
+        } else if (this.discount?.discount_type === 'fixed-amount-off') {
+          this.discounted_selling_price = this.selling_price - this.discount.discount_value;
+        }
+      }
+    }
+  }
+
   @BeforeUpdate()
   async notifyIfRunningOut() {
     if (this.stock_quantity <= 0) {
@@ -77,24 +104,14 @@ export class Item {
     );
   }
 
-  // @AfterInsert()
-  // async addStockInInitialRecord() {
-  //   Bull(
-  //     'STOCK_JOB',
-  //     {
-  //       item_id: this.id,
-  //       purpose: 'initial-stock',
-  //       quantity: this.stock_quantity,
-  //       type: 'stock-in',
-  //     }
-  //   )
-  // }
-
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  system_id: number;
+  system_id: string;
+
+  @Column({ nullable: true })
+  discount_id: number;
 
   @Column({ nullable: true })
   supplier_id: string;
@@ -244,19 +261,44 @@ export class Item {
   @JoinColumn({ name: 'id', referencedColumnName: 'item_id' })
   records: Relation<InventoryRecord>[];
 
+  @ManyToOne('Discount', {
+    eager: true,
+    cascade: true,
+  })
+  @JoinColumn({ name: 'discount_id', referencedColumnName: 'id' })
+  discount?: Relation<Discount> | null;
+
   // Custom functions
   async purchase(quantity: number = 1) {
-    this.stock_quantity -= quantity;
+    if (
+      this.discount?.discount_type === 'buy-one-get-one' &&
+      this.discount?.status === 'active'
+    ) {
+      quantity *= 2;
+      this.stock_quantity -= quantity;
 
-    await Bull(
-      'STOCK_JOB',
-      {
-        item_id: this.id,
-        purpose: 'sold',
-        quantity,
-        type: 'stock-out',
-      }
-    );
+      await Bull(
+        'STOCK_JOB',
+        {
+          item_id: this.id,
+          purpose: 'sold (buy-one-get-one)',
+          quantity,
+          type: 'stock-out',
+        }
+      );
+    } else {
+      this.stock_quantity -= quantity;
+
+      await Bull(
+        'STOCK_JOB',
+        {
+          item_id: this.id,
+          purpose: 'sold',
+          quantity,
+          type: 'stock-out',
+        }
+      );
+    }
 
     if (this.stock_quantity > 15 && this.stock_quantity <= 20) {
       await Bull(

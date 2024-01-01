@@ -21,18 +21,18 @@ export class ShortcutKey {
   @Column({
     nullable: true,
   })
-  system_id: number;
+  system_id: string;
 
   @Column({
     nullable: false,
   })
   user_id: number;
 
-  @Column({ unique: true })
+  @Column()
   @MinLength(1, { message: ValidationMessage.minLength })
   key: string;
 
-  @Column({ unique: true })
+  @Column()
   @MinLength(1, { message: ValidationMessage.minLength })
   key_combination: string;
 

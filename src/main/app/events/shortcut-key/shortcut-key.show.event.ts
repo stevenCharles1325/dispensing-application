@@ -21,6 +21,7 @@ export default class ShortcutKeyShowEvent implements IEvent {
     IResponse<string[] | IPagination<ShortcutKeyDTO> | IPOSError[] | any>
   > {
     try {
+      const { user } = eventData;
       const payload = eventData.payload[0] ?? 'all';
       const page = eventData.payload[1] || 1; // Page
       const take = eventData.payload[2] || 15; // Total
@@ -28,7 +29,10 @@ export default class ShortcutKeyShowEvent implements IEvent {
 
       const keyQuery = ShortcutKeyRepository.createQueryBuilder(
         'key'
-      );
+      )
+      .where({
+        user_id: user.id
+      });
 
       if (take !== 'max') {
         keyQuery.take(take).skip(skip);

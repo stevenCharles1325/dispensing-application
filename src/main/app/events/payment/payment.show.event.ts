@@ -34,7 +34,8 @@ export default class PaymentShowEvent implements IEvent {
 
         const paymentQuery = TransactionRepository.createQueryBuilder(
           'transaction'
-        ).where(`transaction.type = 'customer-payment'`);
+        )
+        .where(`transaction.type = 'customer-payment'`);
 
         if (take !== 'max') {
           paymentQuery.take(take).skip(skip);

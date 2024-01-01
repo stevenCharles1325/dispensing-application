@@ -11,11 +11,11 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   AfterLoad,
+  AfterInsert,
   Relation,
 } from 'typeorm';
 import { IsIn, IsPositive, IsNotEmpty, ValidateIf } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
-import { GlobalStorage } from 'Main/stores';
 import transactionCategories from 'Main/data/defaults/categories/transaction';
 import transactionTypes from 'Main/data/defaults/types/transaction';
 import paymentTypes from 'Main/data/defaults/types/payment';
@@ -23,17 +23,69 @@ import paymentTypes from 'Main/data/defaults/types/payment';
 import type { Order } from './order.model';
 import type { System } from './system.model';
 import type { User } from './user.model';
+import type { Discount } from './discount.model';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
+import { Bull } from 'Main/jobs';
 
 @Entity('transactions')
 export class Transaction {
+  @AfterInsert()
+  async discountTotalUsageListener() {
+    const DiscountRepository = global.datasource.getRepository('discounts');
+    const ItemRepository = global.datasource.getRepository('items');
+    const items = await ItemRepository.createQueryBuilder()
+      .where({
+        discount_id: this.discount_id,
+      })
+      .getMany();
+    const discount = await DiscountRepository.createQueryBuilder()
+      .where({
+        id: this.discount_id,
+      })
+      .getOne();
+
+    if (discount && discount.total_usage >= discount.usage_limit) {
+      discount.status = 'deactivated';
+
+      await Bull(
+        'NOTIF_JOB',
+        {
+          title: `A discount has reached its usage limit`,
+          description: `A discount named ${discount.title} has reached its usage limit now`,
+          link: null,
+          is_system_generated: true,
+          status: 'UNSEEN',
+          type: 'ERROR',
+        }
+      );
+
+      await DiscountRepository.save(discount);
+      await ItemRepository.save(items.map((item) => ({
+        ...item,
+        discount_id: null,
+      })));
+    }
+  }
+
+  @AfterLoad()
+  async getDiscount() {
+    const DiscountRepository = global.datasource.getRepository('discounts');
+    const discount = await DiscountRepository.createQueryBuilder()
+      .where({
+        id: this.discount_id,
+      })
+      .getOne();
+
+    this.discount = discount as Discount;
+  }
+
   @AfterLoad()
   async getOrdersForCustomerPayment() {
     if (this.type === 'customer-payment') {
       const OrderRepository = global.datasource.getRepository('orders');
       const orders = await OrderRepository.createQueryBuilder('order')
-        .where('order.transaction_id = :transactionId')
-        .setParameter('transactionId', this.id)
+        .where(`order.transaction_id = :transactionId`)
+        .setParameter('transactionId', `${this.id}`)
         .getMany();
 
       this.orders = orders as Order[];
@@ -52,16 +104,31 @@ export class Transaction {
     }
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @AfterLoad()
+  async getOrders() {
+    if (this.type !== 'customer-payment') {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'orders' WHERE transaction_id = '${this.id}'`
+      );
+
+      this.orders = rawData as Order[];
+    }
+  }
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: true,
   })
-  system_id: number | null;
+  system_id: string | null;
 
   @Column()
   creator_id: number;
+
+  @Column({ nullable: true })
+  discount_id: number;
 
   @Column()
   @IsNotEmpty({
@@ -103,7 +170,7 @@ export class Transaction {
     },
   })
   @ValidateIf((transaction: TransactionDTO) =>
-    transaction.type === 'customer-payment'
+    transaction.type === 'customer-payment' && transaction.amount_received < transaction.total
   )
   @IsPositive({
     message: ValidationMessage.positive,
@@ -120,7 +187,11 @@ export class Transaction {
     },
   })
   @ValidateIf((transaction: TransactionDTO) =>
-    Boolean(transaction.type === 'customer-payment' && transaction.amount_received)
+    Boolean(
+      transaction.type === 'customer-payment' &&
+      transaction.amount_received &&
+      transaction.amount_received > transaction.total
+    )
   )
   @IsPositive({
     message: ValidationMessage.positive,
@@ -135,9 +206,6 @@ export class Transaction {
       from: (data: string): number => parseFloat(data),
     },
   })
-  @IsPositive({
-    message: ValidationMessage.positive,
-  })
   total: number;
 
   @CreateDateColumn()
@@ -150,6 +218,10 @@ export class Transaction {
   @OneToOne('User', { eager: true })
   @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
   creator: Relation<User>;
+
+  @OneToOne('Discount', { eager: true })
+  @JoinColumn({ name: 'discount_id', referencedColumnName: 'id' })
+  discount: Relation<Discount>;
 
   @OneToMany('Order', (order: Order) => order.transaction, {
     eager: true,

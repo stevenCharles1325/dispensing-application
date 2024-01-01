@@ -21,15 +21,17 @@ import useBarcode from "UI/hooks/useBarcode";
 import DeviceDialog from "UI/components/Dialogs/DevicesDialog";
 import ShortcutKeysForm from "UI/components/Views/ShortcutKeysForm";
 import hotkeys from "hotkeys-js";
+import DiscountForm from "UI/components/Views/DiscountForm";
 
 type ModalNames =
+  | 'BUSINESS DETAILS'
+  | 'ROLES AND PERMISSIONS'
+  | 'SHORTCUT-KEYS'
   | 'CATEGORIES'
   | 'BRANDS'
   | 'SUPPLIERS'
-  | 'BUSINESS DETAILS'
-  | 'ROLES AND PERMISSIONS'
+  | 'DISCOUNTS'
   | 'BARCODE'
-  | 'SHORTCUT-KEYS'
   | null;
 
 const Transition = React.forwardRef(function Transition(
@@ -104,7 +106,7 @@ export default function Settings () {
   return (
     <>
       <div className="w-full h-full flex justify-start">
-        <div className="min-w-[800px] w-[70%] max-w-[1300px] h-fit p-5">
+        <div className="min-w-[800px] w-[75%] max-w-[1300px] h-fit p-5">
           <Divider>
             <p className="text-gray-500">System</p>
           </Divider>
@@ -121,7 +123,7 @@ export default function Settings () {
             </div> */}
 
             {/* NOTIFICATION */}
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Notification" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Turn on/off notifications in your account?
@@ -132,7 +134,7 @@ export default function Settings () {
             </div>
 
             {/* Roles and Permissions */}
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Roles & Permissions" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Edit system's roles and permissions?
@@ -143,7 +145,7 @@ export default function Settings () {
             </div>
 
             {/* Barcode select device */}
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Barcode" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Select a device for scanning
@@ -154,7 +156,7 @@ export default function Settings () {
             </div>
 
             {/* Shortcut keys */}
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Shortcut-keys" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Update your own custom shortcut-keys
@@ -171,7 +173,7 @@ export default function Settings () {
 
           <div className="w-full h-fit flex flex-wrap gap-5 my-5">
             {/* Product's */}
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Categories" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Check out the category list
@@ -181,7 +183,7 @@ export default function Settings () {
               </div>
             </div>
 
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Brands" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Check out the brand list
@@ -191,7 +193,7 @@ export default function Settings () {
               </div>
             </div>
 
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Suppliers" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Check out the supplier list
@@ -201,13 +203,25 @@ export default function Settings () {
               </div>
             </div>
 
-            <div className="w-fit h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Images" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Want to see your image list?
               </p>
               <div className="w-full flex flex-row-reverse">
                 <Button color="secondary" onClick={() => openDrive?.(true)}>
+                  Open
+                </Button>
+              </div>
+            </div>
+
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+              <Chip label="Discounts" variant="outlined" color="secondary" />
+              <p className="py-5 px-2 text-gray-400">
+                Want to add new discounts?
+              </p>
+              <div className="w-full flex flex-row-reverse">
+                <Button color="secondary" onClick={handleOpenModal('DISCOUNTS')}>
                   Open
                 </Button>
               </div>
@@ -233,6 +247,11 @@ export default function Settings () {
           {
             modal === 'SUPPLIERS'
             ? <SupplierFormV2 onClose={handleCloseModal} />
+            : null
+          }
+          {
+            modal === 'DISCOUNTS'
+            ? <DiscountForm onClose={handleCloseModal} />
             : null
           }
           {

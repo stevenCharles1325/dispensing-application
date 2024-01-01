@@ -140,6 +140,33 @@ const permissions = [
   //   group_name: 'products',
   // },
 
+  // Discount management permissions
+  {
+    name: 'View Discount',
+    kebab: 'view-discount',
+    group_name: 'products',
+  },
+  {
+    name: 'Create Discount',
+    kebab: 'create-discount',
+    group_name: 'products',
+  },
+  {
+    name: 'Update Discount',
+    kebab: 'update-discount',
+    group_name: 'products',
+  },
+  // {
+  //   name: 'Archive Item',
+  //   kebab: 'archive-item',
+  //   group_name: 'products',
+  // },
+  {
+    name: 'Delete Discount',
+    kebab: 'delete-discount',
+    group_name: 'products',
+  },
+
   // Category management permissions
   {
     name: 'View Category',
@@ -502,6 +529,11 @@ const permissions = [
   {
     name: 'Download Data',
     kebab: 'download-data',
+    group_name: 'data',
+  },
+  {
+    name: 'Upload Data',
+    kebab: 'upload-data',
     group_name: 'data',
   },
   {

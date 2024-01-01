@@ -43,6 +43,37 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
               </Badge>
             </div>
           ) : null}
+          {cardInfo.discount && cardInfo.discount.status === 'active' ? (
+            <div className="absolute top-0 left-0 flex justify-center items-center p-3">
+              {
+                cardInfo.discount.discount_type === 'buy-one-get-one'
+                ? (
+                  <Chip
+                    variant='filled'
+                    label='Buy one, get one!'
+                    color="warning"
+                  />
+                )
+                : (
+                  <Chip
+                    variant='filled'
+                    label={`Discount ${
+                      cardInfo.discount.discount_type === 'fixed-amount-off'
+                      ? '₱'
+                      : ''
+                    }${
+                      cardInfo.discount.discount_value
+                    }${
+                      cardInfo.discount.discount_type === 'percentage-off'
+                      ? '%'
+                      : ''
+                    } OFF`}
+                    color="warning"
+                  />
+                )
+              }
+            </div>
+          ) : null}
         </div>
         <div className="grow p-3 flex flex-row justify-between">
           <div className="grow">
@@ -61,15 +92,40 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
               {cardInfo.stock_quantity}
             </p>
             <Chip label="Price:" size="small" />
-            <NumericFormat
-              style={{ color: 'var(--info-text-color)' }}
-              className="mb-2 px-1 bg-white"
-              value={cardInfo.selling_price}
-              prefix="₱ "
-              thousandSeparator
-              valueIsNumericString
-              disabled
-            />
+            {
+              cardInfo?.discount &&
+              cardInfo.discount.discount_type !== 'buy-one-get-one' &&
+              cardInfo.discount.status === 'active'
+              ? (
+                <div className='w-fit flex flex-row gap-2'>
+                  <s>
+                    <p
+                      style={{ color: 'var(--info-text-color)' }}
+                      className="mb-2 px-1 bg-white"
+                    >
+                      {`₱ ${cardInfo.selling_price}`}
+                    </p>
+                  </s>
+                  <p
+                    style={{ color: 'var(--info-text-color)' }}
+                    className="mb-2 px-1 bg-white"
+                  >
+                    {`₱ ${cardInfo.discounted_selling_price}`}
+                  </p>
+                </div>
+              )
+              : (
+                <NumericFormat
+                  style={{ color: 'var(--info-text-color)' }}
+                  className="mb-2 px-1 bg-white"
+                  value={cardInfo.selling_price}
+                  prefix="₱ "
+                  thousandSeparator
+                  valueIsNumericString
+                  disabled
+                />
+              )
+            }
           </div>
           <div className="w-[70px] flex flex-col justify-end items-end">
             <IconButton

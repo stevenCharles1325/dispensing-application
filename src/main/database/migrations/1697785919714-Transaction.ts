@@ -13,15 +13,21 @@ export class Transaction1697785919714 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true, // temporarily
+          },
+          {
+            name: 'discount_id',
+            type: 'int',
+            isNullable: true,
+            foreignKeyConstraintName: 'discount',
           },
           {
             name: 'creator_id',
@@ -114,9 +120,20 @@ export class Transaction1697785919714 implements MigrationInterface {
         onDelete: 'CASCADE',
       })
     );
+
+    await queryRunner.createForeignKey(
+      'transactions',
+      new TableForeignKey({
+        name: 'discount',
+        columnNames: ['discount_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'discounts',
+      })
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropForeignKey('transactions', 'discount');
     await queryRunner.dropForeignKey('transactions', 'system');
     await queryRunner.dropForeignKey('transactions', 'creator');
     await queryRunner.dropTable('transactions');

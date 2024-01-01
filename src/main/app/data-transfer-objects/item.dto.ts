@@ -3,20 +3,23 @@ import { IItemStatus } from 'App/interfaces/item/item.status.interface';
 import ImageDTO from './image.dto';
 import { Image } from 'Main/database/models/image.model';
 import InventoryRecordsDTO from './inventory-record.dto';
-import { InventoryRecords } from 'Main/database/models/inventory-records.model';
+import { InventoryRecord } from 'Main/database/models/inventory-record.model';
+import DiscountDTO from './discount.dto';
 
 export default interface ItemDTO {
   id: string;
   image_id?: number;
-  system_id: number;
+  system_id: string;
   category_id: number;
   brand_id: number;
   supplier_id: string;
+  discount_id: number;
   sku: string;
   name: string;
   description: string;
   cost_price: number;
   selling_price: number;
+  discounted_selling_price: number;
   tax_rate: number;
   unit_of_measurement: IItemMeasurement;
 
@@ -29,5 +32,6 @@ export default interface ItemDTO {
   deleted_at?: Date;
 
   image?: ImageDTO | Image;
-  records: InventoryRecordsDTO[] | InventoryRecords[];
+  discount?: DiscountDTO;
+  records: InventoryRecordsDTO[] | InventoryRecord[];
 }

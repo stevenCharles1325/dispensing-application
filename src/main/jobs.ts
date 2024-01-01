@@ -73,6 +73,7 @@ export async function Bull(this: any, jobName: string, data: any) {
 
         if (job?.onComplete) job.onComplete(job as unknown as Job, result, '');
       } catch (err) {
+        console.log('JOB ERROR 2: ', err);
         if (job?.onFail) job.onFail(job as unknown as Job, err as Error, '');
       }
     }

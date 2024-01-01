@@ -170,7 +170,6 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
     (key: string) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 
-    console.log(e.target.value);
     setForm((form) => ({
       ...form,
       [key]: e.target.value,
@@ -290,6 +289,7 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
           return;
         }
 
+        setSelectedIds([]);
         await refetch();
         displayAlert?.('Successfully deleted selected supplier(s)', 'success');
       }
@@ -317,30 +317,30 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
     <>
       <div className="min-w-[1000px] h-fit p-5">
         <div className="w-full flex justify-between items-center">
-          <p className="font-bold text-gray-500">Suppliers</p>
+          <p className="font-bold text-gray-500">Roles & Permissions</p>
           <IconButton onClick={onClose}>
             <Close />
           </IconButton>
         </div>
         <div className="w-full flex flex-row py-4 gap-3">
           <Chip
-            className="shadow-lg"
             color="primary"
+            variant="outlined"
             icon={<AddCircleOutline />}
             label="Add new Role"
             onClick={handleAddNewItem}
           />
           <Chip
-            className="shadow-lg"
             color="secondary"
+            variant="outlined"
             icon={<EditOutlined />}
             label="Edit selected Role"
             onClick={handleEditSelectedItem}
             disabled={selectedIds.length === 0 || selectedIds.length > 1}
           />
           <Chip
-            className="shadow-lg"
             color="error"
+            variant="outlined"
             icon={<DeleteOutlineOutlined />}
             label="Delete selected Role"
             onClick={handleDeleteSelectedItem}

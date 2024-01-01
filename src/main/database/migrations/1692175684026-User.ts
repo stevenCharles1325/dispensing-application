@@ -27,7 +27,7 @@ export class User1692175684026 implements MigrationInterface {
           },
           {
             name: 'system_id',
-            type: 'integer',
+            type: 'varchar',
             isNullable: true,
           },
           {

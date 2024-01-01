@@ -45,7 +45,7 @@ export class Notification {
   id: string;
 
   @Column({ nullable: true })
-  system_id: number;
+  system_id: string;
 
   @Column({ nullable: true })
   @ValidateIf((notif: NotificationDTO) => !notif.is_system_generated)

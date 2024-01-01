@@ -31,7 +31,11 @@ export default class NotificationUpdateEvent implements IEvent {
         const notification = await NotificationRepository.findOneByOrFail({
           id,
         });
-        notification.status = notificationStatusUpdate;
+
+        notification.status = notification.status === 'VISITED'
+          ? notification.status
+          : notificationStatusUpdate;
+
         const errors = await validator(notification);
 
         if (errors.length) {

@@ -87,11 +87,11 @@ const getSuppliers = async (
 };
 
 
-export interface ProductDetailsFormProps {
+export interface SupplierFormProps {
   onClose: () => void;
 }
 
-export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
+export default function SupplierFormV2 ({ onClose }: SupplierFormProps) {
   const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
@@ -128,7 +128,9 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
   });
 
   const items = (data?.data as SupplierDTO[]) ?? [];
-  const selectedItem = items?.find(({ id }) => id === selectedIds?.[0]) ?? null;
+  const selectedItem = items?.find(({ id }) =>
+    id === selectedIds?.[0]
+  ) ?? null;
 
   const handleAddNewItem = () => {
     console.log('Adding new supplier');
@@ -139,7 +141,6 @@ export default function SupplierFormV2 ({ onClose }: ProductDetailsFormProps) {
     console.log('Updating supplier');
     setModalAction('update');
 
-    console.log(selectedItem);
     if (selectedItem) {
       setForm({ ...selectedItem });
     }

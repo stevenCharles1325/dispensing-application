@@ -8,6 +8,7 @@ import handleError from 'App/modules/error-handler.module';
 import validator from 'App/modules/validator.module';
 import BrandRepository from 'App/repositories/brand.repository';
 import CategoryRepository from 'App/repositories/category.repository';
+import DiscountRepository from 'App/repositories/discount.repository';
 import ImageRepository from 'App/repositories/image.repository';
 import ItemRepository from 'App/repositories/item.repository';
 import SupplierRepository from 'App/repositories/supplier.repository';
@@ -38,6 +39,7 @@ export default class ItemDeleteEvent implements IEvent {
         const updatedItem = ItemRepository.merge(item, itemUpdate);
         const errors = await validator(updatedItem);
 
+        console.log(itemUpdate);
         if (errors.length) {
           return {
             errors,
@@ -60,6 +62,15 @@ export default class ItemDeleteEvent implements IEvent {
           });
         } else {
           updatedItem.supplier = undefined;
+        }
+
+        if (itemUpdate.discount_id) {
+          const discount = await DiscountRepository.findOneByOrFail({
+            id: itemUpdate.discount_id
+          });
+          updatedItem.discount = discount;
+        } else {
+          updatedItem.discount = undefined;
         }
 
         updatedItem.brand = await BrandRepository.findOneByOrFail({

@@ -15,6 +15,9 @@ import PaymentDTO from 'App/data-transfer-objects/payment.dto';
 import { Bull } from 'Main/jobs';
 import OrderRepository from 'App/repositories/order.repository';
 import { Transaction } from 'Main/database/models/transaction.model';
+import DiscountRepository from 'App/repositories/discount.repository';
+import { In } from "typeorm";
+import getElementOccurence from 'App/modules/get-element-occurence.module';
 
 export default class PaymentCreateEvent implements IEvent {
   public channel: string = 'payment:create';
@@ -40,6 +43,36 @@ export default class PaymentCreateEvent implements IEvent {
         const order: IOrderDetails = payload;
 
         if (order.payment_method === 'cash') {
+          const discountIds: number[] = [
+            order.discount_id ?? 0,
+            ...order.items.map(({ discount_id }) => discount_id),
+          ];
+
+          if (discountIds.length) {
+            const discounts = await DiscountRepository.createQueryBuilder()
+            .where({
+              id: In(discountIds),
+            })
+            .getMany();
+
+            for await (const discount of discounts) {
+              const occurenceCount = getElementOccurence(discount.id, discountIds);
+              const currentTotalUsage = discount.total_usage + occurenceCount;
+
+              if (currentTotalUsage > discount.usage_limit) {
+                return {
+                  errors: [
+                    `Cannot apply ${
+                      discount.title
+                    } coupon as usage limit might exceed or have exceeded.`
+                  ],
+                  code: 'REQ_INVALID',
+                  status: 'ERROR',
+                } as unknown as IResponse<string[]>;
+              }
+            }
+          }
+
           const orderTransaction: Omit<
             IncomeDTO,
             'id' | 'created_at' | 'updated_at' | 'system' | 'creator'
@@ -47,13 +80,14 @@ export default class PaymentCreateEvent implements IEvent {
             // to add system_id
             creator_id: personnel.id,
             source_name: personnel.fullName(),
-            recipient_name: 'regular-customer',
+            recipient_name: 'N/A',
             category: 'income',
             type: 'customer-payment',
             method: 'cash',
             total: order.total,
             amount_received: order.amount_received,
             change: order.change,
+            discount_id: order.discount_id,
           };
 
           if (orderTransaction.amount_received < orderTransaction.total) {
@@ -77,6 +111,7 @@ export default class PaymentCreateEvent implements IEvent {
             } as unknown as IResponse<IPOSValidationError[]>;
           }
 
+          console.log('Transaction: ', transaction);
           const data = await TransactionRepository.save(transaction);
 
           const desiredOrder: any = order.items.map((item) => ({
@@ -85,6 +120,7 @@ export default class PaymentCreateEvent implements IEvent {
             transaction_id: data.id,
             tax_rate: item.tax_rate,
             price: item.selling_price,
+            discount_id: item.discount_id,
           }));
           const orders = OrderRepository.create(desiredOrder);
           await OrderRepository.save(orders);
@@ -96,7 +132,7 @@ export default class PaymentCreateEvent implements IEvent {
             user_id: user.id as number,
             resource_id: data.id.toString(),
             resource_table: 'transactions',
-            resource_id_type: 'integer',
+            resource_id_type: 'uuid',
             action: 'payment',
             status: 'SUCCEEDED',
             description: `User ${user.fullName} has successfully received a customer payment`,

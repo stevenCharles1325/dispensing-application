@@ -50,7 +50,7 @@ export class User {
   lead_id: number;
 
   @Column()
-  system_id: number;
+  system_id: string;
 
   @Column()
   role_id: number;

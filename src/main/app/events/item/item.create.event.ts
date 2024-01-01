@@ -9,6 +9,7 @@ import ItemRepository from 'App/repositories/item.repository';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import { Item } from 'Main/database/models/item.model';
 import { Bull } from 'Main/jobs';
+import DiscountRepository from 'App/repositories/discount.repository';
 
 export default class ItemCreateEvent implements IEvent {
   public channel: string = 'item:create';
@@ -29,13 +30,20 @@ export default class ItemCreateEvent implements IEvent {
         const item = ItemRepository.create(payload);
         const errors = await validator(item);
 
-        console.log(errors);
+        console.log(item);
         if (errors && errors.length) {
           return {
             errors,
             code: 'VALIDATION_ERR',
             status: 'ERROR',
           } as unknown as IResponse<IPOSValidationError[]>;
+        }
+
+        if (item.discount_id) {
+          const discount = await DiscountRepository.findOneByOrFail({
+            id: item.discount_id
+          });
+          item.discount = discount;
         }
 
         const data = (await ItemRepository.save(item)) as unknown as ItemDTO;

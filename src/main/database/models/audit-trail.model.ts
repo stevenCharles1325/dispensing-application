@@ -48,7 +48,7 @@ export class AuditTrail {
   id: string;
 
   @Column({ nullable: true })
-  system_id: number;
+  system_id: string;
 
   @Column()
   @IsNotEmpty({

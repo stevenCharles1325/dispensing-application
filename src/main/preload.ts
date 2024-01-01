@@ -26,6 +26,9 @@ import HidDTO from 'App/data-transfer-objects/hid.dto';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
+import DiscountDTO from 'App/data-transfer-objects/discount.dto';
+import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
+import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
 
 export type Channels = 'ipc-pos';
 
@@ -264,6 +267,36 @@ const itemHandler = {
     id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('item:delete', id),
+};
+
+/* ================================
++
++      DISCOUNT EVENT HANDLER
++
++ ================================ */
+const discountHandler = {
+  getDiscounts: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<DiscountDTO>>> =>
+    ipcRenderer.invoke('discount:show', payload, page, total),
+
+  createDiscount: async (
+    payload: Partial<DiscountDTO>,
+    itemIds: string[],
+  ): Promise<
+    IResponse<string[] | IPOSError[] | IPOSValidationError[] | DiscountDTO[]>
+  > => ipcRenderer.invoke('discount:create', payload, itemIds),
+
+  updateDiscount: async (
+    id: number,
+    payload: ItemDTO['id'][],
+  ): Promise<IResponse<string[] | IPOSError[] | DiscountDTO>> =>
+    ipcRenderer.invoke('discount:update', id, payload),
+
+  deleteDiscount: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('discount:delete', id),
 };
 
 /* ================================
@@ -528,13 +561,20 @@ const notifHandler = {
 
 const exportHandler = {
   exportTransactionHistory: async (
-    payload: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' = 'WHOLE',
-  ): Promise<IResponse<string[] | IPOSError[] | null>> =>
-    ipcRenderer.invoke('transaction-history:export', payload),
+    exportFormat: 'SQL' | 'SPREADSHEET' = 'SPREADSHEET',
+    recordType?: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' | undefined,
+  ): Promise<IResponse<string[] | IPOSError[] | (ITransactionSpreadSheet | ITransactionSQL)>> =>
+    ipcRenderer.invoke('transaction-history:export', exportFormat, recordType),
+};
+
+const importHandler = {
+  importTransactionHistory: async (
+    sqlFilePath: string
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('transaction-history:import', sqlFilePath),
 };
 
 // EXPOSING HANDLERS
-shortcutKeyHandler
 contextBridge.exposeInMainWorld('storage', storageHandler);
 contextBridge.exposeInMainWorld('barcode', barcodeHandler);
 contextBridge.exposeInMainWorld('main', mainHandler);
@@ -545,6 +585,7 @@ contextBridge.exposeInMainWorld('shortcutKey', shortcutKeyHandler);
 contextBridge.exposeInMainWorld('role', roleHandler);
 contextBridge.exposeInMainWorld('permission', permissionHandler);
 contextBridge.exposeInMainWorld('item', itemHandler);
+contextBridge.exposeInMainWorld('discount', discountHandler);
 contextBridge.exposeInMainWorld('inventoryRecord', inventoryRecordHandler);
 contextBridge.exposeInMainWorld('brand', brandHandler);
 contextBridge.exposeInMainWorld('image', imageHandler);
@@ -556,6 +597,7 @@ contextBridge.exposeInMainWorld('report', reportHandler);
 contextBridge.exposeInMainWorld('notif', notifHandler);
 contextBridge.exposeInMainWorld('validation', validationHandler);
 contextBridge.exposeInMainWorld('export', exportHandler);
+contextBridge.exposeInMainWorld('import', importHandler);
 
 export type StorageHandler = typeof storageHandler;
 export type BarcodeHandler = typeof barcodeHandler;
@@ -567,6 +609,7 @@ export type ShortcutKeyHandler = typeof shortcutKeyHandler;
 export type RoleHandler = typeof roleHandler;
 export type PermissionHandler = typeof permissionHandler;
 export type ItemHandler = typeof itemHandler;
+export type DiscountHandler = typeof discountHandler;
 export type InventoryRecordHandler = typeof inventoryRecordHandler;
 export type ImageHandler = typeof imageHandler;
 export type BrandHandler = typeof brandHandler;
@@ -578,3 +621,4 @@ export type ReportHandler = typeof reportHandler;
 export type NotifHandler = typeof notifHandler;
 export type ValidationHandler = typeof validationHandler;
 export type ExportHandler = typeof exportHandler;
+export type ImportHandler = typeof importHandler;

@@ -13,19 +13,19 @@ export class Orders1698705146069 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
           },
           {
             name: 'system_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true, // temporarily
           },
           {
             name: 'transaction_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'transaction',
           },
@@ -34,6 +34,12 @@ export class Orders1698705146069 implements MigrationInterface {
             type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'item',
+          },
+          {
+            name: 'discount_id',
+            type: 'int',
+            isNullable: true,
+            foreignKeyConstraintName: 'discount',
           },
           {
             name: 'quantity',
@@ -81,9 +87,20 @@ export class Orders1698705146069 implements MigrationInterface {
         onDelete: 'SET NULL',
       })
     );
+
+    await queryRunner.createForeignKey(
+      'orders',
+      new TableForeignKey({
+        name: 'discount',
+        columnNames: ['discount_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'discounts',
+      })
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropForeignKey('orders', 'discount');
     await queryRunner.dropForeignKey('orders', 'item');
     await queryRunner.dropForeignKey('orders', 'transaction');
     await queryRunner.dropTable('orders');

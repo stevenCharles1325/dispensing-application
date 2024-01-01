@@ -2,7 +2,7 @@ import { User } from 'Main/database/models/user.model';
 
 export default interface AuditTrailDTO {
   id: string;
-  system_id?: number | null;
+  system_id?: string | null;
   user_id: number;
 
   resource_table?: string;

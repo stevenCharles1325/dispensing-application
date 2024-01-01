@@ -26,6 +26,8 @@ import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
+import { ClearOutlined, CloseOutlined, DeleteOutline, DiscountOutlined } from '@mui/icons-material';
+import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 460;
@@ -98,6 +100,7 @@ const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
             },
           });
         }}
+        decimalScale={2}
         accept="enter"
         thousandSeparator
         valueIsNumericString
@@ -120,11 +123,56 @@ export default function Home() {
   const [posMenuAnchorEl, setPosMenuAnchorEl] = useState<HTMLElement | null>();
   const [categoryIds, setCategoryIds] = useState<Array<number>>([]);
 
+  const [addCoupon, setAddCoupon] = useState<boolean>(false);
+  const [couponCode, setCouponCode] = useState<string>('');
+  const [discount, setDiscount] = useState<DiscountDTO | null>(null);
+
   // Payment switch
   const [checked, setChecked] = useState(false);
   const selectedPaymentMethod = checked ? 'card' : 'cash';
 
   const hasOrders = Boolean(selectedItemIds.length);
+
+  const handleClearDiscount = () => {
+    confirm?.('Are you sure you want to remove the coupon?', async (agreed) => {
+      if (agreed) {
+        setDiscount(null);
+        setCouponCode('');
+      }
+    });
+  }
+
+  const handleAddCoupon = useCallback(async () => {
+    const res = await window.discount.getDiscounts({
+      coupon_code: couponCode,
+    });
+
+    if (res.status === 'ERROR') {
+      errorHandler({
+        errors: res.errors,
+      });
+      setDiscount(null);
+
+      return;
+    }
+
+    const discounts = res.data as IPagination<DiscountDTO>;
+    const desiredDiscount = discounts.data[0];
+
+    if (!desiredDiscount) {
+      setDiscount(null);
+      displayAlert?.('coupon code does not exist', 'error');
+    } else {
+      if (desiredDiscount.status === 'active') {
+        setDiscount(desiredDiscount);
+        displayAlert?.('successfully applied coupon', 'success');
+
+        setAddCoupon(false);
+      } else {
+        displayAlert?.(`coupon is ${desiredDiscount.status}`, 'error')
+      }
+    }
+  }, [couponCode]);
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, categoryIds],
@@ -173,7 +221,7 @@ export default function Home() {
       return selectedItems.reduce((prev, curr) => {
         const quantity = orders[curr.id];
 
-        return prev + curr.selling_price * quantity;
+        return prev + (curr.discounted_selling_price ?? curr.selling_price) * quantity;
       }, 0);
     }
 
@@ -192,14 +240,32 @@ export default function Home() {
     return 0;
   }, [computedTax, selectedItems.length, subTotal]);
 
-  const total = subTotal + tax;
+  const total = useMemo(() => {
+    const price = subTotal + tax;
 
-  const change = payment - total > 0 ? payment - total : 0;
+    if (!discount) return price;
+    if (discount.discount_type === 'fixed-amount-off') {
+      return price - discount.discount_value;
+    }
+
+    if (discount.discount_type === 'percentage-off') {
+      return price - (price * (discount.discount_value / 100));
+    }
+
+    return price;
+  }, [discount, subTotal, tax]);
+
+  const change = total < 0
+    ? 0
+    : payment - total > 0
+      ? payment - total
+      : 0;
 
   const orderDetails: IOrderDetails = useMemo(
     () => ({
-      items: selectedItems.map(({ id, tax_rate, selling_price }) => ({
+      items: selectedItems.map(({ id, tax_rate, selling_price, discount_id }) => ({
         id,
+        discount_id,
         quantity: orders[id],
         tax_rate,
         selling_price,
@@ -208,9 +274,17 @@ export default function Home() {
       payment_method: selectedPaymentMethod,
       amount_received: payment,
       change,
-      discount: 0, // To be included soon
+      discount_id: discount?.id ?? undefined, // To be included soon
     }),
-    [selectedItems, total, selectedPaymentMethod, payment, change, orders]
+    [
+      total,
+      change,
+      orders,
+      payment,
+      discount,
+      selectedItems,
+      selectedPaymentMethod,
+    ]
   );
 
   const handleAddPayment = useCallback(() => {
@@ -236,20 +310,27 @@ export default function Home() {
       return displayAlert?.('No item to be purchased', 'error');
     }
 
-    const res = await window.payment.createPayment(orderDetails);
+    confirm?.('Are you sure you want to purchase?', async (agreed) => {
+      if (agreed) {
+        const res = await window.payment.createPayment(orderDetails);
 
-    if (res.status === 'ERROR') {
-      return errorHandler({
-        errors: res.errors,
-      });
-    }
+        if (res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
 
-    setPayment(0);
-    setSelectedItemIds([]);
-    setOrders({});
-    refetchItems();
-    displayAlert?.('Purchased successfully', 'success');
-    return res.data as unknown as IPagination<PaymentDTO>;
+          return;
+        }
+
+        setDiscount(null);
+        setCouponCode('');
+        setPayment(0);
+        setSelectedItemIds([]);
+        setOrders({});
+        refetchItems();
+        displayAlert?.('Purchased successfully', 'success');
+      }
+    });
   }, [orderDetails, displayAlert, refetchItems]);
 
   const handleSelectItem = useCallback(
@@ -466,72 +547,130 @@ export default function Home() {
             className="min-w-[320px] max-w-full h-full rounded-md border p-3 shadow-lg flex flex-col overflow-auto"
             style={{ backgroundColor: 'var(--bg-color)' }}
           >
-            <div className="grow overflow-auto flex flex-col gap-2">
-              <b style={{ color: 'white' }}>ORDERS</b>
-              <div className="flex flex-col h-fit gap-2">
-                {selectedItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="w-full w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden"
-                    style={{ backgroundColor: 'white' }}
-                  >
-                    <div className="min-w-[80px] w-[80px] h-full">
-                      <img
-                        src={item.image?.url}
-                        alt={item.image?.name}
-                        style={{
-                          objectFit: 'cover',
-                          objectPosition: 'center',
-                          width: '80px',
-                          height: '80px',
-                        }}
-                      />
+            <div className="grow flex flex-col gap-2">
+              <div className="w-full h-fit flex flex-row justify-between align-center">
+                <b style={{ color: 'white' }}>ORDERS</b>
+                <div className="w-fit h-fit">
+                  <Chip
+                    icon={<DiscountOutlined fontSize="small" sx={{ color: 'white' }} />}
+                    label={
+                      discount
+                      ? (
+                        discount.discount_type === 'fixed-amount-off'
+                        ? `${discount.coupon_code} ₱${discount.discount_value} OFF`
+                        : discount.discount_type === 'percentage-off'
+                          ? `${discount.coupon_code} ${discount.discount_value}% OFF`
+                          : ''
+                      )
+                      : "Add Coupon"
+                    }
+                    color="warning"
+                    onClick={() => setAddCoupon(true)}
+                    onDelete={discount ? handleClearDiscount : undefined}
+                    deleteIcon={(
+                      discount
+                      ? <ClearOutlined sx={{ color: 'white' }} />
+                      : undefined
+                    )}
+                    sx={{
+                      color: 'white',
+                    }}
+                  />
+                </div>
+              </div>
+              <div className='h-[50px] grow overflow-auto'>
+                <div className="w-full h-fit flex flex-col h-fit gap-2">
+                  {selectedItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="w-[98%] w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden border border-transparent"
+                      style={{ backgroundColor: 'white' }}
+                    >
+                      <div className="min-w-[80px] w-[80px] h-full relative">
+                        <img
+                          src={item.image?.url}
+                          alt={item.image?.name}
+                          style={{
+                            objectFit: 'cover',
+                            objectPosition: 'center',
+                            width: '80px',
+                            height: '80px',
+                          }}
+                        />
+                        <div className="absolute top-0 right-0 w-full h-full flex justify-center items-center bg-black/50">
+                          <IconButton
+                            onClick={() => {
+                              confirm?.('Are you sure you want to remove this item?', async (agreed) => {
+                                if (agreed) {
+                                  const filteredOrders = Object.keys(orders)
+                                    .filter(id => id !== item.id);
+
+                                  const updatedOrders: Record<string, number> = {};
+
+                                  filteredOrders.forEach(id => {
+                                    updatedOrders[id] = orders[id];
+                                  });
+
+                                  setOrders(updatedOrders);
+                                  setSelectedItemIds(
+                                    selectedItemIds.filter(id =>
+                                      id !== item.id
+                                    )
+                                  );
+                                }
+                              });
+                            }}
+                          >
+                            <DeleteOutline color="error" />
+                          </IconButton>
+                        </div>
+                      </div>
+                      <div className="shrink min-w-[100px] p-2 capitalize">
+                        <b>{item.name}</b>
+                        <br />
+                        <NumericFormat
+                          className="mb-2 px-1 bg-transparent"
+                          value={item.discounted_selling_price ?? item.selling_price}
+                          prefix="₱ "
+                          thousandSeparator
+                          valueIsNumericString
+                          disabled
+                        />
+                      </div>
+                      <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
+                        <IconButton
+                          disabled={orders[item.id] <= 0}
+                          onClick={() =>
+                            handleIterateOrderQuantity('minus', item.id)
+                          }
+                        >
+                          <ChevronLeftIcon />
+                        </IconButton>
+                        <input
+                          className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
+                          value={orders[item.id]}
+                          max={item.stock_quantity}
+                          min={0}
+                          type="number"
+                          onChange={(e) =>
+                            setOrders((userOrders) => ({
+                              ...userOrders,
+                              [item.id]: Number(e.target.value),
+                            }))
+                          }
+                        />
+                        <IconButton
+                          disabled={orders[item.id] >= item.stock_quantity}
+                          onClick={() =>
+                            handleIterateOrderQuantity('add', item.id)
+                          }
+                        >
+                          <ChevronRightIcon />
+                        </IconButton>
+                      </div>
                     </div>
-                    <div className="shrink min-w-[100px] p-2 capitalize">
-                      <b>{item.name}</b>
-                      <br />
-                      <NumericFormat
-                        className="mb-2 px-1 bg-transparent"
-                        value={item.selling_price}
-                        prefix="₱ "
-                        thousandSeparator
-                        valueIsNumericString
-                        disabled
-                      />
-                    </div>
-                    <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
-                      <IconButton
-                        disabled={orders[item.id] <= 0}
-                        onClick={() =>
-                          handleIterateOrderQuantity('minus', item.id)
-                        }
-                      >
-                        <ChevronLeftIcon />
-                      </IconButton>
-                      <input
-                        className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
-                        value={orders[item.id]}
-                        max={item.stock_quantity}
-                        min={0}
-                        type="number"
-                        onChange={(e) =>
-                          setOrders((userOrders) => ({
-                            ...userOrders,
-                            [item.id]: Number(e.target.value),
-                          }))
-                        }
-                      />
-                      <IconButton
-                        disabled={orders[item.id] >= item.stock_quantity}
-                        onClick={() =>
-                          handleIterateOrderQuantity('add', item.id)
-                        }
-                      >
-                        <ChevronRightIcon />
-                      </IconButton>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
             <div className="w-full h-fit flex flex-col text-white">
@@ -544,6 +683,27 @@ export default function Home() {
                     className="mb-2 px-1 bg-transparent grow text-end"
                     value={subTotal}
                     prefix="₱ "
+                    decimalScale={2}
+                    thousandSeparator
+                    valueIsNumericString
+                    disabled
+                  />
+                </div>
+              </div>
+              <div className="flex flex-row justify-between">
+                <p>Discount:</p>
+                <div>
+                  <NumericFormat
+                    className="mb-2 px-1 bg-transparent grow text-end"
+                    value={
+                      discount?.discount_type === 'fixed-amount-off'
+                      ? discount.discount_value
+                      : discount?.discount_type === 'percentage-off'
+                        ? subTotal * (discount.discount_value / 100)
+                        : 0
+                    }
+                    prefix="₱ "
+                    decimalScale={2}
                     thousandSeparator
                     valueIsNumericString
                     disabled
@@ -557,6 +717,7 @@ export default function Home() {
                     className="mb-2 px-1 bg-transparent grow text-end"
                     value={tax}
                     prefix="₱ "
+                    decimalScale={2}
                     thousandSeparator
                     valueIsNumericString
                     disabled
@@ -572,6 +733,7 @@ export default function Home() {
                       className="mb-2 px-1 bg-transparent grow text-end"
                       value={total}
                       prefix="₱ "
+                      decimalScale={2}
                       thousandSeparator
                       valueIsNumericString
                       disabled
@@ -586,6 +748,7 @@ export default function Home() {
                       value={payment}
                       prefix="₱ "
                       thousandSeparator
+                      decimalScale={2}
                       valueIsNumericString
                       disabled
                     />
@@ -600,6 +763,7 @@ export default function Home() {
                       value={change}
                       prefix="₱ "
                       thousandSeparator
+                      decimalScale={2}
                       valueIsNumericString
                       disabled
                     />
@@ -632,38 +796,52 @@ export default function Home() {
                   </div>
                 </div>
                 <div className='w-full mt-5 flex flex-col gap-2'>
-                  <Button
-                    fullWidth
-                    disabled={payment === 0}
-                    variant="contained"
-                    color="inherit"
-                    sx={{ color: 'black' }}
-                    onClick={() => handlePurchaseItem()}
-                  >
-                    {`Place order (${getCommand?.('place-order')})`}
-                  </Button>
-                  <Button
-                    fullWidth
-                    disabled={!hasOrders}
-                    variant="outlined"
-                    color="inherit"
-                    sx={{ color: 'white' }}
-                    onClick={handleAddPayment}
-                  >
-                    {`${payment === 0
-                      ? `Add Payment (${getCommand?.('add-payment')})`
-                      : `Edit Payment (${getCommand?.('add-payment')})`}`}
-                  </Button>
-                  <Button
-                    disabled={!hasOrders}
-                    fullWidth
-                    variant="text"
-                    color="inherit"
-                    sx={{ color: 'var(--info-text)' }}
-                    onClick={handleCancelOrder}
-                  >
-                    {`Cancel (${getCommand?.('cancel-order')})`}
-                  </Button>
+                  {
+                    !(payment < total || !hasOrders)
+                    ? (
+                      <Button
+                        fullWidth
+                        disabled={payment < total || !hasOrders}
+                        variant="contained"
+                        color="inherit"
+                        sx={{ color: 'black' }}
+                        onClick={() => handlePurchaseItem()}
+                      >
+                        {`Place order (${getCommand?.('place-order')})`}
+                      </Button>
+                    )
+                    : null
+                  }
+                  {
+                    hasOrders
+                    ? (
+                      <>
+                        <Button
+                          fullWidth
+                          disabled={!hasOrders}
+                          variant="outlined"
+                          color="inherit"
+                          sx={{ color: 'white' }}
+                          onClick={handleAddPayment}
+                        >
+                          {`${payment === 0
+                            ? `Add Payment (${getCommand?.('add-payment')})`
+                            : `Edit Payment (${getCommand?.('add-payment')})`}`}
+                        </Button>
+                        <Button
+                          disabled={!hasOrders}
+                          fullWidth
+                          variant="text"
+                          color="inherit"
+                          sx={{ color: 'var(--info-text)' }}
+                          onClick={handleCancelOrder}
+                        >
+                          {`Cancel (${getCommand?.('cancel-order')})`}
+                        </Button>
+                      </>
+                    )
+                    : null
+                  }
                 </div>
               </div>
             </div>
@@ -708,10 +886,7 @@ export default function Home() {
               disabled
               color="secondary"
               label="Change (Peso)"
-              value={payment}
-              onChange={(event) => {
-                setPayment(Number(event.target.value));
-              }}
+              value={change}
               variant="outlined"
               size="small"
               InputProps={{
@@ -731,6 +906,53 @@ export default function Home() {
             onClick={() => setAddPayment(false)}
           >
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={addCoupon}
+        onClose={() => setAddCoupon(false)}
+      >
+        <div className='p-5'>
+          <p className="text-gray-500 text-lg mb-5">Coupon</p>
+          <div className='flex flex-col gap-5'>
+            <TextField
+              required
+              autoFocus
+              color="secondary"
+              label="Coupon Code"
+              value={couponCode}
+              onChange={(event) => {
+                setCouponCode(event.target.value.toLocaleUpperCase());
+              }}
+              variant="outlined"
+              size="small"
+              sx={{
+                width: 300,
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddCoupon();
+                  e.stopPropagation();
+                  e.preventDefault();
+                }
+              }}
+              helperText="One coupon per transaction only"
+              // error={Boolean(errors.cost_price)}
+            />
+          </div>
+        </div>
+        <DialogActions>
+          <Button
+            color="error"
+            onClick={() => setAddCoupon(false)}
+          >
+            Close
+          </Button>
+          <Button
+            onClick={handleAddCoupon}
+          >
+            Apply
           </Button>
         </DialogActions>
       </Dialog>
