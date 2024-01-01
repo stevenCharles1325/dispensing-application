@@ -236,7 +236,7 @@ export class Item1695800617464 implements MigrationInterface {
     await queryRunner.createForeignKey(
       'items',
       new TableForeignKey({
-        name: 'supplier',
+        name: 'discount',
         columnNames: ['discount_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'discounts',

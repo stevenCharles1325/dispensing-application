@@ -28,6 +28,7 @@ import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
+import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
 
 export type Channels = 'ipc-pos';
 
@@ -560,9 +561,17 @@ const notifHandler = {
 
 const exportHandler = {
   exportTransactionHistory: async (
-    payload: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' = 'WHOLE',
-  ): Promise<IResponse<string[] | IPOSError[] | ITransactionSpreadSheet>> =>
-    ipcRenderer.invoke('transaction-history:export', payload),
+    exportFormat: 'SQL' | 'SPREADSHEET' = 'SPREADSHEET',
+    recordType?: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' | undefined,
+  ): Promise<IResponse<string[] | IPOSError[] | (ITransactionSpreadSheet | ITransactionSQL)>> =>
+    ipcRenderer.invoke('transaction-history:export', exportFormat, recordType),
+};
+
+const importHandler = {
+  importTransactionHistory: async (
+    sqlFilePath: string
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('transaction-history:import', sqlFilePath),
 };
 
 // EXPOSING HANDLERS
@@ -588,6 +597,7 @@ contextBridge.exposeInMainWorld('report', reportHandler);
 contextBridge.exposeInMainWorld('notif', notifHandler);
 contextBridge.exposeInMainWorld('validation', validationHandler);
 contextBridge.exposeInMainWorld('export', exportHandler);
+contextBridge.exposeInMainWorld('import', importHandler);
 
 export type StorageHandler = typeof storageHandler;
 export type BarcodeHandler = typeof barcodeHandler;
@@ -611,3 +621,4 @@ export type ReportHandler = typeof reportHandler;
 export type NotifHandler = typeof notifHandler;
 export type ValidationHandler = typeof validationHandler;
 export type ExportHandler = typeof exportHandler;
+export type ImportHandler = typeof importHandler;

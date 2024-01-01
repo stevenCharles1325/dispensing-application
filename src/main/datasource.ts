@@ -22,13 +22,13 @@ import { Discount } from './database/models/discount.model';
 
 type DataSourceWithSeederOption = DataSourceOptions & SeederOptions;
 
-const IS_PROD = process.env.NODE_ENV === 'production';
-const DB_PATH = IS_PROD ? app.getPath('userData') : __dirname;
-const MIGRATION_PATH = IS_PROD ? `${app.getAppPath()}/dist` : __dirname;
+export const IS_PROD = process.env.NODE_ENV === 'production';
+export const DB_PATH = `${IS_PROD ? app.getPath('userData') : __dirname}/database/db.sqlite`;
+const MIGRATION_PATH = `${IS_PROD ? `${app.getAppPath()}/dist` : __dirname}/database/migrations/*`;
 
 export const options: DataSourceWithSeederOption = {
   type: 'sqlite',
-  database: `${DB_PATH}/database/db.sqlite`,
+  database: DB_PATH,
   entities: [
     AuditTrail,
     Brand,
@@ -49,7 +49,7 @@ export const options: DataSourceWithSeederOption = {
     Discount,
   ],
   migrations: [
-    `${MIGRATION_PATH}/database/migrations/*`,
+    MIGRATION_PATH,
   ],
   seeds: [
     MainSeeder,

@@ -532,6 +532,11 @@ const permissions = [
     group_name: 'data',
   },
   {
+    name: 'Upload Data',
+    kebab: 'upload-data',
+    group_name: 'data',
+  },
+  {
     name: 'Request Data', // Main peer request permission
     kebab: 'request-data',
     group_name: 'data',

@@ -6,11 +6,10 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
 import handleError from 'App/modules/error-handler.module';
-import exportAsSpreadsheet from 'App/modules/export/transaction/export-as-spreadsheet.module';
-import exportAsSQL from 'App/modules/export/transaction/export-as-sql.module';
+import importSQLDump from 'App/modules/import/transaction/import-sql.module';
 
-export default class ExportTransactionHistoryEvent implements IEvent {
-  public channel: string = 'transaction-history:export';
+export default class ImportTransactionHistoryEvent implements IEvent {
+  public channel: string = 'transaction-history:import';
 
   public middlewares = ['auth.middleware'];
 
@@ -21,32 +20,16 @@ export default class ExportTransactionHistoryEvent implements IEvent {
   > {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('download-data');
+        eventData.user.hasPermission?.('upload-data');
 
       if (requesterHasPermission) {
-        const exportFormat = eventData.payload[0] as 'SQL' | 'SPREADSHEET';
-        const recordType: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' =
-          eventData.payload[1] ?? 'WHOLE';
+        const sqlFilePath = eventData.payload[0] as string;
 
-
-        switch (exportFormat) {
-          case 'SPREADSHEET':
-            return await exportAsSpreadsheet(recordType) as IResponse<any>;
-
-          case 'SQL':
-            return await exportAsSQL() as IResponse<any>;
-
-          default:
-            return {
-              errors: [`Invalid exporting format`],
-              code: 'REQ_INVALID',
-              status: 'ERROR',
-            };
-        }
+        return await importSQLDump(sqlFilePath) as IResponse<any>;
       }
 
       return {
-        errors: ['You are not allowed to export transaction history'],
+        errors: ['You are not allowed to import transaction history'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

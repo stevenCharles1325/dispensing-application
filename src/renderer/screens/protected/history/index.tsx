@@ -7,7 +7,7 @@ import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
-import { useEffect, useMemo, useState } from 'react';
+import { ChangeEventHandler, useEffect, useMemo, useRef, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 import useAlert from 'UI/hooks/useAlert';
 import ButtonGroup from '@mui/material/ButtonGroup';
@@ -20,6 +20,8 @@ import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
 import OrderDTO from 'App/data-transfer-objects/order.dto';
 import getDiscount from 'UI/helpers/getDiscount';
 import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
+import useErrorHandler from 'UI/hooks/useErrorHandler';
+import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -219,6 +221,7 @@ function a11yProps(index: number) {
 
 export default function Logs() {
   const { displayAlert } = useAlert();
+  const errorHandler = useErrorHandler();
   const { searchText, setPlaceHolder } = useSearch();
 
   const [currentTab, setCurrentTab] = useState(0);
@@ -234,6 +237,8 @@ export default function Logs() {
     Record<string, 'LOADING' | 'SUCCESS' | 'ERROR' | null>
   >({});
 
+  const inputFileRef = useRef<any>(null);
+
   const { data: auditData } = useQuery({
     queryKey: ['audits', searchText],
     queryFn: async () => {
@@ -243,7 +248,7 @@ export default function Logs() {
     },
   });
 
-  const { data: paymentData } = useQuery({
+  const { data: paymentData, refetch: refreshPayments } = useQuery({
     queryKey: ['payments', searchText],
     queryFn: async () => {
       const res = await getPayments(searchText);
@@ -312,14 +317,54 @@ export default function Logs() {
     setSelectedId(null);
   };
 
-  const handleExportTransactionHistory = (
+  const handleSelectFileToImport = () => {
+    inputFileRef.current?.click();
+  }
+
+  const handleImportSQLFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const filePath = e.target?.files?.[0]?.path;
+
+    if (filePath) {
+      const res = await window.import.importTransactionHistory(filePath);
+
+      if (res && res.status === 'ERROR') {
+        return errorHandler({
+          errors: res.errors,
+        });
+      }
+
+      refreshPayments();
+      return displayAlert?.(
+        `Successfully imported SQL file`,
+        'success'
+      );
+    }
+  }
+
+  const handleExportTransactionHistoryAsSQL = async () => {
+    const res = await window.export.exportTransactionHistory('SQL');
+
+    if (res && res.status === 'ERROR') {
+      return errorHandler({
+        errors: res.errors,
+      });
+    }
+
+    const { filePath } = res.data as ITransactionSQL;
+    return displayAlert?.(
+      `Successfully! File is saved at ${filePath}`,
+      'success'
+    );
+  }
+
+  const handleExportTransactionHistoryAsSpreadsheet = (
     type: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' = 'WHOLE',
   ) => async () => {
     setDownLoadExportState((state) => ({
       ...state,
       [type]: 'LOADING',
     }));
-    const res = await window.export.exportTransactionHistory(type);
+    const res = await window.export.exportTransactionHistory('SPREADSHEET', type);
 
     if (res && res.status === 'ERROR') {
       const errorMessage = res.errors?.[0] as unknown as string;
@@ -388,7 +433,7 @@ export default function Logs() {
             disablePadding
           >
             <ListItemButton
-              onClick={handleExportTransactionHistory('WHOLE')}
+              onClick={handleExportTransactionHistoryAsSpreadsheet('WHOLE')}
             >
               <ListItemText primary={`Whole`} />
               {exportDownloadState['WHOLE'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
@@ -402,7 +447,7 @@ export default function Logs() {
             disablePadding
           >
             <ListItemButton
-              onClick={handleExportTransactionHistory('CURRENT:DAY')}
+              onClick={handleExportTransactionHistoryAsSpreadsheet('CURRENT:DAY')}
             >
               <ListItemText primary={`Current day`} />
               {exportDownloadState['CURRENT:DAY'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
@@ -416,7 +461,7 @@ export default function Logs() {
             disablePadding
           >
             <ListItemButton
-              onClick={handleExportTransactionHistory('CURRENT:MONTH')}
+              onClick={handleExportTransactionHistoryAsSpreadsheet('CURRENT:MONTH')}
             >
               <ListItemText primary={`Current month`} />
               {exportDownloadState['CURRENT:MONTH'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
@@ -430,7 +475,7 @@ export default function Logs() {
             disablePadding
           >
             <ListItemButton
-              onClick={handleExportTransactionHistory('CURRENT:YEAR')}
+              onClick={handleExportTransactionHistoryAsSpreadsheet('CURRENT:YEAR')}
             >
               <ListItemText primary={`Current year`} />
               {exportDownloadState['CURRENT:YEAR'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
@@ -452,6 +497,14 @@ export default function Logs() {
             <Tab label="Audit Trail" {...a11yProps(0)} />
             <Tab label="Transaction History" {...a11yProps(1)} />
           </Tabs>
+        </div>
+        <div className='hidden'>
+          <input
+            ref={inputFileRef}
+            type="file"
+            accept='.sqlite'
+            onChange={handleImportSQLFile}
+          />
         </div>
         <div className="w-full h-[750px]">
           {currentTab === 1
@@ -476,18 +529,17 @@ export default function Logs() {
                     color="secondary"
                     size="small"
                     startIcon={<DownloadOutlinedIcon fontSize="small" />}
-                    onClick={handleOpenExportMenu}
+                    onClick={handleExportTransactionHistoryAsSQL}
                   >
                     Export SQL
                   </Button>
                   <Button
-                    disabled={!selectedRows.length}
                     className="shadow shadow-md"
                     variant="outlined"
                     color="secondary"
                     size="small"
                     startIcon={<UploadOutlinedIcon fontSize="small" />}
-                    onClick={handleOpenExportMenu}
+                    onClick={handleSelectFileToImport}
                   >
                     Import SQL
                   </Button>
