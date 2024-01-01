@@ -13,10 +13,10 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
           columns: [
             {
               name: 'id',
-              type: 'integer',
+              type: 'varchar',
+              generationStrategy: 'uuid',
               isPrimary: true,
               isGenerated: true,
-              generationStrategy: 'increment',
             },
             {
               name: 'item_id',
@@ -28,7 +28,7 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
             },
             {
               name: 'creator_id',
-              type: 'int',
+              type: 'varchar',
               isPrimary: false,
               isUnique: false,
               isNullable: false,

@@ -55,10 +55,10 @@ export default class UserCreateEvent implements IEvent {
         await ShortcutKeyRepository.save(keys);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: data.id.toString(),
           resource_table: 'users',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'create',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully created a new User`,
@@ -72,7 +72,7 @@ export default class UserCreateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'users', // Change this
         action: 'create',
         status: 'FAILED',

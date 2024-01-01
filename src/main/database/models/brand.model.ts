@@ -12,8 +12,8 @@ import { ValidationMessage } from '../../app/validators/message/message';
 
 @Entity('brands')
 export class Brand {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   system_id: string;

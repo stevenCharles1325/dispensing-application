@@ -46,9 +46,9 @@ class LocalStorage {
 const useUser = create(
   persist<AppUserState>(
     (set, get) => ({
-      id: 0,
+      id: '',
       system_id: '',
-      role_id: 0,
+      role_id: '',
       image_url: '',
       birth_date: new Date(),
       address: '',

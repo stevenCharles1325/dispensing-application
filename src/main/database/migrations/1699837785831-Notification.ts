@@ -25,13 +25,13 @@ export class Notification1699837785831 implements MigrationInterface {
           },
           {
             name: 'recipient_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'recipient',
           },
           {
             name: 'sender_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'sender',
           },

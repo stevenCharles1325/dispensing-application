@@ -19,10 +19,10 @@ export default class AuthSignOutEvent implements IEvent {
 
       if (res.status === 'SUCCESS') {
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as string,
           resource_id: user.id.toString() as string,
           resource_table: 'users',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'sign-out',
           status: 'SUCCEEDED',
           description: `User ${user.first_name} ${user.last_name} has successfully signed-out`,

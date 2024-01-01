@@ -27,7 +27,7 @@ export class InventoryRecord {
     if (!this.creator) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'users' WHERE id = ${this.creator_id}`
+        `SELECT * FROM 'users' WHERE id = '${this.creator_id}'`
       );
 
       // To-filter-out all unnecessary properties
@@ -35,8 +35,8 @@ export class InventoryRecord {
     }
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: false,
@@ -46,7 +46,7 @@ export class InventoryRecord {
   @Column({
     nullable: false,
   })
-  creator_id: number;
+  creator_id: string;
 
   @Column()
   @MinLength(3, { message: ValidationMessage.minLength })

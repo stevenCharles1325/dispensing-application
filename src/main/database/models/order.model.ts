@@ -90,7 +90,7 @@ export class Order {
   item_id: string;
 
   @Column()
-  discount_id: number;
+  discount_id: string;
 
   @Column()
   transaction_id: string;

@@ -66,7 +66,7 @@ export default function ShortcutKeysForm ({ onClose }: ShortcutKeyFormProps) {
   const [newKeyCombination, setNewKeyCombination] = useState('');
   const [error, setError] = useState<Record<string, any>>({});
 
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>();
 
   const handleCloseModal = () => {
@@ -168,7 +168,7 @@ export default function ShortcutKeysForm ({ onClose }: ShortcutKeyFormProps) {
           columns={columns}
           rowCount={data?.total}
           onRowSelectionModelChange={(itemIds) =>
-            setSelectedIds(itemIds as number[])
+            setSelectedIds(itemIds as string[])
           }
           sortingOrder={['asc', 'desc']}
           sortingMode='client'

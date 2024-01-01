@@ -45,10 +45,10 @@ export default class RoleDeleteEvent implements IEvent {
         if (Array.isArray(payload)) {
           for await (const id of payload) {
             await Bull('AUDIT_JOB', {
-              user_id: user.id as number,
+              user_id: user.id as unknown as string,
               resource_id: id.toString(),
               resource_table: 'roles',
-              resource_id_type: 'integer',
+              resource_id_type: 'uuid',
               action: 'delete',
               status: 'SUCCEEDED',
               description: `User ${user.fullName} has successfully deleted a Role`,
@@ -56,10 +56,10 @@ export default class RoleDeleteEvent implements IEvent {
           }
         } else {
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as unknown as string,
             resource_id: payload.toString(),
             resource_table: 'roles',
-            resource_id_type: 'integer',
+            resource_id_type: 'uuid',
             action: 'delete',
             status: 'SUCCEEDED',
             description: `User ${user.fullName} has successfully deleted a Role`,
@@ -74,7 +74,7 @@ export default class RoleDeleteEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'roles',
         action: 'delete',
         status: 'FAILED',

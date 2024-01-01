@@ -115,10 +115,10 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
   const [form, setForm] = useState<Partial<RoleDTO>>({});
   const [errors, setErrors] = useState<Record<string, any>>({});
 
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>();
   const [selectedPermissions, setSelectedPermissions] = useState<
-    Record<string, number[]>
+    Record<string, string[]>
   >({});
 
   const permissionIds = useMemo(() => {
@@ -356,7 +356,7 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
           columns={columns}
           rowCount={data?.total}
           onRowSelectionModelChange={(itemIds) =>
-            setSelectedIds(itemIds as number[])
+            setSelectedIds(itemIds as string[])
           }
           sortingOrder={['asc', 'desc']}
           sortingMode='client'

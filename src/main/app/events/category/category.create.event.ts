@@ -43,10 +43,10 @@ export default class CategoryCreateEvent implements IEvent {
         const data: Category = await CategoryRepository.save(category);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: data.id.toString(),
           resource_table: 'categories',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'create',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully created a new Category`,
@@ -61,7 +61,7 @@ export default class CategoryCreateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'categories',
         action: 'create',
         status: 'FAILED',

@@ -46,7 +46,7 @@ export class Item {
     if (this.discount_id) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'discounts' WHERE id = ${this.discount_id}`
+        `SELECT * FROM 'discounts' WHERE id = '${this.discount_id}'`
       );
 
       const discount = rawData[0] as Discount;
@@ -111,7 +111,7 @@ export class Item {
   system_id: string;
 
   @Column({ nullable: true })
-  discount_id: number;
+  discount_id: string;
 
   @Column({ nullable: true })
   supplier_id: string;
@@ -119,19 +119,19 @@ export class Item {
   @Column({
     nullable: true,
   })
-  image_id: number;
+  image_id: string;
 
   @Column()
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  category_id: number;
+  category_id: string;
 
   @Column()
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  brand_id: number;
+  brand_id: string;
 
   @Column({
     unique: true,

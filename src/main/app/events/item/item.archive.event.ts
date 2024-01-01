@@ -28,7 +28,7 @@ export default class ItemArchiveEvent implements IEvent {
         const data = await itemRepo.softDelete(id);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: id.toString(),
           resource_table: 'items',
           resource_id_type: 'uuid',
@@ -45,7 +45,7 @@ export default class ItemArchiveEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'items',
         action: 'archive',
         status: 'FAILED',

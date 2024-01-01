@@ -148,15 +148,15 @@ const userHandler = {
   > => ipcRenderer.invoke('user:create', payload),
 
   updateUser: async (
-    id: number,
+    id: string,
     payload: Partial<UserDTO>
   ): Promise<IResponse<string[] | IPOSError[] | UserDTO>> =>
     ipcRenderer.invoke('user:update', id, payload),
 
-  archiveUser: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  archiveUser: async (id: string): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('user:archive', id),
 
-  deleteUser: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteUser: async (id: string | string[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('user:delete', id),
 };
 
@@ -174,7 +174,7 @@ const shortcutKeyHandler = {
     ipcRenderer.invoke('shortcut-key:show', payload, page, total),
 
   updateShortcutKey: async (
-    id: number,
+    id: string,
     payload: Pick<ShortcutKeyDTO, 'key' | 'key_combination'>
   ): Promise<IResponse<string[] | IPOSError[] | ShortcutKeyDTO>> =>
     ipcRenderer.invoke('shortcut-key:update', id, payload),
@@ -195,22 +195,22 @@ const roleHandler = {
 
   createRole: async (
     payload: RoleDTO,
-    permissionIds: number[],
+    permissionIds: string[],
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | RoleDTO[]>
   > => ipcRenderer.invoke('role:create', payload, permissionIds),
 
   updateRole: async (
-    id: number,
+    id: string,
     payload: Partial<RoleDTO>,
-    permissionIds: number[],
+    permissionIds: string[],
   ): Promise<IResponse<string[] | IPOSError[] | UserDTO>> =>
     ipcRenderer.invoke('role:update', id, payload, permissionIds),
 
-  archiveRole: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  archiveRole: async (id: string): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('role:archive', id),
 
-  deleteRole: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteRole: async (id: string | string[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('role:delete', id),
 };
 
@@ -290,12 +290,12 @@ const discountHandler = {
   > => ipcRenderer.invoke('discount:create', payload, itemIds),
 
   updateDiscount: async (
-    id: number,
+    id: string,
     payload: ItemDTO['id'][],
   ): Promise<IResponse<string[] | IPOSError[] | DiscountDTO>> =>
     ipcRenderer.invoke('discount:update', id, payload),
 
-  deleteDiscount: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteDiscount: async (id: string | string[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('discount:delete', id),
 };
 
@@ -339,18 +339,18 @@ const brandHandler = {
   > => ipcRenderer.invoke('brand:create', payload),
 
   updateBrand: async (
-    id: number,
+    id: string,
     payload: Partial<BrandDTO>
   ): Promise<IResponse<string[] | IPOSError[] | BrandDTO>> =>
     ipcRenderer.invoke('brand:update', id, payload),
 
   archiveBrand: async (
-    id: number
+    id: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('brand:archive', id),
 
   deleteBrand: async (
-    id: number | number[]
+    id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('brand:delete', id),
 };
@@ -375,18 +375,18 @@ const categoryHandler = {
   > => ipcRenderer.invoke('category:create', payload),
 
   updateCategory: async (
-    id: number,
+    id: string,
     payload: Partial<CategoryDTO>
   ): Promise<IResponse<string[] | IPOSError[] | CategoryDTO>> =>
     ipcRenderer.invoke('category:update', id, payload),
 
   archiveCategory: async (
-    id: number
+    id: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('category:archive', id),
 
   deleteCategory: async (
-    id: number | number[]
+    id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('category:delete', id),
 };
@@ -415,18 +415,18 @@ const imageHandler = {
   > => ipcRenderer.invoke('image:create', bucketName, payload),
 
   updateImage: async (
-    id: number,
+    id: string,
     payload: Partial<ImageDTO>
   ): Promise<IResponse<string[] | IPOSError[] | ImageDTO>> =>
     ipcRenderer.invoke('image:update', id, payload),
 
   archiveImage: async (
-    id: number
+    id: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('image:archive', id),
 
   deleteImage: async (
-    id: number | number[]
+    id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('image:delete', id),
 };
@@ -487,18 +487,18 @@ const paymentHandler = {
   > => ipcRenderer.invoke('payment:create', payload),
 
   // updateSupplier: async (
-  //   id: number,
+  //   id: string,
   //   payload: Partial<SupplierDTO>
   // ): Promise<IResponse<string[] | IPOSError[] | SupplierDTO>> =>
   //   ipcRenderer.invoke('supplier:update', id, payload),
 
   // archiveSupplier: async (
-  //   id: number
+  //   id: string
   // ): Promise<IResponse<string[] | IPOSError[]>> =>
   //   ipcRenderer.invoke('supplier:archive', id),
 
   // deleteSupplier: async (
-  //   id: number | number[]
+  //   id: string | string[]
   // ): Promise<IResponse<string[] | IPOSError[]>> =>
   //   ipcRenderer.invoke('supplier:delete', id),
 };

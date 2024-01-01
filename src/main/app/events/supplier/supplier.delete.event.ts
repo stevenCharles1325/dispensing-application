@@ -31,7 +31,7 @@ export default class SupplierDeleteEvent implements IEvent {
         if (Array.isArray(payload)) {
           for await (const id of payload) {
             await Bull('AUDIT_JOB', {
-              user_id: user.id as number,
+              user_id: user.id as unknown as string,
               resource_id: id,
               resource_table: 'suppliers',
               resource_id_type: 'uuid',
@@ -42,7 +42,7 @@ export default class SupplierDeleteEvent implements IEvent {
           }
         } else {
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as unknown as string,
             resource_id: payload,
             resource_table: 'suppliers', // Change this
             resource_id_type: 'uuid',
@@ -60,7 +60,7 @@ export default class SupplierDeleteEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'suppliers',
         action: 'delete',
         status: 'FAILED',

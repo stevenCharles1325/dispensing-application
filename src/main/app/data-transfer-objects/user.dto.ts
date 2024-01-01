@@ -1,11 +1,11 @@
 import RoleDTO from './role.dto';
 
 export default interface UserDTO {
-  id: number;
+  id: string;
   image_url: string;
-  lead_id: number | null;
+  lead_id: string | null;
   system_id: string;
-  role_id: number;
+  role_id: string;
   notification_status?: 'on' | 'off';
   status?: 'active' | 'deactivated';
   first_name: string;

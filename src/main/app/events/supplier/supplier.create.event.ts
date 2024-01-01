@@ -42,7 +42,7 @@ export default class SupplierCreateEvent implements IEvent {
         const data: Supplier = await SupplierRepository.save(supplier);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: data.id,
           resource_table: 'suppliers',
           resource_id_type: 'uuid',
@@ -60,7 +60,7 @@ export default class SupplierCreateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'suppliers',
         action: 'create',
         status: 'FAILED',

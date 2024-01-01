@@ -97,7 +97,7 @@ export class Transaction {
     if (!this.creator) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'users' WHERE id = ${this.creator_id}`
+        `SELECT * FROM 'users' WHERE id = '${this.creator_id}'`
       );
 
       this.creator = rawData[0] as User;
@@ -125,10 +125,10 @@ export class Transaction {
   system_id: string | null;
 
   @Column()
-  creator_id: number;
+  creator_id: string;
 
   @Column({ nullable: true })
-  discount_id: number;
+  discount_id: string;
 
   @Column()
   @IsNotEmpty({

@@ -47,7 +47,7 @@ export default class SupplierDeleteEvent implements IEvent {
         const data: Supplier = await SupplierRepository.save(updatedSupplier);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: id,
           resource_table: 'suppliers',
           resource_id_type: 'uuid',
@@ -64,7 +64,7 @@ export default class SupplierDeleteEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_id: id,
         resource_table: 'suppliers',
         resource_id_type: 'uuid',

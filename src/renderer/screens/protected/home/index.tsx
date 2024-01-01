@@ -34,7 +34,7 @@ const CARD_HEIGHT = 460;
 
 const getItems = async (
   searchText = '',
-  categoryIds: Array<number>
+  categoryIds: Array<string>
 ): Promise<IPagination<ItemDTO>> => {
   const res = await window.item.getItems(
     { name: searchText, category_id: categoryIds },
@@ -121,7 +121,7 @@ export default function Home() {
   const [addPayment, setAddPayment] = useState<boolean>(false);
   const [orders, setOrders] = useState<Record<string, number>>({});
   const [posMenuAnchorEl, setPosMenuAnchorEl] = useState<HTMLElement | null>();
-  const [categoryIds, setCategoryIds] = useState<Array<number>>([]);
+  const [categoryIds, setCategoryIds] = useState<Array<string>>([]);
 
   const [addCoupon, setAddCoupon] = useState<boolean>(false);
   const [couponCode, setCouponCode] = useState<string>('');
@@ -960,7 +960,7 @@ export default function Home() {
         list={categories}
         anchorEl={posMenuAnchorEl}
         open={Boolean(posMenuAnchorEl)}
-        onChange={(ids) => setCategoryIds(ids as Array<number>)}
+        onChange={(ids) => setCategoryIds(ids as Array<string>)}
         onClose={() => setPosMenuAnchorEl(null)}
       />
     </>

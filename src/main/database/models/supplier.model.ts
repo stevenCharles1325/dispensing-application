@@ -26,12 +26,8 @@ export class Supplier {
   })
   system_id: string | null;
 
-  @Column({
-    type: Number,
-    nullable: true,
-    default: null,
-  })
-  image_id: number | null;
+  @Column()
+  image_id: string | null;
 
   @Column({
     nullable: true,

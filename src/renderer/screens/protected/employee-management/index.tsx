@@ -136,10 +136,14 @@ export default function EmployeeManagement () {
   const drive = useAppDrive?.();
   const [openDrive, driveListener] = drive?.subscribe?.('EMPLOYEE_MANAGEMENT') ?? [];
 
-  const [form, setForm] = useState<Partial<UserDTO>>({ birth_date: new Date(), status: 'active', role_id: 2 });
+  const [form, setForm] = useState<Partial<UserDTO>>({
+     birth_date: new Date(),
+     status: 'active',
+     role_id: '714b1c87-37ee-43e1-80a5-48885d4aafe5'
+    });
   const [errors, setErrors] = useState<Record<string, any>>({});
 
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>();
 
   const { data, refetch } = useQuery({
@@ -161,7 +165,7 @@ export default function EmployeeManagement () {
   });
 
   const roleList = (roles?.data as RoleDTO[]) ?? [];
-  const roleDictionary: Record<number, string> = (roles?.data.reduce((prev, curr) => ({
+  const roleDictionary: Record<string, string> = (roles?.data.reduce((prev, curr) => ({
     ...prev,
     [curr.id]: curr.name,
   }), {})) ?? {};
@@ -189,7 +193,7 @@ export default function EmployeeManagement () {
   const handleCloseModal = () => {
     // setSelectedIds([]);
     setModalAction(null);
-    setForm({ birth_date: new Date(), status: 'active', role_id: 2 });
+    setForm({ birth_date: new Date(), status: 'active', role_id: '714b1c87-37ee-43e1-80a5-48885d4aafe5' });
     setErrors({});
   }
 
@@ -327,7 +331,7 @@ export default function EmployeeManagement () {
             columns={columns}
             rowCount={data?.total}
             onRowSelectionModelChange={(itemIds) =>
-              setSelectedIds(itemIds as number[])
+              setSelectedIds(itemIds as string[])
             }
             sortingOrder={['asc', 'desc']}
             checkboxSelection
@@ -496,7 +500,7 @@ export default function EmployeeManagement () {
               onChange={(_, value) => {
                 setForm((form) => ({
                   ...form,
-                  role_id: value ?? 3,
+                  role_id: value ?? '714b1c87-37ee-43e1-80a5-48885d4aafe5',
                 }));
               }}
               sx={{

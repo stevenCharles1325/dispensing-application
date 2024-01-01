@@ -32,7 +32,7 @@ export default class NotificationDeleteEvent implements IEvent {
         if (Array.isArray(payload)) {
           for await (const id of payload) {
             await Bull('AUDIT_JOB', {
-              user_id: user.id as number,
+              user_id: user.id as unknown as string,
               resource_id: id.toString(),
               resource_table: 'notifications',
               resource_id_type: 'uuid',
@@ -43,7 +43,7 @@ export default class NotificationDeleteEvent implements IEvent {
           }
         } else {
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as unknown as string,
             resource_id: payload.toString(),
             resource_table: 'notifications',
             resource_id_type: 'uuid',
@@ -61,7 +61,7 @@ export default class NotificationDeleteEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'notifications',
         action: 'delete',
         status: 'FAILED',

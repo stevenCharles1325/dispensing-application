@@ -1,9 +1,9 @@
 import UserDTO from "./user.dto";
 
 export default interface ShortcutKeyDTO {
-  id: number;
+  id: string;
   system_id: string;
-  user_id: number;
+  user_id: string;
   key: string;
   key_combination: string;
   title: string;

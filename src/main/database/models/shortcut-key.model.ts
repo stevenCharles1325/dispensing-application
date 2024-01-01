@@ -15,8 +15,8 @@ import { ValidationMessage } from '../../app/validators/message/message';
 
 @Entity('shortcut_keys')
 export class ShortcutKey {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: true,
@@ -26,7 +26,7 @@ export class ShortcutKey {
   @Column({
     nullable: false,
   })
-  user_id: number;
+  user_id: string;
 
   @Column()
   @MinLength(1, { message: ValidationMessage.minLength })

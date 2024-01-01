@@ -9,9 +9,9 @@ export interface IncomeDTO {
 
   system_id?: string | null;
 
-  creator_id: number;
+  creator_id: string;
 
-  discount_id?: number | null;
+  discount_id?: string | null;
 
   source_name: string;
 
@@ -47,7 +47,7 @@ export interface ExpenseDTO {
 
   system_id?: string | null;
 
-  creator_id: number;
+  creator_id: string;
 
   source_name: string;
 

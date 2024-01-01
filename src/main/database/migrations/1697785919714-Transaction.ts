@@ -25,13 +25,13 @@ export class Transaction1697785919714 implements MigrationInterface {
           },
           {
             name: 'discount_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'discount',
           },
           {
             name: 'creator_id',
-            type: 'integer',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'creator',
           },

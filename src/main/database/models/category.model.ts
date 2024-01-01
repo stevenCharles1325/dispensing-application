@@ -12,8 +12,8 @@ import { ValidationMessage } from '../../app/validators/message/message';
 
 @Entity('categories')
 export class Category {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   system_id: string;

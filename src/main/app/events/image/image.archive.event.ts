@@ -28,10 +28,10 @@ export default class ImageArchiveEvent implements IEvent {
         const data = await imageRepo.softDelete(id);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: id.toString(),
           resource_table: 'images',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'archive',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully archived an Image`,
@@ -45,7 +45,7 @@ export default class ImageArchiveEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'images',
         action: 'archive',
         status: 'FAILED',

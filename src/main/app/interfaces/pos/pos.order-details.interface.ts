@@ -5,14 +5,14 @@ export interface IDesiredItems {
   quantity: number;
   tax_rate: number;
   selling_price: number;
-  discount_id: number;
+  discount_id: string;
 }
 
 export interface IOrderDetails {
   items: IDesiredItems[];
   total: number;
   payment_method: IPaymentTypes;
-  discount_id?: number;
+  discount_id?: string;
   amount_received: number;
   change: number;
 }

@@ -8,12 +8,12 @@ import DiscountDTO from './discount.dto';
 
 export default interface ItemDTO {
   id: string;
-  image_id?: number;
+  image_id?: string;
   system_id: string;
-  category_id: number;
-  brand_id: number;
+  category_id: string;
+  brand_id: string;
   supplier_id: string;
-  discount_id: number;
+  discount_id: string;
   sku: string;
   name: string;
   description: string;

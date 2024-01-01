@@ -129,7 +129,7 @@ export default class PaymentCreateEvent implements IEvent {
           await TransactionRepository.save(data);
 
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as unknown as string,
             resource_id: data.id.toString(),
             resource_table: 'transactions',
             resource_id_type: 'uuid',
@@ -155,7 +155,7 @@ export default class PaymentCreateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'transactions',
         action: 'payment',
         status: 'FAILED',

@@ -34,10 +34,10 @@ export default class DiscountDeleteEvent implements IEvent {
         if (Array.isArray(payload)) {
           for await (const id of payload) {
             await Bull('AUDIT_JOB', {
-              user_id: user.id as number,
+              user_id: user.id as unknown as string,
               resource_id: id.toString(),
               resource_table: 'discounts',
-              resource_id_type: 'integer',
+              resource_id_type: 'uuid',
               action: 'delete',
               status: 'SUCCEEDED',
               description: `User ${user.fullName} has successfully deleted a Discount`,
@@ -45,10 +45,10 @@ export default class DiscountDeleteEvent implements IEvent {
           }
         } else {
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as unknown as string,
             resource_id: payload.toString(),
             resource_table: 'discounts',
-            resource_id_type: 'integer',
+            resource_id_type: 'uuid',
             action: 'delete',
             status: 'SUCCEEDED',
             description: `User ${user.fullName} has successfully deleted a Discount`,
@@ -63,7 +63,7 @@ export default class DiscountDeleteEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'discounts',
         action: 'delete',
         status: 'FAILED',

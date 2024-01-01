@@ -1,7 +1,7 @@
 export default interface NotificationDTO {
   id: string;
-  recipient_id: number | null;
-  sender_id: number | null;
+  recipient_id: string | null;
+  sender_id: string | null;
   title: string;
   description: string;
   link: string | null;

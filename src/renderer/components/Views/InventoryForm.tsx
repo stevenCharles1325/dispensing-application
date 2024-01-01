@@ -522,7 +522,7 @@ export default function InventoryForm({
   }, [action, selectedItem]);
 
   // Records states
-  const [selectedRecordIds, setSelectedRecordIds] = useState<number[]>([]);
+  const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [recordFormErrors, setRecordFormErrors] = useState<Record<string, string>>({
   });
   const [recordForm, setRecordForm] = useState<Partial<InventoryRecordDTO>>({
@@ -561,7 +561,7 @@ export default function InventoryForm({
     }
   }
 
-  const handleOnChangeTab = (_, newValue: number) => {
+  const handleOnChangeTab = (_: any, newValue: number) => {
     setTab(newValue);
   }
 
@@ -641,7 +641,7 @@ export default function InventoryForm({
     return res.data as IPagination<DiscountDTO>;
   }, []);
 
-  const [selectedDiscountId, setSelectedDiscountId] = useState<number | null>(null);
+  const [selectedDiscountId, setSelectedDiscountId] = useState<string | null>(null);
   const { data: discountList, isLoading: isDiscountLoading } = useQuery({
     queryKey: ['inventory-discount'],
     queryFn: getDiscounts,
@@ -1211,7 +1211,7 @@ export default function InventoryForm({
                     rowCount={stocksRecords?.total}
                     disableRowSelectionOnClick
                     onRowSelectionModelChange={(recordIds) =>
-                      setSelectedRecordIds(recordIds as number[])
+                      setSelectedRecordIds(recordIds as string[])
                     }
                   />
                 </>

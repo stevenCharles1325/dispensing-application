@@ -53,14 +53,14 @@ export class Discount {
     this.total_usage = discountTransactionCount + discountOrderCount;
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   system_id: string;
 
   @Column()
-  creator_id: number;
+  creator_id: string;
 
   @Column({ nullable: false, unique: true })
   @MinLength(5, {

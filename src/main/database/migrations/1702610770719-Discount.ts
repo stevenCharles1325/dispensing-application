@@ -13,8 +13,8 @@ export class Discount1702610770719 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
           },
@@ -25,7 +25,7 @@ export class Discount1702610770719 implements MigrationInterface {
           },
           {
             name: 'creator_id',
-            type: 'int',
+            type: 'varchar',
             foreignKeyConstraintName: 'creator',
           },
           {

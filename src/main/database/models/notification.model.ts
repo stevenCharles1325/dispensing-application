@@ -22,7 +22,7 @@ export class Notification {
     if (!this.sender) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'users' WHERE id = ${this.sender_id}`
+        `SELECT * FROM 'users' WHERE id = '${this.sender_id}'`
       );
 
       this.sender = rawData[0];
@@ -34,7 +34,7 @@ export class Notification {
     if (!this.recipient) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'users' WHERE id = ${this.recipient_id}`
+        `SELECT * FROM 'users' WHERE id = '${this.recipient_id}'`
       );
 
       this.recipient = rawData[0];
@@ -52,14 +52,14 @@ export class Notification {
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  recipient_id: number;
+  recipient_id: string;
 
   @Column({ nullable: true })
   @ValidateIf((notif: NotificationDTO) => !notif.is_system_generated)
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  sender_id: number;
+  sender_id: string;
 
   @Column()
   @MinLength(3, { message: ValidationMessage.minLength })

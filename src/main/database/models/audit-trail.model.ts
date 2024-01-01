@@ -26,7 +26,7 @@ export class AuditTrail {
         ? `'${this.resource_id}'`
         : this.resource_id;
     const rawData: any[] = await manager.query(
-      `SELECT * FROM '${this.resource_table}' WHERE id = ${id}`
+      `SELECT * FROM '${this.resource_table}' WHERE id = '${id}'`
     );
 
     this.related = rawData[0];
@@ -37,7 +37,7 @@ export class AuditTrail {
     if (!this.user) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'users' WHERE id = ${this.user_id}`
+        `SELECT * FROM 'users' WHERE id = '${this.user_id}'`
       );
 
       this.user = rawData[0];
@@ -54,7 +54,7 @@ export class AuditTrail {
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  user_id: number;
+  user_id: string;
 
   @Column()
   @MinLength(5, { message: ValidationMessage.minLength })
@@ -73,7 +73,7 @@ export class AuditTrail {
   resource_id: string;
 
   @Column()
-  @IsIn(['uuid', 'integer'], {
+  @IsIn(['uuid'], {
     message: ValidationMessage.notEmpty,
   })
   resource_id_type: string;

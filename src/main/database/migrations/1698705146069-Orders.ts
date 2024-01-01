@@ -37,7 +37,7 @@ export class Orders1698705146069 implements MigrationInterface {
           },
           {
             name: 'discount_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'discount',
           },

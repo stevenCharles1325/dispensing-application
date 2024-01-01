@@ -48,7 +48,7 @@ export default class NotificationUpdateEvent implements IEvent {
 
         if (notificationStatusUpdate === 'UNSEEN') {
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as unknown as string,
             resource_id: id.toString(),
             resource_table: 'notifications',
             resource_id_type: 'uuid',
@@ -68,7 +68,7 @@ export default class NotificationUpdateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_id: id.toString(),
         resource_table: 'notifications',
         resource_id_type: 'uuid',

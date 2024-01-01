@@ -59,10 +59,10 @@ export default class RoleUpdateEvent implements IEvent {
         }
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: id.toString(),
           resource_table: 'roles',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'update',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully updated a Role`,
@@ -111,10 +111,10 @@ export default class RoleUpdateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_id: id.toString(),
         resource_table: 'roles',
-        resource_id_type: 'integer',
+        resource_id_type: 'uuid',
         action: 'update',
         status: 'FAILED',
         description: `User ${user.fullName} has failed to update a Role`,

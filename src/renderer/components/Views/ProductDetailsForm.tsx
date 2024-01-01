@@ -89,7 +89,7 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>();
 
   const handleCloseModal = () => {
@@ -256,7 +256,7 @@ export default function ProductDetailsForm ({ type, onClose }: ProductDetailsFor
           columns={columns}
           rowCount={data?.total}
           onRowSelectionModelChange={(itemIds) =>
-            setSelectedIds(itemIds as number[])
+            setSelectedIds(itemIds as string[])
           }
           sortingOrder={['asc', 'desc']}
           sortingMode='client'

@@ -15,8 +15,8 @@ import type { Permission } from './permission.model';
 
 @Entity('roles')
 export class Role {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: true,

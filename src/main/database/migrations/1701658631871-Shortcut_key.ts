@@ -13,8 +13,8 @@ export class ShortcutKey1701658631871 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
           },
@@ -25,7 +25,7 @@ export class ShortcutKey1701658631871 implements MigrationInterface {
           },
           {
             name: 'user_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'user',
           },

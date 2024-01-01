@@ -11,7 +11,7 @@ import {
 import PermissionDTO from "App/data-transfer-objects/permission.dto";
 
 export interface PermissionRendererProps {
-  values: number[];
+  values: string[];
   groupName: string;
   permissions: PermissionDTO[];
   onChange?: (permissions: PermissionDTO['id'][]) => void;

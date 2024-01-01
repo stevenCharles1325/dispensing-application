@@ -41,13 +41,13 @@ export class User {
     this.role = role as Role;
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: true,
   })
-  lead_id: number;
+  lead_id: string;
 
   @Column()
   system_id: string;
