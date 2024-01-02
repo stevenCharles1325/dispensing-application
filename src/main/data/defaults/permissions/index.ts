@@ -500,6 +500,18 @@ const permissions = [
     group_name: 'settings',
   },
 
+  // System permissions
+  {
+    name: 'View System',
+    kebab: 'view-system',
+    group_name: 'system',
+  },
+  {
+    name: 'Update System',
+    kebab: 'update-system',
+    group_name: 'system',
+  },
+
   // Data/Peer/Graph management permissions
   {
     name: 'View Data',

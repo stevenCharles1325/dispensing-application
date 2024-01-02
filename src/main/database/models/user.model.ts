@@ -10,6 +10,7 @@ import {
   ManyToOne,
   AfterLoad,
   JoinColumn,
+  AfterInsert,
   BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
@@ -30,6 +31,9 @@ import { ValidationMessage } from '../../app/validators/message/message';
 import type { Role } from './role.model';
 import type { InventoryRecord } from './inventory-record.model';
 import type { ShortcutKey } from './shortcut-key.model';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 @Entity('users')
 export class User {
@@ -41,6 +45,19 @@ export class User {
     this.role = role as Role;
   }
 
+  @AfterInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -49,7 +66,7 @@ export class User {
   })
   lead_id: string;
 
-  @Column()
+  @Column({ nullable: true })
   system_id: string;
 
   @Column()

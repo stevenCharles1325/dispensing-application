@@ -21,7 +21,7 @@ import {
   StorageHandler,
   SupplierHandler,
   UserHandler,
-  ValidationHandler,
+  SystemHandler,
 } from 'Main/preload';
 
 declare global {
@@ -45,7 +45,7 @@ declare global {
     auditTrail: AuditTrailHandler;
     report: ReportHandler;
     notif: NotifHandler;
-    validation: ValidationHandler;
+    system: SystemHandler;
     export: ExportHandler;
     import: ImportHandler;
     role: RoleHandler;

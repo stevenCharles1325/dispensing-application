@@ -6,6 +6,7 @@ import {
   OneToOne,
   JoinColumn,
   AfterLoad,
+  AfterInsert,
   Relation,
   CreateDateColumn,
   PrimaryGeneratedColumn,
@@ -14,6 +15,9 @@ import { MinLength, IsNotEmpty, IsIn, ValidateIf } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import NotificationDTO from 'App/data-transfer-objects/notification.dto';
 import type { User } from './user.model';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 @Entity('notifications')
 export class Notification {
@@ -38,6 +42,19 @@ export class Notification {
       );
 
       this.recipient = rawData[0];
+    }
+  }
+
+  @AfterInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
     }
   }
 

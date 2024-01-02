@@ -18,11 +18,6 @@ export class Role {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({
-    nullable: true,
-  })
-  system_id: string;
-
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })
   name: string;

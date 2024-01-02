@@ -28,7 +28,6 @@ export class User1692175684026 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
           },
           {
             name: 'role_id',

@@ -29,6 +29,7 @@ import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
 import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
+import SystemDTO from 'App/data-transfer-objects/system.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -81,14 +82,36 @@ const barcodeHandler = {
 
 /* ================================
 +
-+   USER VALIDATION EVENT HANDLER
++   SYSTEM VALIDATION EVENT HANDLER
 +
 + ================================ */
-const validationHandler = {
-  isUserPermitted: async (): Promise<boolean> =>
-    ipcRenderer.invoke('get:master-key'),
-  makeUserPermitted: async (key: string): Promise<boolean> =>
-    ipcRenderer.invoke('set:master-key', key),
+const systemHandler = {
+  hasSystemSetup: async (): Promise<boolean> => {
+    const res = await ipcRenderer.invoke(
+      'system:show',
+      'all',
+      1,
+      15,
+      process.env.SYSTEM_KEY
+    );
+
+    console.log(res.data);
+    if (res.status === 'SUCCESS') {
+      return Boolean(res.data.data.length);
+    }
+
+    return false;
+  },
+  getSystems: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<SystemDTO>>> =>
+    ipcRenderer.invoke('system:show', payload, page, total),
+  createSystem: async (
+    payload: Partial<SystemDTO>,
+  ): Promise<IResponse<string[] | IPOSError[] | IPOSValidationError[] | SystemDTO>> =>
+    ipcRenderer.invoke('system:create', payload, process.env.SYSTEM_KEY),
 };
 
 /* ================================
@@ -142,10 +165,11 @@ const userHandler = {
     ipcRenderer.invoke('user:show', payload, page, total),
 
   createUser: async (
-    payload: UserDTO
+    payload: Partial<UserDTO>,
+    ...others: any[]
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | UserDTO[]>
-  > => ipcRenderer.invoke('user:create', payload),
+  > => ipcRenderer.invoke('user:create', payload, ...others),
 
   updateUser: async (
     id: string,
@@ -595,7 +619,7 @@ contextBridge.exposeInMainWorld('payment', paymentHandler);
 contextBridge.exposeInMainWorld('auditTrail', auditTrailHandler);
 contextBridge.exposeInMainWorld('report', reportHandler);
 contextBridge.exposeInMainWorld('notif', notifHandler);
-contextBridge.exposeInMainWorld('validation', validationHandler);
+contextBridge.exposeInMainWorld('system', systemHandler);
 contextBridge.exposeInMainWorld('export', exportHandler);
 contextBridge.exposeInMainWorld('import', importHandler);
 
@@ -619,6 +643,6 @@ export type PaymentHandler = typeof paymentHandler;
 export type AuditTrailHandler = typeof auditTrailHandler;
 export type ReportHandler = typeof reportHandler;
 export type NotifHandler = typeof notifHandler;
-export type ValidationHandler = typeof validationHandler;
+export type SystemHandler = typeof systemHandler;
 export type ExportHandler = typeof exportHandler;
 export type ImportHandler = typeof importHandler;

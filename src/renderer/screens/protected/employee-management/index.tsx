@@ -439,15 +439,6 @@ export default function EmployeeManagement () {
               }
             }}
           />
-          {/* <TextField
-            size="small"
-            type="date"
-            value={handleDateFormat(form.birth_date) ?? ''}
-            color="secondary"
-            onChange={handleUpdateForm('birth_date')}
-            error={Boolean(errors['birth_date'])}
-            helperText={errors['birth_date'] ?? 'Birth-date'}
-          /> */}
           <TextField
             size="small"
             label="Phone number"

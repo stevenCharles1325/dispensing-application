@@ -18,6 +18,9 @@ import type { Transaction } from './transaction.model';
 import type { Item } from './item.model';
 import type { Discount } from './discount.model';
 import { Bull } from 'Main/jobs';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 @Entity('orders')
 export class Order {
@@ -80,10 +83,23 @@ export class Order {
     await ItemRepository.save(item);
   }
 
+  @AfterInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   system_id: string;
 
   @Column()

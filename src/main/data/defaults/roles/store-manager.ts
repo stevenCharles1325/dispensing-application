@@ -1,7 +1,7 @@
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 
 const storeManager: RoleDTO = {
-  id: '677e59a9-3880-441a-bf8a-95ac3601d02c',
+  id: process.env.DEFAULT_STORE_MANAGER_ROLE_ID as string,
   name: 'Store Manager',
   kebab: 'store-manager',
 };

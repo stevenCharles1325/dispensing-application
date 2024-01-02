@@ -1,7 +1,7 @@
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 
 const administrator: RoleDTO = {
-  id: '7d004a8b-013c-4546-a727-075e498647cc',
+  id: process.env.DEFAULT_ADMIN_ROLE_ID as string,
   name: 'Administrator',
   kebab: 'administrator',
 };

@@ -17,9 +17,6 @@ export class Permission {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  system_id: string;
-
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })
   name: string;

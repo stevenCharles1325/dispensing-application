@@ -12,12 +12,11 @@ import { User } from 'Main/database/models/user.model';
 import { Bull } from 'Main/jobs';
 import ShortcutKeyRepository from 'App/repositories/shortcut-key.repository';
 import shortcutKeys from 'Main/data/defaults/shortcut-keys';
-import { ShortcutKey } from 'Main/database/models/shortcut-key.model';
 
 export default class UserCreateEvent implements IEvent {
   public channel: string = 'user:create';
 
-  public middlewares = ['auth.middleware'];
+  public middlewares = ['auth.v2.middleware'];
 
   public async listener({
     eventData,
@@ -27,9 +26,11 @@ export default class UserCreateEvent implements IEvent {
     try {
       const { user } = eventData;
       const payload: User = eventData.payload[0];
-      const requesterHasPermission = user.hasPermission?.('create-user');
+      const requesterHasPermission =
+        user.hasPermission?.('create-user');
+      const hasSystemPermission = user.hasSystemKey;
 
-      if (requesterHasPermission) {
+      if (requesterHasPermission || hasSystemPermission) {
         const _user = UserRepository.create(payload);
         const errors = await validator(_user);
 
@@ -48,21 +49,23 @@ export default class UserCreateEvent implements IEvent {
           shortcutKeys.map((shortcutKey) => ({
             ...shortcutKey,
             user_id: data.id,
+            system_id: _user.system_id,
           })) as any[]
         );
 
-        console.log(keys);
         await ShortcutKeyRepository.save(keys);
 
-        await Bull('AUDIT_JOB', {
-          user_id: user.id as unknown as string,
-          resource_id: data.id.toString(),
-          resource_table: 'users',
-          resource_id_type: 'uuid',
-          action: 'create',
-          status: 'SUCCEEDED',
-          description: `User ${user.fullName} has successfully created a new User`,
-        });
+        if (requesterHasPermission && !hasSystemPermission) {
+          await Bull('AUDIT_JOB', {
+            user_id: user.id as unknown as string,
+            resource_id: data.id.toString(),
+            resource_table: 'users',
+            resource_id_type: 'uuid',
+            action: 'create',
+            status: 'SUCCEEDED',
+            description: `User ${user.fullName} has successfully created a new User`,
+          });
+        }
 
         return {
           data,
@@ -71,13 +74,15 @@ export default class UserCreateEvent implements IEvent {
         } as IResponse<typeof data>;
       }
 
-      await Bull('AUDIT_JOB', {
-        user_id: user.id as unknown as string,
-        resource_table: 'users', // Change this
-        action: 'create',
-        status: 'FAILED',
-        description: `User ${user.fullName} has no permission to create a new User`, // Change this
-      });
+      if (requesterHasPermission && !hasSystemPermission) {
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as unknown as string,
+          resource_table: 'users', // Change this
+          action: 'create',
+          status: 'FAILED',
+          description: `User ${user.fullName} has no permission to create a new User`, // Change this
+        });
+      }
 
       return {
         errors: ['You are not allowed to create a User'],

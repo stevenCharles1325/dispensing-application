@@ -21,7 +21,6 @@ export class Discount1702610770719 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
           },
           {
             name: 'creator_id',

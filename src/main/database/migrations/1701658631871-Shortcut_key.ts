@@ -21,7 +21,6 @@ export class ShortcutKey1701658631871 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
           },
           {
             name: 'user_id',

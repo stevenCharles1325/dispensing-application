@@ -5,6 +5,7 @@ import {
   Relation,
   ManyToOne,
   JoinColumn,
+  AfterInsert,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
@@ -12,9 +13,25 @@ import {
 import type { User } from './user.model';
 import { MinLength } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 @Entity('shortcut_keys')
 export class ShortcutKey {
+  @AfterInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

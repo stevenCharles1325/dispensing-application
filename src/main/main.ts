@@ -310,44 +310,6 @@ app
           }
         });
 
-
-        // VALIDATOR HANDLERS
-        ipcMain.handle('get:master-key', async () => {
-          const system = await SqliteDataSource.createEntityManager().query(
-            'SELECT * FROM systems WHERE is_branch = 0'
-          );
-
-          if (!system[0]) return false;
-
-          const { master_key: key } = system[0];
-
-          if (key && key.length && key === process.env.MASTER_KEY) {
-            return true;
-          }
-
-          return false;
-        });
-
-        ipcMain.handle('set:master-key', async (_, ...payload: any[]) => {
-          const key = payload[0];
-
-          if (key === process.env.MASTER_KEY) {
-            try {
-              await SqliteDataSource.createEntityManager().query(
-                `UPDATE systems SET master_key = '${key}' WHERE is_branch = 0`
-              );
-
-              return true;
-            } catch (err) {
-              console.log('ERROR: ', err);
-            }
-
-            return true;
-          }
-
-          return false;
-        });
-
         await Bull('DISCOUNT_JOB', {});
         await createWindow();
 

@@ -21,7 +21,6 @@ export class Transaction1697785919714 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true, // temporarily
           },
           {
             name: 'discount_id',

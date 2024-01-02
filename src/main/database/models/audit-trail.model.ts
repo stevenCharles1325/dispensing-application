@@ -6,6 +6,7 @@ import {
   OneToOne,
   JoinColumn,
   AfterLoad,
+  AfterInsert,
   Relation,
   CreateDateColumn,
   PrimaryGeneratedColumn,
@@ -13,6 +14,9 @@ import {
 import { MinLength, IsNotEmpty, IsIn, ValidateIf } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import type { User } from './user.model';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 @Entity('audit_trails')
 export class AuditTrail {
@@ -41,6 +45,19 @@ export class AuditTrail {
       );
 
       this.user = rawData[0];
+    }
+  }
+
+  @AfterInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
     }
   }
 

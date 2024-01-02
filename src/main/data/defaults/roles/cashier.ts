@@ -1,7 +1,7 @@
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 
 const cashier: RoleDTO = {
-  id: '714b1c87-37ee-43e1-80a5-48885d4aafe5',
+  id: process.env.DEFAULT_CASHIER_ROLE_ID as string,
   name: 'Cashier',
   kebab: 'cashier',
 };

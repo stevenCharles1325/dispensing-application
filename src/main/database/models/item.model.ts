@@ -36,6 +36,9 @@ import type { Brand } from './brand.model';
 import type { Category } from './category.model';
 import type { InventoryRecord } from './inventory-record.model';
 import type { Discount } from './discount.model';
+import Provider from '@IOC:Provider';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 @Entity('items')
 export class Item {
@@ -104,10 +107,23 @@ export class Item {
     );
   }
 
+  @AfterInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   system_id: string;
 
   @Column({ nullable: true })
