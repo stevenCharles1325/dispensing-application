@@ -8,7 +8,6 @@ import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interfa
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import SystemDTO from 'App/data-transfer-objects/system.dto';
 import { System } from 'Main/database/models/system.model';
-import { runSeeders } from 'typeorm-extension';
 
 export default class SystemCreateEvent implements IEvent {
   public channel: string = 'system:create';
@@ -24,6 +23,16 @@ export default class SystemCreateEvent implements IEvent {
       const { user } = eventData;
       const payload: System = eventData.payload[0];
       const requesterHasPermission = user.hasSystemKey;
+
+      const hasOneSystem = ((await SystemRepository.createQueryBuilder().getCount()) >= 1);
+
+      if (hasOneSystem) {
+        return {
+          errors: ['You are not allowed to initialized multiple System in a single device'],
+          code: 'REQ_UNAUTH',
+          status: 'ERROR',
+        } as unknown as IResponse<string[]>;
+      }
 
       if (requesterHasPermission) {
         const system = SystemRepository.create(payload);

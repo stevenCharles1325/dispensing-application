@@ -217,7 +217,8 @@ export class User {
     if (!this.system_id) {
       const SystemRepository = global.datasource.getRepository('systems');
       const thisSystem = await SystemRepository.createQueryBuilder()
-        .where('uuid = main_branch_id')
+        .where('is_main = 1')
+        .orWhere('main_branch_id not null')
         .getOne();
 
       if (thisSystem) {

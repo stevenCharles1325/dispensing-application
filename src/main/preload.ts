@@ -95,7 +95,6 @@ const systemHandler = {
       process.env.SYSTEM_KEY
     );
 
-    console.log(res.data);
     if (res.status === 'SUCCESS') {
       return Boolean(res.data.data.length);
     }

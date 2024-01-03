@@ -12,6 +12,7 @@ import { DatePicker } from '@mui/x-date-pickers';
 import SystemDTO from 'App/data-transfer-objects/system.dto';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import PasswordInput from 'UI/components/TextField/PasswordInput';
+import useConfirm from 'UI/hooks/useConfirm';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
@@ -33,6 +34,7 @@ const initialProgress: IProgressCache = {
 
 export default function Setup () {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const [systemForm, setSystemForm] = useState<Partial<SystemDTO>>({
     is_main: false,
@@ -43,7 +45,8 @@ export default function Setup () {
     role_id: process.env.DEFAULT_OWNER_ROLE_ID
   });
   const [system, setSystem] = useState<Partial<SystemDTO>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [systemFormErrors, setSystemFormErrors] = useState<Record<string, string>>({});
+  const [userFormErrors, setUserFormErrors] = useState<Record<string, string>>({});
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -65,41 +68,50 @@ export default function Setup () {
     }));
   }
 
-  const handleCreateSystem = useCallback(async () => {
-    if (progress.progress === 'SETUP:USER') return true;
+  const handleCreateSystem = useCallback(async (cb: Function) => {
+    if (progress.progress === 'SETUP:USER') return cb?.();
 
-    const res = await window.system.createSystem(systemForm);
+    confirm?.(
+      'Are you sure you want to submit? Once you submit you will not be able to edit all system information.',
+      async (agreed) => {
+        if (agreed) {
 
-    if (res.status === 'ERROR') {
-      const errors: Record<string, string> = {};
+          const res = await window.system.createSystem(systemForm);
 
-      const onError = (field: string | null, message: string) => {
-        if (field) {
-          errors[field] = message;
+          if (res.status === 'ERROR') {
+            const errors: Record<string, string> = {};
+
+            const onError = (field: string | null, message: string) => {
+              if (field) {
+                errors[field] = message;
+              }
+            }
+
+            errorHandler({
+              errors: res.errors,
+              onError,
+            });
+
+            setSystemFormErrors(errors);
+
+            return;
+          }
+
+          setSystem(res.data as SystemDTO);
+          setProgress({
+            progress: 'SETUP:USER',
+            system: res.data as SystemDTO,
+          });
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            progress: 'SETUP:USER',
+            system: res.data,
+          }));
+
+          setSystemFormErrors({});
+          return cb?.();
         }
       }
-
-      errorHandler({
-        errors: res.errors,
-        onError,
-      });
-
-      setErrors(errors);
-
-      return false;
-    }
-
-    setSystem(res.data as SystemDTO);
-    setProgress({
-      progress: 'SETUP:USER',
-      system: res.data as SystemDTO,
-    });
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
-      progress: 'SETUP:USER',
-      system: res.data,
-    }));
-
-    return true;
+    )
   }, [navigate, systemForm, progress]);
 
   const handleCreateUser = useCallback(async () => {
@@ -122,7 +134,7 @@ export default function Setup () {
         onError,
       });
 
-      setErrors(errors);
+      setUserFormErrors(errors);
       return;
     }
 
@@ -132,16 +144,14 @@ export default function Setup () {
 
   const handleNext = useCallback(async () => {
     if (activeStep === 0) {
-      const isSuccess = await handleCreateSystem();
-
-      if (!isSuccess) return;
+      await handleCreateSystem(() => {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      });
     }
 
     if (activeStep === 1) {
       await handleCreateUser();
     }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   }, [activeStep, handleCreateSystem, handleCreateUser]);
 
   const handleBack = () => {
@@ -175,6 +185,10 @@ export default function Setup () {
       }
     }
   }, []);
+
+  // useEffect(() => {
+  //   localStorage.clear();
+  // }, []);
 
   useEffect(() => {
     setSystemForm({ ...system });
@@ -215,8 +229,8 @@ export default function Setup () {
                 size="small"
                 label="Store Name"
                 color="secondary"
-                error={Boolean(errors.store_name)}
-                helperText={errors.store_name}
+                error={Boolean(systemFormErrors.store_name)}
+                helperText={systemFormErrors.store_name}
                 onChange={handleSystemFormUpdate('store_name')}
               />
               <TextField
@@ -226,9 +240,9 @@ export default function Setup () {
                 value={systemForm.phone_number ?? ''}
                 size="small"
                 label="Phone Number"
-                error={Boolean(errors.phone_number)}
+                error={Boolean(systemFormErrors.phone_number)}
                 placeholder='+639123456789'
-                helperText={errors.phone_number}
+                helperText={systemFormErrors.phone_number}
                 color="secondary"
                 onChange={handleSystemFormUpdate('phone_number')}
               />
@@ -240,8 +254,8 @@ export default function Setup () {
                 size="small"
                 label="Email"
                 color="secondary"
-                error={Boolean(errors.email)}
-                helperText={errors.email}
+                error={Boolean(systemFormErrors.email)}
+                helperText={systemFormErrors.email}
                 onChange={handleSystemFormUpdate('email')}
               />
               <FormGroup>
@@ -271,8 +285,8 @@ export default function Setup () {
                 size="small"
                 label="Main Branch System ID"
                 color="secondary"
-                error={Boolean(errors.main_branch_id)}
-                helperText={errors.main_branch_id}
+                error={Boolean(systemFormErrors.main_branch_id)}
+                helperText={systemFormErrors.main_branch_id}
                 onChange={handleSystemFormUpdate('main_branch_id')}
               />
               <TextField
@@ -283,8 +297,8 @@ export default function Setup () {
                 size="small"
                 label="Master Key"
                 color="secondary"
-                error={Boolean(errors.master_key)}
-                helperText={errors.master_key}
+                error={Boolean(systemFormErrors.master_key)}
+                helperText={systemFormErrors.master_key}
                 type={progress.progress === 'SETUP:USER' ? 'password' : 'text'}
                 onChange={handleSystemFormUpdate('master_key')}
               />
@@ -295,8 +309,8 @@ export default function Setup () {
                 size="small"
                 label="API Url"
                 color="secondary"
-                error={Boolean(errors.api_url)}
-                helperText={errors.api_url}
+                error={Boolean(systemFormErrors.api_url)}
+                helperText={systemFormErrors.api_url}
                 onChange={handleSystemFormUpdate('api_url')}
               />
               <FormGroup>
@@ -329,20 +343,19 @@ export default function Setup () {
                 size="small"
                 label="First Name"
                 color="secondary"
-                error={Boolean(errors.first_name)}
-                helperText={errors.first_name}
+                error={Boolean(userFormErrors.first_name)}
+                helperText={userFormErrors.first_name}
                 onChange={handleUserFormUpdate('first_name')}
               />
               <TextField
                 required
                 fullWidth
-                autoFocus
                 value={userForm.last_name ?? ''}
                 size="small"
                 label="Last Name"
                 color="secondary"
-                error={Boolean(errors.last_name)}
-                helperText={errors.last_name}
+                error={Boolean(userFormErrors.last_name)}
+                helperText={userFormErrors.last_name}
                 onChange={handleUserFormUpdate('last_name')}
               />
               <TextField
@@ -351,9 +364,9 @@ export default function Setup () {
                 value={userForm.phone_number ?? ''}
                 size="small"
                 label="Phone Number"
-                error={Boolean(errors.phone_number)}
+                error={Boolean(userFormErrors.phone_number)}
                 placeholder='+639123456789'
-                helperText={errors.phone_number}
+                helperText={userFormErrors.phone_number}
                 color="secondary"
                 onChange={handleUserFormUpdate('phone_number')}
               />
@@ -364,8 +377,8 @@ export default function Setup () {
                 size="small"
                 label="Email"
                 color="secondary"
-                error={Boolean(errors.email)}
-                helperText={errors.email}
+                error={Boolean(userFormErrors.email)}
+                helperText={userFormErrors.email}
                 onChange={handleUserFormUpdate('email')}
               />
               <TextField
@@ -374,8 +387,8 @@ export default function Setup () {
                 size="small"
                 label="Address"
                 color="secondary"
-                error={Boolean(errors.address)}
-                helperText={errors.address}
+                error={Boolean(userFormErrors.address)}
+                helperText={userFormErrors.address}
                 onChange={handleUserFormUpdate('address')}
               />
               <DatePicker
@@ -392,8 +405,8 @@ export default function Setup () {
                 }}
                 slotProps={{
                   textField: {
-                    helperText: errors['birth_date'] ?? 'Birth-date',
-                    error: Boolean(errors['birth_date']),
+                    helperText: userFormErrors['birth_date'] ?? 'Birth-date',
+                    error: Boolean(userFormErrors['birth_date']),
                     size: 'small',
                     color: 'secondary'
                   }
@@ -406,8 +419,8 @@ export default function Setup () {
                 size="small"
                 label="Password"
                 color="secondary"
-                error={Boolean(errors.password)}
-                helperText={errors.password}
+                error={Boolean(userFormErrors.password)}
+                helperText={userFormErrors.password}
                 onChange={handleUserFormUpdate('password') as any}
               />
             </div>

@@ -25,10 +25,7 @@ export class AuditTrail {
   @AfterLoad()
   async getRelated() {
     const manager = global.datasource.createEntityManager();
-    const id =
-      this.resource_id_type === 'uuid'
-        ? `'${this.resource_id}'`
-        : this.resource_id;
+    const id = this.resource_id
     const rawData: any[] = await manager.query(
       `SELECT * FROM '${this.resource_table}' WHERE id = '${id}'`
     );

@@ -20,7 +20,7 @@ export default class SystemShowEvent implements IEvent {
   > {
     try {
       const requesterHasPermission =
-        eventData.user.hasPermission?.('view-system') ??
+        eventData.user.hasPermission?.('view-system') ||
         eventData.user.hasSystemKey;
 
       if (requesterHasPermission) {
