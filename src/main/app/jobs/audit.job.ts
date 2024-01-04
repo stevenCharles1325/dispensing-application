@@ -17,9 +17,13 @@ export default class AuditJob implements IJob {
       const user = authResponse.data as UserDTO;
 
       const AuditTrailRepository = global.datasource.getRepository('audit_trails')
+
+      if (!data.system_id) {
+        data.system_id = user.system_id;
+      }
+
       const audit = AuditTrailRepository.create({
         ...data,
-        system_id: user.system_id,
       });
 
       const errors = await validator(audit);

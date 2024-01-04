@@ -5,7 +5,7 @@ import {
   JoinColumn,
   AfterLoad,
   Relation,
-  AfterInsert,
+  BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
@@ -57,7 +57,7 @@ export class Discount {
     this.total_usage = discountTransactionCount + discountOrderCount;
   }
 
-  @AfterInsert()
+  @BeforeInsert()
   async getSystemData() {
     const authService = Provider.ioc<IAuthService>('AuthProvider');
     const token = authService.getAuthToken?.()?.token;

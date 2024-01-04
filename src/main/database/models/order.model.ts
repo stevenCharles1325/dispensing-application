@@ -10,6 +10,7 @@ import {
   Entity,
   CreateDateColumn,
   AfterLoad,
+  BeforeInsert,
   PrimaryGeneratedColumn,
   Relation,
   AfterInsert,
@@ -83,7 +84,7 @@ export class Order {
     await ItemRepository.save(item);
   }
 
-  @AfterInsert()
+  @BeforeInsert()
   async getSystemData() {
     const authService = Provider.ioc<IAuthService>('AuthProvider');
     const token = authService.getAuthToken?.()?.token;

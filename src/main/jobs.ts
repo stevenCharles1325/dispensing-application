@@ -50,7 +50,6 @@ export async function Bull(this: any, jobName: string, data: any) {
     try {
       const result = await job.handler({ data });
 
-      console.log(result);
       if (job?.onComplete) job.onComplete(job as unknown as Job, result, '');
     } catch (err) {
       if (job?.onFail) job.onFail(job as unknown as Job, err as Error, '');
@@ -66,14 +65,11 @@ export async function Bull(this: any, jobName: string, data: any) {
       if (job?.onComplete) worker.on('completed', job.onComplete);
       if (job?.onFail) worker.on('failed', job.onFail);
     } catch (err) {
-      console.log('JOB ERROR: ', err);
-
       try {
         const result = await job.handler({ data });
 
         if (job?.onComplete) job.onComplete(job as unknown as Job, result, '');
       } catch (err) {
-        console.log('JOB ERROR 2: ', err);
         if (job?.onFail) job.onFail(job as unknown as Job, err as Error, '');
       }
     }

@@ -5,7 +5,7 @@ import {
   Relation,
   ManyToOne,
   JoinColumn,
-  AfterInsert,
+  BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
@@ -19,7 +19,7 @@ import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 @Entity('shortcut_keys')
 export class ShortcutKey {
-  @AfterInsert()
+  @BeforeInsert()
   async getSystemData() {
     const authService = Provider.ioc<IAuthService>('AuthProvider');
     const token = authService.getAuthToken?.()?.token;

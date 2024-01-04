@@ -6,7 +6,7 @@ import {
   OneToOne,
   JoinColumn,
   AfterLoad,
-  AfterInsert,
+  BeforeInsert,
   Relation,
   CreateDateColumn,
   PrimaryGeneratedColumn,
@@ -45,7 +45,7 @@ export class AuditTrail {
     }
   }
 
-  @AfterInsert()
+  @BeforeInsert()
   async getSystemData() {
     const authService = Provider.ioc<IAuthService>('AuthProvider');
     const token = authService.getAuthToken?.()?.token;

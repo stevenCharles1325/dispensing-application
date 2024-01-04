@@ -375,7 +375,6 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
       if (agreed) {
         const res = await window.discount.deleteDiscount(selectedIds)
 
-        console.log(res);
         if (res.status === 'ERROR') {
           errorHandler({
             errors: res.errors,

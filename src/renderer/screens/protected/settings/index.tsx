@@ -20,8 +20,8 @@ import RolesAndPermissionsForm from "UI/components/Views/RolesAndPermissionsForm
 import useBarcode from "UI/hooks/useBarcode";
 import DeviceDialog from "UI/components/Dialogs/DevicesDialog";
 import ShortcutKeysForm from "UI/components/Views/ShortcutKeysForm";
-import hotkeys from "hotkeys-js";
 import DiscountForm from "UI/components/Views/DiscountForm";
+import usePermission from "UI/hooks/usePermission";
 
 type ModalNames =
   | 'BUSINESS DETAILS'
@@ -55,6 +55,7 @@ export default function Settings () {
 
   const { displayAlert } = useAlert();
   const { setPlaceHolder, setDisabled } = useSearch();
+  const hasPermission = usePermission();
 
   const drive = useAppDrive?.();
   const [openDrive] = drive?.subscribe?.('SETTINGS') ?? [];
@@ -134,15 +135,21 @@ export default function Settings () {
             </div>
 
             {/* Roles and Permissions */}
-            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
-              <Chip label="Roles & Permissions" variant="outlined" color="secondary" />
-              <p className="py-5 px-2 text-gray-400">
-                Edit system's roles and permissions?
-              </p>
-              <div className="w-full flex flex-row-reverse">
-                <Button color="secondary" onClick={handleOpenModal('ROLES AND PERMISSIONS')}>Edit</Button>
-              </div>
-            </div>
+            {
+              hasPermission('view-role') && hasPermission('view-permission')
+              ? (
+                <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+                  <Chip label="Roles & Permissions" variant="outlined" color="secondary" />
+                  <p className="py-5 px-2 text-gray-400">
+                    Edit system's roles and permissions?
+                  </p>
+                  <div className="w-full flex flex-row-reverse">
+                    <Button color="secondary" onClick={handleOpenModal('ROLES AND PERMISSIONS')}>Edit</Button>
+                  </div>
+                </div>
+              )
+              : null
+            }
 
             {/* Barcode select device */}
             <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
@@ -173,59 +180,89 @@ export default function Settings () {
 
           <div className="w-full h-fit flex flex-wrap gap-5 my-5">
             {/* Product's */}
-            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
-              <Chip label="Categories" variant="outlined" color="secondary" />
-              <p className="py-5 px-2 text-gray-400">
-                Check out the category list
-              </p>
-              <div className="w-full flex flex-row-reverse">
-                <Button color="secondary" onClick={handleOpenModal('CATEGORIES')}>Open</Button>
-              </div>
-            </div>
+            {
+              hasPermission('view-category')
+              ? (
+                <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+                  <Chip label="Categories" variant="outlined" color="secondary" />
+                  <p className="py-5 px-2 text-gray-400">
+                    Check out the category list
+                  </p>
+                  <div className="w-full flex flex-row-reverse">
+                    <Button color="secondary" onClick={handleOpenModal('CATEGORIES')}>Open</Button>
+                  </div>
+                </div>
+              )
+              : null
+            }
 
-            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
-              <Chip label="Brands" variant="outlined" color="secondary" />
-              <p className="py-5 px-2 text-gray-400">
-                Check out the brand list
-              </p>
-              <div className="w-full flex flex-row-reverse">
-                <Button color="secondary" onClick={handleOpenModal('BRANDS')}>Open</Button>
-              </div>
-            </div>
+            {
+              hasPermission('view-brand')
+              ? (
+                <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+                  <Chip label="Brands" variant="outlined" color="secondary" />
+                  <p className="py-5 px-2 text-gray-400">
+                    Check out the brand list
+                  </p>
+                  <div className="w-full flex flex-row-reverse">
+                    <Button color="secondary" onClick={handleOpenModal('BRANDS')}>Open</Button>
+                  </div>
+                </div>
+              )
+              : null
+            }
 
-            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
-              <Chip label="Suppliers" variant="outlined" color="secondary" />
-              <p className="py-5 px-2 text-gray-400">
-                Check out the supplier list
-              </p>
-              <div className="w-full flex flex-row-reverse">
-                <Button color="secondary" onClick={handleOpenModal('SUPPLIERS')}>Open</Button>
-              </div>
-            </div>
+            {
+              hasPermission('view-supplier')
+              ? (
+                <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+                  <Chip label="Suppliers" variant="outlined" color="secondary" />
+                  <p className="py-5 px-2 text-gray-400">
+                    Check out the supplier list
+                  </p>
+                  <div className="w-full flex flex-row-reverse">
+                    <Button color="secondary" onClick={handleOpenModal('SUPPLIERS')}>Open</Button>
+                  </div>
+                </div>
+              )
+              : null
+            }
 
-            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
-              <Chip label="Images" variant="outlined" color="secondary" />
-              <p className="py-5 px-2 text-gray-400">
-                Want to see your image list?
-              </p>
-              <div className="w-full flex flex-row-reverse">
-                <Button color="secondary" onClick={() => openDrive?.(true)}>
-                  Open
-                </Button>
-              </div>
-            </div>
+            {
+              hasPermission('view-image')
+              ? (
+                <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+                  <Chip label="Images" variant="outlined" color="secondary" />
+                  <p className="py-5 px-2 text-gray-400">
+                    Want to see your image list?
+                  </p>
+                  <div className="w-full flex flex-row-reverse">
+                    <Button color="secondary" onClick={() => openDrive?.(true)}>
+                      Open
+                    </Button>
+                  </div>
+                </div>
+              )
+              : null
+            }
 
-            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
-              <Chip label="Discounts" variant="outlined" color="secondary" />
-              <p className="py-5 px-2 text-gray-400">
-                Want to add new discounts?
-              </p>
-              <div className="w-full flex flex-row-reverse">
-                <Button color="secondary" onClick={handleOpenModal('DISCOUNTS')}>
-                  Open
-                </Button>
-              </div>
-            </div>
+            {
+              hasPermission('view-discount')
+              ? (
+                <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+                  <Chip label="Discounts" variant="outlined" color="secondary" />
+                  <p className="py-5 px-2 text-gray-400">
+                    Want to add new discounts?
+                  </p>
+                  <div className="w-full flex flex-row-reverse">
+                    <Button color="secondary" onClick={handleOpenModal('DISCOUNTS')}>
+                      Open
+                    </Button>
+                  </div>
+                </div>
+              )
+              : null
+            }
           </div>
 
           <Divider />

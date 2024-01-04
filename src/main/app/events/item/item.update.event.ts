@@ -39,7 +39,6 @@ export default class ItemDeleteEvent implements IEvent {
         const updatedItem = ItemRepository.merge(item, itemUpdate);
         const errors = await validator(updatedItem);
 
-        console.log(itemUpdate);
         if (errors.length) {
           return {
             errors,

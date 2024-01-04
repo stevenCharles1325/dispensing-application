@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  AfterInsert,
+  BeforeInsert,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MinLength } from 'class-validator';
@@ -16,7 +16,7 @@ import UserDTO from 'App/data-transfer-objects/user.dto';
 
 @Entity('brands')
 export class Brand {
-  @AfterInsert()
+  @BeforeInsert()
   async getSystemData() {
     const authService = Provider.ioc<IAuthService>('AuthProvider');
     const token = authService.getAuthToken?.()?.token;

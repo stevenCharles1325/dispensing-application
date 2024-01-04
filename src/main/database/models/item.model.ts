@@ -7,6 +7,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  BeforeInsert,
   AfterLoad,
   AfterInsert,
   BeforeUpdate,
@@ -107,7 +108,7 @@ export class Item {
     );
   }
 
-  @AfterInsert()
+  @BeforeInsert()
   async getSystemData() {
     const authService = Provider.ioc<IAuthService>('AuthProvider');
     const token = authService.getAuthToken?.()?.token;

@@ -6,6 +6,7 @@ import {
   OneToOne,
   Relation,
   JoinColumn,
+  BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
@@ -15,9 +16,24 @@ import { IsMobilePhone, Length, IsEmail, MinLength } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import type { Image } from './image.model';
 import type { System } from './system.model';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import Provider from '@IOC:Provider';
 
 @Entity('suppliers')
 export class Supplier {
+  @BeforeInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

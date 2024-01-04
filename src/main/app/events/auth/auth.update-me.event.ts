@@ -83,6 +83,7 @@ export default class AuthUpdateMeEvent implements IEvent {
       const user_data = {
         id: data.id,
         email: data.email,
+        system_id: data.system_id,
         image_url: data.image_url,
         first_name: data.first_name,
         last_name: data.last_name,

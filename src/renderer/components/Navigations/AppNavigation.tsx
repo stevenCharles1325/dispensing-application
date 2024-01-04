@@ -119,7 +119,6 @@ const getNotifs = async (
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
-    console.log(errorMessage);
 
     return {
       data: [],
@@ -139,7 +138,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
 
   const { date, time } = useDateTime();
   const hasPermission = usePermission();
-  const { addListener, getCommand } = useShortcutKeys();
+  const { addListener, reset, getCommand } = useShortcutKeys();
 
   const drive = useAppDrive();
   const [openDrive, driveListener] =
@@ -223,7 +222,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         const res = await window.notif.updateNotif(notif.id, 'SEEN');
 
         if (res.status === 'ERROR') {
-          console.log(res.errors);
           const errorMessage = res.errors?.[0] as unknown as string;
 
           return console.log(errorMessage);
@@ -237,9 +235,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   const handleVisitedNotif = async (id: string) => {
     const res = await window.notif.updateNotif(id, 'VISITED');
 
-    console.log('RES: ', res);
     if (res.status === 'ERROR') {
-      console.log(res.errors);
       const errorMessage = res.errors?.[0] as unknown as string;
       return console.log(errorMessage);
     }
@@ -251,7 +247,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     const res = await window.notif.deleteNotif(id);
 
     if (res.status === 'ERROR') {
-      console.log(res.errors);
       const errorMessage = res.errors?.[0] as unknown as string;
       return console.log(errorMessage);
     }
@@ -265,7 +260,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
       const res = await window.notif.deleteNotif(ids);
 
       if (res.status === 'ERROR') {
-        console.log(res.errors);
         const errorMessage = res.errors?.[0] as unknown as string;
         return console.log(errorMessage);
       }
@@ -318,6 +312,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
       return displayAlert?.(errorMessage ?? 'Please try again', 'error');
     }
 
+    reset?.();
     displayAlert?.('Successfully signed-out', 'success');
     return navigate('/sign-in', { replace: true });
   };

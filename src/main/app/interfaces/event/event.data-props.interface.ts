@@ -3,7 +3,7 @@ import { PermissionsKebabType } from 'Main/data/defaults/permissions';
 export default interface IEventDataProperties {
   payload: any[];
   user: {
-    id?: number | null;
+    id?: string | null;
     fullName?: string | null;
     token?: string | null;
 

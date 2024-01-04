@@ -2,7 +2,7 @@
 import {
   Column,
   Entity,
-  AfterInsert,
+  BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
@@ -16,7 +16,7 @@ import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 @Entity('categories')
 export class Category {
-  @AfterInsert()
+  @BeforeInsert()
   async getSystemData() {
     const authService = Provider.ioc<IAuthService>('AuthProvider');
     const token = authService.getAuthToken?.()?.token;

@@ -8,6 +8,7 @@ import {
   OneToOne,
   OneToMany,
   JoinColumn,
+  BeforeInsert,
   CreateDateColumn,
   PrimaryGeneratedColumn,
   AfterLoad,
@@ -26,9 +27,26 @@ import type { User } from './user.model';
 import type { Discount } from './discount.model';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 import { Bull } from 'Main/jobs';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import Provider from '@IOC:Provider';
 
 @Entity('transactions')
 export class Transaction {
+  @BeforeInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+
+      console.log('THIS: ', this);
+    }
+  }
+
   @AfterInsert()
   async discountTotalUsageListener() {
     const DiscountRepository = global.datasource.getRepository('discounts');

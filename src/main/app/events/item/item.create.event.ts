@@ -30,7 +30,6 @@ export default class ItemCreateEvent implements IEvent {
         const item = ItemRepository.create(payload);
         const errors = await validator(item);
 
-        console.log(item);
         if (errors && errors.length) {
           return {
             errors,

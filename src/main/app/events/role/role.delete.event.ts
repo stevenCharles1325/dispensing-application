@@ -26,9 +26,15 @@ export default class RoleDeleteEvent implements IEvent {
       const requesterHasPermission =
         eventData.user.hasPermission?.('delete-role');
 
-      const defaultRoleIds = [1, 2, 3, 4];
+      const defaultRoleIds = [
+        process.env.DEFAULT_ADMIN_ROLE_ID,
+        process.env.DEFAULT_CASHIER_ROLE_ID,
+        process.env.DEFAULT_OWNER_ROLE_ID,
+        process.env.DEFAULT_STORE_MANAGER_ROLE_ID,
+      ];
+
       if (
-        (typeof payload === 'number' && defaultRoleIds.includes(payload)) ||
+        (typeof payload === 'string' && defaultRoleIds.includes(payload)) ||
         (Array.isArray(payload) && payload.some((id ) => defaultRoleIds.includes(id)))
        ) {
         return {

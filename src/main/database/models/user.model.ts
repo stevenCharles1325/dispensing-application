@@ -10,7 +10,6 @@ import {
   ManyToOne,
   AfterLoad,
   JoinColumn,
-  AfterInsert,
   BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
@@ -45,7 +44,7 @@ export class User {
     this.role = role as Role;
   }
 
-  @AfterInsert()
+  @BeforeInsert()
   async getSystemData() {
     const authService = Provider.ioc<IAuthService>('AuthProvider');
     const token = authService.getAuthToken?.()?.token;
