@@ -18,7 +18,10 @@ import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const steps = ['Setup system information', 'Create an owner/manager account'];
+const steps = [
+  'Setup system information',
+  'Create an owner/manager account'
+];
 
 const CACHE_KEY = 'SYSTEM-SETUP:PROGRESS';
 

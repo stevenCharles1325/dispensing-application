@@ -33,6 +33,7 @@ import useSearch from 'UI/hooks/useSearch';
 import debounce from 'lodash.debounce';
 import { List, ListRowRenderer } from 'react-virtualized';
 import Loading from '../Loading';
+import useConnectionStatus from 'UI/hooks/useConnectionStatus';
 
 // Icons
 import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
@@ -65,6 +66,9 @@ import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined
 import usePermission from 'UI/hooks/usePermission';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import useDateTime from 'UI/hooks/useDateTime';
+import CircleIcon from '@mui/icons-material/Circle';
+import SyncIcon from '@mui/icons-material/Sync';
+import SyncDisabledOutlinedIcon from '@mui/icons-material/SyncDisabledOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -144,11 +148,18 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   const [openDrive, driveListener] =
     drive?.subscribe?.('APP_NAVIGATION') ?? [];
 
+  const connection = useConnectionStatus();
   const navigate = useNavigate();
   const location = useLocation();
   const { displayAlert } = useAlert();
   const { searchText, placeHolder, disabled, setSearchText, setDisabled } =
     useSearch();
+
+  const connectionColor = connection === 'offline'
+    ? 'gray'
+    : connection === 'online'
+      ? 'rgb(68, 183, 0)'
+      : '#ed6c02';
 
   const activeRouteId = navigationRoutes.findIndex(({ redirectPath }) =>
     redirectPath === location?.pathname
@@ -577,7 +588,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           ))}
         </div>
         <div className="navigation-screen-container grow my-5 mr-5 bg-white rounded-2xl p-5 flex flex-col overflow-auto">
-          <div className="w-full h-[50px] flex justify-between px-5">
+          <div className="w-full h-[50px] flex justify-between pr-5">
             <Input
               ref={inputRef as Ref<InputRef>}
               opacity="clear"
@@ -607,21 +618,34 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                 handleDebouncedSearching(e.target.value);
               }}
             />
-            <div className="w-[100px] flex justify-end gap-5 items-center">
-              {
-                hasPermission('view-notification')
-                ? (
-                  <IconButton onClick={handleOpenNotifMenu}>
-                    <Badge badgeContent={unseenNotifs?.length ?? 0} color="secondary">
-                      <NotificationsNoneOutlinedIcon />
-                    </Badge>
-                  </IconButton>
-                )
-                : null
-              }
-              <IconButton onClick={handleOpenProfileMenu}>
-                <PersonOutlinedIcon />
-              </IconButton>
+            <div className='flex flex-row gap-10 items-center'>
+              <div className='p-1 border rounded-full border-[#9c27b0] flex gap-4'>
+                <CircleIcon
+                  fontSize='small'
+                  sx={{
+                    color: connectionColor
+                  }}
+                />
+                <SyncIcon
+                  fontSize='small'
+                />
+              </div>
+              <div className="w-[100px] flex justify-end gap-5 items-center">
+                {
+                  hasPermission('view-notification')
+                  ? (
+                    <IconButton onClick={handleOpenNotifMenu}>
+                      <Badge badgeContent={unseenNotifs?.length ?? 0} color="secondary">
+                        <NotificationsNoneOutlinedIcon />
+                      </Badge>
+                    </IconButton>
+                  )
+                  : null
+                }
+                <IconButton onClick={handleOpenProfileMenu}>
+                  <PersonOutlinedIcon />
+                </IconButton>
+              </div>
             </div>
           </div>
           <div className="grow overflow-auto scrollbar scrollbar-thumb-blue-700 scrollbar-track-blue-300">{children}</div>
