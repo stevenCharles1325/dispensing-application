@@ -7,6 +7,7 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
 import handleError from 'App/modules/error-handler.module';
 import importSQLDump from 'App/modules/import/transaction/import-sql.module';
+import { Bull } from 'Main/jobs';
 
 export default class ImportTransactionHistoryEvent implements IEvent {
   public channel: string = 'transaction-history:import';
@@ -19,13 +20,28 @@ export default class ImportTransactionHistoryEvent implements IEvent {
     IResponse<string[] | IPOSError[] | ITransactionSpreadSheet | any>
   > {
     try {
+      const { user } = eventData;
       const requesterHasPermission =
         eventData.user.hasPermission?.('upload-data');
 
       if (requesterHasPermission) {
         const sqlFilePath = eventData.payload[0] as string;
 
-        return await importSQLDump(sqlFilePath) as IResponse<any>;
+        const importRes = await importSQLDump(sqlFilePath) as IResponse<any>;
+
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as unknown as string,
+          resource_id: null,
+          resource_table: 'transactions',
+          resource_id_type: null,
+          action: 'import',
+          status: 'SUCCEEDED',
+          description: `User ${
+            user.fullName
+          } has successfully imported a transaction-history`,
+        });
+
+        return importRes;
       }
 
       return {

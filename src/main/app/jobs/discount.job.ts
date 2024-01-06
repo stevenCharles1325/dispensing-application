@@ -4,6 +4,7 @@ import { Job } from 'bullmq';
 import { Bull } from 'Main/jobs';
 import process from 'node:process';
 import { parentPort } from 'node:worker_threads';
+import { In } from "typeorm"
 
 export default class DiscountJob implements IJob {
   readonly key = 'DISCOUNT_JOB';
@@ -12,10 +13,26 @@ export default class DiscountJob implements IJob {
     try {
       console.log('CHECKING DISCOUNT SCHEDULER');
       const DiscountRepository = global.datasource.getRepository('discounts');
+      const ItemRepository = global.datasource.getRepository('items');
+
       const discounts = await DiscountRepository.createQueryBuilder('discount')
         .where(`discount.status = 'active'`)
-        .andWhere(`DATE(discount.end_date, 'localtime') <= DATE('now', 'localtime')`)
+        .andWhere(`DATE(discount.end_date, 'localtime') = DATE('now', 'localtime')`)
         .getMany();
+      const discountIds = discounts.map(({ id }) => id);
+
+      const items = await ItemRepository.createQueryBuilder('items')
+        .where({
+          discount_id: In(discountIds),
+        })
+        .getMany();
+
+      const updatedItems = items.map((item) => ({
+        ...item,
+        discount_id: null,
+      })) as any[];
+
+      await ItemRepository.save(updatedItems);
 
       for await (const discount of discounts) {
         const { title } = discount;
@@ -42,6 +59,7 @@ export default class DiscountJob implements IJob {
 
       parentPort?.postMessage('done');
     } catch (error) {
+      console.log('ERROR:  ', error);
       return Promise.reject(error);
     }
   }

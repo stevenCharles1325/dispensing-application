@@ -7,6 +7,7 @@ import IResponse from 'App/interfaces/pos/pos.response.interface';
 import handleError from 'App/modules/error-handler.module';
 import DiscountRepository from 'App/repositories/discount.repository';
 import ItemRepository from 'App/repositories/item.repository';
+import { Discount } from 'Main/database/models/discount.model';
 import { Bull } from 'Main/jobs';
 import { In } from "typeorm"
 
@@ -23,11 +24,13 @@ export default class DiscountUpdateEvent implements IEvent {
     try {
       const { user } = eventData;
       const id = eventData.payload[0];
-      const itemIds: ItemDTO['id'][] = eventData.payload[1];
+      const discountUpdate: Discount = eventData.payload[1];
+      const itemIds: ItemDTO['id'][] = eventData.payload[2];
       const requesterHasPermission = user.hasPermission?.('update-discount');
 
       if (requesterHasPermission) {
         const discount = await DiscountRepository.findOneByOrFail({ id });
+        const updatedDiscount = DiscountRepository.merge(discount, discountUpdate);
         const items = await ItemRepository.createQueryBuilder()
           .where({
             id: In(itemIds),
@@ -74,8 +77,10 @@ export default class DiscountUpdateEvent implements IEvent {
           }));
         }
 
+        const data = await DiscountRepository.save(updatedDiscount);
+
         return {
-          data: discount,
+          data,
           code: 'REQ_OK',
           status: 'SUCCESS',
         } as IResponse<typeof discount>;

@@ -41,7 +41,6 @@ export default class BrandCreateEvent implements IEvent {
 
         const data: BrandDTO = await BrandRepository.save(brand);
 
-        // Copy this
         await Bull('AUDIT_JOB', {
           user_id: user.id as unknown as string,
           resource_id: data.id.toString(),

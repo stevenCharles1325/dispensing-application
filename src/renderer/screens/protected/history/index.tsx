@@ -241,7 +241,7 @@ export default function Logs() {
 
   const inputFileRef = useRef<any>(null);
 
-  const { data: auditData } = useQuery({
+  const { data: auditData, refetch: refreshAudits } = useQuery({
     queryKey: ['audits', searchText],
     queryFn: async () => {
       const res = await getAuditTrail(searchText);
@@ -312,6 +312,8 @@ export default function Logs() {
 
   const handleChangeTab = (_: any, newValue: number) => {
     setCurrentTab(newValue);
+    refreshAudits();
+    refreshPayments();
   };
 
   const handleCloseReceiptDialog = () => {

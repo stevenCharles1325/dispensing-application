@@ -58,7 +58,6 @@ import {
   VisibilityOutlined
 } from '@mui/icons-material';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
-import CheckBox from '@mui/icons-material/CheckBox';
 
 
 const columns: Array<GridColDef> = [
@@ -708,6 +707,7 @@ export default function InventoryForm({
       renderCell: (params: any) => (
         <>
           <Checkbox
+            disabled={['deactivated', 'expired'].includes(params.row.status)}
             checked={selectedDiscountId === params.id}
             onChange={() => {
               if (selectedDiscountId === params.id) {

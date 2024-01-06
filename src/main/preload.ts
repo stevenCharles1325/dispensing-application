@@ -314,9 +314,10 @@ const discountHandler = {
 
   updateDiscount: async (
     id: string,
-    payload: ItemDTO['id'][],
+    payload: DiscountDTO,
+    itemIds: ItemDTO['id'][],
   ): Promise<IResponse<string[] | IPOSError[] | DiscountDTO>> =>
-    ipcRenderer.invoke('discount:update', id, payload),
+    ipcRenderer.invoke('discount:update', id, payload, itemIds),
 
   deleteDiscount: async (id: string | string[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('discount:delete', id),

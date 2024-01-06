@@ -45,7 +45,7 @@ const columns: Array<GridColDef> = [
     field: 'sku',
     headerName: 'SKU (Stock Keeping Unit)',
     flex: 1,
-    type: 'number',
+    type: 'string',
     align: 'left',
     headerAlign: 'left',
   },

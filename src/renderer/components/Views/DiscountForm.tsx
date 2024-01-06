@@ -355,7 +355,8 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
   const handleUpdate = useCallback(async () => {
     const res = await window.discount.updateDiscount(
       selectedIds[0],
-      selectedItemIds,
+      form as DiscountDTO,
+      form.status === 'deactivated' ? [] : selectedItemIds,
     );
 
     if (res.status === 'ERROR') {
@@ -368,7 +369,7 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
     await refreshItem();
     handleCloseModal();
     displayAlert?.('Successfully updated discount', 'success');
-  }, [selectedIds, selectedItemIds]);
+  }, [selectedIds, form, selectedItemIds]);
 
   const handleDeleteSelectedItem = useCallback(() => {
     confirm?.('Are you sure you want to delete selected discount(s)?',  async (agreed) => {
@@ -451,7 +452,11 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
       >
         <Tabs value={tab} onChange={handleOnChangeTab} aria-label='discount-tabs'>
           <Tab label="Discount Details" {...allyProps(0)} />
-          <Tab label="Attached Items" {...allyProps(0)} />
+          {
+            form.status === 'active'
+            ? <Tab label="Attached Items" {...allyProps(1)} />
+            : null
+          }
         </Tabs>
         <Divider />
         {
@@ -697,7 +702,8 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
                     form.total_usage &&
                     form.usage_limit &&
                     form.total_usage >= form.usage_limit
-                  )
+                  ) ||
+                  form.status === 'expired'
                 }
                 getOptionDisabled={(option) => {
                   if (modalAction === 'create') {

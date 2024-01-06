@@ -43,8 +43,8 @@ export default class PaymentCreateEvent implements IEvent {
         const order: IOrderDetails = payload;
 
         if (order.payment_method === 'cash') {
-          const discountIds: number[] = [
-            order.discount_id ?? 0,
+          const discountIds: string[] = [
+            order.discount_id ?? '',
             ...order.items.map(({ discount_id }) => discount_id),
           ];
 
@@ -65,6 +65,18 @@ export default class PaymentCreateEvent implements IEvent {
                     `Cannot apply ${
                       discount.title
                     } coupon as usage limit might exceed or have exceeded.`
+                  ],
+                  code: 'REQ_INVALID',
+                  status: 'ERROR',
+                } as unknown as IResponse<string[]>;
+              }
+
+              if (discount.status === 'expired') {
+                return {
+                  errors: [
+                    `Cannot apply ${
+                      discount.title
+                    } coupon as it is expired.`
                   ],
                   code: 'REQ_INVALID',
                   status: 'ERROR',

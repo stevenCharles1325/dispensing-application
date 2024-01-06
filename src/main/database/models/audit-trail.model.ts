@@ -26,11 +26,14 @@ export class AuditTrail {
   async getRelated() {
     const manager = global.datasource.createEntityManager();
     const id = this.resource_id
-    const rawData: any[] = await manager.query(
-      `SELECT * FROM '${this.resource_table}' WHERE id = '${id}'`
-    );
 
-    this.related = rawData[0];
+    if (id) {
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM '${this.resource_table}' WHERE id = '${id}'`
+      );
+
+      this.related = rawData[0];
+    }
   }
 
   @AfterLoad()
@@ -80,16 +83,10 @@ export class AuditTrail {
   })
   resource_table: string;
 
-  @Column()
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
-  })
+  @Column({ nullable: true })
   resource_id: string;
 
-  @Column()
-  @IsIn(['uuid'], {
-    message: ValidationMessage.notEmpty,
-  })
+  @Column({ nullable: true })
   resource_id_type: string;
 
   @Column()
