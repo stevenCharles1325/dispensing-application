@@ -72,7 +72,7 @@ export default class InventoryRecordCreateEvent implements IEvent {
         await Bull('AUDIT_JOB', {
           user_id: user.id as unknown as string,
           resource_id: data.id.toString(),
-          resource_table: 'inventory-records',
+          resource_table: 'inventory_records',
           resource_id_type: 'uuid',
           action: 'create',
           status: 'SUCCEEDED',
@@ -88,7 +88,7 @@ export default class InventoryRecordCreateEvent implements IEvent {
 
       await Bull('AUDIT_JOB', {
         user_id: user.id as unknown as string,
-        resource_table: 'inventory-records',
+        resource_table: 'inventory_records',
         action: 'create',
         status: 'FAILED',
         description: `User ${user.fullName} has no permission to create a new Stocks-record`,

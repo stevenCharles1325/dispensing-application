@@ -12,7 +12,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { User } from './user.model';
-import type { Item } from 'electron';
+import type { Item } from './item.model';
 import { MinLength, IsIn, IsPositive, ValidateIf } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';

@@ -619,7 +619,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               }}
             />
             <div className='flex flex-row gap-10 items-center'>
-              <div className='p-1 border rounded-full border-[#9c27b0] flex gap-4'>
+              {/* <div className='p-1 border rounded-full border-[#9c27b0] flex gap-4'>
                 <CircleIcon
                   fontSize='small'
                   sx={{
@@ -629,7 +629,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
                 <SyncIcon
                   fontSize='small'
                 />
-              </div>
+              </div> */}
               <div className="w-[100px] flex justify-end gap-5 items-center">
                 {
                   hasPermission('view-notification')

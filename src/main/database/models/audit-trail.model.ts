@@ -11,7 +11,7 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { MinLength, IsNotEmpty, IsIn, ValidateIf } from 'class-validator';
+import { MinLength, IsNotEmpty, IsIn } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import type { User } from './user.model';
 import IAuthService from 'App/interfaces/service/service.auth.interface';

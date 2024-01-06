@@ -45,6 +45,7 @@ export default function Setup () {
   });
   const [progress, setProgress] = useState<IProgressCache>(initialProgress);
   const [userForm, setUserForm] = useState<Partial<UserDTO>>({
+    birth_date: new Date(),
     role_id: process.env.DEFAULT_OWNER_ROLE_ID
   });
   const [system, setSystem] = useState<Partial<SystemDTO>>({});
@@ -75,7 +76,7 @@ export default function Setup () {
     if (progress.progress === 'SETUP:USER') return cb?.();
 
     confirm?.(
-      'Are you sure you want to submit? Once you submit you will not be able to edit all system information.',
+      'Are you sure you want to submit? Once you submit, these fields will be disabled.',
       async (agreed) => {
         if (agreed) {
 
