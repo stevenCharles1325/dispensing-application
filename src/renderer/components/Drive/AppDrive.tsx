@@ -166,28 +166,32 @@ export default function AppDrive({
 
   const handleSaveImage = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newImage = event.target.files?.[0];
+      if (!event.target?.files) return;
 
-      if (newImage && bucketName && displayAlert) {
-        const res = await window.image.createImage(bucketName, {
-          name: newImage.name,
-          url: newImage.path,
-          type: newImage.type,
-        });
+      const files = Object.values(event.target.files);
 
-        if (res.status === 'ERROR') {
-          const errorMessage =
-            typeof res.errors?.[0] === 'string'
-              ? res.errors?.[0]
-              : (res.errors?.[0] as unknown as IPOSError).message;
+      for await (const newImage of files) {
+        if (newImage && bucketName && displayAlert) {
+          const res = await window.image.createImage(bucketName, {
+            name: newImage.name,
+            url: newImage.path,
+            type: newImage.type,
+          });
 
-          console.log('ERROR: ', res.errors);
-          return displayAlert?.(errorMessage ?? 'Please try again', 'error');
+          if (res.status === 'ERROR') {
+            const errorMessage =
+              typeof res.errors?.[0] === 'string'
+                ? res.errors?.[0]
+                : (res.errors?.[0] as unknown as IPOSError).message;
+
+            console.log('ERROR: ', res.errors);
+            return displayAlert?.(errorMessage ?? 'Please try again', 'error');
+          }
+
+          refetch();
         }
-
-        refetch();
-        return displayAlert?.('Successfully uploaded image', 'success');
       }
+      return displayAlert?.('Successfully uploaded image', 'success');
     },
     [bucketName, displayAlert, refetch]
   );
@@ -266,6 +270,7 @@ export default function AppDrive({
                     Upload file
                     <VisuallyHiddenInput
                       type="file"
+                      multiple
                       onChange={handleSaveImage}
                       accept="image/png, image/gif, image/jpeg"
                     />

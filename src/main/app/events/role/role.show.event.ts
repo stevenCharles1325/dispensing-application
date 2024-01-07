@@ -45,8 +45,17 @@ export default class RoleShowEvent implements IEvent {
           roleQuery.take(take).skip(skip);
         }
 
-        if (user.role.name !== 'Owner') {
+        if (user.role.name === 'Owner') {
           roleQuery.where(`role.name != 'Owner'`);
+        } else if (user.role.name === 'Administrator') {
+          roleQuery
+            .where(`role.name != 'Owner'`)
+            .andWhere(`role.name != 'Administrator'`);
+        } else if (user.role.name === 'Store Manager') {
+          roleQuery
+            .where(`role.name != 'Owner'`)
+            .andWhere(`role.name != 'Administrator'`)
+            .andWhere(`role.name != 'Store Manager'`);
         }
 
         if (payload === 'all') {

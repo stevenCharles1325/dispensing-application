@@ -15,9 +15,9 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const EXEC_PATH = IS_PROD
   ? path.join(
       AppRootDir.get(),
-      `../../assets/object-storage/${getPlatform()}/bin`
+      `../../assets/binaries/object-storage/${getPlatform()}/bin`
     )
-  : `${AppRootDir.get()}/assets/object-storage/${getPlatform()}/bin`;
+  : `${AppRootDir.get()}/assets/binaries/object-storage/${getPlatform()}/bin`;
 
 const executeMinioBinary = () => {
   try {

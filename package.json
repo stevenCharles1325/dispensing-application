@@ -36,9 +36,9 @@
   ],
   "main": "./src/main/main.ts",
   "scripts": {
-    "dep:binaries:minio:linux": "mkdir -p assets/object-storage/linux/bin && cd assets/object-storage/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
-    "dep:binaries:minio:mac": "mkdir -p assets/object-storage/mac/bin && cd assets/object-storage/mac/bin && wget https://dl.min.io/server/minio/release/darwin-arm64/minio",
-    "dep:binaries:minio:win": "mkdir -p assets/object-storage/win/bin && cd assets/object-storage/win/bin && wget https://dl.min.io/server/minio/release/windows-amd64/minio.exe",
+    "dep:binaries:minio:linux": "mkdir -p assets/binaries/object-storage/linux/bin && cd assets/binaries/object-storage/linux/bin && wget https://dl.min.io/server/minio/release/linux-amd64/minio",
+    "dep:binaries:minio:mac": "mkdir -p assets/binaries/object-storage/mac/bin && cd assets/binaries/object-storage/mac/bin && wget https://dl.min.io/server/minio/release/darwin-arm64/minio",
+    "dep:binaries:minio:win": "mkdir -p assets/binaries/object-storage/win/bin && cd assets/binaries/object-storage/win/bin && wget https://dl.min.io/server/minio/release/windows-amd64/minio.exe",
     "dep:binaries:minio": "concurrently \"npm run dep:binaries:minio:linux\" \"npm run dep:binaries:minio:mac\" \"npm run dep:binaries:minio:win\"",
     "migration:fresh": "npm run schema:drop && npm run migration:run",
     "migration:refresh": "npm run migration:rollback && npm run migration:run",

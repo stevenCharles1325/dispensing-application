@@ -23,6 +23,7 @@ import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadshe
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
 import useConfirm from 'UI/hooks/useConfirm';
+import titleCase from 'UI/helpers/titleCase';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -33,7 +34,7 @@ const logsColumns: Array<GridColDef> = [
     align: 'left',
     headerAlign: 'left',
     valueFormatter(params) {
-      return `${params.value.first_name} ${params.value.last_name}`;
+      return titleCase(`${params.value.first_name} ${params.value.last_name}`);
     },
   },
   {

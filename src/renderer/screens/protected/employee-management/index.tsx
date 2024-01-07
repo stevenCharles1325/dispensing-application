@@ -316,14 +316,14 @@ export default function EmployeeManagement () {
               onClick={handleEditSelectedItem}
               disabled={selectedIds.length === 0 || selectedIds.length > 1}
             />
-            <Chip
+            {/* <Chip
               variant="outlined"
               color="error"
               icon={<DeleteOutlineOutlined />}
               label="Delete selected Employee"
               onClick={handleDeleteSelectedUser}
               disabled={selectedIds.length === 0}
-            />
+            /> */}
           </div>
           <DataGrid
             className="shadow"
