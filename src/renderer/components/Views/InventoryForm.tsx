@@ -152,29 +152,32 @@ interface CustomProps {
   name: string;
 }
 
-const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
-  function PesoNumberFormat(props, ref) {
-    const { onChange, ...other } = props;
+// const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
+//   function PesoNumberFormat(props, ref) {
+//     const { onChange, ...other } = props;
 
-    return (
-      <NumericFormat
-        {...other}
-        getInputRef={ref}
-        onValueChange={(values) => {
-          onChange({
-            target: {
-              name: props.name,
-              value: values.value,
-            },
-          });
-        }}
-        thousandSeparator
-        valueIsNumericString
-        prefix="₱"
-      />
-    );
-  }
-);
+//     return (
+//       <NumericFormat
+//         {...other}
+//         getInputRef={ref}
+//         onValueChange={(values) => {
+//           onChange({
+//             target: {
+//               name: props.name,
+//               value: values.value,
+//             },
+//           });
+//         }}
+//         thousandSeparator
+//         valueIsNumericString
+//         prefix="₱"
+//       />
+//     );
+//   }
+// );
+
+const date = new Date();
+date.setDate(date.getDate() + 1);
 
 const NumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
   function PesoNumberFormat(props, ref) {
@@ -240,7 +243,7 @@ export default function InventoryForm({
     barcode: '',
     stock_quantity: 0,
     discount_id: null,
-    expired_at: new Date(),
+    expired_at: date,
     status: 'available',
   } as const;
 
@@ -904,6 +907,7 @@ export default function InventoryForm({
                         payload: new Date(value.toString()),
                       });
                     }}
+                    minDate={dayjs(date)}
                     slotProps={{
                       textField: {
                         helperText: errors['expired_at'],
