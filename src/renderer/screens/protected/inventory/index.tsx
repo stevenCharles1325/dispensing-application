@@ -42,8 +42,8 @@ const columns: Array<GridColDef> = [
     renderCell: ({ value }) => `${value?.length ? value : '—'}`
   },
   {
-    field: 'sku',
-    headerName: 'SKU (Stock Keeping Unit)',
+    field: 'item_code',
+    headerName: 'Item ID',
     flex: 1,
     type: 'string',
     align: 'left',
@@ -60,12 +60,6 @@ const columns: Array<GridColDef> = [
     headerName: 'Quantity',
     flex: 1,
     type: 'string',
-  },
-  {
-    field: 'selling_price',
-    headerName: 'Selling Price (Peso)',
-    flex: 1,
-    type: 'number',
   },
   {
     field: 'status',
@@ -280,7 +274,7 @@ export default function Inventory() {
           count={data?.total}
           label="total products displayed"
         />
-        <CounterWidget
+        {/* <CounterWidget
           icon={<LocalOfferOutlinedIcon color="secondary" fontSize="large" />}
           count={
             formatCurrency(
@@ -288,8 +282,8 @@ export default function Inventory() {
             )
           }
           label="total selling price displayed"
-        />
-        <CounterWidget
+        /> */}
+        {/* <CounterWidget
           icon={<MonetizationOnOutlinedIcon color="warning" fontSize="large" />}
           count={
             formatCurrency(
@@ -297,7 +291,7 @@ export default function Inventory() {
             )
           }
           label="total cost price displayed"
-        />
+        /> */}
       </div>
       <div className="w-full h-[650px]">
         <div className="w-full flex flex-row py-4 gap-3">

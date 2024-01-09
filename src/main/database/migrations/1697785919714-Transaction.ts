@@ -19,6 +19,10 @@ export class Transaction1697785919714 implements MigrationInterface {
             isGenerated: true,
           },
           {
+            name: 'transaction_code',
+            type: 'varchar',
+          },
+          {
             name: 'system_id',
             type: 'varchar',
           },
@@ -86,7 +90,7 @@ export class Transaction1697785919714 implements MigrationInterface {
           {
             name: 'total',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: 'created_at',

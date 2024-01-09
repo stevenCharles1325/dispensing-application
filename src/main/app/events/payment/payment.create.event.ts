@@ -33,7 +33,7 @@ export default class PaymentCreateEvent implements IEvent {
       const { user } = eventData;
       const payload: PaymentDTO = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.(
-        'create-customer-payment'
+        'create-transaction'
       );
 
       if (requesterHasPermission && user.id) {
@@ -133,6 +133,7 @@ export default class PaymentCreateEvent implements IEvent {
             tax_rate: item.tax_rate,
             price: item.selling_price,
             discount_id: item.discount_id,
+            unit_of_measurement: item.unit_of_measurement
           }));
           const orders = OrderRepository.create(desiredOrder);
           await OrderRepository.save(orders);
@@ -145,9 +146,9 @@ export default class PaymentCreateEvent implements IEvent {
             resource_id: data.id.toString(),
             resource_table: 'transactions',
             resource_id_type: 'uuid',
-            action: 'payment',
+            action: 'TRANSACT',
             status: 'SUCCEEDED',
-            description: `User ${user.fullName} has successfully received a customer payment`,
+            description: `User ${user.fullName} has successfully performed a transaction`,
           });
 
           return {

@@ -29,6 +29,7 @@ import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 import { Bull } from 'Main/jobs';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 @Entity('transactions')
 export class Transaction {
@@ -45,6 +46,24 @@ export class Transaction {
 
       console.log('THIS: ', this);
     }
+  }
+
+  @BeforeInsert()
+  async computeTransactionCode() {
+    const TransactionRepository = global.datasource.getRepository('transactions');
+
+    const date = new Date();
+
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+
+    const count = ((await TransactionRepository.createQueryBuilder()
+      .getCount()) + 1)
+      .toString()
+      .padStart(2, '0');
+
+    this.transaction_code = `${year}${month}${day}${count}`;
   }
 
   @AfterInsert()
@@ -141,6 +160,9 @@ export class Transaction {
     nullable: true,
   })
   system_id: string | null;
+
+  @Column({ nullable: true })
+  transaction_code: string;
 
   @Column()
   creator_id: string;

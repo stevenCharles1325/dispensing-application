@@ -10,6 +10,8 @@ export default interface ItemDTO {
   id: string;
   image_id?: string;
   system_id: string;
+  item_code: string;
+  batch_code: string;
   category_id: string;
   brand_id: string;
   supplier_id: string;
@@ -27,6 +29,7 @@ export default interface ItemDTO {
   stock_quantity: number;
   status: IItemStatus;
 
+  expired_at: Date;
   created_at: Date;
   updated_at: Date;
   deleted_at?: Date;

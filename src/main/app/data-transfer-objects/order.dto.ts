@@ -13,4 +13,5 @@ export default interface OrderDTO {
   created_at: Date;
   item: ItemDTO;
   discount: DiscountDTO;
+  unit_of_measurement: string;
 }

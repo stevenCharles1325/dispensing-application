@@ -40,7 +40,7 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import SupplierForm from './SupplierForm';
-import { DateTimeField } from '@mui/x-date-pickers';
+import { DatePicker, DateTimeField } from '@mui/x-date-pickers';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
@@ -229,6 +229,8 @@ export default function InventoryForm({
     category_id: null,
     brand_id: null,
     sku: '',
+    item_code: '',
+    batch_code: '',
     name: '',
     description: '',
     cost_price: 0,
@@ -238,6 +240,7 @@ export default function InventoryForm({
     barcode: '',
     stock_quantity: 0,
     discount_id: null,
+    expired_at: new Date(),
     status: 'available',
   } as const;
 
@@ -284,10 +287,15 @@ export default function InventoryForm({
           ...state,
           discount_id: action.payload,
         };
-      case 'sku':
+      case 'item_code':
         return {
           ...state,
-          sku: action.payload,
+          item_code: action.payload,
+        };
+      case 'batch_code':
+        return {
+          ...state,
+          batch_code: action.payload,
         };
       case 'description':
         return {
@@ -328,6 +336,11 @@ export default function InventoryForm({
         return {
           ...state,
           status: action.payload,
+        };
+      case 'expired_at':
+        return {
+          ...state,
+          expired_at: action.payload,
         };
       default:
         return state;
@@ -735,7 +748,7 @@ export default function InventoryForm({
           ? <Tab label="Stocks" {...allyProps(1)} />
           : null
         }
-        <Tab label="Discount" {...allyProps(2)} />
+        {/* <Tab label="Discount" {...allyProps(2)} /> */}
       </Tabs>
       <Divider />
       {
@@ -766,13 +779,13 @@ export default function InventoryForm({
                     error={Boolean(errors.name)}
                   />
                   <TextField
-                    label="Stock Keeping Unit (SKU)"
+                    label="Batch ID"
                     required
-                    value={form.sku}
+                    value={form.batch_code}
                     color="secondary"
                     onChange={(event) => {
                       dispatch({
-                        type: 'sku',
+                        type: 'batch_code',
                         payload: event.target.value?.toUpperCase(),
                       });
                     }}
@@ -781,8 +794,27 @@ export default function InventoryForm({
                     sx={{
                       width: 300,
                     }}
-                    helperText={errors.sku}
-                    error={Boolean(errors.sku)}
+                    helperText={errors.batch_code}
+                    error={Boolean(errors.batch_code)}
+                  />
+                  <TextField
+                    label="Item ID"
+                    required
+                    value={form.item_code}
+                    color="secondary"
+                    onChange={(event) => {
+                      dispatch({
+                        type: 'item_code',
+                        payload: event.target.value?.toUpperCase(),
+                      });
+                    }}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.item_code}
+                    error={Boolean(errors.item_code)}
                   />
                   <TextField
                     label="Barcode"
@@ -860,6 +892,30 @@ export default function InventoryForm({
                       />
                     )}
                   />
+                  <DatePicker
+                    label="Expiration Date"
+                    views={['year', 'month', 'day']}
+                    value={dayjs(form.expired_at)}
+                    onChange={(value) => {
+                      if (!value) return;
+
+                      dispatch({
+                        type: 'expired_at',
+                        payload: new Date(value.toString()),
+                      });
+                    }}
+                    slotProps={{
+                      textField: {
+                        helperText: errors['expired_at'],
+                        error: Boolean(errors['expired_at']),
+                        size: 'small',
+                        color: 'secondary'
+                      },
+                    }}
+                    sx={{
+                      width: 300
+                    }}
+                  />
                   <TextField
                     label="Description"
                     color="secondary"
@@ -884,7 +940,7 @@ export default function InventoryForm({
               </div>
 
               {/* PRICING INFORMATION */}
-              <div className="w-full h-fit">
+              {/* <div className="w-full h-fit">
                 <h3>Pricing Information</h3>
                 <br />
                 <div className="w-full flex flex-wrap gap-5">
@@ -955,7 +1011,7 @@ export default function InventoryForm({
                     error={Boolean(errors.tax_rate)}
                   />
                 </div>
-              </div>
+              </div> */}
 
               {/* INVENTORY INFORMATION */}
               <div className="w-full h-fit">
@@ -966,7 +1022,7 @@ export default function InventoryForm({
                     required
                     disabled={action === 'update'}
                     color="secondary"
-                    label="Stock Quantity"
+                    label="Quantity"
                     value={form.stock_quantity}
                     type="number"
                     onChange={(event) => {

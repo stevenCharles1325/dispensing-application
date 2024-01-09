@@ -46,14 +46,21 @@ export class Orders1698705146069 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: 'unit_of_measurement',
+            type: 'string',
+            isNullable: false,
+          },
+          {
             name: 'tax_rate',
             type: 'int',
-            isNullable: false,
+            isNullable: true,
+            default: 0
           },
           {
             name: 'price',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
+            default: 0,
           },
           {
             name: 'created_at',

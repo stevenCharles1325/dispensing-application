@@ -24,6 +24,16 @@ export class Item1695800617464 implements MigrationInterface {
             type: 'varchar',
           },
           {
+            name: 'item_code',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'batch_code',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
             name: 'image_id',
             type: 'varchar',
             isNullable: true,
@@ -56,8 +66,7 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'sku',
             type: 'varchar',
-            isUnique: true,
-            isNullable: false,
+            isNullable: true,
             comment: 'Item ID or SKU (Stock Keeping Unit).',
           },
           {
@@ -73,21 +82,22 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'cost_price',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
             default: 0,
             comment: 'The cost of acquiring the item from the supplier.',
           },
           {
             name: 'selling_price',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
             default: 0,
             comment: 'The price at which the item is sold to customers.',
           },
           {
             name: 'tax_rate',
             type: 'int',
-            isNullable: false,
+            isNullable: true,
+            default: 0,
             comment:
               'The price at which the item is sold to customers. (percentage)',
           },
@@ -159,6 +169,11 @@ export class Item1695800617464 implements MigrationInterface {
               'awaiting-shipment', // Has been ordered but is waiting to be delivered
             ],
             default: "'available'",
+          },
+          {
+            name: 'expired_at',
+            type: 'datetime',
+            default: 'now()',
           },
           {
             name: 'created_at',

@@ -7,6 +7,8 @@ import DiscountDTO from './discount.dto';
 export interface IncomeDTO {
   id: string;
 
+  transaction_code: string;
+
   system_id?: string | null;
 
   creator_id: string;
@@ -44,6 +46,8 @@ export interface IncomeDTO {
 
 export interface ExpenseDTO {
   id: string;
+
+  transaction_code: string;
 
   system_id?: string | null;
 

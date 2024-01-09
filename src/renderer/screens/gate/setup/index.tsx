@@ -35,6 +35,26 @@ const initialProgress: IProgressCache = {
   system: {}
 }
 
+const initialSystem: SystemDTO = {
+  store_name: 'Sample Store',
+  is_main: true,
+  email: 'store@sample.com',
+  phone_number: '+639123456789',
+  main_branch_id: null,
+  api_url: null,
+  master_key: 'sample-123',
+  auto_sync: true,
+}
+
+const initialUser: UserDTO = {
+  first_name: 'john',
+  last_name: 'doe',
+  email: 'johndoe@gmail.com',
+  phone_number: '+639123456789',
+  address: 'sample address 123',
+  password: 'passWORD123@@@'
+}
+
 export default function Setup () {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -45,10 +65,13 @@ export default function Setup () {
   });
   const [progress, setProgress] = useState<IProgressCache>(initialProgress);
   const [userForm, setUserForm] = useState<Partial<UserDTO>>({
+    ...initialUser,
     birth_date: new Date(),
     role_id: process.env.DEFAULT_OWNER_ROLE_ID
   });
-  const [system, setSystem] = useState<Partial<SystemDTO>>({});
+  const [system, setSystem] = useState<Partial<SystemDTO>>({
+    ...initialSystem,
+  });
   const [systemFormErrors, setSystemFormErrors] = useState<Record<string, string>>({});
   const [userFormErrors, setUserFormErrors] = useState<Record<string, string>>({});
 

@@ -106,7 +106,7 @@ export class Order {
   @Column()
   item_id: string;
 
-  @Column()
+  @Column({ nullable: true })
   discount_id: string;
 
   @Column()
@@ -116,9 +116,12 @@ export class Order {
   quantity: number;
 
   @Column()
+  unit_of_measurement: string;
+
+  @Column({ nullable: true })
   tax_rate: number;
 
-  @Column()
+  @Column({ nullable: true })
   price: number;
 
   @CreateDateColumn()

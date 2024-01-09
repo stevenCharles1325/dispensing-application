@@ -6,6 +6,7 @@ export interface IDesiredItems {
   tax_rate: number;
   selling_price: number;
   discount_id: string;
+  unit_of_measurement: string;
 }
 
 export interface IOrderDetails {

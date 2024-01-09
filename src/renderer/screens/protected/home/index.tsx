@@ -12,7 +12,7 @@ import ItemCard from 'UI/components/Cards/ItemCard';
 import useAlert from 'UI/hooks/useAlert';
 import useSearch from 'UI/hooks/useSearch';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NumericFormat, NumericFormatProps } from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 import { AutoSizer, List } from 'react-virtualized';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -20,17 +20,15 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import POSMenu from 'UI/components/Menu/PosMenu';
 import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import { IOrderDetails } from 'App/interfaces/pos/pos.order-details.interface';
-import PaymentDTO from 'App/data-transfer-objects/payment.dto';
-import PaymentUISwitch from 'UI/components/Switches/PaymentSwitch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
-import { ClearOutlined, CloseOutlined, DeleteOutline, DiscountOutlined } from '@mui/icons-material';
+import { DeleteOutline } from '@mui/icons-material';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 
 const CARD_WIDTH = 325;
-const CARD_HEIGHT = 460;
+const CARD_HEIGHT = 200;
 
 const getItems = async (
   searchText = '',
@@ -84,31 +82,36 @@ interface CustomProps {
   name: string;
 }
 
-const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
-  function PesoNumberFormat(props, ref) {
-    const { onChange, ...other } = props;
+// const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
+//   function PesoNumberFormat(props, ref) {
+//     const { onChange, ...other } = props;
 
-    return (
-      <NumericFormat
-        {...other}
-        getInputRef={ref}
-        onValueChange={(values) => {
-          onChange({
-            target: {
-              name: props.name,
-              value: values.value,
-            },
-          });
-        }}
-        decimalScale={2}
-        accept="enter"
-        thousandSeparator
-        valueIsNumericString
-        prefix="₱"
-      />
-    );
-  }
-);
+//     return (
+//       <NumericFormat
+//         {...other}
+//         getInputRef={ref}
+//         onValueChange={(values) => {
+//           onChange({
+//             target: {
+//               name: props.name,
+//               value: values.value,
+//             },
+//           });
+//         }}
+//         decimalScale={2}
+//         accept="enter"
+//         thousandSeparator
+//         valueIsNumericString
+//         prefix="₱"
+//       />
+//     );
+//   }
+// );
+
+type OrderType = {
+  unit_of_measurement: string;
+  quantity: number;
+};
 
 export default function Home() {
   const confirm = useConfirm();
@@ -117,15 +120,15 @@ export default function Home() {
   const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
   const [selectedItemIds, setSelectedItemIds] = useState<Array<string>>([]);
-  const [payment, setPayment] = useState<number>(0);
-  const [addPayment, setAddPayment] = useState<boolean>(false);
-  const [orders, setOrders] = useState<Record<string, number>>({});
+  // const [payment, setPayment] = useState<number>(0);
+  // const [addPayment, setAddPayment] = useState<boolean>(false);
+  const [orders, setOrders] = useState<Record<string, OrderType>>({});
   const [posMenuAnchorEl, setPosMenuAnchorEl] = useState<HTMLElement | null>();
   const [categoryIds, setCategoryIds] = useState<Array<string>>([]);
 
-  const [addCoupon, setAddCoupon] = useState<boolean>(false);
+  // const [addCoupon, setAddCoupon] = useState<boolean>(false);
   const [couponCode, setCouponCode] = useState<string>('');
-  const [discount, setDiscount] = useState<DiscountDTO | null>(null);
+  // const [discount, setDiscount] = useState<DiscountDTO | null>(null);
 
   // Payment switch
   const [checked, setChecked] = useState(false);
@@ -133,46 +136,46 @@ export default function Home() {
 
   const hasOrders = Boolean(selectedItemIds.length);
 
-  const handleClearDiscount = () => {
-    confirm?.('Are you sure you want to remove the coupon?', async (agreed) => {
-      if (agreed) {
-        setDiscount(null);
-        setCouponCode('');
-      }
-    });
-  }
+  // const handleClearDiscount = () => {
+  //   confirm?.('Are you sure you want to remove the coupon?', async (agreed) => {
+  //     if (agreed) {
+  //       setDiscount(null);
+  //       setCouponCode('');
+  //     }
+  //   });
+  // }
 
-  const handleAddCoupon = useCallback(async () => {
-    const res = await window.discount.getDiscounts({
-      coupon_code: couponCode,
-    });
+  // const handleAddCoupon = useCallback(async () => {
+  //   const res = await window.discount.getDiscounts({
+  //     coupon_code: couponCode,
+  //   });
 
-    if (res.status === 'ERROR') {
-      errorHandler({
-        errors: res.errors,
-      });
-      setDiscount(null);
+  //   if (res.status === 'ERROR') {
+  //     errorHandler({
+  //       errors: res.errors,
+  //     });
+  //     setDiscount(null);
 
-      return;
-    }
+  //     return;
+  //   }
 
-    const discounts = res.data as IPagination<DiscountDTO>;
-    const desiredDiscount = discounts.data[0];
+  //   const discounts = res.data as IPagination<DiscountDTO>;
+  //   const desiredDiscount = discounts.data[0];
 
-    if (!desiredDiscount) {
-      setDiscount(null);
-      displayAlert?.('coupon code does not exist', 'error');
-    } else {
-      if (desiredDiscount.status === 'active') {
-        setDiscount(desiredDiscount);
-        displayAlert?.('successfully applied coupon', 'success');
+  //   if (!desiredDiscount) {
+  //     setDiscount(null);
+  //     displayAlert?.('coupon code does not exist', 'error');
+  //   } else {
+  //     if (desiredDiscount.status === 'active') {
+  //       setDiscount(desiredDiscount);
+  //       displayAlert?.('successfully applied coupon', 'success');
 
-        setAddCoupon(false);
-      } else {
-        displayAlert?.(`coupon is ${desiredDiscount.status}`, 'error')
-      }
-    }
-  }, [couponCode]);
+  //       setAddCoupon(false);
+  //     } else {
+  //       displayAlert?.(`coupon is ${desiredDiscount.status}`, 'error')
+  //     }
+  //   }
+  // }, [couponCode]);
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, categoryIds],
@@ -214,89 +217,90 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItemIds]);
 
-  const subTotal = useMemo(() => {
-    const ids = Object.keys(orders);
+  // const subTotal = useMemo(() => {
+  //   const ids = Object.keys(orders);
 
-    if (ids.length) {
-      return selectedItems.reduce((prev, curr) => {
-        const quantity = orders[curr.id];
+  //   if (ids.length) {
+  //     return selectedItems.reduce((prev, curr) => {
+  //       const quantity = orders[curr.id];
 
-        return prev + (curr.discounted_selling_price ?? curr.selling_price) * quantity;
-      }, 0);
-    }
+  //       return prev + (curr.discounted_selling_price ?? curr.selling_price) * quantity;
+  //     }, 0);
+  //   }
 
-    return 0;
-  }, [selectedItems, orders]);
+  //   return 0;
+  // }, [selectedItems, orders]);
 
-  const computedTax = selectedItems.reduce((prev, curr) => {
-    return prev + curr.tax_rate;
-  }, 0);
+  // const computedTax = selectedItems.reduce((prev, curr) => {
+  //   return prev + curr.tax_rate;
+  // }, 0);
 
-  const tax = useMemo(() => {
-    if (selectedItems.length) {
-      return subTotal * (computedTax / 100);
-    }
+  // const tax = useMemo(() => {
+  //   if (selectedItems.length) {
+  //     return subTotal * (computedTax / 100);
+  //   }
 
-    return 0;
-  }, [computedTax, selectedItems.length, subTotal]);
+  //   return 0;
+  // }, [computedTax, selectedItems.length, subTotal]);
 
-  const total = useMemo(() => {
-    const price = subTotal + tax;
+  // const total = useMemo(() => {
+  //   const price = subTotal + tax;
 
-    if (!discount) return price;
-    if (discount.discount_type === 'fixed-amount-off') {
-      return price - discount.discount_value;
-    }
+  //   if (!discount) return price;
+  //   if (discount.discount_type === 'fixed-amount-off') {
+  //     return price - discount.discount_value;
+  //   }
 
-    if (discount.discount_type === 'percentage-off') {
-      return price - (price * (discount.discount_value / 100));
-    }
+  //   if (discount.discount_type === 'percentage-off') {
+  //     return price - (price * (discount.discount_value / 100));
+  //   }
 
-    return price;
-  }, [discount, subTotal, tax]);
+  //   return price;
+  // }, [discount, subTotal, tax]);
 
-  const change = total < 0
-    ? 0
-    : payment - total > 0
-      ? payment - total
-      : 0;
+  // const change = total < 0
+  //   ? 0
+  //   : payment - total > 0
+  //     ? payment - total
+  //     : 0;
 
   const orderDetails: IOrderDetails = useMemo(
     () => ({
-      items: selectedItems.map(({ id, tax_rate, selling_price, discount_id }) => ({
+      items: selectedItems.map(({
+        id,
+        tax_rate,
+        selling_price,
+        discount_id,
+        unit_of_measurement,
+      }) => ({
         id,
         discount_id,
-        quantity: orders[id],
+        quantity: orders[id]?.quantity ?? 1,
+        unit_of_measurement: orders[id]?.unit_of_measurement ?? unit_of_measurement,
         tax_rate,
         selling_price,
       })),
-      total,
+      total: 0,
       payment_method: selectedPaymentMethod,
-      amount_received: payment,
-      change,
-      discount_id: discount?.id ?? undefined, // To be included soon
+      amount_received: 0,
+      change: 0,
     }),
     [
-      total,
-      change,
       orders,
-      payment,
-      discount,
       selectedItems,
       selectedPaymentMethod,
     ]
   );
 
-  const handleAddPayment = useCallback(() => {
-    if (hasOrders) {
-      setAddPayment(true);
-    }
-  }, [hasOrders]);
+  // const handleAddPayment = useCallback(() => {
+  //   if (hasOrders) {
+  //     setAddPayment(true);
+  //   }
+  // }, [hasOrders]);
 
   const handleCancelOrder = () => {
     confirm?.('Are you sure you want to cancel the orders?', async (agreed) => {
       if (agreed) {
-        setPayment(0);
         setSelectedItemIds([]);
         setOrders({});
 
@@ -322,9 +326,9 @@ export default function Home() {
           return;
         }
 
-        setDiscount(null);
-        setCouponCode('');
-        setPayment(0);
+        // setDiscount(null);
+        // setCouponCode('');
+        // setPayment(0);
         setSelectedItemIds([]);
         setOrders({});
         refetchItems();
@@ -335,25 +339,35 @@ export default function Home() {
 
   const handleSelectItem = useCallback(
     (id: string) => {
+      const item = items.find(item => item.id === id);
+
       if (selectedItemIds.includes(id)) {
         setOrders((userOrders) => ({
           ...userOrders,
-          [id]: userOrders[id] + 1,
+          [id]: {
+            ...userOrders[id],
+            quantity: userOrders[id].quantity + 1,
+          },
         }));
 
         return;
       };
 
-      setOrders((userOrders) => ({
-        ...userOrders,
-        [id]: 1,
-      }));
+      if (item) {
+        setOrders((userOrders) => ({
+          ...userOrders,
+          [id]: {
+            quantity: 1,
+            unit_of_measurement: item?.unit_of_measurement,
+          },
+        }));
+      }
 
       setSelectedItemIds((selectedIds) => {
         return [...selectedIds, id];
       });
     },
-    [selectedItemIds]
+    [selectedItemIds, items]
   );
 
   const handleSelectItemByBarcode = useCallback(
@@ -364,7 +378,10 @@ export default function Home() {
         if (selectedItemIds.includes(item.id)) {
           setOrders((userOrders) => ({
             ...userOrders,
-            [item.id]: userOrders[item.id] += 1,
+            [item.id]: {
+              ...userOrders[item.id],
+              quantity: userOrders[item.id].quantity + 1,
+            },
           }));
         } else {
           setSelectedItemIds((selectedIds) =>
@@ -373,7 +390,10 @@ export default function Home() {
 
           setOrders((userOrders) => ({
             ...userOrders,
-            [item.id]: 1,
+            [item.id]: {
+              unit_of_measurement: item.unit_of_measurement,
+              quantity: userOrders[item.id].quantity + 1,
+            },
           }));
         }
       } else {
@@ -390,15 +410,18 @@ export default function Home() {
     if (action === 'add') {
       setOrders((userOrders) => ({
         ...userOrders,
-        [id]: userOrders[id] + 1,
+        [id]: {
+          ...userOrders[id],
+          quantity: userOrders[id].quantity + 1,
+        },
       }));
     }
 
     if (action === 'minus') {
-      if (orders[id] - 1 <= 0) {
+      if (orders[id].quantity - 1 <= 0) {
         const tempOrders = orders;
 
-        if (orders[id] - 1 <= 0) {
+        if (orders[id].quantity - 1 <= 0) {
           delete tempOrders[id];
           const filteredSelectedIds = selectedItemIds.filter(
             (itemId) => itemId !== id
@@ -411,7 +434,10 @@ export default function Home() {
 
       setOrders((userOrders) => ({
         ...userOrders,
-        [id]: userOrders[id] - 1,
+        [id]: {
+          ...userOrders[id],
+          quantity: userOrders[id].quantity - 1,
+        },
       }));
     }
   };
@@ -430,7 +456,7 @@ export default function Home() {
           <div key={i}>
             <ItemCard
               cardInfo={card}
-              orderNumber={orders[card.id] ?? 0}
+              orderNumber={orders[card.id]?.quantity ?? 0}
               onSelect={handleSelectItem}
             />
           </div>
@@ -469,12 +495,12 @@ export default function Home() {
   useEffect(() => {
     if (addListener) {
       addListener([
-        {
-          key: 'add-payment',
-          handler: () => {
-            if (hasOrders) handleAddPayment();
-          },
-        },
+        // {
+        //   key: 'add-payment',
+        //   handler: () => {
+        //     if (hasOrders) handleAddPayment();
+        //   },
+        // },
         {
           key: 'place-order',
           handler: () => {
@@ -492,7 +518,6 @@ export default function Home() {
   },
   [
     hasOrders,
-    handleAddPayment,
     handlePurchaseItem,
   ]);
 
@@ -548,9 +573,9 @@ export default function Home() {
             style={{ backgroundColor: 'var(--bg-color)' }}
           >
             <div className="grow flex flex-col gap-2">
-              <div className="w-full h-fit flex flex-row justify-between align-center">
-                <b style={{ color: 'white' }}>ORDERS</b>
-                <div className="w-fit h-fit">
+              <div className="w-full h-fit flex flex-row justify-start align-center">
+                <b style={{ color: 'white' }}>ITEMS</b>
+                {/* <div className="w-fit h-fit">
                   <Chip
                     icon={<DiscountOutlined fontSize="small" sx={{ color: 'white' }} />}
                     label={
@@ -576,14 +601,14 @@ export default function Home() {
                       color: 'white',
                     }}
                   />
-                </div>
+                </div> */}
               </div>
               <div className='h-[50px] grow overflow-auto'>
                 <div className="w-full h-fit flex flex-col h-fit gap-2">
                   {selectedItems.map((item) => (
                     <div
                       key={item.id}
-                      className="w-[98%] w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden border border-transparent"
+                      className="relative w-[98%] w-full h-fit shadow-md rounded-md flex flex-row overflow-hidden border border-transparent"
                       style={{ backgroundColor: 'white' }}
                     >
                       <div className="min-w-[80px] w-[80px] h-full relative">
@@ -597,7 +622,7 @@ export default function Home() {
                             height: '80px',
                           }}
                         />
-                        <div className="absolute top-0 right-0 w-full h-full flex justify-center items-center bg-black/50">
+                        <div className="absolute top-0 right-0 w-full h-full flex justify-center items-center bg-white/30">
                           <IconButton
                             onClick={() => {
                               confirm?.('Are you sure you want to remove this item?', async (agreed) => {
@@ -605,7 +630,7 @@ export default function Home() {
                                   const filteredOrders = Object.keys(orders)
                                     .filter(id => id !== item.id);
 
-                                  const updatedOrders: Record<string, number> = {};
+                                  const updatedOrders: Record<string, OrderType> = {};
 
                                   filteredOrders.forEach(id => {
                                     updatedOrders[id] = orders[id];
@@ -625,21 +650,18 @@ export default function Home() {
                           </IconButton>
                         </div>
                       </div>
-                      <div className="shrink min-w-[100px] p-2 capitalize">
-                        <b>{item.name}</b>
-                        <br />
-                        <NumericFormat
-                          className="mb-2 px-1 bg-transparent"
-                          value={item.discounted_selling_price ?? item.selling_price}
-                          prefix="₱ "
-                          thousandSeparator
-                          valueIsNumericString
-                          disabled
-                        />
+                      <div className="grow min-w-[100px] p-2 capitalize">
+                        <b className='truncate'>{item.name}</b>
+                        <p className='truncate text-slate-500 text-sm'>
+                          {item.batch_code}
+                        </p>
+                        <p className='truncate text-slate-500 text-sm'>
+                          {item.unit_of_measurement}
+                        </p>
                       </div>
-                      <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
+                      <div className="absolute bg-white right-0 w-fit h-[80px] flex flex-row justify-center items-center">
                         <IconButton
-                          disabled={orders[item.id] <= 0}
+                          disabled={orders[item.id].quantity <= 0}
                           onClick={() =>
                             handleIterateOrderQuantity('minus', item.id)
                           }
@@ -648,19 +670,25 @@ export default function Home() {
                         </IconButton>
                         <input
                           className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
-                          value={orders[item.id]}
+                          value={orders[item.id].quantity}
                           max={item.stock_quantity}
                           min={0}
                           type="number"
-                          onChange={(e) =>
+                          size={orders[item.id].quantity}
+                          onChange={(e) => {
                             setOrders((userOrders) => ({
                               ...userOrders,
-                              [item.id]: Number(e.target.value),
+                              [item.id]: {
+                                unit_of_measurement: item.unit_of_measurement,
+                                quantity: Number(e.target.value) > item.stock_quantity
+                                  ? item.stock_quantity
+                                  : Number(e.target.value),
+                              },
                             }))
-                          }
+                          }}
                         />
                         <IconButton
-                          disabled={orders[item.id] >= item.stock_quantity}
+                          disabled={orders[item.id].quantity >= item.stock_quantity}
                           onClick={() =>
                             handleIterateOrderQuantity('add', item.id)
                           }
@@ -675,8 +703,8 @@ export default function Home() {
             </div>
             <div className="w-full h-fit flex flex-col text-white">
               <br />
-              <b style={{ color: 'white' }}>BILL</b>
-              <div className="flex flex-row justify-between">
+              {/* <b style={{ color: 'white' }}>BILL</b> */}
+              {/* <div className="flex flex-row justify-between">
                 <p>Sub-total:</p>
                 <div>
                   <NumericFormat
@@ -689,8 +717,8 @@ export default function Home() {
                     disabled
                   />
                 </div>
-              </div>
-              <div className="flex flex-row justify-between">
+              </div> */}
+              {/* <div className="flex flex-row justify-between">
                 <p>Discount:</p>
                 <div>
                   <NumericFormat
@@ -709,8 +737,8 @@ export default function Home() {
                     disabled
                   />
                 </div>
-              </div>
-              <div className="flex flex-row justify-between">
+              </div> */}
+              {/* <div className="flex flex-row justify-between">
                 <p>{`Tax ${tax ? `${computedTax}%` : ''} (VAT included):`}</p>
                 <div>
                   <NumericFormat
@@ -723,10 +751,10 @@ export default function Home() {
                     disabled
                   />
                 </div>
-              </div>
+              </div> */}
               <br />
               <div className="grow w-full border-dashed border-t-4 pt-3 flex flex-col justify-between">
-                <div className="flex flex-row justify-between">
+                {/* <div className="flex flex-row justify-between">
                   <p>Total:</p>
                   <div>
                     <NumericFormat
@@ -773,7 +801,7 @@ export default function Home() {
                 <div className="flex flex-row justify-between">
                   <div>
                     <p>Payment Method:</p>
-                    {/* <div className="flex flex-row justify-start items-center">
+                    <div className="flex flex-row justify-start items-center">
                       <p className="text-sm text-gray-600">Cash</p>
                       <PaymentUISwitch
                         checked={checked}
@@ -789,66 +817,40 @@ export default function Home() {
                         }}
                       />
                       <p className="text-sm text-gray-600">Card</p>
-                    </div> */}
+                    </div>
                   </div>
                   <div>
                     <p className="capitalize">{selectedPaymentMethod}</p>
                   </div>
-                </div>
+                </div> */}
                 <div className='w-full mt-5 flex flex-col gap-2'>
-                  {
-                    !(payment < total || !hasOrders)
-                    ? (
-                      <Button
-                        fullWidth
-                        disabled={payment < total || !hasOrders}
-                        variant="contained"
-                        color="inherit"
-                        sx={{ color: 'black' }}
-                        onClick={() => handlePurchaseItem()}
-                      >
-                        {`Place order (${getCommand?.('place-order')})`}
-                      </Button>
-                    )
-                    : null
-                  }
-                  {
-                    hasOrders
-                    ? (
-                      <>
-                        <Button
-                          fullWidth
-                          disabled={!hasOrders}
-                          variant="outlined"
-                          color="inherit"
-                          sx={{ color: 'white' }}
-                          onClick={handleAddPayment}
-                        >
-                          {`${payment === 0
-                            ? `Add Payment (${getCommand?.('add-payment')})`
-                            : `Edit Payment (${getCommand?.('add-payment')})`}`}
-                        </Button>
-                        <Button
-                          disabled={!hasOrders}
-                          fullWidth
-                          variant="text"
-                          color="inherit"
-                          sx={{ color: 'var(--info-text)' }}
-                          onClick={handleCancelOrder}
-                        >
-                          {`Cancel (${getCommand?.('cancel-order')})`}
-                        </Button>
-                      </>
-                    )
-                    : null
-                  }
+                  <Button
+                    fullWidth
+                    disabled={!hasOrders}
+                    variant="contained"
+                    color="inherit"
+                    sx={{ color: 'black' }}
+                    onClick={() => handlePurchaseItem()}
+                  >
+                    {`Place order (${getCommand?.('place-order')})`}
+                  </Button>
+                  <Button
+                    disabled={!hasOrders}
+                    fullWidth
+                    variant="text"
+                    color="inherit"
+                    sx={{ color: 'var(--info-text)' }}
+                    onClick={handleCancelOrder}
+                  >
+                    {`Cancel (${getCommand?.('cancel-order')})`}
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <Dialog
+      {/* <Dialog
         open={addPayment}
         onClose={() => setAddPayment(false)}
       >
@@ -908,8 +910,8 @@ export default function Home() {
             Close
           </Button>
         </DialogActions>
-      </Dialog>
-      <Dialog
+      </Dialog> */}
+      {/* <Dialog
         open={addCoupon}
         onClose={() => setAddCoupon(false)}
       >
@@ -955,7 +957,7 @@ export default function Home() {
             Apply
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
       <POSMenu
         list={categories}
         anchorEl={posMenuAnchorEl}

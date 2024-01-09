@@ -125,6 +125,12 @@ export class Item {
   id: string;
 
   @Column({ nullable: true })
+  item_code: string;
+
+  @Column({ nullable: true })
+  batch_code: string;
+
+  @Column({ nullable: true })
   system_id: string;
 
   @Column({ nullable: true })
@@ -151,10 +157,7 @@ export class Item {
   brand_id: string;
 
   @Column({
-    unique: true,
-  })
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
+    nullable: true,
   })
   sku: string;
 
@@ -180,9 +183,6 @@ export class Item {
       from: (data: string): number => parseFloat(data),
     },
   })
-  @IsPositive({
-    message: ValidationMessage.positive,
-  })
   cost_price: number;
 
   @Column('numeric', {
@@ -193,9 +193,6 @@ export class Item {
       to: (data: number): number => data,
       from: (data: string): number => parseFloat(data),
     },
-  })
-  @IsPositive({
-    message: ValidationMessage.positive,
   })
   selling_price: number;
 
@@ -234,6 +231,9 @@ export class Item {
     message: ValidationMessage.status,
   })
   status: string;
+
+  @Column()
+  expired_at: Date;
 
   @CreateDateColumn()
   created_at: Date;

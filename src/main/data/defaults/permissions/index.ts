@@ -331,16 +331,16 @@ const permissions = [
 
   // Transaction management permissions
   // Customer Payment permissions
-  {
-    name: 'View Customer Payment',
-    kebab: 'view-customer-payment',
-    group_name: 'transaction',
-  },
-  {
-    name: 'Create Customer Payment',
-    kebab: 'create-customer-payment',
-    group_name: 'transaction',
-  },
+  // {
+  //   name: 'View Customer Payment',
+  //   kebab: 'view-customer-payment',
+  //   group_name: 'transaction',
+  // },
+  // {
+  //   name: 'Create Customer Payment',
+  //   kebab: 'create-customer-payment',
+  //   group_name: 'transaction',
+  // },
   // {
   //   name: 'Update Customer Payment',
   //   kebab: 'update-customer-payment',
@@ -467,26 +467,26 @@ const permissions = [
     kebab: 'view-notification',
     group_name: 'notification',
   },
-  {
-    name: 'Create Notification',
-    kebab: 'create-notification',
-    group_name: 'notification',
-  },
-  {
-    name: 'Update Notification',
-    kebab: 'update-notification',
-    group_name: 'notification',
-  },
+  // {
+  //   name: 'Create Notification',
+  //   kebab: 'create-notification',
+  //   group_name: 'notification',
+  // },
+  // {
+  //   name: 'Update Notification',
+  //   kebab: 'update-notification',
+  //   group_name: 'notification',
+  // },
   // {
   //   name: 'Archive Notification',
   //   kebab: 'archive-notification',
   //   group_name: 'notification',
   // },
-  {
-    name: 'Delete Notification',
-    kebab: 'delete-notification',
-    group_name: 'notification',
-  },
+  // {
+  //   name: 'Delete Notification',
+  //   kebab: 'delete-notification',
+  //   group_name: 'notification',
+  // },
 
   // Settings permissions
   {

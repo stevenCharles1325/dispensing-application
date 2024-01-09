@@ -80,50 +80,20 @@ const logsColumns: Array<GridColDef> = [
 const paymentsColumns: Array<GridColDef> = [
   {
     field: 'source_name',
-    headerName: 'Cashier',
+    headerName: 'Personnel',
     width: 250,
     type: 'string',
     align: 'left',
     headerAlign: 'left',
+    valueFormatter(params) {
+      return titleCase(params.value);
+    },
   },
   {
     field: 'recipient_name',
     headerName: 'Customer',
     flex: 250,
     type: 'string',
-  },
-  {
-    field: 'total',
-    headerName: 'Total',
-    width: 250,
-    type: 'number',
-    renderCell: (params) => {
-      return (
-        <NumericFormat
-          className="mb-2 px-1 bg-transparent grow text-end"
-          value={params.value}
-          prefix="₱ "
-          thousandSeparator
-          valueIsNumericString
-          decimalSeparator="."
-          decimalScale={2}
-          fixedDecimalScale
-          disabled
-        />
-      );
-    },
-  },
-  {
-    field: 'method',
-    headerName: 'Mode of payment',
-    width: 200,
-    type: 'string',
-    renderCell: (params) => (
-      <Chip
-        variant="outlined"
-        label={params.value}
-      />
-    ),
   },
   {
     field: 'created_at',
@@ -138,19 +108,24 @@ const paymentsColumns: Array<GridColDef> = [
   {
     field: '',
     headerName: 'Actions',
-    width: 100,
+    width: 150,
     type: 'string',
     renderCell: (params) => (
-      <>
+      <div className='w-full flex justify-around'>
         <IconButton
           onClick={() => params.api.setRowSelectionModel([params.id])}
         >
           <VisibilityOutlinedIcon />
         </IconButton>
+        <IconButton
+          onClick={() => params.api.setRowSelectionModel([params.id])}
+        >
+          <DownloadOutlinedIcon />
+        </IconButton>
         {/* <IconButton onClick={() => params.api.setRowSelectionModel([params.id])}>
           <DownloadOutlinedIcon />
         </IconButton> */}
-      </>
+      </div>
     ),
     sortable: false,
     filterable: false,
