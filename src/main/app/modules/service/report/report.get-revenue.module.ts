@@ -11,14 +11,14 @@ const getRevenue = async (): Promise<{
     (await TransactionRepository.createQueryBuilder('transaction')
       .select('SUM(transaction.total)', 'totalYesterday')
       .where(`transaction.type = 'customer-payment'`)
-      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now', '-1 day'))`)
+      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now', '-1 day', 'localtime'))`)
       .getRawOne()) ?? 0;
 
   const { totalToday: revenueToday } =
     (await TransactionRepository.createQueryBuilder('transaction')
       .select('SUM(transaction.total)', 'totalToday')
       .where(`transaction.type = 'customer-payment'`)
-      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now'))`)
+      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now', 'localtime'))`)
       .getRawOne()) ?? 0;
 
 

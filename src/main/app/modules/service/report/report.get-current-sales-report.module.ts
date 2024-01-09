@@ -19,7 +19,7 @@ const getCurrentSalesReport = async (): Promise<
       'count(*) as amount',
     ])
     .where(`transaction.type = 'customer-payment'`)
-    .where(`DATE(transaction.created_at) = DATE('now')`)
+    .where(`DATE(transaction.created_at, 'localtime') = DATE('now', 'localtime')`)
     .groupBy('hour')
     .orderBy('hour')
     .getRawMany();
