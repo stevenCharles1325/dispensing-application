@@ -83,8 +83,9 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
                 label="Product Name:"
                 size="small"
                 color='secondary'
+                variant="outlined"
                 sx={{
-                  color: 'white',
+                  fontWeight: 'bold',
                 }}
               />
               <div className='max-w-[150px]'>
@@ -103,8 +104,9 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
                 label="Quantity:"
                 size="small"
                 color='secondary'
+                variant="outlined"
                 sx={{
-                  color: 'white',
+                  fontWeight: 'bold',
                 }}
               />
               <div className='max-w-[150px]'>
@@ -125,9 +127,10 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
               <Chip
                 label="Batch ID:"
                 size="small"
+                variant="outlined"
                 color='secondary'
                 sx={{
-                  color: 'white',
+                  fontWeight: 'bold',
                 }}
               />
               <div className='max-w-[150px]'>

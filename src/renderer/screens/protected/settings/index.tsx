@@ -246,7 +246,7 @@ export default function Settings () {
               : null
             }
 
-            {
+            {/* {
               hasPermission('view-discount')
               ? (
                 <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
@@ -262,7 +262,7 @@ export default function Settings () {
                 </div>
               )
               : null
-            }
+            } */}
           </div>
 
           <Divider />
@@ -286,11 +286,11 @@ export default function Settings () {
             ? <SupplierFormV2 onClose={handleCloseModal} />
             : null
           }
-          {
+          {/* {
             modal === 'DISCOUNTS'
             ? <DiscountForm onClose={handleCloseModal} />
             : null
-          }
+          } */}
           {
             modal === 'ROLES AND PERMISSIONS'
             ? <RolesAndPermissionsForm onClose={handleCloseModal} />
