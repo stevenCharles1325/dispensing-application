@@ -4,7 +4,7 @@ import { NumericFormat } from 'react-number-format';
 
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
-import { AddCircle } from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 
 interface ItemCardParams {
   cardInfo: ItemDTO;
@@ -15,8 +15,8 @@ interface ItemCardParams {
 export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCardParams) {
   return (
     <div className="w-[325px] h-[200px] py-2">
-      <div className="relative w-full h-full rounded-md border shadow flex flex-col overflow-hidden hover:border-fuchsia-500 hover:shadow-lg">
-        <div className="w-full h-[255px] bg-gray-300 relative">
+      <div className="relative w-full h-full rounded-md overflow-hidden flex flex-col overflow-hidden hover:shadow-lg">
+        <div className="w-full h-[200px] bg-white relative rounded-md">
           <img
             src={cardInfo.image?.url}
             alt={cardInfo.image?.name}
@@ -76,68 +76,50 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
             </div>
           ) : null} */}
         </div>
-        <div className="grow p-3 flex flex-row justify-between absolute top-0 left-0 w-full h-full bg-white/30">
+        <div className="grow p-3 flex flex-row rounded-md justify-between border hover:border-fuchsia-500 absolute top-0 left-0 w-full h-full bg-white/30">
           <div className="w-fit h-fit flex flex-wrap gap-3">
-            <div className='w-fit h-fit flex flex-col gap-1'>
-              <Chip
-                label="Product Name:"
-                size="small"
-                color='secondary'
-                variant="outlined"
-                sx={{
-                  fontWeight: 'bold',
-                }}
-              />
+            <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
+              <p className="text-md font-bold">
+                Product Name:
+              </p>
               <div className='max-w-[150px]'>
                 <Tooltip title={cardInfo.name} arrow>
                   <p
-                    className="truncate mb-2 capitalize px-1 text-sm"
-                    style={{ color: 'var(--text-color)' }}
+                    className="truncate capitalize text-sm font-thin"
+                    style={{ color: 'rgba(0, 0, 0, 0.5)' }}
                   >
                     {cardInfo.name}
                   </p>
                 </Tooltip>
               </div>
             </div>
-            <div className='w-fit h-fit flex flex-col gap-1'>
-              <Chip
-                label="Quantity:"
-                size="small"
-                color='secondary'
-                variant="outlined"
-                sx={{
-                  fontWeight: 'bold',
-                }}
-              />
+            <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
+              <p className="text-md font-bold">
+                Quantity:
+              </p>
               <div className='max-w-[150px]'>
                 <Tooltip
                   title={`${cardInfo.stock_quantity} ${getUOFSymbol(cardInfo.unit_of_measurement)}}`}
                   arrow
                 >
                   <p
-                    className="truncate mb-2 px-1 text-sm"
-                    style={{ color: 'var(--text-color)' }}
+                    className="truncate text-sm font-thin"
+                    style={{ color: 'rgba(0, 0, 0, 0.5)' }}
                   >
                     {cardInfo.stock_quantity} {getUOFSymbol(cardInfo.unit_of_measurement) + '.'}
                   </p>
                 </Tooltip>
               </div>
             </div>
-            <div className='w-fit h-fit flex flex-col gap-1'>
-              <Chip
-                label="Batch ID:"
-                size="small"
-                variant="outlined"
-                color='secondary'
-                sx={{
-                  fontWeight: 'bold',
-                }}
-              />
+            <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
+              <p className="text-md font-bold">
+                Batch ID:
+              </p>
               <div className='max-w-[150px]'>
                 <Tooltip title={cardInfo.batch_code} arrow>
                   <p
-                    className="truncate mb-2 px-1 text-sm"
-                    style={{ color: 'var(--text-color)' }}
+                    className="truncate text-sm font-thin"
+                    style={{ color: 'rgba(0, 0, 0, 0.5)' }}
                   >
                     {cardInfo.batch_code}
                   </p>
@@ -185,7 +167,7 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
               disabled={cardInfo.status !== 'available' || orderNumber >= cardInfo.stock_quantity}
               onClick={() => onSelect(cardInfo.id)}
             >
-              <AddCircle color="secondary" />
+              <Add color="secondary" />
             </IconButton>
           </div>
         </div>

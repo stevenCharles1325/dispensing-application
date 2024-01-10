@@ -291,7 +291,7 @@ export default function EmployeeManagement () {
 
   return (
     <>
-      <div className="w-full h-full flex flex-col justify-around">
+      <div className="w-full h-full flex flex-col gap-5 pr-3">
         <div className="w-full h-fit gap-5 flex flex-row flex-wrap">
           <CounterWidget
             icon={<PeopleAltOutlinedIcon color="info" fontSize="large" />}

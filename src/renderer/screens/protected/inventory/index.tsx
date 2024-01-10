@@ -4,18 +4,15 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Chip, Dialog, Slide } from '@mui/material';
+import { Chip, Collapse, Dialog, IconButton, Slide, styled, useMediaQuery, useTheme } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
-import formatCurrency from 'UI/helpers/formatCurrency';
 import { TransitionProps } from '@mui/material/transitions';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from "react-router-dom";
 
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
-import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
-import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
@@ -30,6 +27,9 @@ import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useConfirm from 'UI/hooks/useConfirm';
+import { ChevronLeftOutlined, ChevronRightOutlined, DownloadOutlined, UploadOutlined } from '@mui/icons-material';
+import useErrorHandler from 'UI/hooks/useErrorHandler';
+import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 
 const columns: Array<GridColDef> = [
   {
@@ -91,6 +91,18 @@ const columns: Array<GridColDef> = [
   }
 ];
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
 const getItems = async (
   searchText = '',
   page = 1,
@@ -125,7 +137,12 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Inventory() {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('xl'));
+  const [collapse, setCollapse] = useState(false);
+
   const confirm = useConfirm();
+  const errorHandler = useErrorHandler();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
@@ -184,6 +201,12 @@ export default function Inventory() {
     setSuppliers(pagination.data);
   };
 
+  const inputFileRef = useRef<HTMLInputElement>(null);
+
+  const handleSelectFileToImport = () => {
+    inputFileRef.current?.click();
+  }
+
   useEffect(() => {
     getBrands();
     getCategories();
@@ -192,6 +215,10 @@ export default function Inventory() {
     setPlaceHolder?.('Search for product name');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setPlaceHolder]);
+
+  const handleCollapse = () => {
+    setCollapse((collapse) => !collapse);
+  }
 
   const handleAddNewItem = () => {
     console.log('Adding new item');
@@ -245,6 +272,69 @@ export default function Inventory() {
     [items, selectedIds, displayAlert]
   );
 
+  const handleImport = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      confirm?.(
+        'Are you sure you want to import this file?',
+        async (agreed) => {
+          if (agreed) {
+            const res = await window.import.importInventoryRecords(file.path);
+
+            if (res.status === 'ERROR') {
+              errorHandler({
+                errors: res.errors,
+              });
+
+              refetchItems();
+              return;
+            }
+
+            refetchItems();
+            displayAlert?.(
+              `Successfully imported file`,
+              'success'
+            );
+            return;
+          }
+        }
+      );
+    }
+  }
+
+  const handleExport = (ids: string[] | null = null) => {
+    let message = 'Do you want to export stocks record for all items?';
+
+    ids = ids ?? selectedIds;
+
+    if (ids) {
+      message = 'Do you want to export stocks record for this item?'
+    }
+
+    confirm?.(message, async (agreed) => {
+      if (agreed) {
+        const res = await window.export.exportInventoryRecord(ids);
+
+        if (res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
+
+          return;
+        }
+
+        const { filePath } = res.data as IExportResult;
+
+        displayAlert?.(
+          `Successful! File is saved at ${filePath}`,
+          'success'
+        );
+        return;
+      }
+    });
+  }
+
   useEffect(() => {
     const id = searchParams.get('id');
 
@@ -267,7 +357,7 @@ export default function Inventory() {
   }, [displayAlert, handleSelectItemByBarcode]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-around">
+    <div className="w-full h-full flex flex-col gap-5 pr-3">
       <div className="w-full h-fit gap-5 flex flex-row flex-wrap">
         <CounterWidget
           icon={<CategoryOutlinedIcon color="info" fontSize="large" />}
@@ -294,31 +384,81 @@ export default function Inventory() {
         /> */}
       </div>
       <div className="w-full h-[650px]">
-        <div className="w-full flex flex-row py-4 gap-3">
-          <Chip
-            color="primary"
-            variant="outlined"
-            icon={<AddCircleOutlineIcon />}
-            label="Add new Product"
-            onClick={handleAddNewItem}
-          />
-          <Chip
-            variant="outlined"
-            color="secondary"
-            icon={<EditOutlinedIcon />}
-            label="Edit selected Product"
-            onClick={handleEditSelectedItem}
-            disabled={selectedIds.length === 0 || selectedIds.length > 1}
-          />
-          <Chip
-            variant="outlined"
-            color="error"
-            icon={<DeleteOutlineOutlinedIcon />}
-            label="Delete selected Product"
-            onClick={handleDeleteSelectedItem}
-            disabled={selectedIds.length === 0}
-          />
-          <BarcodeIndicator />
+        <div className="w-full flex flex-row justify-between py-3 h-fit">
+          <div className={`w-fit flex flex-row items-center h-fit`}>
+            <Collapse in={!fullScreen || collapse} collapsedSize={150} orientation='horizontal'>
+              <div className="flex flex-row gap-3 w-fit bg-white pr-5">
+                <Chip
+                  color="primary"
+                  variant="outlined"
+                  icon={<AddCircleOutlineIcon />}
+                  label="Add new Product"
+                  onClick={handleAddNewItem}
+                />
+                <Chip
+                  variant="outlined"
+                  color="secondary"
+                  icon={<EditOutlinedIcon />}
+                  label="Edit selected Product"
+                  onClick={handleEditSelectedItem}
+                  disabled={selectedIds.length === 0 || selectedIds.length > 1}
+                />
+                <Chip
+                  variant="outlined"
+                  color="error"
+                  icon={<DeleteOutlineOutlinedIcon />}
+                  label="Delete selected Product"
+                  onClick={handleDeleteSelectedItem}
+                  disabled={selectedIds.length === 0}
+                />
+                <BarcodeIndicator />
+              </div>
+            </Collapse>
+            {
+              fullScreen
+              ? (
+                <IconButton
+                  onClick={handleCollapse}
+                >
+                  {collapse
+                  ? <ChevronLeftOutlined />
+                  : <ChevronRightOutlined />}
+                </IconButton>
+              )
+              : null
+            }
+          </div>
+
+          <div
+            className={
+              `h-fit flex items-center ${
+                !fullScreen
+                ? 'w-full justify-end'
+                : ''
+              }`
+            }
+          >
+            <div className={`w-fit flex flex-row gap-3 ${
+                fullScreen && collapse
+                ? 'hidden'
+                : 'visible'
+              }`}>
+              <Chip
+                variant="outlined"
+                color="secondary"
+                icon={<UploadOutlined />}
+                label="Import Stock Records"
+                onClick={() => handleSelectFileToImport()}
+              />
+              <Chip
+                variant="outlined"
+                color="secondary"
+                icon={<DownloadOutlined />}
+                label="Export Stock Records"
+                onClick={() => handleExport()}
+              />
+            </div>
+          </div>
         </div>
         {data ? (
           <DataGrid
@@ -333,6 +473,13 @@ export default function Inventory() {
             checkboxSelection
           />
         ) : null}
+        <VisuallyHiddenInput
+          ref={inputFileRef}
+          type="file"
+          multiple
+          onChange={handleImport}
+          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+        />
         <Dialog
           open={Boolean(modalAction)}
           onClose={handleOnClose}
@@ -350,6 +497,8 @@ export default function Inventory() {
             getCategories={getCategories}
             getSuppliers={getSuppliers}
             onClose={handleOnClose}
+            handleExport={handleExport}
+            handleImport={handleImport}
           />
         </Dialog>
       </div>

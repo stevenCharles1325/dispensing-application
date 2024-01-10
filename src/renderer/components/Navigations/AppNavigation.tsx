@@ -17,6 +17,7 @@ import {
   Chip,
   Dialog,
   DialogActions,
+  DialogTitle,
   Divider,
   IconButton,
   ListItem,
@@ -448,6 +449,14 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     getInitialUnseenNotifs();
   }, []);
 
+  // Notifications
+  const [selectedNotif, setSelectedNotif] = useState<NotificationDTO | null>(null);
+  const isNotifDialogOpen = Boolean(selectedNotif);
+
+  const handleCloseNotif = () => {
+    setSelectedNotif(null);
+  }
+
   const notifRowRenderer: ListRowRenderer = ({ index, key, style }) => {
     const notif = notifs[index];
 
@@ -474,7 +483,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               handleCloseMenuNotif();
               navigate(notif.link, { replace: true });
             } else {
-              displayAlert?.('This notification has no redirection', 'warning');
+              setSelectedNotif(notif);
             }
           }}
         >
@@ -909,6 +918,31 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           </Button>
           <Button onClick={handleUpdateProfile}>Save</Button>
         </DialogActions>
+      </Dialog>
+      <Dialog
+        maxWidth="lg"
+        open={isNotifDialogOpen}
+        onClose={handleCloseNotif}
+      >
+        {selectedNotif
+        ? (
+          <>
+            <DialogTitle>
+              <p className='text-xl font-bold text-black/70'>{selectedNotif.title}</p>
+            </DialogTitle>
+            <div className='w-[500px] h-[400px] text-pretty overflow-auto m-5'>
+              <div className='w-full h-full'>
+                <p className='text-md font-light text-pretty text-slate-500'>{selectedNotif.description}</p>
+              </div>
+            </div>
+            <DialogActions>
+              <Button onClick={handleCloseNotif}>
+                Close
+              </Button>
+            </DialogActions>
+          </>
+        )
+        : null}
       </Dialog>
     </>
   );

@@ -6,7 +6,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useReducer, useState, useRef } from 'react';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
 import {
   TextField,
@@ -28,6 +28,7 @@ import {
   Select,
   SelectChangeEvent,
   Checkbox,
+  styled,
 } from '@mui/material';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import itemStatuses from 'UI/data/defaults/statuses/item';
@@ -55,6 +56,8 @@ import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import Loading from '../Loading';
 import {
   AddCircleOutline,
+  DownloadOutlined,
+  UploadOutlined,
   VisibilityOutlined
 } from '@mui/icons-material';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
@@ -145,6 +148,8 @@ interface InventoryFormProps {
   getCategories: () => Promise<void>;
   getSuppliers: () => Promise<void>;
   onClose: () => void;
+  handleExport: (id: string[] | null) => void;
+  handleImport: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 interface CustomProps {
@@ -208,6 +213,18 @@ function allyProps(index: number) {
   }
 }
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
 export default function InventoryForm({
   action,
   selectedItem,
@@ -219,6 +236,8 @@ export default function InventoryForm({
   getCategories,
   getSuppliers,
   onClose,
+  handleExport,
+  handleImport
 }: InventoryFormProps) {
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
@@ -363,6 +382,17 @@ export default function InventoryForm({
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
   >('add-new');
+
+  const inputFileRef = useRef<HTMLInputElement>(null);
+
+  const handleSelectFileToImport = () => {
+    inputFileRef.current?.click();
+  }
+
+  const handleImportStockRecords = (e: ChangeEvent<HTMLInputElement>) => {
+    handleImport(e);
+    refetch();
+  }
 
   const handleSupplierToggle = (value: typeof supplierToggle) => {
     dispatch({
@@ -1253,14 +1283,36 @@ export default function InventoryForm({
               ? <Loading />
               : (
                 <>
-                  <div className="w-full flex flex-row py-4 gap-3">
-                    <Chip
-                      color="primary"
-                      variant="outlined"
-                      icon={<AddCircleOutline />}
-                      label="Add new record"
-                      onClick={() => setRecordAction('create')}
-                    />
+                  <div className='w-full h-fit flex justify-between py-4'>
+                    <div className="w-fit flex flex-row gap-3">
+                      <Chip
+                        color="primary"
+                        variant="outlined"
+                        icon={<AddCircleOutline />}
+                        label="Add new record"
+                        onClick={() => setRecordAction('create')}
+                      />
+                    </div>
+                    <div className="w-fit flex flex-row gap-3">
+                      <Chip
+                        color="secondary"
+                        variant="outlined"
+                        icon={<UploadOutlined />}
+                        label="Import Record"
+                        onClick={handleSelectFileToImport}
+                      />
+                      <Chip
+                        color="secondary"
+                        variant="outlined"
+                        icon={<DownloadOutlined />}
+                        label="Export Record"
+                        onClick={() => {
+                          if (selectedItem) {
+                            handleExport([selectedItem.id]);
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                   <DataGrid
                     sx={{
@@ -1459,6 +1511,13 @@ export default function InventoryForm({
         )
         : null
       }
+      <VisuallyHiddenInput
+        ref={inputFileRef}
+        type="file"
+        multiple
+        onChange={handleImportStockRecords}
+        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+      />
     </div>
   );
 }

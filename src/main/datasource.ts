@@ -19,6 +19,7 @@ import { InventoryRecord } from './database/models/inventory-record.model';
 import MainSeeder from './database/seeders/main.seeder';
 import { ShortcutKey } from './database/models/shortcut-key.model';
 import { Discount } from './database/models/discount.model';
+import { UploadChunk } from './database/models/upload-chunk.model';
 
 type DataSourceWithSeederOption = DataSourceOptions & SeederOptions;
 
@@ -47,6 +48,7 @@ export const options: DataSourceWithSeederOption = {
     InventoryRecord,
     ShortcutKey,
     Discount,
+    UploadChunk
   ],
   migrations: [
     MIGRATION_PATH,

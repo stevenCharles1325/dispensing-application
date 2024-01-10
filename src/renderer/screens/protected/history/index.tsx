@@ -1,16 +1,28 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Tabs, Tab, Chip, IconButton, Dialog, Button, Menu, ListItem, ListItemButton, ListItemText, CircularProgress, DialogActions } from '@mui/material';
+import {
+  Tabs,
+  Tab,
+  Chip,
+  IconButton,
+  Dialog,
+  Button,
+  Menu,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  CircularProgress,
+  DialogActions
+} from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
-import { ChangeEventHandler, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 import useAlert from 'UI/hooks/useAlert';
-import ButtonGroup from '@mui/material/ButtonGroup';
 
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
@@ -19,11 +31,10 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
 import OrderDTO from 'App/data-transfer-objects/order.dto';
 import getDiscount from 'UI/helpers/getDiscount';
-import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
-import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
 import useConfirm from 'UI/hooks/useConfirm';
 import titleCase from 'UI/helpers/titleCase';
+import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -341,10 +352,10 @@ export default function Logs() {
           return;
         }
 
-        const { filePath } = res.data as ITransactionSQL;
+        const { filePath } = res.data as IExportResult;
 
         displayAlert?.(
-          `Successfully! File is saved at ${filePath}`,
+          `Successful! File is saved at ${filePath}`,
           'success'
         );
       }
@@ -370,7 +381,7 @@ export default function Logs() {
       return displayAlert?.(errorMessage, 'error');
     }
 
-    const { filePath } = res.data as ITransactionSpreadSheet;
+    const { filePath } = res.data as IExportResult;
 
     setDownLoadExportState((state) => ({
       ...state,

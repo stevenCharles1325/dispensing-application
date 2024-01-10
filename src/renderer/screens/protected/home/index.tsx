@@ -574,7 +574,7 @@ export default function Home() {
           >
             <div className="grow flex flex-col gap-2">
               <div className="w-full h-fit flex flex-row justify-start align-center">
-                <b style={{ color: 'white' }}>ITEMS</b>
+                <b style={{ color: 'white' }}>PRODUCTS</b>
                 {/* <div className="w-fit h-fit">
                   <Chip
                     icon={<DiscountOutlined fontSize="small" sx={{ color: 'white' }} />}
@@ -698,6 +698,13 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
+                  {!selectedItems.length ?
+                  (
+                    <div className="w-full h-[50px] flex text-white/50 justify-center items-center">
+                      <p>Empty!</p>
+                    </div>
+                  )
+                  : null}
                 </div>
               </div>
             </div>

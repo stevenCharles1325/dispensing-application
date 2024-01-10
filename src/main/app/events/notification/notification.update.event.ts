@@ -25,63 +25,43 @@ export default class NotificationUpdateEvent implements IEvent {
       const id = eventData.payload[0];
       const notificationStatusUpdate: NotificationDTO['status'] = eventData.payload[1];
 
-      const requesterHasPermission = user.hasPermission?.('update-notification');
-
-      if (requesterHasPermission) {
-        const notification = await NotificationRepository.findOneByOrFail({
-          id,
-        });
-
-        notification.status = notification.status === 'VISITED'
-          ? notification.status
-          : notificationStatusUpdate;
-
-        const errors = await validator(notification);
-
-        if (errors.length) {
-          return {
-            errors,
-            code: 'VALIDATION_ERR',
-            status: 'ERROR',
-          } as unknown as IResponse<IPOSValidationError[]>;
-        }
-
-        if (notificationStatusUpdate === 'UNSEEN') {
-          await Bull('AUDIT_JOB', {
-            user_id: user.id as unknown as string,
-            resource_id: id.toString(),
-            resource_table: 'notifications',
-            resource_id_type: 'uuid',
-            action: 'update',
-            status: 'SUCCEEDED',
-            description: `User ${user.fullName} marked a notification as unread`,
-          });
-        }
-
-        const data: Notification = await NotificationRepository.save(notification);
-
-        return {
-          data,
-          code: 'REQ_OK',
-          status: 'SUCCESS',
-        } as IResponse<typeof data>;
-      }
-
-      await Bull('AUDIT_JOB', {
-        user_id: user.id as unknown as string,
-        resource_id: id.toString(),
-        resource_table: 'notifications',
-        resource_id_type: 'uuid',
-        action: 'update',
-        status: 'FAILED',
-        description: `User ${user.fullName} has failed to update a Notification`,
+      const notification = await NotificationRepository.findOneByOrFail({
+        id,
       });
 
+      notification.status = notification.status === 'VISITED'
+        ? notification.status
+        : notificationStatusUpdate;
+
+      const errors = await validator(notification);
+
+      if (errors.length) {
+        return {
+          errors,
+          code: 'VALIDATION_ERR',
+          status: 'ERROR',
+        } as unknown as IResponse<IPOSValidationError[]>;
+      }
+
+      if (notificationStatusUpdate === 'UNSEEN') {
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as unknown as string,
+          resource_id: id.toString(),
+          resource_table: 'notifications',
+          resource_id_type: 'uuid',
+          action: 'update',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} marked a notification as unread`,
+        });
+      }
+
+      const data: Notification = await NotificationRepository.save(notification);
+
       return {
-        errors: ['You are not allowed to update a Notification'],
-        code: 'REQ_UNAUTH',
-        status: 'ERROR',
-      } as unknown as IResponse<string[]>;
+        data,
+        code: 'REQ_OK',
+        status: 'SUCCESS',
+      } as IResponse<typeof data>;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);

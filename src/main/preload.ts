@@ -27,9 +27,8 @@ import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
-import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
-import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
 import SystemDTO from 'App/data-transfer-objects/system.dto';
+import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 
 export type Channels = 'ipc-pos';
 
@@ -587,8 +586,13 @@ const exportHandler = {
   exportTransactionHistory: async (
     exportFormat: 'SQL' | 'SPREADSHEET' = 'SPREADSHEET',
     recordType?: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' | undefined,
-  ): Promise<IResponse<string[] | IPOSError[] | (ITransactionSpreadSheet | ITransactionSQL)>> =>
+  ): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
     ipcRenderer.invoke('transaction-history:export', exportFormat, recordType),
+
+  exportInventoryRecord: async (
+    ids: string[] | null,
+  ): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
+    ipcRenderer.invoke('inventory-record:export', ids),
 };
 
 const importHandler = {
@@ -596,6 +600,10 @@ const importHandler = {
     sqlFilePath: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('transaction-history:import', sqlFilePath),
+  importInventoryRecords: async (
+    filePath: string
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('inventory-record:import', filePath),
 };
 
 // EXPOSING HANDLERS

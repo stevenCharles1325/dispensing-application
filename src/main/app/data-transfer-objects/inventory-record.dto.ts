@@ -9,6 +9,7 @@ export default interface InventoryRecordDTO {
   quantity: number;
   type: 'stock-in' | 'stock-out';
   created_at: Date;
+  creator_id: string;
   item: ItemDTO;
   creator: UserDTO;
 }

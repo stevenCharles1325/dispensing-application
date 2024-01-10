@@ -23,6 +23,19 @@ import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 @Entity('inventory_records')
 export class InventoryRecord {
   @AfterLoad()
+  async getItem() {
+    if (!this.creator) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'items' WHERE id = '${this.item_id}'`
+      );
+
+      // To-filter-out all unnecessary properties
+      this.item = rawData[0] as Item;
+    }
+  }
+
+  @AfterLoad()
   async getUser() {
     if (!this.creator) {
       const manager = global.datasource.createEntityManager();

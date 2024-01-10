@@ -4,7 +4,7 @@ import IEvent from 'App/interfaces/event/event.interface';
 import IEventListenerProperties from 'App/interfaces/event/event.listener-props.interface';
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
-import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
+import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 import handleError from 'App/modules/error-handler.module';
 import exportAsSpreadsheet from 'App/modules/export/transaction/export-as-spreadsheet.module';
 import exportAsSQL from 'App/modules/export/transaction/export-as-sql.module';
@@ -18,7 +18,7 @@ export default class ExportTransactionHistoryEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | ITransactionSpreadSheet | any>
+    IResponse<string[] | IPOSError[] | IExportResult | any>
   > {
     try {
       const { user } = eventData;

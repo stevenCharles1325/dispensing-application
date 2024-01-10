@@ -5,12 +5,14 @@ import IEventListenerProperties from 'App/interfaces/event/event.listener-props.
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import chunkImport from 'App/modules/chunk-import.module';
 import handleError from 'App/modules/error-handler.module';
-import importSQLDump from 'App/modules/import/transaction/import-sql.module';
 import { Bull } from 'Main/jobs';
 
-export default class ImportTransactionHistoryEvent implements IEvent {
-  public channel: string = 'transaction-history:import';
+const excelToJson = require('convert-excel-to-json');
+
+export default class ImportInventoryRecordEvent implements IEvent {
+  public channel: string = 'inventory-record:import';
 
   public middlewares = ['auth.middleware'];
 
@@ -25,23 +27,41 @@ export default class ImportTransactionHistoryEvent implements IEvent {
         eventData.user.hasPermission?.('upload-data');
 
       if (requesterHasPermission) {
-        const sqlFilePath = eventData.payload[0] as string;
+        const filePath = eventData.payload[0] as string;
 
-        const importRes = await importSQLDump(sqlFilePath) as IResponse<any>;
+        const result = await excelToJson({
+          sourceFile: filePath,
+          columnToKey: {
+            '*': '{{columnHeader}}'
+          }
+        });
+
+        const list = result['Stock-records'].slice(1);
+
+        chunkImport(
+          list,
+          {
+            processorName: 'INVENTORY_RECORD_IMPORT_JOB'
+          }
+        );
 
         await Bull('AUDIT_JOB', {
           user_id: user.id as unknown as string,
           resource_id: null,
-          resource_table: 'transactions',
+          resource_table: 'inventory_records',
           resource_id_type: null,
           action: 'import',
           status: 'SUCCEEDED',
           description: `User ${
             user.fullName
-          } has successfully imported a transaction-history`,
+          } has successfully imported a stock records`,
         });
 
-        return importRes;
+        return {
+          data: [],
+          code: 'REQ_OK',
+          status: 'SUCCESS',
+        };
       }
 
       return {
