@@ -45,8 +45,8 @@ const Transition = React.forwardRef(function Transition(
 
 export default function Settings () {
   const {
+    button,
     devices,
-    isLoading,
     refetch,
     handleSelect,
   } = useBarcode();
@@ -158,7 +158,7 @@ export default function Settings () {
                 Select a device for scanning
               </p>
               <div className="w-full flex flex-row-reverse">
-                <Button color="secondary" onClick={handleOpenModal('BARCODE')}>Open</Button>
+                <Button ref={button} color="secondary" onClick={handleOpenModal('BARCODE')}>Open</Button>
               </div>
             </div>
 
@@ -304,10 +304,10 @@ export default function Settings () {
         </div>
       </Dialog>
       <DeviceDialog
+        loading={false}
         open={modal === 'BARCODE'}
         refresh={refetch}
         devices={devices}
-        loading={isLoading}
         onChange={handleSelect}
         onClose={handleCloseModal}
       />

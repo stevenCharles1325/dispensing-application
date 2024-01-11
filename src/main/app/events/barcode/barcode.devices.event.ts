@@ -21,6 +21,8 @@ export default class BarcodeDevicesEvent implements IEvent {
         selected: selectedDevice?.id === `${device.vendorId}${device.productId}`
       }));
 
+      console.log('DEVICES: ', devices);
+
       return {
         data: devices,
         code: 'REQ_OK',

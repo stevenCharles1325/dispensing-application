@@ -16,14 +16,15 @@ import HidDTO from "App/data-transfer-objects/hid.dto";
 import UsbIcon from '@mui/icons-material/Usb';
 import Loading from "../Loading";
 import { InfoOutlined } from "@mui/icons-material";
+import { HIDType } from "UI/hooks/useBarcode";
 
 interface DeviceDialogProps {
   open: boolean;
-  devices?: HidDTO[];
+  devices?: HIDType[];
   loading: boolean;
   refresh: () => void;
   onClose: () => void;
-  onChange?: (device: HidDTO) => void;
+  onChange?: (device: HIDType) => void;
 }
 
 export default function DeviceDialog ({
@@ -58,23 +59,25 @@ export default function DeviceDialog ({
       </DialogTitle>
 
       {!devices?.length && !loading
-      ? <p>No device available</p>
+      ? <p className="text-center text-slate-400">No device available</p>
       : null}
 
       {!loading
       ? (
-        <List>
-          {devices?.map?.((device, index) => (
-            <ListItem key={index} onClick={() => onChange?.(device)}>
-              <ListItemButton selected={device.selected}>
-                <ListItemAvatar>
-                  <UsbIcon fontSize="small" color="secondary" />
-                </ListItemAvatar>
-                <ListItemText primary={device.product ?? 'Unknown'} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+        <div className="h-[500px] overflow-auto">
+          <List>
+            {devices?.map?.((device, index) => (
+              <ListItem key={index} onClick={() => onChange?.(device)}>
+                <ListItemButton selected={device.selected}>
+                  <ListItemAvatar>
+                    <UsbIcon fontSize="small" color="secondary" />
+                  </ListItemAvatar>
+                  <ListItemText primary={device.productName ?? 'Unknown'} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </div>
       )
       : <Loading />}
       <DialogActions>

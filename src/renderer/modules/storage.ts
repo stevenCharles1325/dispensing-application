@@ -2,7 +2,11 @@ class LocalStorage {
   constructor() {}
 
   getItem(key: string): any {
-    return JSON.parse(window.storage.get(key));
+    const result = window.storage.get(key);
+
+    if (result) return JSON.parse(result);
+
+    return null;
   }
 
   setItem(key: string, value: any): void {

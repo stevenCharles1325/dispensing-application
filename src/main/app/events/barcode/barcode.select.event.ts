@@ -20,6 +20,7 @@ export default class BarcodeSelectEvent implements IEvent {
       const device: HidDTO = eventData.payload[0];
 
       if (device && device.vendorId && device.productId) {
+        console.log('SHEES: ', device.vendorId, device.productId);
         const selectedDevice = new HID.HID(device.vendorId, device.productId);
 
         const deviceCachedInfo: IDeviceInfo = {
