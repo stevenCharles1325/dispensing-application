@@ -144,6 +144,7 @@ export default function Inventory() {
   const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [barcodeNumber, setBarcodeNumber] = useState<string | null>(null);
 
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
@@ -259,18 +260,20 @@ export default function Inventory() {
     setModalAction(null);
   }
 
-  const handleSelectItemByBarcode = useCallback(
-    (itemBarcode: string) => {
-      const item = items.find(({ barcode }) => barcode === itemBarcode);
+  const handleSelectItemByBarcode = useCallback((_, payload) => {
+    if (
+      payload.channel === 'BARCODE:DATA' &&
+      payload.data?.length &&
+      items?.length &&
+      displayAlert
+    ) {
+      setBarcodeNumber(payload.data);
+    }
 
-      if (item) {
-        setSelectedIds([item.id]);
-      } else {
-        displayAlert?.(`Unable to find item with code ${itemBarcode}`, 'error');
-      }
-    },
-    [items, selectedIds, displayAlert]
-  );
+    if (payload.channel === 'BARCODE:ERROR') {
+      displayAlert?.(payload.data, 'error');
+    }
+  }, [items, displayAlert]);
 
   const handleImport = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -345,16 +348,26 @@ export default function Inventory() {
   }, [searchParams]);
 
   useEffect(() => {
-    window.main.mainMessage((_, payload) => {
-      if (payload.channel === 'BARCODE:DATA') {
-        handleSelectItemByBarcode(payload.data);
+    window.main.mainMessage(handleSelectItemByBarcode);
+  }, [handleSelectItemByBarcode]);
+
+  useEffect(() => {
+    if (barcodeNumber && items.length) {
+      const selectedProduct = items.find(({ barcode }) => barcode === barcodeNumber);
+
+      if (selectedProduct) {
+        setSelectedIds([selectedProduct.id]);
+        setModalAction('update');
+        setBarcodeNumber(null);
+        return;
       }
 
-      if (payload.channel === 'BARCODE:ERROR') {
-        displayAlert?.(payload.data, 'error');
+      if (!selectedProduct) {
+        displayAlert?.(`Unable to find item with code ${barcodeNumber}`, 'error');
+        return;
       }
-    })
-  }, [displayAlert, handleSelectItemByBarcode]);
+    }
+  }, [items, barcodeNumber]);
 
   return (
     <div className="w-full h-full flex flex-col gap-5 pr-3">

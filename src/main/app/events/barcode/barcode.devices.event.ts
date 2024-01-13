@@ -18,10 +18,8 @@ export default class BarcodeDevicesEvent implements IEvent {
       const selectedDevice = globalStorage.get('HID:SELECTED');
       const devices = HID.devices().map(device => ({
         ...device,
-        selected: selectedDevice?.id === `${device.vendorId}${device.productId}`
+        selected: selectedDevice?.id === `${device.vendorId}:${device.productId}`
       }));
-
-      console.log('DEVICES: ', devices);
 
       return {
         data: devices,

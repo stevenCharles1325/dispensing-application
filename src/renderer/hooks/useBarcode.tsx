@@ -1,171 +1,69 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import useErrorHandler from "./useErrorHandler";
+import HidDTO from "App/data-transfer-objects/hid.dto";
 import useAlert from "./useAlert";
-import localStorage from "UI/modules/storage";
-
-export interface HIDType {
-  collections: any[];
-  oninputreport: Function | null,
-  opened: boolean;
-  productId: number;
-  productName: string;
-  vendorId: number;
-  selected: boolean;
-  addEventListener?: any;
-  open: () => Promise<void>;
-  close: () => Promise<void>;
-}
-
-const CACHE_KEY = 'SYSTEM:HID:BARCODE';
 
 export default function useBarcode () {
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
-  const button = useRef<any | null>();
 
-  const [devices, setDevices] = useState<HIDType[]>([]);
-  const [selectedDevice, setSelectedDevice] = useState<HIDType | null>(null);
+  const getDevices = async (): Promise<HidDTO[]> => {
+    const res = await window.barcode.devices();
 
-  const isDeviceMatchedWithCached = (
-    device: Partial<HIDType>,
-    cached?: Partial<HIDType>
-  ) => {
-    if (!cached) return false;
-
-    return (
-      device.productId === cached.productId &&
-      cached.vendorId === cached.vendorId
-    );
-  }
-
-  const handleSetListeners = async (device: HIDType) => {
-    try {
-      await device?.open();
-    } catch (err) {
-      await device?.close();
-
+    if (res.status === 'ERROR') {
       errorHandler({
-        errors: [err]
+        errors: res.errors,
       });
+
+      return [];
     }
+
+    return res.data as HidDTO[];
   }
 
-  const handleSelect = useCallback(
-    async (
-      device: Pick<HIDType, 'vendorId' | 'productId' | 'productName'> | null
-    ) => {
-      try {
-        if (device?.productId === selectedDevice?.productId) {
-          await selectedDevice?.close();
-          setSelectedDevice(null);
-          localStorage.removeItem(CACHE_KEY);
+  const getDeviceStatus = async (): Promise<void> => {
+    const res = await window.barcode.status();
 
-          getDevices();
-          return;
-        }
-
-        const requestedDevices: HIDType[] = await navigator.hid.requestDevice({
-          filters: [
-            {
-              vendorId: device?.vendorId,
-              productId: device?.productId,
-            }
-          ]
-        });
-
-        const [requestedDevice] = requestedDevices;
-        const deviceData = {
-          vendorId: requestedDevice.vendorId,
-          productId: requestedDevice.productId,
-          productName: requestedDevice.productName,
-        }
-
-        await handleSetListeners(requestedDevice);
-        console.log(`CONNECTED DEVICE: "${device?.productName}"`);
-        localStorage.setItem(CACHE_KEY, deviceData);
-        setSelectedDevice(requestedDevice);
-
-        getDevices();
-      } catch (err) {
-        errorHandler({
-          errors: [err],
-        });
-      }
-  }, [displayAlert, selectedDevice]);
-
-  const getDevices = useCallback(async () => {
-    const cachedSelected = localStorage.getItem(CACHE_KEY) as Pick<HIDType, 'vendorId' | 'productId'>;
-
-    if (navigator?.hid) {
-      const result = await navigator.hid.getDevices();
-      const modResult = result.map((device: HIDType) => {
-        device['selected'] = isDeviceMatchedWithCached(device, cachedSelected);
-        return device;
+    if (res.status === 'ERROR') {
+      errorHandler({
+        errors: res.errors,
       });
 
-      setDevices(modResult);
+      return;
     }
-  }, [selectedDevice, devices, handleSelect]);
 
-  const handleDisconnection = async () => {
-    if (selectedDevice) {
-      await selectedDevice?.close();
-    }
+    return;
   }
 
-  const handleClick = useCallback(async () => {
-    if (!selectedDevice) {
-      const cachedSelected = localStorage.getItem(CACHE_KEY) as Pick<
-        HIDType, 'vendorId' | 'productId' | 'productName'
-      >;
+  const handleSelect = useCallback(async (device: HidDTO | null) => {
+    if (!device) return;
 
-      if (
-        cachedSelected &&
-        cachedSelected.productId &&
-        cachedSelected.vendorId
-      ) {
-        await handleSelect({
-          vendorId: cachedSelected.vendorId,
-          productId: cachedSelected.productId,
-          productName: cachedSelected.productName,
-        });
-      }
-    }
+    const res = await window.barcode.select(device);
 
-    await getDevices();
-  }, [selectedDevice, getDevices, handleSelect]);
-
-  useEffect(() => {
-    button.current.addEventListener('click', handleClick);
-
-    return () => button.current?.removeEventListener('click', handleClick);
-  }, [button.current, handleClick]);
-
-  useEffect(() => {
-    if (selectedDevice && navigator?.hid) {
-      const getReports = async () => {
-        const reports = await selectedDevice.getReports();
-        console.log('REPORTS: ', reports);
-      };
-
-      navigator.hid.addEventListener('inputreport', (event) => {
-        const { data } = event;
-
-        console.log('HELLO MOTHER FUCKER:', event);
+    if (res.status === 'ERROR') {
+      return errorHandler({
+        errors: res.errors,
       });
     }
 
-    return () => {
-      if (selectedDevice) {
-        handleDisconnection();
-      }
-    }
-  }, [selectedDevice]);
+    displayAlert?.('Successfully connected the device', 'success');
+  }, [displayAlert]);
+
+  const { data: devices } = useQuery({
+    queryKey: ['barcode-devices'],
+    queryFn: getDevices,
+  });
+
+  const { isLoading, refetch } = useQuery({
+    queryKey: ['barcode-device-status'],
+    queryFn: getDeviceStatus,
+  });
 
   return {
-    button,
     devices,
-    refetch: getDevices,
+    isLoading,
+    refetch,
     handleSelect,
   };
 }

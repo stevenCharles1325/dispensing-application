@@ -6,6 +6,7 @@ import handleError from "App/modules/error-handler.module";
 import HidDTO from "App/data-transfer-objects/hid.dto";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
 import IDeviceInfo from "App/interfaces/barcode/barcode.device-info.interface";
+import barcodeMap from "Main/data/defaults/map/barcode-map";
 
 export default class BarcodeSelectEvent implements IEvent {
   public channel: string = 'barcode:select';
@@ -20,22 +21,31 @@ export default class BarcodeSelectEvent implements IEvent {
       const device: HidDTO = eventData.payload[0];
 
       if (device && device.vendorId && device.productId) {
-        console.log('SHEES: ', device.vendorId, device.productId);
         const selectedDevice = new HID.HID(device.vendorId, device.productId);
 
         const deviceCachedInfo: IDeviceInfo = {
-          id: `${device.vendorId}${device.productId}`,
+          id: `${device.vendorId}:${device.productId}`,
           status: 'SUCCESS',
         }
         globalStorage.set('HID:SELECTED', deviceCachedInfo);
 
         global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
 
+        let barcodeNumber = '';
+
         selectedDevice.on('data', (data) => {
           deviceCachedInfo.status = 'SUCCESS';
+          const mappedNumber  = barcodeMap[data[2].toString()];
 
-          global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
-          global.emitToRenderer('BARCODE:DATA', data.toString('utf8'));
+          if (mappedNumber && mappedNumber !== 'ENTER') {
+            barcodeNumber += mappedNumber;
+          }
+
+          if (mappedNumber === 'ENTER') {
+            global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
+            global.emitToRenderer('BARCODE:DATA', barcodeNumber);
+            barcodeNumber = '';
+          }
         });
 
         selectedDevice.on('error', (err: any) => {
@@ -44,12 +54,21 @@ export default class BarcodeSelectEvent implements IEvent {
           deviceCachedInfo.status = 'ERROR';
           globalStorage.set('HID:SELECTED', deviceCachedInfo);
 
+          console.log('HID ERROR: ', err);
+
           global.emitToRenderer('BARCODE:STATUS', 'ERROR');
           global.emitToRenderer('BARCODE:ERROR', error);
+
+          selectedDevice.close();
         });
+
+        return {
+          code: 'REQ_OK',
+          status: 'SUCCESS',
+        };
       } else {
         const deviceCachedInfo = {
-          id: `${device.vendorId}${device.productId}`,
+          id: `${device.vendorId}:${device.productId}`,
           status: 'ERROR',
         }
         globalStorage.set('HID:SELECTED', deviceCachedInfo);
@@ -61,22 +80,9 @@ export default class BarcodeSelectEvent implements IEvent {
           status: 'ERROR',
         } as unknown as IResponse<IPOSError[]>;
       }
-
-      const deviceCachedInfo = {
-        id: `${device.vendorId}${device.productId}`,
-        status: 'ERROR',
-      }
-
-      globalStorage.set('HID:SELECTED', deviceCachedInfo);
-      global.emitToRenderer('BARCODE:STATUS', 'ERROR');
-
-      return {
-        code: 'REQ_OK',
-        status: 'ERROR',
-      };
     } catch (err) {
       const error = handleError(err);
-      console.log('ERROR HANDLER OUTPUT: ', error);
+      console.log('ERROR HANDLER OUTPUT: ', err);
 
       const deviceCachedInfo = {
         id: null,

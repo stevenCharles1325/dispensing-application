@@ -35,6 +35,7 @@ export default function DeviceDialog ({
   onClose,
   onChange,
 }: DeviceDialogProps) {
+  console.log(devices);
   const info = (
     <div className="text-base">
       <b>NOTE:</b>
@@ -72,7 +73,7 @@ export default function DeviceDialog ({
                   <ListItemAvatar>
                     <UsbIcon fontSize="small" color="secondary" />
                   </ListItemAvatar>
-                  <ListItemText primary={device.productName ?? 'Unknown'} />
+                  <ListItemText primary={device.product ?? 'Unknown'} />
                 </ListItemButton>
               </ListItem>
             ))}

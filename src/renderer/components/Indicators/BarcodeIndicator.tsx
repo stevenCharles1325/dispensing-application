@@ -76,7 +76,7 @@ export default function BarcodeIndicator () {
             ? <CircularProgress size={20} />
             : undefined
       }
-      onClick={handleRefresh}
+      // onClick={handleRefresh}
     />
   )
 }
