@@ -14,8 +14,8 @@ export default class ExpirationJob implements IJob {
       const ItemRepository = global.datasource.getRepository('items');
 
       const items = await ItemRepository.createQueryBuilder('item')
-        .where(`item.status = 'active'`)
-        .andWhere(`DATE(item.expired_at, 'localtime') = DATE('now', 'localtime')`)
+        .where(`item.status = 'available'`)
+        .andWhere(`DATE(item.expired_at, 'localtime') <= DATE('now', 'localtime')`)
         .getMany();
 
       const updatedItems = items.map((item) => ({

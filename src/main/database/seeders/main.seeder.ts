@@ -23,8 +23,6 @@ export default class MainSeeder implements Seeder {
   public async run(dataSource: DataSource): Promise<any> {
     console.log('RUNNING SEEDER...');
 
-    console.log('OWNER ID: ', roles.owner);
-
     const PermissionRepo = dataSource.getRepository(Permission);
     const RoleRepo = dataSource.getRepository(Role);
 

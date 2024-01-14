@@ -163,6 +163,7 @@ export class Item1695800617464 implements MigrationInterface {
             isNullable: false,
             enum: [
               'available', // Can be purchased
+              'expired',
               'on-hold', // Might be having quality control
               'out-of-stock', // Not available for the meantime
               'discontinued', // Will not be selling for any reason

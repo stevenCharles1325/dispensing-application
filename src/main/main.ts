@@ -383,6 +383,7 @@ app
         });
 
         await Bull('DISCOUNT_JOB', {});
+        await Bull('EXPIRATION_JOB', {});
         await createWindow();
 
         app.on('activate', () => {
