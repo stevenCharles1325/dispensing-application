@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
 import { Add } from '@mui/icons-material';
+import capitalizeCase from 'UI/helpers/capitalCase';
 
 interface ItemCardParams {
   cardInfo: ItemDTO;
@@ -14,7 +15,7 @@ interface ItemCardParams {
 
 export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCardParams) {
   return (
-    <div className="w-[325px] h-[200px] py-2">
+    <div className="w-[325px] h-[200px]">
       <div className="relative w-full h-full rounded-md overflow-hidden flex flex-col overflow-hidden hover:shadow-lg">
         <div className="w-full h-[200px] bg-white relative rounded-md">
           <img
@@ -24,13 +25,13 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
             style={{
               objectFit: 'cover',
               width: '325px',
-              height: '255px',
+              height: '200px',
             }}
           />
           {cardInfo.status !== 'available' ? (
             <div className="w-full h-full absolute top-0 right-0 flex justify-center items-center bg-slate-800/50">
               <div>
-                <Chip label={cardInfo.status} color="error" size="medium" />
+                <Chip label={capitalizeCase(cardInfo.status)} color="error" size="medium" />
               </div>
             </div>
           ) : null}
@@ -88,7 +89,7 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
                     className="truncate capitalize text-sm font-thin"
                     style={{ color: 'rgba(0, 0, 0, 0.5)' }}
                   >
-                    {cardInfo.name}
+                    {capitalizeCase(cardInfo.name)}
                   </p>
                 </Tooltip>
               </div>

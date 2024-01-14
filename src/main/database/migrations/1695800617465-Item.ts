@@ -154,7 +154,7 @@ export class Item1695800617464 implements MigrationInterface {
           },
           {
             name: 'stock_quantity',
-            type: 'int',
+            type: 'real',
             isNullable: false,
           },
           {

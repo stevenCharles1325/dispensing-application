@@ -220,7 +220,15 @@ export class Item {
   })
   barcode: string;
 
-  @Column()
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })

@@ -42,7 +42,7 @@ export class Orders1698705146069 implements MigrationInterface {
           },
           {
             name: 'quantity',
-            type: 'int',
+            type: 'real',
             isNullable: false,
           },
           {

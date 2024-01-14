@@ -930,11 +930,13 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
             <DialogTitle>
               <p className='text-xl font-bold text-black/70'>{selectedNotif.title}</p>
             </DialogTitle>
+            <Divider />
             <div className='w-[500px] h-[400px] text-pretty overflow-auto m-5'>
-              <div className='w-full h-full'>
+              <div className='w-full h-full px-2'>
                 <p className='text-md font-light text-pretty text-slate-500'>{selectedNotif.description}</p>
               </div>
             </div>
+            <Divider />
             <DialogActions>
               <Button onClick={handleCloseNotif}>
                 Close

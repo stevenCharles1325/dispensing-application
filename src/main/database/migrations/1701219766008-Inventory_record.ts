@@ -46,7 +46,7 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
             },
             {
               name: 'quantity',
-              type: 'int',
+              type: 'real',
               isNullable: false,
             },
             {

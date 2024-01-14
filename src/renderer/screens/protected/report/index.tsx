@@ -103,13 +103,13 @@ export default function Report() {
               differenceYesterday={orders?.difference_yesterday}
               label="Transactions"
             />
-            <TotalDifferenceWidget
+            {/* <TotalDifferenceWidget
               total={soldItems?.total ?? 0}
               hasIncreased={soldItems?.has_increased}
               icon={<ReceiptIcon color="secondary" />}
               differenceYesterday={soldItems?.difference_yesterday}
               label="Released Items"
-            />
+            /> */}
           </div>
         </div>
       </div>
