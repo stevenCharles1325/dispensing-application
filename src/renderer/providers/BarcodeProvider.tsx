@@ -86,6 +86,8 @@ export default function BarcodeProvider({ children }: React.PropsWithChildren) {
 
       setStatus('SUCCESS');
     }
+
+    return;
   }, [status]);
 
   const { refetch: refetchStatus } = useQuery({
