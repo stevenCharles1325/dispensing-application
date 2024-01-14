@@ -20,7 +20,6 @@ import RolesAndPermissionsForm from "UI/components/Views/RolesAndPermissionsForm
 import useBarcode from "UI/hooks/useBarcode";
 import DeviceDialog from "UI/components/Dialogs/DevicesDialog";
 import ShortcutKeysForm from "UI/components/Views/ShortcutKeysForm";
-import DiscountForm from "UI/components/Views/DiscountForm";
 import usePermission from "UI/hooks/usePermission";
 
 type ModalNames =
@@ -45,10 +44,9 @@ const Transition = React.forwardRef(function Transition(
 
 export default function Settings () {
   const {
-    button,
     devices,
-    refetch,
-    handleSelect,
+    refetchDevices,
+    select,
   } = useBarcode();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -158,7 +156,7 @@ export default function Settings () {
                 Select a device for scanning
               </p>
               <div className="w-full flex flex-row-reverse">
-                <Button ref={button} color="secondary" onClick={handleOpenModal('BARCODE')}>Open</Button>
+                <Button color="secondary" onClick={handleOpenModal('BARCODE')}>Open</Button>
               </div>
             </div>
 
@@ -306,9 +304,9 @@ export default function Settings () {
       <DeviceDialog
         loading={false}
         open={modal === 'BARCODE'}
-        refresh={refetch}
+        refresh={refetchDevices}
         devices={devices}
-        onChange={handleSelect}
+        onChange={select}
         onClose={handleCloseModal}
       />
     </>

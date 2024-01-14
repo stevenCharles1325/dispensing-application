@@ -127,7 +127,8 @@ export default function Home() {
   const [categoryIds, setCategoryIds] = useState<Array<string>>([]);
 
   // const [addCoupon, setAddCoupon] = useState<boolean>(false);
-  const [couponCode, setCouponCode] = useState<string>('');
+  const [barcodeNumber, setBarcodeNumber] = useState<string | null>(null);
+  // const [couponCode, setCouponCode] = useState<string>('');
   // const [discount, setDiscount] = useState<DiscountDTO | null>(null);
 
   // Payment switch
@@ -298,6 +299,21 @@ export default function Home() {
   //   }
   // }, [hasOrders]);
 
+  const handleSelectItemByBarcode = useCallback((_, payload) => {
+    if (
+      payload.channel === 'BARCODE:DATA' &&
+      payload.data?.length &&
+      items?.length &&
+      displayAlert
+    ) {
+      setBarcodeNumber(payload.data);
+    }
+
+    if (payload.channel === 'BARCODE:ERROR') {
+      displayAlert?.(payload.data, 'error');
+    }
+  }, [items, displayAlert]);
+
   const handleCancelOrder = () => {
     confirm?.('Are you sure you want to cancel the orders?', async (agreed) => {
       if (agreed) {
@@ -370,38 +386,38 @@ export default function Home() {
     [selectedItemIds, items]
   );
 
-  const handleSelectItemByBarcode = useCallback(
-    (itemBarcode: string) => {
-      const item = items.find(({ barcode }) => barcode === itemBarcode);
+  // const handleSelectItemByBarcode = useCallback(
+  //   (itemBarcode: string) => {
+  //     const item = items.find(({ barcode }) => barcode === itemBarcode);
 
-      if (item) {
-        if (selectedItemIds.includes(item.id)) {
-          setOrders((userOrders) => ({
-            ...userOrders,
-            [item.id]: {
-              ...userOrders[item.id],
-              quantity: userOrders[item.id].quantity + 1,
-            },
-          }));
-        } else {
-          setSelectedItemIds((selectedIds) =>
-            [...selectedIds, item.id]
-          );
+  //     if (item) {
+  //       if (selectedItemIds.includes(item.id)) {
+  //         setOrders((userOrders) => ({
+  //           ...userOrders,
+  //           [item.id]: {
+  //             ...userOrders[item.id],
+  //             quantity: userOrders[item.id].quantity + 1,
+  //           },
+  //         }));
+  //       } else {
+  //         setSelectedItemIds((selectedIds) =>
+  //           [...selectedIds, item.id]
+  //         );
 
-          setOrders((userOrders) => ({
-            ...userOrders,
-            [item.id]: {
-              unit_of_measurement: item.unit_of_measurement,
-              quantity: userOrders[item.id].quantity + 1,
-            },
-          }));
-        }
-      } else {
-        displayAlert?.(`Unable to find item with code ${itemBarcode}`, 'error');
-      }
-    },
-    [items, selectedItemIds, displayAlert]
-  );
+  //         setOrders((userOrders) => ({
+  //           ...userOrders,
+  //           [item.id]: {
+  //             unit_of_measurement: item.unit_of_measurement,
+  //             quantity: userOrders[item.id].quantity + 1,
+  //           },
+  //         }));
+  //       }
+  //     } else {
+  //       displayAlert?.(`Unable to find item with code ${itemBarcode}`, 'error');
+  //     }
+  //   },
+  //   [items, selectedItemIds, displayAlert]
+  // );
 
   const handleIterateOrderQuantity = (
     action: 'add' | 'minus' = 'add',
@@ -481,18 +497,6 @@ export default function Home() {
   }, [setPlaceHolder]);
 
   useEffect(() => {
-    window.main.mainMessage((_, payload) => {
-      if (payload.channel === 'BARCODE:DATA') {
-        handleSelectItemByBarcode(payload.data);
-      }
-
-      if (payload.channel === 'BARCODE:ERROR') {
-        displayAlert?.(payload.data, 'error');
-      }
-    })
-  }, [displayAlert, handleSelectItemByBarcode]);
-
-  useEffect(() => {
     if (addListener) {
       addListener([
         // {
@@ -520,6 +524,30 @@ export default function Home() {
     hasOrders,
     handlePurchaseItem,
   ]);
+
+  useEffect(() => {
+    window.main.mainMessage(handleSelectItemByBarcode);
+  }, [handleSelectItemByBarcode]);
+
+  useEffect(() => {
+    if (barcodeNumber && items.length) {
+      const selectedProduct = items.find(
+        ({ barcode }) =>
+          barcode === barcodeNumber
+        );
+
+      if (selectedProduct) {
+        handleSelectItem(selectedProduct.id);
+        setBarcodeNumber(null);
+        return;
+      }
+
+      if (!selectedProduct) {
+        displayAlert?.(`Unable to find item with code ${barcodeNumber}`, 'error');
+        return;
+      }
+    }
+  }, [items, barcodeNumber, handleSelectItem]);
 
   return (
     <>

@@ -479,6 +479,7 @@ export default function Inventory() {
             rows={items}
             columns={columns}
             rowCount={data?.total}
+            rowSelectionModel={selectedIds}
             onRowSelectionModelChange={(itemIds) =>
               setSelectedIds(itemIds as string[])
             }

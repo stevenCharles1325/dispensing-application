@@ -16,7 +16,8 @@ export default class BarcodeDevicesEvent implements IEvent {
   > {
     try {
       const selectedDevice = globalStorage.get('HID:SELECTED');
-      const devices = HID.devices().map(device => ({
+      const result = await HID.devicesAsync();
+      const devices = result.map(device => ({
         ...device,
         selected: selectedDevice?.id === `${device.vendorId}:${device.productId}`
       }));

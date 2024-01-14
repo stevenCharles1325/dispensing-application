@@ -18,9 +18,9 @@ export default class BarcodeStatusEvent implements IEvent {
     try {
       const cachedInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
 
-      if (cachedInfo && cachedInfo.id) {
+      if (cachedInfo && cachedInfo.id && cachedInfo.status !== 'SUCCESS') {
         const [vendorId, productId] = cachedInfo.id.split(':');
-        const selectedDevice = new HID.HID(Number(vendorId), Number(productId));
+        let selectedDevice = await HID.HIDAsync.open(Number(vendorId), Number(productId));
 
         global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
 
@@ -35,38 +35,51 @@ export default class BarcodeStatusEvent implements IEvent {
           }
 
           if (mappedNumber === 'ENTER') {
+            console.log('FROM HERE 2: ', barcodeNumber);
             global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
             global.emitToRenderer('BARCODE:DATA', barcodeNumber);
             barcodeNumber = '';
+            return
           }
         });
 
-        selectedDevice.on('error', (err: any) => {
-          const error = handleError(err) ?? 'Please try scanning again';
-
+        selectedDevice.on('error', async (err: any) => {
           cachedInfo.status = 'ERROR';
           globalStorage.set('HID:SELECTED', cachedInfo);
 
           console.log('HID ERROR: ', err);
 
           global.emitToRenderer('BARCODE:STATUS', 'ERROR');
-          global.emitToRenderer('BARCODE:ERROR', error);
+          global.emitToRenderer('BARCODE:ERROR', err);
 
-          selectedDevice.close();
+          return await selectedDevice.close();
         });
-      }
 
-      return {
-        data: cachedInfo,
-        code: 'REQ_OK',
-        status: 'SUCCESS',
-      };
+        return {
+          data: cachedInfo,
+          code: 'REQ_OK',
+          status: 'SUCCESS',
+        };
+      } else {
+        return {
+          errors: ['No device selected for barcode scanning'],
+          code: 'REQ_ERR',
+          status: 'ERROR',
+        };
+      }
     } catch (err) {
       const error = handleError(err);
+      const deviceCachedInfo = {
+        id: null,
+        status: 'ERROR',
+      }
+      globalStorage.set('HID:SELECTED', deviceCachedInfo);
+      global.emitToRenderer('BARCODE:STATUS', 'ERROR');
+      global.emitToRenderer('BARCODE:ERROR', error);
       console.log('ERROR HANDLER OUTPUT: ', error);
 
       return {
-        errors: [error],
+        errors: [error ?? 'Error connecting to HID device'],
         code: 'REQ_ERR',
         status: 'ERROR',
       } as unknown as IResponse<IPOSError[]>;

@@ -33,7 +33,9 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs, { Bull } from './jobs';
 import policies from './data/defaults/object-storage/policies';
+import HID from 'node-hid';
 import './scheduler';
+import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -110,6 +112,9 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     webPreferences: {
       nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      sandbox: false,
+      webSecurity: false,
       preload: process.env.NODE_ENV === 'production'
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
@@ -129,8 +134,27 @@ const createWindow = async () => {
     }
   });
 
-  mainWindow.on('closed', () => {
+  mainWindow.on('closed', async () => {
     console.log('CLOSING APP');
+    const globalStorage = GlobalStorage();
+
+    const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+
+    if (cachedHIDInfo && cachedHIDInfo.id) {
+      console.log('CLOSING DEVICE');
+
+      const [vendorId, productId] = cachedHIDInfo.id.split(':');
+      const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
+
+      try {
+        cachedHIDInfo.status = 'WAIT';
+        globalStorage.set('HID:SELECTED', cachedHIDInfo);
+
+        await device.close();
+      } catch (err) {
+        console.log('ERROR CLOSING THE HID DEVICE: ', err);
+      }
+    }
 
     if (global.binaryProcesses) {
       console.log('TERMINATING BINARY-PROCESS');
@@ -191,6 +215,26 @@ const createWindow = async () => {
  * Add event listeners...
  */
 app.on('window-all-closed', async () => {
+  const globalStorage = GlobalStorage();
+
+  const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+
+  if (cachedHIDInfo && cachedHIDInfo.id) {
+    console.log('CLOSING DEVICE');
+
+    const [vendorId, productId] = cachedHIDInfo.id.split(':');
+    const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
+
+    try {
+      cachedHIDInfo.status = 'WAIT';
+      globalStorage.set('HID:SELECTED', cachedHIDInfo);
+
+      await device.close();
+    } catch (err) {
+      console.log('ERROR CLOSING THE HID DEVICE: ', err);
+    }
+  }
+
   // Log-outs the user first before closing
   // const authService = Provider.ioc<IAuthService>('AuthProvider');
   // const res = await authService.revoke();

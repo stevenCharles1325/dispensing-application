@@ -13,6 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import ConfirmationProvider from 'UI/providers/ConfirmationProvider';
 import ShortcutKeysProvider from 'UI/providers/ShortcutKeysProvider';
+import BarcodeProvider from 'UI/providers/BarcodeProvider';
 
 const queryClient = new QueryClient();
 
@@ -56,7 +57,9 @@ export default function AuthLayout() {
                   <ConfirmationProvider>
                     <ShortcutKeysProvider>
                       <AlertProvider>
-                        <AppDriveProvider>{outlet}</AppDriveProvider>
+                        <BarcodeProvider>
+                          <AppDriveProvider>{outlet}</AppDriveProvider>
+                        </BarcodeProvider>
                       </AlertProvider>
                     </ShortcutKeysProvider>
                   </ConfirmationProvider>

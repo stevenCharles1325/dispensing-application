@@ -19,9 +19,25 @@ export default class BarcodeSelectEvent implements IEvent {
   > {
     try {
       const device: HidDTO = eventData.payload[0];
+      const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
 
-      if (device && device.vendorId && device.productId) {
-        const selectedDevice = new HID.HID(device.vendorId, device.productId);
+      if (
+        device &&
+        device.vendorId &&
+        device.productId
+      ) {
+        if (cachedHIDInfo && cachedHIDInfo.id) {
+          const [vendorId, productId] = cachedHIDInfo.id.split(':');
+
+          if (device.vendorId === Number(vendorId) && device.productId === Number(productId)) {
+            return {
+              code: 'REQ_OK',
+              status: 'SUCCESS',
+            };
+          }
+        }
+
+        let selectedDevice = await HID.HIDAsync.open(device.vendorId, device.productId);
 
         const deviceCachedInfo: IDeviceInfo = {
           id: `${device.vendorId}:${device.productId}`,
@@ -33,7 +49,7 @@ export default class BarcodeSelectEvent implements IEvent {
 
         let barcodeNumber = '';
 
-        selectedDevice.on('data', (data) => {
+        selectedDevice.on('data', async (data) => {
           deviceCachedInfo.status = 'SUCCESS';
           const mappedNumber  = barcodeMap[data[2].toString()];
 
@@ -45,21 +61,20 @@ export default class BarcodeSelectEvent implements IEvent {
             global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
             global.emitToRenderer('BARCODE:DATA', barcodeNumber);
             barcodeNumber = '';
+            return;
           }
         });
 
-        selectedDevice.on('error', (err: any) => {
-          const error = handleError(err) ?? 'Please try scanning again';
-
+        selectedDevice.on('error', async (err: any) => {
           deviceCachedInfo.status = 'ERROR';
           globalStorage.set('HID:SELECTED', deviceCachedInfo);
 
           console.log('HID ERROR: ', err);
 
           global.emitToRenderer('BARCODE:STATUS', 'ERROR');
-          global.emitToRenderer('BARCODE:ERROR', error);
+          global.emitToRenderer('BARCODE:ERROR', err);
 
-          selectedDevice.close();
+          await selectedDevice.close();
         });
 
         return {

@@ -16,15 +16,14 @@ import HidDTO from "App/data-transfer-objects/hid.dto";
 import UsbIcon from '@mui/icons-material/Usb';
 import Loading from "../Loading";
 import { InfoOutlined } from "@mui/icons-material";
-import { HIDType } from "UI/hooks/useBarcode";
 
 interface DeviceDialogProps {
   open: boolean;
-  devices?: HIDType[];
+  devices?: HidDTO[];
   loading: boolean;
   refresh: () => void;
   onClose: () => void;
-  onChange?: (device: HIDType) => void;
+  onChange?: (device: HidDTO) => void;
 }
 
 export default function DeviceDialog ({
@@ -35,7 +34,6 @@ export default function DeviceDialog ({
   onClose,
   onChange,
 }: DeviceDialogProps) {
-  console.log(devices);
   const info = (
     <div className="text-base">
       <b>NOTE:</b>
