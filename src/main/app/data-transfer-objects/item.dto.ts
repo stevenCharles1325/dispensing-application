@@ -5,6 +5,7 @@ import { Image } from 'Main/database/models/image.model';
 import InventoryRecordsDTO from './inventory-record.dto';
 import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 import DiscountDTO from './discount.dto';
+import BrandDTO from './brand.dto';
 
 export default interface ItemDTO {
   id: string;
@@ -35,6 +36,7 @@ export default interface ItemDTO {
   deleted_at?: Date;
 
   image?: ImageDTO | Image;
+  brand: BrandDTO;
   discount?: DiscountDTO;
   records: InventoryRecordsDTO[] | InventoryRecord[];
 }

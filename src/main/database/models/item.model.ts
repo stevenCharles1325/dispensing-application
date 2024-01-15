@@ -40,10 +40,12 @@ import type { Discount } from './discount.model';
 import Provider from '@IOC:Provider';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import UserDTO from 'App/data-transfer-objects/user.dto';
+import BrandDTO from 'App/data-transfer-objects/brand.dto';
 
 @Entity('items')
 export class Item {
   discounted_selling_price: number;
+  brand: BrandDTO;
 
   @AfterLoad()
   async getDiscount() {
@@ -66,6 +68,19 @@ export class Item {
           this.discounted_selling_price = this.selling_price - this.discount.discount_value;
         }
       }
+    }
+  }
+
+  @AfterLoad()
+  async getBrand() {
+    if (this.brand_id) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'brands' WHERE id = '${this.brand_id}'`
+      );
+
+      const brand = rawData[0] as Brand;
+      this.brand = brand;
     }
   }
 

@@ -15,7 +15,7 @@ interface ItemCardParams {
 
 export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCardParams) {
   return (
-    <div className="w-[325px] h-[200px]">
+    <div className="w-[360px] h-[200px]">
       <div className="relative w-full h-full rounded-md overflow-hidden flex flex-col overflow-hidden hover:shadow-lg">
         <div className="w-full h-[200px] bg-white relative rounded-md">
           <img
@@ -24,7 +24,7 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
             loading="lazy"
             style={{
               objectFit: 'cover',
-              width: '325px',
+              width: '360px',
               height: '200px',
             }}
           />
@@ -123,6 +123,21 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
                     style={{ color: 'rgba(0, 0, 0, 0.5)' }}
                   >
                     {cardInfo.batch_code}
+                  </p>
+                </Tooltip>
+              </div>
+            </div>
+            <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
+              <p className="text-md font-bold">
+                Brand:
+              </p>
+              <div className='max-w-[150px]'>
+                <Tooltip title={cardInfo.brand?.name} arrow>
+                  <p
+                    className="truncate text-sm font-thin"
+                    style={{ color: 'rgba(0, 0, 0, 0.5)' }}
+                  >
+                    {cardInfo.brand?.name}
                   </p>
                 </Tooltip>
               </div>

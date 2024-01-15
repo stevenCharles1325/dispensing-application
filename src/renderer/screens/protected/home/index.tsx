@@ -25,11 +25,10 @@ import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import { DeleteOutline } from '@mui/icons-material';
-import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
 
-const CARD_WIDTH = 325;
-const CARD_HEIGHT = 200;
+const CARD_WIDTH = 360;
+const CARD_HEIGHT = 215;
 
 const getItems = async (
   searchText = '',
@@ -717,12 +716,14 @@ export default function Home() {
                           <ChevronLeftIcon />
                         </IconButton>
                         <input
-                          className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
+                          className="input-number-hidden-buttons bg-transparent w-[30px] w-fit text-center"
                           value={orders[item.id].quantity}
                           max={item.stock_quantity}
                           min={0}
                           type="number"
-                          size={orders[item.id].quantity}
+                          style={{
+                            width: `${(orders[item.id].quantity?.toString().length * 10) + 40}px`
+                          }}
                           onChange={(e) => {
                             setOrders((userOrders) => ({
                               ...userOrders,
