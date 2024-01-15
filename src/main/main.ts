@@ -56,7 +56,7 @@ class AppUpdater {
   }
 }
 
-let mainWindow: BrowserWindow | null = null;
+export let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -138,7 +138,7 @@ const createWindow = async () => {
     console.log('CLOSING APP');
     const globalStorage = GlobalStorage();
 
-    const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+    const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:BARCODE');
 
     if (cachedHIDInfo && cachedHIDInfo.id) {
       console.log('CLOSING DEVICE');
@@ -148,7 +148,7 @@ const createWindow = async () => {
 
       try {
         cachedHIDInfo.status = 'WAIT';
-        globalStorage.set('HID:SELECTED', cachedHIDInfo);
+        globalStorage.set('HID:SELECTED:BARCODE', cachedHIDInfo);
 
         await device.close();
       } catch (err) {
@@ -217,7 +217,7 @@ const createWindow = async () => {
 app.on('window-all-closed', async () => {
   const globalStorage = GlobalStorage();
 
-  const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+  const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:BARCODE');
 
   if (cachedHIDInfo && cachedHIDInfo.id) {
     console.log('CLOSING DEVICE');
@@ -227,7 +227,7 @@ app.on('window-all-closed', async () => {
 
     try {
       cachedHIDInfo.status = 'WAIT';
-      globalStorage.set('HID:SELECTED', cachedHIDInfo);
+      globalStorage.set('HID:SELECTED:BARCODE', cachedHIDInfo);
 
       await device.close();
     } catch (err) {
@@ -386,8 +386,9 @@ app
         await Bull('EXPIRATION_JOB', {});
         await createWindow();
 
-        app.on('activate', () => {
+        app.on('activate', async () => {
           console.log('APP IS ACTIVE');
+
           // On macOS it's common to re-create a window in the app when the
           // dock icon is clicked and there are no other windows open.
           if (mainWindow === null) createWindow();

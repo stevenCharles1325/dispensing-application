@@ -22,6 +22,7 @@ import {
   SupplierHandler,
   UserHandler,
   SystemHandler,
+  PrinterHandler,
 } from 'Main/preload';
 
 declare global {
@@ -50,6 +51,7 @@ declare global {
     import: ImportHandler;
     role: RoleHandler;
     permission: PermissionHandler;
+    printer: PrinterHandler;
   }
 }
 

@@ -29,6 +29,7 @@ import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 import SystemDTO from 'App/data-transfer-objects/system.dto';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import PrinterDTO from 'App/data-transfer-objects/printer.dto';
 
 export type Channels = 'ipc-pos';
 
@@ -77,7 +78,17 @@ const barcodeHandler = {
     ipcRenderer.invoke('barcode:select', device),
 };
 
-
+/* ================================
++
++       BARCODE EVENT HANDLER
++
++ ================================ */
+const printerHandler = {
+  devices: async (): Promise<IResponse<string[] | IPOSError[] | PrinterDTO[]>> =>
+    ipcRenderer.invoke('printer:devices'),
+  select: async (device: PrinterDTO | null): Promise<IResponse<string[] | IPOSError[] | void>> =>
+    ipcRenderer.invoke('printer:select', device),
+};
 
 /* ================================
 +
@@ -609,6 +620,7 @@ const importHandler = {
 // EXPOSING HANDLERS
 contextBridge.exposeInMainWorld('storage', storageHandler);
 contextBridge.exposeInMainWorld('barcode', barcodeHandler);
+contextBridge.exposeInMainWorld('printer', printerHandler);
 contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
@@ -633,6 +645,7 @@ contextBridge.exposeInMainWorld('import', importHandler);
 
 export type StorageHandler = typeof storageHandler;
 export type BarcodeHandler = typeof barcodeHandler;
+export type PrinterHandler = typeof printerHandler;
 export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;

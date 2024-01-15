@@ -1,30 +1,31 @@
-import HID from "node-hid";
 import IEvent from "App/interfaces/event/event.interface";
 import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IResponse from "App/interfaces/pos/pos.response.interface";
 import handleError from "App/modules/error-handler.module";
-import HidDTO from "App/data-transfer-objects/hid.dto";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
+import { mainWindow } from "Main/main";
+import PrinterDTO from "App/data-transfer-objects/printer.dto";
 
-export default class BarcodeDevicesEvent implements IEvent {
-  public channel: string = 'barcode:devices';
+export default class PrinterDevicesEvent implements IEvent {
+  public channel: string = 'printer:devices';
 
   public async listener({
     globalStorage,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | HidDTO[] | any>
+    IResponse<string[] | IPOSError[] | PrinterDTO[] | any>
   > {
     try {
-      // mainWindow?.webContents.getPrintersAsync().then((printers) => {
-      //   console.log('PRINTER: ', printers);
-      // });
+      const cachedPrinterInfo: Partial<PrinterDTO> = globalStorage.get('PRINTER:SELECTED');
+      const result = await mainWindow?.webContents.getPrintersAsync() as PrinterDTO[] ?? [];
+      const devices = result.map((device) => {
+        if (cachedPrinterInfo) {
+          device.selected = device.displayName === cachedPrinterInfo?.displayName;
+        } else {
+          device.selected = device.isDefault;
+        }
 
-      const selectedDevice = globalStorage.get('HID:SELECTED:BARCODE:BARCODE');
-      const result = await HID.devicesAsync();
-      const devices = result.map(device => ({
-        ...device,
-        selected: selectedDevice?.id === `${device.vendorId}:${device.productId}`
-      }));
+        return device;
+      });
 
       return {
         data: devices,
