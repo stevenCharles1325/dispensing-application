@@ -21,12 +21,12 @@ const shortcutKeys: Omit<
     title: 'Place Order',
     description: '—'
   },
-  {
-    key: 'add-payment',
-    key_combination: 'f3',
-    title: 'Add Payment',
-    description: '—'
-  },
+  // {
+  //   key: 'add-payment',
+  //   key_combination: 'f3',
+  //   title: 'Add Payment',
+  //   description: '—'
+  // },
   {
     key: 'cancel-order',
     key_combination: 'f4',

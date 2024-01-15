@@ -26,6 +26,7 @@ import useConfirm from 'UI/hooks/useConfirm';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import { DeleteOutline } from '@mui/icons-material';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
+import getUOFSymbol from 'UI/helpers/getUOFSymbol';
 
 const CARD_WIDTH = 325;
 const CARD_HEIGHT = 200;
@@ -537,17 +538,36 @@ export default function Home() {
         );
 
       if (selectedProduct) {
+        if (selectedProduct.status !== 'available') {
+          displayAlert?.(`Product with code ${barcodeNumber} is ${selectedProduct.status}`, 'error');
+          return;
+        }
+
+        if (orders[selectedProduct.id]?.quantity + 1 > selectedProduct.stock_quantity) {
+          displayAlert?.(
+            `Product with code ${
+              barcodeNumber
+            } has only ${
+              selectedProduct.stock_quantity
+            } ${
+              getUOFSymbol(selectedProduct.unit_of_measurement)
+            }. available stock`,
+            'error'
+          );
+          return;
+        }
+
         handleSelectItem(selectedProduct.id);
         setBarcodeNumber(null);
         return;
       }
 
       if (!selectedProduct) {
-        displayAlert?.(`Unable to find item with code ${barcodeNumber}`, 'error');
+        displayAlert?.(`Unable to find product with code ${barcodeNumber}`, 'error');
         return;
       }
     }
-  }, [items, barcodeNumber, handleSelectItem]);
+  }, [items, barcodeNumber, orders, handleSelectItem]);
 
   return (
     <>
