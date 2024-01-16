@@ -30,6 +30,7 @@ import useConfirm from 'UI/hooks/useConfirm';
 import { ChevronLeftOutlined, ChevronRightOutlined, DownloadOutlined, UploadOutlined } from '@mui/icons-material';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
 
 const columns: Array<GridColDef> = [
   {
@@ -425,6 +426,7 @@ export default function Inventory() {
                   disabled={selectedIds.length === 0}
                 />
                 <BarcodeIndicator />
+                <PrinterIndicator />
               </div>
             </Collapse>
             {

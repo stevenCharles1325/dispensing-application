@@ -27,6 +27,7 @@ import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import { DeleteOutline } from '@mui/icons-material';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
 import titleCase from 'UI/helpers/titleCase';
+import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
 
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 215;
@@ -609,6 +610,7 @@ export default function Home() {
               onClick={handleFilterClick}
             />
             <BarcodeIndicator />
+            <PrinterIndicator />
           </div>
           <div className="grow">
             {items?.length ? (

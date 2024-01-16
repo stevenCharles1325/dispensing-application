@@ -21,6 +21,8 @@ import useBarcode from "UI/hooks/useBarcode";
 import DeviceDialog from "UI/components/Dialogs/DevicesDialog";
 import ShortcutKeysForm from "UI/components/Views/ShortcutKeysForm";
 import usePermission from "UI/hooks/usePermission";
+import PrinterDialog from "UI/components/Dialogs/PrinterDialog";
+import usePrinter from "UI/hooks/usePrinter";
 
 type ModalNames =
   | 'BUSINESS DETAILS'
@@ -31,6 +33,7 @@ type ModalNames =
   | 'SUPPLIERS'
   | 'DISCOUNTS'
   | 'BARCODE'
+  | 'PRINTER'
   | null;
 
 const Transition = React.forwardRef(function Transition(
@@ -48,6 +51,12 @@ export default function Settings () {
     refetchDevices,
     select,
   } = useBarcode();
+  const {
+    devices: printers,
+    refetchDevices: refetchPrinters,
+    select: selectPrinter,
+  } = usePrinter();
+
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -157,6 +166,17 @@ export default function Settings () {
               </p>
               <div className="w-full flex flex-row-reverse">
                 <Button color="secondary" onClick={handleOpenModal('BARCODE')}>Open</Button>
+              </div>
+            </div>
+
+            {/* Printer select device */}
+            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+              <Chip label="Printer" variant="outlined" color="secondary" />
+              <p className="py-5 px-2 text-gray-400">
+                Select a printer
+              </p>
+              <div className="w-full flex flex-row-reverse">
+                <Button color="secondary" onClick={handleOpenModal('PRINTER')}>Open</Button>
               </div>
             </div>
 
@@ -307,6 +327,14 @@ export default function Settings () {
         refresh={refetchDevices}
         devices={devices}
         onChange={select}
+        onClose={handleCloseModal}
+      />
+      <PrinterDialog
+        loading={false}
+        open={modal === 'PRINTER'}
+        refresh={refetchPrinters}
+        devices={printers}
+        onChange={selectPrinter}
         onClose={handleCloseModal}
       />
     </>

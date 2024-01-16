@@ -1,34 +1,30 @@
 import useErrorHandler from 'UI/hooks/useErrorHandler';
-import React, { createContext, useCallback, useEffect, useState } from 'react';
-import HidDTO from "App/data-transfer-objects/hid.dto";
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import useAlert from 'UI/hooks/useAlert';
 import PrinterDTO from 'App/data-transfer-objects/printer.dto';
 
 interface IPrinterContext {
   devices: any[];
   status: 'SUCCESS' | 'ERROR' | 'WAIT';
-  isDeviceListLoading: boolean;
   refetchDevices: () => void;
-  retry: () => void;
-  select: (device: HidDTO) => Promise<void>;
+  select: (device: PrinterDTO | null) => Promise<void>;
 }
 
 export const PrinterContext = createContext<IPrinterContext>({
   devices: [],
   status: 'WAIT',
-  isDeviceListLoading: true,
   refetchDevices: () => {},
-  retry: () => {},
   select: async () => {},
 });
 
 export default function PrinterProvider({ children }: React.PropsWithChildren) {
   const { displayAlert } = useAlert();
   const errorHandler = useErrorHandler();
+  const [devices, setDevices] = useState<PrinterDTO[]>([]);
   const [status, setStatus]= useState<'WAIT' | 'SUCCESS' | 'ERROR'>('WAIT');
   const [selectedDevice, setSelectedDevice] = useState<Partial<PrinterDTO> | null>(null);
 
-  const getDevices = async (): Promise<PrinterDTO[]> => {
+  const getDevices = async () => {
     const res = await window.printer.devices();
 
     if (res.status === 'ERROR') {
@@ -39,7 +35,8 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
       return [];
     }
 
-    return res.data as PrinterDTO[];
+    const printers = res.data as PrinterDTO[];
+    setDevices(res.data as PrinterDTO[]);
   }
 
   const handleSelect = useCallback(async (device: PrinterDTO | null) => {
@@ -58,43 +55,19 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
     return;
   }, [selectedDevice, displayAlert]);
 
-  const getBarcodeStatus = useCallback(async () => {
-
-
-  }, [status]);
-
-
-  // const value = useMemo(
-  //   () => ({
-  //     devices: devices ?? [],
-  //     status,
-  //     retry,
-  //     select: handleSelect,
-  //     refetchDevices: refetchDevices,
-  //     isDeviceListLoading: isLoading,
-  //   }),
-  //   [status, retry, devices, isLoading, handleSelect]
-  // );
-
-  // useEffect(() => {
-  //   const getlist = async () => {
-  //     if (printWindow) {
-  //       console.log('SHEES');
-  //       let list = await printWindow?.webContents.getPrintersAsync();
-
-  //       console.log(list);
-  //     }
-  //   }
-
-  //   getlist();
-  // }, []);
-
   useEffect(() => {
     getDevices();
   }, []);
 
+  const value = useMemo(() => ({
+    devices,
+    status,
+    refetchDevices: getDevices,
+    select: handleSelect,
+  }), [devices, status, handleSelect]);
+
   return (
-    <PrinterContext.Provider value={{}}>
+    <PrinterContext.Provider value={value}>
       {children}
     </PrinterContext.Provider>
   );
