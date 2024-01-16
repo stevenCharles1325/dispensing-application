@@ -21,6 +21,10 @@ export interface IncomeDTO {
 
   category: 'income';
 
+  product_used: string;
+
+  product_lot_number: string;
+
   type: 'customer-payment';
 
   method: IPaymentTypes;

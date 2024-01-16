@@ -81,15 +81,15 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
           <div className="w-fit h-fit flex flex-wrap gap-3">
             <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
               <p className="text-md font-bold">
-                Product Name:
+                Item ID:
               </p>
               <div className='max-w-[150px]'>
-                <Tooltip title={cardInfo.name} arrow>
+                <Tooltip title={cardInfo.item_code} arrow>
                   <p
                     className="truncate capitalize text-sm font-thin"
                     style={{ color: 'rgba(0, 0, 0, 0.5)' }}
                   >
-                    {capitalizeCase(cardInfo.name)}
+                    {capitalizeCase(cardInfo.item_code)}
                   </p>
                 </Tooltip>
               </div>

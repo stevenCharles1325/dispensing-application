@@ -194,6 +194,22 @@ export class Transaction {
   })
   type: string;
 
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  product_used: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  product_lot_number: string;
+
   @Column()
   @IsIn(paymentTypes, {
     message: ValidationMessage.isIn,

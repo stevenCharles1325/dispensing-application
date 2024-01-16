@@ -99,6 +99,8 @@ export default class PaymentCreateEvent implements IEvent {
             total: order.total,
             amount_received: order.amount_received,
             change: order.change,
+            product_lot_number: order.product_lot_number,
+            product_used: order.product_used,
             discount_id: order.discount_id,
           };
 

@@ -70,6 +70,16 @@ export class Transaction1697785919714 implements MigrationInterface {
             default: "'customer-payment'",
           },
           {
+            name: 'product_used',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'product_lot_number',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
             name: 'method',
             type: 'varchar',
             isNullable: false,

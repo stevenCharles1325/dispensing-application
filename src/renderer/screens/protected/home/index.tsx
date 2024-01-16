@@ -26,6 +26,7 @@ import useConfirm from 'UI/hooks/useConfirm';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import { DeleteOutline } from '@mui/icons-material';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
+import titleCase from 'UI/helpers/titleCase';
 
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 215;
@@ -35,7 +36,17 @@ const getItems = async (
   categoryIds: Array<string>
 ): Promise<IPagination<ItemDTO>> => {
   const res = await window.item.getItems(
-    { name: searchText, category_id: categoryIds },
+    {
+      name: searchText,
+      category_id: categoryIds,
+      status: [
+        'available',
+        'expired',
+        'on-hold',
+        'discontinued',
+        'awaiting-shipment',
+      ]
+    },
     0,
     'max'
   );
@@ -128,6 +139,8 @@ export default function Home() {
 
   // const [addCoupon, setAddCoupon] = useState<boolean>(false);
   const [barcodeNumber, setBarcodeNumber] = useState<string | null>(null);
+  const [productUsed, setProductUsed] = useState<string>('');
+  const [productLotNumber, setProductLotNumber] = useState<string>('');
   // const [couponCode, setCouponCode] = useState<string>('');
   // const [discount, setDiscount] = useState<DiscountDTO | null>(null);
 
@@ -282,6 +295,8 @@ export default function Home() {
         selling_price,
       })),
       total: 0,
+      product_used: productUsed,
+      product_lot_number: productLotNumber,
       payment_method: selectedPaymentMethod,
       amount_received: 0,
       change: 0,
@@ -289,6 +304,8 @@ export default function Home() {
     [
       orders,
       selectedItems,
+      productUsed,
+      productLotNumber,
       selectedPaymentMethod,
     ]
   );
@@ -319,7 +336,8 @@ export default function Home() {
       if (agreed) {
         setSelectedItemIds([]);
         setOrders({});
-
+        setProductUsed('');
+        setProductLotNumber('');
         displayAlert?.('Successfully cancelled order', 'success');
       }
     });
@@ -335,8 +353,16 @@ export default function Home() {
         const res = await window.payment.createPayment(orderDetails);
 
         if (res.status === 'ERROR') {
+          const onError = (field: string | null, message: string) => {
+            if (field) {
+              const fieldName = titleCase(field.split('_').join(' '));
+              displayAlert?.(`${fieldName} ${message.toLowerCase()}`, 'error');
+            }
+          }
+
           errorHandler({
             errors: res.errors,
+            onError
           });
 
           return;
@@ -345,6 +371,8 @@ export default function Home() {
         // setDiscount(null);
         // setCouponCode('');
         // setPayment(0);
+        setProductUsed('');
+        setProductLotNumber('');
         setSelectedItemIds([]);
         setOrders({});
         refetchItems();
@@ -809,9 +837,67 @@ export default function Home() {
                 </div>
               </div> */}
               <br />
-              <div className="grow w-full border-dashed border-t-4 pt-3 flex flex-col justify-between">
-                {/* <div className="flex flex-row justify-between">
-                  <p>Total:</p>
+              <div className="grow w-full border-t-4 pt-3 flex flex-col justify-between">
+                <div
+                  className={`flex flex-col gap-5 mt-3 py-3 px-3 pb-5 border ${
+                    !selectedItemIds.length
+                    ? 'border-white/30'
+                    : 'border-white'
+                  } rounded`}
+                >
+                  <TextField
+                    disabled={!selectedItemIds.length}
+                    label="Product Used:"
+                    color="secondary"
+                    fullWidth
+                    size="small"
+                    multiline
+                    variant="standard"
+                    onChange={(e) => {
+                      setProductUsed(e.target.value);
+                    }}
+                    sx={{
+                      '& .MuiFormLabel-root': {
+                        color: 'white !important',
+                      },
+                      '& .MuiInput-input': {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                      },
+                      '& .MuiInputBase-root:before': {
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.3)'
+                      },
+                      '& .MuiInputBase-root:after': {
+                        borderBottom: '1px solid rgba(255, 255, 255, 1)'
+                      }
+                    }}
+                  />
+                  <TextField
+                    disabled={!selectedItemIds.length}
+                    label="Product Lot No.:"
+                    color="secondary"
+                    fullWidth
+                    size="small"
+                    variant="standard"
+                    onChange={(e) => {
+                      setProductLotNumber(e.target.value);
+                    }}
+                    sx={{
+                      '& .MuiFormLabel-root': {
+                        color: 'white !important',
+                      },
+                      '& .MuiInput-input': {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                      },
+                      '& .MuiInputBase-root:before': {
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.3)'
+                      },
+                      '& .MuiInputBase-root:after': {
+                        borderBottom: '1px solid rgba(255, 255, 255, 1)'
+                      }
+                    }}
+                  />
+                  {/*
+                    <p>Total:</p>
                   <div>
                     <NumericFormat
                       className="mb-2 px-1 bg-transparent grow text-end"
@@ -878,7 +964,8 @@ export default function Home() {
                   <div>
                     <p className="capitalize">{selectedPaymentMethod}</p>
                   </div>
-                </div> */}
+                  */}
+                </div>
                 <div className='w-full mt-5 flex flex-col gap-2'>
                   <Button
                     fullWidth
