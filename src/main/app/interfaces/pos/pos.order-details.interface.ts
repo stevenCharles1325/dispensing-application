@@ -15,5 +15,7 @@ export interface IOrderDetails {
   payment_method: IPaymentTypes;
   discount_id?: string;
   amount_received: number;
+  product_used: string;
+  product_lot_number: string;
   change: number;
 }
