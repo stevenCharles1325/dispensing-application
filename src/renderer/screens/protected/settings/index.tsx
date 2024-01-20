@@ -32,8 +32,6 @@ type ModalNames =
   | 'BRANDS'
   | 'SUPPLIERS'
   | 'DISCOUNTS'
-  | 'BARCODE'
-  | 'PRINTER'
   | null;
 
 const Transition = React.forwardRef(function Transition(
@@ -159,7 +157,7 @@ export default function Settings () {
             }
 
             {/* Barcode select device */}
-            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            {/* <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Barcode" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Select a device for scanning
@@ -167,7 +165,7 @@ export default function Settings () {
               <div className="w-full flex flex-row-reverse">
                 <Button color="secondary" onClick={handleOpenModal('BARCODE')}>Open</Button>
               </div>
-            </div>
+            </div> */}
 
             {/* Printer select device */}
             {/* <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
@@ -321,14 +319,6 @@ export default function Settings () {
           }
         </div>
       </Dialog>
-      <DeviceDialog
-        loading={false}
-        open={modal === 'BARCODE'}
-        refresh={refetchDevices}
-        devices={devices}
-        onChange={select}
-        onClose={handleCloseModal}
-      />
       {/* <PrinterDialog
         loading={false}
         open={modal === 'PRINTER'}

@@ -149,13 +149,13 @@ const createWindow = async () => {
       console.log('CLOSING DEVICE');
 
       const [vendorId, productId] = cachedHIDInfo.id.split(':');
-      const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
+      // const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
 
       try {
         cachedHIDInfo.status = 'WAIT';
         globalStorage.set('HID:SELECTED:BARCODE', cachedHIDInfo);
 
-        await device.close();
+        // await device.close();
       } catch (err) {
         console.log('ERROR CLOSING THE HID DEVICE: ', err);
       }
@@ -171,11 +171,36 @@ const createWindow = async () => {
 
   app.commandLine.appendSwitch('disable-hid-blocklist');
 
+  let grantedDeviceThroughPermHandler:
+    | globalThis.Electron.USBDevice
+    | globalThis.Electron.HIDDevice
+    | globalThis.Electron.SerialPort
+    | null;
+
   if (mainWindow) {
-    mainWindow.webContents.session.on('select-hid-device', (event, details, callback) => {
+    mainWindow.webContents.session.on('select-usb-device', (event, details, callback) => {
+      // Add events to handle devices being added or removed before the callback on
+      // `select-usb-device` is called.
+      mainWindow!.webContents.session.on('usb-device-added', (event, device) => {
+        console.log('usb-device-added FIRED WITH', device)
+        // Optionally update details.deviceList
+      })
+
+      mainWindow!.webContents.session.on('usb-device-removed', (event, device) => {
+        console.log('usb-device-removed FIRED WITH', device)
+        // Optionally update details.deviceList
+      })
+
       event.preventDefault()
       if (details.deviceList && details.deviceList.length > 0) {
-        callback(details.deviceList[0].deviceId)
+        const deviceToReturn = details.deviceList.find((device) => {
+          return !grantedDeviceThroughPermHandler || (device.deviceId !== grantedDeviceThroughPermHandler.deviceId)
+        })
+        if (deviceToReturn) {
+          callback(deviceToReturn.deviceId)
+        } else {
+          callback()
+        }
       }
     });
 
@@ -184,16 +209,31 @@ const createWindow = async () => {
       permission,
       requestingOrigin,
       details
-      ) => {
-      if (permission === 'hid') {
-        return true
-      }
+    ) => {
+      return true
+      // if (permission === 'usb') {
+      // }
     })
 
     mainWindow.webContents.session.setDevicePermissionHandler((details) => {
-      if (details.deviceType === 'hid') {
-        return true
-      }
+      return true;
+      // if (details.deviceType === 'usb') {
+      //   // if (!grantedDeviceThroughPermHandler) {
+      //   //   grantedDeviceThroughPermHandler = details.device
+      //   //   return true
+      //   // } else {
+      //   //   return false
+      //   // }
+      // }
+    })
+
+    mainWindow.webContents.session.setUSBProtectedClassesHandler((details) => {
+      // return details.protectedClasses.filter((usbClass) => {
+      //   // Exclude classes except for audio classes
+      //   return usbClass.indexOf('audio') === -1
+      // })
+
+      return [];
     })
   }
 
@@ -228,13 +268,13 @@ app.on('window-all-closed', async () => {
     console.log('CLOSING DEVICE');
 
     const [vendorId, productId] = cachedHIDInfo.id.split(':');
-    const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
+    // const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
 
     try {
       cachedHIDInfo.status = 'WAIT';
       globalStorage.set('HID:SELECTED:BARCODE', cachedHIDInfo);
 
-      await device.close();
+      // await device.close();
     } catch (err) {
       console.log('ERROR CLOSING THE HID DEVICE: ', err);
     }

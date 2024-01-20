@@ -190,6 +190,8 @@
     "@types/simple-peer": "^9.11.5",
     "@types/terser-webpack-plugin": "^5.0.4",
     "@types/validator": "^13.11.1",
+    "@types/w3c-web-hid": "^1.0.6",
+    "@types/w3c-web-usb": "^1.0.10",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@types/webpack-env": "^1.18.3",
     "@typescript-eslint/eslint-plugin": "^5.59.8",
