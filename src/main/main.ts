@@ -16,7 +16,7 @@
 import 'reflect-metadata';
 import dotenv from 'dotenv';
 import path, { join } from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import Electron, { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -36,6 +36,8 @@ import policies from './data/defaults/object-storage/policies';
 import HID from 'node-hid';
 import './scheduler';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
+
+const { setupSecurePOSPrinter } = require('electron-secure-pos-printer');
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -113,6 +115,7 @@ const createWindow = async () => {
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
+      contextIsolation: true,
       sandbox: false,
       webSecurity: false,
       preload: process.env.NODE_ENV === 'production'
@@ -127,6 +130,8 @@ const createWindow = async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+
+    setupSecurePOSPrinter(Electron);
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {

@@ -87,7 +87,7 @@ export default class PaymentCreateEvent implements IEvent {
 
           const orderTransaction: Omit<
             IncomeDTO,
-            'id' | 'created_at' | 'updated_at' | 'system' | 'creator'
+            'id' | 'created_at' | 'updated_at' | 'system' | 'creator' | 'transaction_code'
           > = {
             // to add system_id
             creator_id: personnel.id,
@@ -98,6 +98,9 @@ export default class PaymentCreateEvent implements IEvent {
             method: 'cash',
             total: order.total,
             amount_received: order.amount_received,
+            tare_weight: order.tare_weight,
+            net_weight: order.net_weight,
+            gross_weight: order.gross_weight,
             change: order.change,
             product_lot_number: order.product_lot_number,
             product_used: order.product_used,

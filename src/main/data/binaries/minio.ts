@@ -29,7 +29,6 @@ const executeMinioBinary = () => {
     if (os === 'linux' || os === 'mac') {
       cmd = `chmod +x ${EXEC_PATH}/minio && sudo -S MINIO_ROOT_USER=${MINIO_USER} MINIO_ROOT_PASSWORD=${MINIO_PASSWORD} minio server /mnt/data --console-address ":${MINIO_PORT}"`;
 
-      console.log('COMMAND: ', cmd);
       minioProcess = spawn('bash', ['-c', cmd]);
     }
 
@@ -38,7 +37,6 @@ const executeMinioBinary = () => {
         'appData'
       )}" --console-address :${MINIO_PORT}"`;
 
-      console.log('COMMAND: ', cmd);
       /*
         The /C option is to run command then terminate command prompt
       */

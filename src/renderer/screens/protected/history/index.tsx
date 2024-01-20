@@ -35,6 +35,7 @@ import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import titleCase from 'UI/helpers/titleCase';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import usePrinter from 'UI/hooks/usePrinter';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -85,62 +86,6 @@ const logsColumns: Array<GridColDef> = [
       return new Date(params.value).toLocaleString();
     },
     sortingOrder: ['desc', 'asc'],
-  },
-];
-
-const paymentsColumns: Array<GridColDef> = [
-  {
-    field: 'source_name',
-    headerName: 'Personnel',
-    width: 250,
-    type: 'string',
-    align: 'left',
-    headerAlign: 'left',
-    valueFormatter(params) {
-      return titleCase(params.value);
-    },
-  },
-  {
-    field: 'recipient_name',
-    headerName: 'Customer',
-    flex: 250,
-    type: 'string',
-  },
-  {
-    field: 'created_at',
-    headerName: 'Date',
-    width: 250,
-    type: 'string',
-    valueFormatter(params) {
-      return new Date(params.value).toLocaleString();
-    },
-    sortingOrder: ['desc', 'asc'],
-  },
-  {
-    field: '',
-    headerName: 'Actions',
-    width: 150,
-    type: 'string',
-    renderCell: (params) => (
-      <div className='w-full flex justify-around'>
-        <IconButton
-          onClick={() => params.api.setRowSelectionModel([params.id])}
-        >
-          <VisibilityOutlinedIcon />
-        </IconButton>
-        <IconButton
-          onClick={() => params.api.setRowSelectionModel([params.id])}
-        >
-          <DownloadOutlinedIcon />
-        </IconButton>
-        {/* <IconButton onClick={() => params.api.setRowSelectionModel([params.id])}>
-          <DownloadOutlinedIcon />
-        </IconButton> */}
-      </div>
-    ),
-    sortable: false,
-    filterable: false,
-    hideable: false,
   },
 ];
 
@@ -208,6 +153,7 @@ function a11yProps(index: number) {
 }
 
 export default function Logs() {
+  const { print } = usePrinter();
   const { displayAlert } = useAlert();
   const confirm = useConfirm();
   const errorHandler = useErrorHandler();
@@ -281,6 +227,60 @@ export default function Logs() {
 
     return 0;
   }, [computedTax, selectedPayment, subTotal]);
+
+  const paymentsColumns: Array<GridColDef> = [
+    {
+      field: 'source_name',
+      headerName: 'Personnel',
+      width: 250,
+      type: 'string',
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter(params) {
+        return titleCase(params.value);
+      },
+    },
+    {
+      field: 'recipient_name',
+      headerName: 'Customer',
+      flex: 250,
+      type: 'string',
+    },
+    {
+      field: 'created_at',
+      headerName: 'Date',
+      width: 250,
+      type: 'string',
+      valueFormatter(params) {
+        return new Date(params.value).toLocaleString();
+      },
+      sortingOrder: ['desc', 'asc'],
+    },
+    {
+      field: '',
+      headerName: 'Actions',
+      width: 150,
+      type: 'string',
+      renderCell: (params) => (
+        <div className='w-full flex justify-around'>
+          <IconButton
+            onClick={() => setSelectedId(params.id)}
+          >
+            <VisibilityOutlinedIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => print(params.id)}
+          >
+            <DownloadOutlinedIcon />
+          </IconButton>
+
+        </div>
+      ),
+      sortable: false,
+      filterable: false,
+      hideable: false,
+    },
+  ];
 
   const data = currentTab === 0 ? auditData : paymentData;
   const selectedRows = currentTab === 0 ? audits : payments;

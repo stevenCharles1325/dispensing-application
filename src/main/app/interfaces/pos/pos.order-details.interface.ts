@@ -13,6 +13,9 @@ export interface IOrderDetails {
   items: IDesiredItems[];
   total: number;
   payment_method: IPaymentTypes;
+  tare_weight: string;
+  net_weight: string;
+  gross_weight: string;
   discount_id?: string;
   amount_received: number;
   product_used: string;

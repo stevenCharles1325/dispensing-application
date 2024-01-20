@@ -69,6 +69,7 @@ export class Transaction1697785919714 implements MigrationInterface {
             ],
             default: "'customer-payment'",
           },
+
           {
             name: 'product_used',
             type: 'varchar',
@@ -77,6 +78,21 @@ export class Transaction1697785919714 implements MigrationInterface {
           {
             name: 'product_lot_number',
             type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'tare_weight',
+            type: 'string',
+            isNullable: false,
+          },
+          {
+            name: 'net_weight',
+            type: 'string',
+            isNullable: false,
+          },
+          {
+            name: 'gross_weight',
+            type: 'string',
             isNullable: false,
           },
           {

@@ -30,9 +30,11 @@ import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 import SystemDTO from 'App/data-transfer-objects/system.dto';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 import PrinterDTO from 'App/data-transfer-objects/printer.dto';
+const { setupSecureBridge } = require('electron-secure-pos-printer');
 
 export type Channels = 'ipc-pos';
 
+setupSecureBridge(contextBridge, ipcRenderer);
 
 /* ================================
 +
@@ -88,6 +90,8 @@ const printerHandler = {
     ipcRenderer.invoke('printer:devices'),
   select: async (device: PrinterDTO | null): Promise<IResponse<string[] | IPOSError[] | void>> =>
     ipcRenderer.invoke('printer:select', device),
+  print: async (id: string): Promise<IResponse<string[] | IPOSError[] | void>> =>
+    ipcRenderer.invoke('printer:print', id),
 };
 
 /* ================================

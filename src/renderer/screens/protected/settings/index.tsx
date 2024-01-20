@@ -51,11 +51,11 @@ export default function Settings () {
     refetchDevices,
     select,
   } = useBarcode();
-  const {
-    devices: printers,
-    refetchDevices: refetchPrinters,
-    select: selectPrinter,
-  } = usePrinter();
+  // const {
+  //   devices: printers,
+  //   refetchDevices: refetchPrinters,
+  //   select: selectPrinter,
+  // } = usePrinter();
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -170,7 +170,7 @@ export default function Settings () {
             </div>
 
             {/* Printer select device */}
-            <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
+            {/* <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
               <Chip label="Printer" variant="outlined" color="secondary" />
               <p className="py-5 px-2 text-gray-400">
                 Select a printer
@@ -178,7 +178,7 @@ export default function Settings () {
               <div className="w-full flex flex-row-reverse">
                 <Button color="secondary" onClick={handleOpenModal('PRINTER')}>Open</Button>
               </div>
-            </div>
+            </div> */}
 
             {/* Shortcut keys */}
             <div className="w-[350px] h-fit rounded border shadow p-5 hover:shadow-lg hover:border-fuchsia-500">
@@ -329,14 +329,14 @@ export default function Settings () {
         onChange={select}
         onClose={handleCloseModal}
       />
-      <PrinterDialog
+      {/* <PrinterDialog
         loading={false}
         open={modal === 'PRINTER'}
         refresh={refetchPrinters}
         devices={printers}
         onChange={selectPrinter}
         onClose={handleCloseModal}
-      />
+      /> */}
     </>
   );
 }
