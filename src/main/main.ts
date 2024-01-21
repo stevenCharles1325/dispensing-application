@@ -382,8 +382,7 @@ app
 
         // STORAGE HANDLERS
         ipcMain.on('storage:set', (event, ...payload: any[]) => {
-          const key = payload[0];
-          const value = payload[1];
+          const [key, value] = payload;
 
           try {
             storage.set(key, value);
@@ -395,7 +394,7 @@ app
         });
 
         ipcMain.on('storage:get', (event, ...payload: any[]) => {
-          const key = payload[0];
+          const [key] = payload;
 
           try {
             event.returnValue = storage.get(key);
@@ -406,7 +405,7 @@ app
         });
 
         ipcMain.on('storage:remove', (event, ...payload: any[]) => {
-          const key = payload[0];
+          const [key] = payload;
 
           try {
             storage.delete(key);
@@ -425,6 +424,12 @@ app
             console.log('STORAGE:CLEAR:ERROR: ', err);
             event.returnValue = err?.message ?? 'Error occured in Storage-set';
           }
+        });
+
+        ipcMain.handle('broadcast-message', (_, ...payload: any[]) => {
+          const [channel, data] = payload;
+
+          global.emitToRenderer(channel, data);
         });
 
         await Bull('DISCOUNT_JOB', {});

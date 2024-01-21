@@ -10,8 +10,10 @@ import React, {
   useState
 } from 'react';
 import useAlert from 'UI/hooks/useAlert';
-import DeviceDialog from 'UI/components/Dialogs/DevicesDialog';
+// import DeviceDialog from 'UI/components/Dialogs/DevicesDialog';
 import localStorage from 'UI/modules/storage';
+import _ from 'lodash';
+import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 
 const USB_BARCODE_KEY = 'HID:SELECTED:BARCODE';
 const USB_BARCODE_INTERFACE_NUMBER = 0;
@@ -20,251 +22,297 @@ const USB_BARCODE_PACKET_SIZE = 64;
 
 interface IBarcodeContext {
   status: 'SUCCESS' | 'ERROR' | 'WAIT';
-  connectButtonRef: React.MutableRefObject<HTMLButtonElement | HTMLDivElement | null>;
-  disconnectButtonRef: React.MutableRefObject<HTMLButtonElement | HTMLDivElement | null>;
+  connect: (status: string) => void;
+  disconnect: (status: string) => void;
+  // connectButtonRef: React.MutableRefObject<HTMLButtonElement | HTMLDivElement | null>;
+  // disconnectButtonRef: React.MutableRefObject<HTMLButtonElement | HTMLDivElement | null>;
 }
 
 export const BarcodeContext = createContext<IBarcodeContext>({
   status: 'WAIT',
-  connectButtonRef: { current: null },
-  disconnectButtonRef: { current: null },
+  connect: () => {},
+  disconnect: () => {},
+  // connectButtonRef: { current: null },
+  // disconnectButtonRef: { current: null },
 });
 
 export default function BarcodeProvider({ children }: React.PropsWithChildren) {
   const { displayAlert } = useAlert();
   const errorHandler = useErrorHandler();
-  const [status, setStatus]= useState<'WAIT' | 'SUCCESS' | 'ERROR'>('SUCCESS');
+  const { addListener } = useShortcutKeys();
+  const [status, setStatus]= useState<'WAIT' | 'SUCCESS' | 'ERROR'>('WAIT');
   const [selectedDevice, setSelectedDevice] = useState<USBDevice | null>(null);
   const [devices, setDevices] = useState<USBDevice[]>([]);
+  const [tempBarcode, setTempBarcode] = useState('');
   const [barcode, setBarcode] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const connectButtonRef = useRef<HTMLButtonElement | null>(null);
-  const disconnectButtonRef = useRef<HTMLButtonElement | null>(null);
+  // const connectButtonRef = useRef<HTMLButtonElement | null>(null);
+  // const disconnectButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const handleCloseModal = () => {
-    setOpenDialog(false);
-  }
+  const debouncedReading = _.throttle(() => {
+    setBarcode(tempBarcode);
+  }, 1000);
 
-  const getDevices = async () => {
-    if ('usb' in navigator) {
-      try {
-        const devices = await navigator.usb.getDevices()
+  // const handleCloseModal = () => {
+  //   setOpenDialog(false);
+  // }
 
-        setDevices(devices);
-      } catch (err) {
-        console.log(err);
-        setDevices([]);
-      }
-    } else {
-      setDevices([]);
-    }
-  }
+  // const getDevices = async () => {
+  //   if ('usb' in navigator) {
+  //     try {
+  //       const devices = await navigator.usb.getDevices()
 
-  const handleSelect = useCallback(async (device: USBDevice) => {
-    setSelectedDevice(device);
+  //       setDevices(devices);
+  //     } catch (err) {
+  //       console.log(err);
+  //       setDevices([]);
+  //     }
+  //   } else {
+  //     setDevices([]);
+  //   }
+  // }
 
-    const deviceInfo: Partial<USBDevice> = {
-      productId: device.productId,
-      vendorId: device.vendorId
-    };
+  // const handleSelect = useCallback(async (device: USBDevice) => {
+  //   setSelectedDevice(device);
 
-    localStorage.setItem(USB_BARCODE_KEY, deviceInfo);
-    displayAlert?.('Successfully connected the device', 'success');
-  }, [selectedDevice, displayAlert]);
+  //   const deviceInfo: Partial<USBDevice> = {
+  //     productId: device.productId,
+  //     vendorId: device.vendorId
+  //   };
 
-  const processDevice = useCallback(async () => {
-    let selected: Partial<USBDevice> | null = null;
+  //   localStorage.setItem(USB_BARCODE_KEY, deviceInfo);
+  //   displayAlert?.('Successfully connected the device', 'success');
+  // }, [selectedDevice, displayAlert]);
 
-    if (selectedDevice) {
-      selected = selectedDevice;
-    } else {
-      try {
-        selected = localStorage.getItem(USB_BARCODE_KEY);
-      } catch (err) {
-        console.log(err);
-        localStorage.removeItem(USB_BARCODE_KEY);
-      }
-    }
+  // const processDevice = useCallback(async () => {
+  //   let selected: Partial<USBDevice> | null = null;
 
-    if (selected) {
-      try {
-        const grantedDevice = await navigator.usb.requestDevice({
-          filters: [
-            {
-              productId: selected?.productId,
-              vendorId: selected?.vendorId
-            },
-          ]
-        });
+  //   if (selectedDevice) {
+  //     selected = selectedDevice;
+  //   } else {
+  //     try {
+  //       selected = localStorage.getItem(USB_BARCODE_KEY);
+  //     } catch (err) {
+  //       console.log(err);
+  //       localStorage.removeItem(USB_BARCODE_KEY);
+  //     }
+  //   }
 
-        await grantedDevice.open();
+  //   if (selected) {
+  //     try {
+  //       const grantedDevice = await navigator.usb.requestDevice({
+  //         filters: [
+  //           {
+  //             productId: selected?.productId,
+  //             vendorId: selected?.vendorId
+  //           },
+  //         ]
+  //       });
 
-        // const interfaceNumber =
-        //   grantedDevice.configuration?.interfaces[0].interfaceNumber ??
-        //   USB_BARCODE_INTERFACE_NUMBER;
+  //       await grantedDevice.open();
 
-        // const alternateInterfaceNumber =
-        //   grantedDevice.configurations?.[0]?.interfaces?.[0]?.interfaceNumber;
-        // const alternateSetting =
-        //   grantedDevice.configurations?.[0]?.interfaces?.[0]?.alternate.alternateSetting;
+  //       // const interfaceNumber =
+  //       //   grantedDevice.configuration?.interfaces[0].interfaceNumber ??
+  //       //   USB_BARCODE_INTERFACE_NUMBER;
 
-        // if (grantedDevice.configuration === null) await grantedDevice.selectConfiguration(1);
-        // await grantedDevice.releaseInterface(interfaceNumber);
-        // await grantedDevice.claimInterface(interfaceNumber);
-        // await grantedDevice.selectAlternateInterface(alternateInterfaceNumber, alternateSetting);
+  //       // const alternateInterfaceNumber =
+  //       //   grantedDevice.configurations?.[0]?.interfaces?.[0]?.interfaceNumber;
+  //       // const alternateSetting =
+  //       //   grantedDevice.configurations?.[0]?.interfaces?.[0]?.alternate.alternateSetting;
 
-        // const usbDevice = await grantedDevice.transferIn(
-        //   USB_BARCODE_ENDPOINT_NUMBER,
-        //   USB_BARCODE_PACKET_SIZE
-        // );
+  //       // if (grantedDevice.configuration === null) await grantedDevice.selectConfiguration(1);
+  //       // await grantedDevice.releaseInterface(interfaceNumber);
+  //       // await grantedDevice.claimInterface(interfaceNumber);
+  //       // await grantedDevice.selectAlternateInterface(alternateInterfaceNumber, alternateSetting);
 
-        // grantedDevice?.addEventListener('data', (data) => {
-        //   console.log(data);
-        // });
+  //       // const usbDevice = await grantedDevice.transferIn(
+  //       //   USB_BARCODE_ENDPOINT_NUMBER,
+  //       //   USB_BARCODE_PACKET_SIZE
+  //       // );
 
-        // grantedDevice?.addEventListener('error', (data) => {
-        //   console.log(data);
-        //   setStatus('ERROR');
-        // });
+  //       // grantedDevice?.addEventListener('data', (data) => {
+  //       //   console.log(data);
+  //       // });
 
-        setStatus('SUCCESS');
-      } catch (err) {
-        console.log('BARCODE ERROR: ', err);
-        errorHandler({
-          errors: [err],
-        });
+  //       // grantedDevice?.addEventListener('error', (data) => {
+  //       //   console.log(data);
+  //       //   setStatus('ERROR');
+  //       // });
 
-        setStatus('ERROR');
-      }
-    } else {
-      await getDevices();
-      setStatus('WAIT');
-      setOpenDialog(true);
-    }
-  }, [selectedDevice]);
+  //       setStatus('SUCCESS');
+  //     } catch (err) {
+  //       console.log('BARCODE ERROR: ', err);
+  //       errorHandler({
+  //         errors: [err],
+  //       });
 
-  const disconnectDevice = useCallback(async () => {
-    let selected: Partial<USBDevice> | null = null;
+  //       setStatus('ERROR');
+  //     }
+  //   } else {
+  //     await getDevices();
+  //     setStatus('WAIT');
+  //     setOpenDialog(true);
+  //   }
+  // }, [selectedDevice]);
 
-    if (selectedDevice) {
-      selected = selectedDevice;
-    } else {
-      try {
-        selected = localStorage.getItem(USB_BARCODE_KEY);
-      } catch (err) {
-        console.log(err);
-        localStorage.removeItem(USB_BARCODE_KEY);
-      }
-    }
+  // const disconnectDevice = useCallback(async () => {
+  //   let selected: Partial<USBDevice> | null = null;
 
-    if (selected) {
-      try {
-        const grantedDevice = await navigator.usb.requestDevice({
-          filters: [
-            {
-              productId: selected?.productId,
-              vendorId: selected?.vendorId
-            },
-          ]
-        });
+  //   if (selectedDevice) {
+  //     selected = selectedDevice;
+  //   } else {
+  //     try {
+  //       selected = localStorage.getItem(USB_BARCODE_KEY);
+  //     } catch (err) {
+  //       console.log(err);
+  //       localStorage.removeItem(USB_BARCODE_KEY);
+  //     }
+  //   }
 
-        await grantedDevice.close();
-        localStorage.removeItem(USB_BARCODE_KEY);
-        setStatus('WAIT');
-      } catch (err) {
-        console.log('BARCODE ERROR: ', err);
-        errorHandler({
-          errors: [err],
-        });
+  //   if (selected) {
+  //     try {
+  //       const grantedDevice = await navigator.usb.requestDevice({
+  //         filters: [
+  //           {
+  //             productId: selected?.productId,
+  //             vendorId: selected?.vendorId
+  //           },
+  //         ]
+  //       });
 
-        setStatus('ERROR');
-      }
-    }
-  }, [selectedDevice]);
+  //       await grantedDevice.close();
+  //       localStorage.removeItem(USB_BARCODE_KEY);
+  //       setStatus('WAIT');
+  //     } catch (err) {
+  //       console.log('BARCODE ERROR: ', err);
+  //       errorHandler({
+  //         errors: [err],
+  //       });
+
+  //       setStatus('ERROR');
+  //     }
+  //   }
+  // }, [selectedDevice]);
 
   // Temporary solution for barcode scanning
-  const handleProxyScanningListener = useCallback(() => {
+  const handleScannerConnectListener = useCallback(() => {
     if (inputRef.current) {
       inputRef.current.focus();
       setStatus('SUCCESS');
     }
-  }, [inputRef]);
+  }, [inputRef.current]);
+
+  const handleScannerDisconnectListener = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.blur();
+      setStatus('WAIT');
+    }
+  }, [inputRef.current]);
+
+  // useEffect(() => {
+  //   console.log(disconnectButtonRef.current, connectButtonRef.current);
+  //   if (connectButtonRef.current) {
+  //     // connectButtonRef.current.addEventListener(
+  //     //   'click',
+  //     //   processDevice
+  //     // );
+  //     connectButtonRef.current.addEventListener(
+  //       'click',
+  //       handleProxyScanningListener
+  //     );
+  //   }
+
+  //   if (disconnectButtonRef.current) {
+  //     disconnectButtonRef.current.addEventListener(
+  //       'click',
+  //       handleScannerDisconnectListener
+  //     );
+  //   }
+
+  //   return () => {
+  //     if (connectButtonRef.current) {
+  //       connectButtonRef.current.removeEventListener(
+  //         'click',
+  //         handleProxyScanningListener
+  //       );
+  //     }
+
+  //     if (disconnectButtonRef.current) {
+  //       disconnectButtonRef.current.removeEventListener(
+  //         'click',
+  //         handleScannerDisconnectListener
+  //       );
+  //     }
+  //   }
+  // }, [
+  //   handleScannerDisconnectListener,
+  //   handleProxyScanningListener,
+  //   connectButtonRef.current,
+  //   disconnectButtonRef.current,
+  //   // processDevice,
+  //   // disconnectDevice
+  // ]);
 
   useEffect(() => {
-    if (connectButtonRef.current) {
-      // connectButtonRef.current.addEventListener(
-      //   'click',
-      //   processDevice
-      // );
-      connectButtonRef.current.addEventListener(
-        'click',
-        handleProxyScanningListener
-      );
-    }
-
-    if (disconnectButtonRef.current) {
-      disconnectButtonRef.current.addEventListener(
-        'click',
-        disconnectDevice
-      );
-    }
-
-    return () => {
-      if (connectButtonRef.current) {
-        connectButtonRef.current.removeEventListener(
-          'click',
-          handleProxyScanningListener
-        );
+    addListener?.([
+      {
+        key: 'barcode-start',
+        handler: handleScannerConnectListener
       }
+    ]);
+  }, [handleScannerConnectListener]);
 
-      if (disconnectButtonRef.current) {
-        disconnectButtonRef.current.removeEventListener(
-          'click',
-          disconnectDevice
-        );
-      }
+  useEffect(() => {
+    debouncedReading();
+  }, [tempBarcode]);
+
+  useEffect(() => {
+    if (barcode.length) {
+      window.main.globalEmit('BARCODE:DATA', barcode);
+      setTempBarcode('');
     }
-  }, [
-    handleProxyScanningListener,
-    connectButtonRef.current,
-    disconnectButtonRef.current,
-    processDevice,
-    disconnectDevice
-  ]);
+  }, [barcode]);
 
   const value = useMemo(
     () => ({
       status,
       barcode,
-      connectButtonRef,
-      disconnectButtonRef
+      connect: handleScannerConnectListener,
+      disconnect: handleScannerDisconnectListener,
+      // connectButtonRef,
+      // disconnectButtonRef
     }),
-    [status, connectButtonRef]
+    [
+      status,
+      handleScannerConnectListener,
+      handleScannerDisconnectListener
+    ]
   );
+
+
 
   return (
     <BarcodeContext.Provider value={value}>
       {children}
       <input
         autoFocus
+        id="hidden-input-barcode"
         ref={inputRef}
-        className='hidden'
-        onInput={() => {
-          console.log(inputRef.current?.value);
-          setBarcode(inputRef.current?.value ?? '');
-        }}
-        onBlur={() => setStatus('WAIT')}
+        value={tempBarcode}
+        className="w-[0px] h-[0px] p-0 m-0 absolute top-0 right-0"
+        onChange={e => setTempBarcode(e.target.value ?? '')}
+        onBlur={handleScannerDisconnectListener}
       />
-      <DeviceDialog
+      {/* <DeviceDialog
         loading={false}
         open={openDialog}
         refresh={getDevices}
         devices={devices}
         onChange={handleSelect}
         onClose={handleCloseModal}
-      />
+      /> */}
     </BarcodeContext.Provider>
   );
 }

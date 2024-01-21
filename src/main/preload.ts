@@ -64,6 +64,10 @@ const mainHandler = {
       }
     ) => void
   ) => ipcRenderer.on('main-message', callback),
+  globalEmit: (
+    channel: string,
+    data: any
+  ) => ipcRenderer.invoke('broadcast-message', channel, data),
 }
 
 /* ================================
