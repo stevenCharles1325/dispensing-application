@@ -264,7 +264,10 @@ export default function Logs() {
       renderCell: (params) => (
         <div className='w-full flex justify-around'>
           <IconButton
-            onClick={() => setSelectedId(params.id)}
+            onClick={() => {
+              setSelectedId(params.id)
+              setReceiptDialogOpen(true);
+            }}
           >
             <VisibilityOutlinedIcon />
           </IconButton>
@@ -399,18 +402,18 @@ export default function Logs() {
       if (currentTab === 0) {
         setPlaceHolder('Search for audit description');
       } else {
-        setPlaceHolder('Search for payment receiver');
+        setPlaceHolder('Search for personnel');
       }
     }
   }, [currentTab, setPlaceHolder]);
 
-  const { discount } = useMemo(() => {
-    return getDiscount(
-      selectedPayment?.total,
-      selectedPayment?.discount?.discount_type,
-      selectedPayment?.discount?.discount_value,
-    );
-  }, [selectedPayment]);
+  // const { discount } = useMemo(() => {
+  //   return getDiscount(
+  //     selectedPayment?.total,
+  //     selectedPayment?.discount?.discount_type,
+  //     selectedPayment?.discount?.discount_value,
+  //   );
+  // }, [selectedPayment]);
 
   return (
     <>
@@ -564,187 +567,119 @@ export default function Logs() {
             open={Boolean(receiptDialogOpen && selectedPayment)}
           >
             {selectedPayment ? (
-              <div className="w-[600px] h-[850px] overflow-auto">
+              <div className="w-[400px] h-[590px] overflow-auto">
                 <div
-                  className="w-full min-h-[800px] h-fit p-5"
-                  style={{ color: 'var(--info-text-color)' }}
+                  className="w-full p-5"
                 >
-                  <div className="w-full h-[60px] flex flex-row justify-between">
-                    <div className="font-bold">
-                      <p>Date: </p>
-                    </div>
-                    <div>
-                      <p>
-                        {`${new Date(
-                          selectedPayment.created_at
-                        ).toLocaleString()}`}
+                  <p className='font-bold text-center text-2xl'>
+                    {selectedPayment.system?.store_name?.toLocaleUpperCase()}
+                  </p>
+                  <p className='text-center text-md py-3 border-y mt-3'>
+                    RAW MATERIAL DISPENSING SLIP
+                  </p>
+                  <div className='w-full text-sm h-fit flex flex-col gap-5 mt-5 items-center text-black/70'>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Item Number:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.orders?.[0]?.item?.item_code}
                       </p>
                     </div>
-                  </div>
-                  <div className="w-full bg-gray-200 h-[60px] p-5 font-bold border-gray-400 border-b-2">
-                    <p>Product Description</p>
-                  </div>
-                  <div className="w-full h-[50px] flex py-5 px-2">
-                    <div className="grow font-bold">Name</div>
-                    <div className="w-[100px] font-bold">Qty</div>
-                    <div className="w-[100px] font-bold">Discount</div>
-                    <div className="w-[100px] font-bold">Sub Price</div>
-                    <div className="w-[100px] font-bold">Price</div>
-                  </div>
-                  <div className="w-full h-[400px] overflow-auto border-b-2">
-                    <div className="w-full h-fit">
-                      {selectedPayment.orders?.map((order: OrderDTO) => {
-                        const {
-                          discountedPrice,
-                          formattedDiscount
-                        } = getDiscount(
-                          order.price,
-                          order?.discount?.discount_type,
-                          order?.discount?.discount_value
-                        );
-
-                        return (
-                          <div
-                            key={order.id}
-                            className="w-full h-[50px] flex py-5 px-2"
-                          >
-                            <div className="grow">{order.item.name}</div>
-                            <div className="w-[100px]">{order.quantity}</div>
-                            <div className="w-[100px]">{formattedDiscount}</div>
-                            <div className="w-[100px]">
-                              <NumericFormat
-                                style={{ width: '100%', textAlign: 'left' }}
-                                className="mb-2 px-1 bg-transparent grow text-end"
-                                value={order.price * order.quantity}
-                                prefix="₱ "
-                                thousandSeparator
-                                valueIsNumericString
-                                decimalSeparator="."
-                                decimalScale={2}
-                                fixedDecimalScale
-                                disabled
-                              />
-                            </div>
-                            <div className="w-[100px]">
-                              <NumericFormat
-                                style={{ width: '100%', textAlign: 'left' }}
-                                className="mb-2 px-1 bg-transparent grow text-end"
-                                value={discountedPrice * order.quantity}
-                                prefix="₱ "
-                                thousandSeparator
-                                valueIsNumericString
-                                decimalSeparator="."
-                                decimalScale={2}
-                                fixedDecimalScale
-                                disabled
-                              />
-                            </div>
-                          </div>
-                        )
-                      })}
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Batch Number:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.orders?.[0]?.item?.batch_code}
+                      </p>
                     </div>
-                  </div>
-                  <div className="w-full flex justify-end mt-5">
-                    <div className="w-[350px] h-fit">
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Sub-total:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={subTotal}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Discount:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={discount}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">{`Tax ${`${computedTax}%`} (VAT included):`}</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={tax}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Total:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={selectedPayment.total}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Amount Received:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={selectedPayment.amount_received}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Change:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={selectedPayment.change}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Tare Wt.:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.tare_weight}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Net Wt.:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.net_weight}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Gross Wt.:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.gross_weight}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Dispensing By:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.source_name}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Checked By/Date:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.orders?.[0]?.item?.item_code}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Product Lot No.:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.product_lot_number}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        For Product:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.product_used}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Date:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.created_at.toLocaleDateString(
+                          'default',
+                          {
+                            month: '2-digit',
+                            day: '2-digit',
+                            year: 'numeric'
+                          }
+                        )}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Time:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.created_at.toLocaleTimeString(
+                          'default',
+                          {
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true,
+                            hour: '2-digit'
+                          }
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>

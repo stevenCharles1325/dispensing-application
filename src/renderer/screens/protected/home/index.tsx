@@ -29,6 +29,7 @@ import titleCase from 'UI/helpers/titleCase';
 import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
 import usePrinter from 'UI/hooks/usePrinter';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
+import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 215;
@@ -152,7 +153,7 @@ const weightsInit = {
 }
 
 export default function Home() {
-  // const { print } = usePrinter();
+  const { print } = usePrinter();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
@@ -412,6 +413,8 @@ export default function Home() {
           return;
         }
 
+        const transaction = res.data as unknown as TransactionDTO;
+
         // setDiscount(null);
         // setCouponCode('');
         // setPayment(0);
@@ -424,6 +427,8 @@ export default function Home() {
         setOrders({});
         refetchItems();
         displayAlert?.('Purchased successfully', 'success');
+
+        print(transaction.id);
       }
     });
   }, [orderDetails, displayAlert, refetchItems]);
@@ -834,7 +839,6 @@ export default function Home() {
               </div>
             </div>
             <div className="w-full h-fit flex flex-col text-white">
-              <br />
               {/* <b style={{ color: 'white' }}>BILL</b> */}
               {/* <div className="flex flex-row justify-between">
                 <p>Sub-total:</p>
@@ -884,7 +888,6 @@ export default function Home() {
                   />
                 </div>
               </div> */}
-              <br />
               <div className="grow w-full border-t-4 pt-3 flex flex-col justify-between">
                 <br />
                 <div
@@ -985,7 +988,7 @@ export default function Home() {
                       disabled={!selectedItemIds.length}
                       options={['Kilograms', 'Grams', 'Pieces']}
                       size="small"
-                      value={tareWeight.unit_of_measurement}
+                      value={netWeight.unit_of_measurement}
                       renderInput={(params) =>
                         <TextField
                           {...params}
@@ -1014,7 +1017,7 @@ export default function Home() {
                         inputComponent: PesoNumberFormat as any,
                       }}
                       onChange={(e) => {
-                        setNetWeight((grossW) => ({
+                        setGrossWeight((grossW) => ({
                           ...grossW,
                           quantity: Number(e.target.value),
                         }));
@@ -1036,7 +1039,7 @@ export default function Home() {
                         />
                       }
                       onChange={(e, newValue) => {
-                        setNetWeight((grossW) => ({
+                        setGrossWeight((grossW) => ({
                           ...grossW,
                           unit_of_measurement: newValue ?? 'Kilograms',
                         }));

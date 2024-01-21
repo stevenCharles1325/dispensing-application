@@ -38,5 +38,5 @@ const measurementSymbols: Record<string, string> = {
 };
 
 export default function getUOFSymbol(name: string) {
-  return measurementSymbols[name] ?? null;
+  return measurementSymbols[name?.toLocaleLowerCase()] ?? null;
 }

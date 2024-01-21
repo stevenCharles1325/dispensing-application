@@ -31,45 +31,48 @@ export default function BarcodeIndicator () {
 
   return (
       <>
-        <div className={status !== 'SUCCESS' ? 'visible' : 'hidden'}>
-          <Tooltip arrow title={getCommand?.('barcode-start') ?? ''}>
-            <Chip
-              component="button"
-              label={label}
-              color={
-                status === 'ERROR'
-                  ? 'error'
-                  : status === 'WAIT'
-                    ? 'secondary'
-                    : undefined
-              }
-              variant="outlined"
-              icon={
-                status === 'ERROR'
-                  ? <ErrorOutlineIcon fontSize='small' />
-                  : status === 'WAIT'
-                    ? <PauseCircleOutlineIcon fontSize='small' />
-                    : undefined
-              }
-              onClick={connect as any}
-              // ref={connectButtonRef as any}
-            />
-          </Tooltip>
-        </div>
-        <div className={status === 'SUCCESS' ? 'visible' : 'hidden'}>
-          <Tooltip arrow title={'Stop/Pause barcode scanning'}>
-            <Chip
-              clickable
-              component="button"
-              label={label}
-              color='success'
-              variant="outlined"
-              icon={<PlayCircleOutlineIcon fontSize='small' />}
-              onClick={disconnect as any}
-              // ref={disconnectButtonRef as any}
-            />
-          </Tooltip>
-        </div>
+        <Tooltip
+          arrow
+          title={status !== 'SUCCESS' ? getCommand?.('barcode-start') ?? '' : 'Stop/Pause barcode scanning'}
+        >
+          <div className='touch-none h-fit'>
+            <div className={status !== 'SUCCESS' ? 'visible' : 'hidden'}>
+              <Chip
+                component="button"
+                label={label}
+                color={
+                  status === 'ERROR'
+                    ? 'error'
+                    : status === 'WAIT'
+                      ? 'secondary'
+                      : undefined
+                }
+                variant="outlined"
+                icon={
+                  status === 'ERROR'
+                    ? <ErrorOutlineIcon fontSize='small' />
+                    : status === 'WAIT'
+                      ? <PauseCircleOutlineIcon fontSize='small' />
+                      : undefined
+                }
+                onClick={connect as any}
+                // ref={connectButtonRef as any}
+              />
+            </div>
+            <div className={status === 'SUCCESS' ? 'visible' : 'hidden'}>
+              <Chip
+                clickable
+                component="button"
+                label={label}
+                color='success'
+                variant="outlined"
+                icon={<PlayCircleOutlineIcon fontSize='small' />}
+                onClick={disconnect as any}
+                // ref={disconnectButtonRef as any}
+              />
+            </div>
+          </div>
+        </Tooltip>
     </>
   );
 }

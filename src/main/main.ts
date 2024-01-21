@@ -33,7 +33,6 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs, { Bull } from './jobs';
 import policies from './data/defaults/object-storage/policies';
-import HID from 'node-hid';
 import './scheduler';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 
@@ -251,6 +250,7 @@ const createWindow = async () => {
     mainWindow?.webContents.send('main-message', { channel, data });
   }
 
+  mainWindow.webContents.openDevTools();
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();

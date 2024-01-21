@@ -2,7 +2,6 @@ import useErrorHandler from 'UI/hooks/useErrorHandler';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import useAlert from 'UI/hooks/useAlert';
 import PrinterDTO from 'App/data-transfer-objects/printer.dto';
-import IResponse from 'App/interfaces/pos/pos.response.interface';
 import getTemplate from 'UI/helpers/getTemplate';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
@@ -23,7 +22,6 @@ export const PrinterContext = createContext<IPrinterContext>({
 });
 
 export default function PrinterProvider({ children }: React.PropsWithChildren) {
-  const { displayAlert } = useAlert();
   const errorHandler = useErrorHandler();
   // const [devices, setDevices] = useState<PrinterDTO[]>([]);
   // const [status, setStatus]= useState<'WAIT' | 'SUCCESS' | 'ERROR'>('WAIT');
@@ -35,9 +33,10 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
 
   const option = {
     preview: true,
-    margin: '1 1 1 1',
+    margin: '0 0 0 0',
     copies: 1,
     printerName: selectedDevice?.displayName,
+    styleSheet: 'td:last-child { text-align: right !important; }'
   }
 
   const getDevices = async () => {
@@ -71,7 +70,6 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
     const data = res.data as IPagination<TransactionDTO>;
     const transaction = data.data[0] as TransactionDTO;
 
-    console.log('PRINT DATA: ', transaction);
     const template = getTemplate({
       store_name: transaction.system?.store_name ?? 'X-GEN',
       ...transaction as any,
