@@ -12,7 +12,6 @@ import React, {
 import useAlert from 'UI/hooks/useAlert';
 // import DeviceDialog from 'UI/components/Dialogs/DevicesDialog';
 import localStorage from 'UI/modules/storage';
-import _ from 'lodash';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 
 const USB_BARCODE_KEY = 'HID:SELECTED:BARCODE';
@@ -22,6 +21,7 @@ const USB_BARCODE_PACKET_SIZE = 64;
 
 interface IBarcodeContext {
   status: 'SUCCESS' | 'ERROR' | 'WAIT';
+  setDictionary: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   connect: (status: string) => void;
   disconnect: (status: string) => void;
   // connectButtonRef: React.MutableRefObject<HTMLButtonElement | HTMLDivElement | null>;
@@ -30,6 +30,7 @@ interface IBarcodeContext {
 
 export const BarcodeContext = createContext<IBarcodeContext>({
   status: 'WAIT',
+  setDictionary: () => {},
   connect: () => {},
   disconnect: () => {},
   // connectButtonRef: { current: null },
@@ -37,23 +38,43 @@ export const BarcodeContext = createContext<IBarcodeContext>({
 });
 
 export default function BarcodeProvider({ children }: React.PropsWithChildren) {
-  const { displayAlert } = useAlert();
-  const errorHandler = useErrorHandler();
+  // const { displayAlert } = useAlert();
+  // const errorHandler = useErrorHandler();
+  // const [selectedDevice, setSelectedDevice] = useState<USBDevice | null>(null);
+  // const [devices, setDevices] = useState<USBDevice[]>([]);
+  // const [openDialog, setOpenDialog] = useState(false);
   const { addListener } = useShortcutKeys();
   const [status, setStatus]= useState<'WAIT' | 'SUCCESS' | 'ERROR'>('WAIT');
-  const [selectedDevice, setSelectedDevice] = useState<USBDevice | null>(null);
-  const [devices, setDevices] = useState<USBDevice[]>([]);
-  const [tempBarcode, setTempBarcode] = useState('');
   const [barcode, setBarcode] = useState('');
-  const [openDialog, setOpenDialog] = useState(false);
+
+  const [dictionary, setDictionary] = useState<Record<string, string>>({});
 
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const lengths = useMemo(() => {
+    if (typeof dictionary !== 'object' || dictionary === null) {
+      throw new Error('Input must be a valid object');
+    }
+
+    // Get all keys from the object
+    const keys = Object.keys(dictionary);
+
+    // Use a Set to store unique key lengths
+    const uniqueKeyLengths = new Set();
+
+    // Iterate through keys and add their lengths to the Set
+    for (const key of keys) {
+      uniqueKeyLengths.add(key.length);
+    }
+
+    // Convert the Set to an array and return
+    return Array
+      .from<any>(uniqueKeyLengths)
+      .sort((a, b) => a - b);
+  }, [dictionary]);
+
   // const connectButtonRef = useRef<HTMLButtonElement | null>(null);
   // const disconnectButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  const debouncedReading = _.throttle(() => {
-    setBarcode(tempBarcode);
-  }, 1000);
 
   // const handleCloseModal = () => {
   //   setOpenDialog(false);
@@ -200,6 +221,7 @@ export default function BarcodeProvider({ children }: React.PropsWithChildren) {
   const handleScannerConnectListener = useCallback(() => {
     if (inputRef.current) {
       inputRef.current.focus();
+      setBarcode('');
       setStatus('SUCCESS');
     }
   }, [inputRef.current]);
@@ -207,6 +229,7 @@ export default function BarcodeProvider({ children }: React.PropsWithChildren) {
   const handleScannerDisconnectListener = useCallback(() => {
     if (inputRef.current) {
       inputRef.current.blur();
+      setBarcode('');
       setStatus('WAIT');
     }
   }, [inputRef.current]);
@@ -264,21 +287,34 @@ export default function BarcodeProvider({ children }: React.PropsWithChildren) {
     ]);
   }, [handleScannerConnectListener]);
 
-  useEffect(() => {
-    debouncedReading();
-  }, [tempBarcode]);
+  // useEffect(() => {
+  //   debouncedReading();
+  // }, [tempBarcode]);
 
   useEffect(() => {
-    if (barcode.length) {
-      window.main.globalEmit('BARCODE:DATA', barcode);
-      setTempBarcode('');
+    const longestKey = lengths[lengths.length - 1];
+
+    if (
+      barcode.length &&
+      lengths.includes(barcode.length)
+    ) {
+      window.main.globalEmit('BARCODE:DATA', barcode);x
+      setBarcode('');
     }
-  }, [barcode]);
+
+    if (
+      barcode.length > longestKey &&
+      (barcode.length === longestKey && !dictionary[barcode])
+    ) {
+      setBarcode('');
+    }
+  }, [barcode, dictionary, lengths]);
 
   const value = useMemo(
     () => ({
       status,
       barcode,
+      setDictionary,
       connect: handleScannerConnectListener,
       disconnect: handleScannerDisconnectListener,
       // connectButtonRef,
@@ -291,8 +327,6 @@ export default function BarcodeProvider({ children }: React.PropsWithChildren) {
     ]
   );
 
-
-
   return (
     <BarcodeContext.Provider value={value}>
       {children}
@@ -300,9 +334,9 @@ export default function BarcodeProvider({ children }: React.PropsWithChildren) {
         autoFocus
         id="hidden-input-barcode"
         ref={inputRef}
-        value={tempBarcode}
+        value={barcode}
         className="w-[0px] h-[0px] p-0 m-0 absolute top-0 right-0"
-        onChange={e => setTempBarcode(e.target.value ?? '')}
+        onChange={e => setBarcode(() => e.target.value ?? '')}
         onBlur={handleScannerDisconnectListener}
       />
       {/* <DeviceDialog

@@ -30,6 +30,7 @@ import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
 import usePrinter from 'UI/hooks/usePrinter';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
+import useBarcode from 'UI/hooks/useBarcode';
 
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 215;
@@ -154,6 +155,7 @@ const weightsInit = {
 
 export default function Home() {
   const { print } = usePrinter();
+  const { setDictionary } = useBarcode();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
@@ -648,6 +650,18 @@ export default function Home() {
     }
   }, [items, barcodeNumber, orders, handleSelectItem]);
 
+  useEffect(() => {
+    setDictionary(
+      items?.reduce((prev, curr) => {
+        return {
+          ...prev,
+          [curr.barcode]: curr.barcode
+        };
+      }, {})
+      ?? {}
+    );
+  }, [items]);
+
   return (
     <>
       <div className="w-full h-full flex">
@@ -900,6 +914,7 @@ export default function Home() {
                   <TextField
                     autoFocus
                     disabled={!selectedItemIds.length}
+                    value={productUsed}
                     label="Product Used:"
                     color="secondary"
                     fullWidth
@@ -914,6 +929,7 @@ export default function Home() {
                   <TextField
                     disabled={!selectedItemIds.length}
                     label="Product Lot No.:"
+                    value={productLotNumber}
                     color="secondary"
                     fullWidth
                     size="small"
@@ -930,6 +946,7 @@ export default function Home() {
                       color="secondary"
                       size="small"
                       fullWidth
+                      value={tareWeight.quantity}
                       variant="standard"
                       InputProps={{
                         inputComponent: PesoNumberFormat as any,
@@ -969,6 +986,7 @@ export default function Home() {
                       disabled={!selectedItemIds.length}
                       label="Net Weight:"
                       color="secondary"
+                      value={netWeight.quantity}
                       size="small"
                       fullWidth
                       variant="standard"
@@ -1013,6 +1031,7 @@ export default function Home() {
                       size="small"
                       fullWidth
                       variant="standard"
+                      value={grossWeight.quantity}
                       InputProps={{
                         inputComponent: PesoNumberFormat as any,
                       }}

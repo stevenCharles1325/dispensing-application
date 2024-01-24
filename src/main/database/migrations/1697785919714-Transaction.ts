@@ -69,7 +69,6 @@ export class Transaction1697785919714 implements MigrationInterface {
             ],
             default: "'customer-payment'",
           },
-
           {
             name: 'product_used',
             type: 'varchar',

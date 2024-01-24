@@ -1,5 +1,10 @@
+import OrderDTO from 'App/data-transfer-objects/order.dto';
+import { PosPrintData } from 'electron-pos-printer';
+import titleCase from '../title-case.module';
+
 export interface IPrintTemplate {
   store_name: string;
+  source_name: string;
   product_used: string;
   product_lot_number: string;
   created_at: Date;
@@ -9,114 +14,129 @@ export interface IPrintTemplate {
   gross_weight: string;
   item_code: string;
   batch_code: string;
+  orders: OrderDTO[];
 }
 
-export default function getTemplate (data: IPrintTemplate) {
+export default function getTemplate (data: IPrintTemplate): PosPrintData[] {
   return [
     {
       type: 'text',
-      value: data.store_name,
+      value: data.store_name?.toLocaleUpperCase(),
       style: {
         fontWeight: '700',
         textAlign: 'center',
-        fontSize: '24px',
+        fontSize: '25px',
       },
     },
     {
       type: 'text',
       value: 'RAW MATERIAL DISPENSING SLIP',
       style: {
-        fontWeight: '400',
         textAlign: 'center',
-        fontSize: '24px',
+        fontSize: '14px',
+        padding: '12px 0',
+        borderTop: '1px solid black',
+        borderBottom: '1px solid black',
       },
     },
     {
-      type: 'text',
-      value: `Item Number:  ${data.item_code}`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['Item Number: ', data?.orders?.[0]?.item.item_code],
+      ],
+      tableBodyStyle: 'border: none;',
     },
     {
-      type: 'text',
-      value: `Batch Number: ${data.item_code}`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['Batch Number: ', data?.orders?.[0]?.item.batch_code],
+      ],
+      tableBodyStyle: 'border: none;',
     },
     {
-      type: 'text',
-      value: `Tare Wt.:     ${data.tare_weight}`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['Tare Wt.: ', data.tare_weight],
+      ],
+      tableBodyStyle: 'border: none;',
+      // columnStyle: 'font-size: 13px; text-align: left;',
     },
     {
-      type: 'text',
-      value: `Net Wt.:      ${data.net_weight}`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['Net Wt.: ', data.net_weight],
+      ],
+      tableBodyStyle: 'border: none;',
     },
     {
-      type: 'text',
-      value: `Gross Wt.:    ${data.gross_weight}`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['Gross Wt.: ', data.gross_weight],
+      ],
+      tableBodyStyle: 'border: none;',
     },
     {
-      type: 'text',
-      value: `Dispensing by/Date:  __________`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['Dispensing by: ', titleCase(data.source_name)],
+      ],
+      tableBodyStyle: 'border: none;',
     },
     {
-      type: 'text',
-      value: `Checked by/Date:     __________`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['Checked by/Date: ', '__________'],
+      ],
+      tableBodyStyle: 'border: none;',
     },
     {
-      type: 'text',
-      value: `Product Lot No.: ${data.product_lot_number}`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['Product Lot No.: ', data.product_lot_number],
+      ],
+      tableBodyStyle: 'border: none;',
     },
     {
-      type: 'text',
-      value: `For Product:     ${data.product_used}`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        ['For Product: ', data.product_used],
+      ],
+      tableBodyStyle: 'border: none;',
     },
     {
-      type: 'text',
-      value: `Date:            ${data.created_at.toLocaleDateString(
-        'default',
-        {
-          month: 'numeric',
-          day: 'numeric',
-          year: 'numeric'
-        }
-      )}`,
-      style: {
-        textAlign: 'left',
-        fontSize: '24px',
-      },
+      type: 'table',
+      tableBody: [
+        [
+          'Date: ',
+          data.created_at.toLocaleDateString(
+            'default',
+            {
+              month: '2-digit',
+              day: '2-digit',
+              year: 'numeric'
+            }
+          )
+        ],
+      ],
+      tableBodyStyle: 'border: none;',
+    },
+    {
+      type: 'table',
+      tableBody: [
+        [
+          'Time: ',
+          data.created_at.toLocaleTimeString(
+            'default',
+            {
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: true,
+              hour: '2-digit'
+            }
+          )
+        ],
+      ],
+      tableBodyStyle: 'border: none;',
     },
   ]
 }

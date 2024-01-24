@@ -36,8 +36,6 @@ import policies from './data/defaults/object-storage/policies';
 import './scheduler';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 
-const { setupSecurePOSPrinter } = require('electron-secure-pos-printer');
-
 // Initializing .ENV
 const myEnv = dotenv.config();
 dotenvExpand(myEnv);
@@ -130,7 +128,6 @@ const createWindow = async () => {
       throw new Error('"mainWindow" is not defined');
     }
 
-    setupSecurePOSPrinter(Electron);
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {

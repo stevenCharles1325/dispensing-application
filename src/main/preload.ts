@@ -30,11 +30,8 @@ import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 import SystemDTO from 'App/data-transfer-objects/system.dto';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 import PrinterDTO from 'App/data-transfer-objects/printer.dto';
-const { setupSecureBridge } = require('electron-secure-pos-printer');
 
 export type Channels = 'ipc-pos';
-
-setupSecureBridge(contextBridge, ipcRenderer);
 
 /* ================================
 +

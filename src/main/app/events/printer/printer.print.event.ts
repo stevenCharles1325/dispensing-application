@@ -5,9 +5,8 @@ import handleError from "App/modules/error-handler.module";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
 import TransactionDTO from "App/data-transfer-objects/transaction.dto";
 import TransactionRepository from "App/repositories/transaction.repository";
-import SystemRepository from "App/repositories/system.repository";
 import getTemplate from "App/modules/printer/get-template.module";
-import { mainWindow } from "Main/main";
+import { PosPrinter, PosPrintOptions } from 'electron-pos-printer';
 
 export default class PrinterPrintEvent implements IEvent {
   public channel: string = 'printer:print';
@@ -15,11 +14,13 @@ export default class PrinterPrintEvent implements IEvent {
   public middlewares = ['auth.v2.middleware'];
 
   public async listener({
+    event,
     eventData,
   }: IEventListenerProperties): Promise<
     IResponse<string[] | IPOSError[] | void | any>
   > {
     try {
+      console.log('SHEREES');
       const { user } = eventData;
       const transactionId: TransactionDTO['id'] = eventData.payload[0];
       const transaction = await TransactionRepository.createQueryBuilder()
@@ -27,41 +28,33 @@ export default class PrinterPrintEvent implements IEvent {
           id: transactionId
         })
         .getOneOrFail();
-      const system = await SystemRepository.createQueryBuilder()
-        .where({
-          id: transaction.system_id,
-        })
-        .getOneOrFail();
 
-
-      const result = await mainWindow?.webContents.getPrintersAsync();
+      console.log('SHEREES 2');
+      const webContents = event.sender;
+      webContents.focus();
+      const result = await webContents.getPrintersAsync();
       const printer = result?.find((printer) => printer.isDefault);
 
       const requesterHasPermission = user.hasPermission?.('download-data');
 
-      if (requesterHasPermission && user.hasSystemKey) {
+      console.log('SHEREES 3: ', result, printer, requesterHasPermission);
+      if (requesterHasPermission || user.hasSystemKey) {
         const data = getTemplate({
-          store_name: system.store_name,
-          item_code: transaction.orders[0].item.item_code,
-          batch_code: transaction.orders[0].item.batch_code,
-          tare_weight: transaction.tare_weight,
-          net_weight: transaction.net_weight,
-          gross_weight: transaction.gross_weight,
-          product_lot_number: transaction.product_lot_number,
-          product_used: transaction.product_used,
-          created_at: transaction.created_at,
-          transaction_code: transaction.transaction_code,
+          store_name: transaction.system?.store_name ?? 'X-GEN',
+          ...transaction as any,
         });
 
-        const option = {
-          preview: true,
-          margin: '1 1 1 1',
+        const option: PosPrintOptions = {
+          preview: false,
+          boolean: true,
+          silent: true,
           copies: 1,
           printerName: printer?.displayName,
-          timeOutPerLine: 400,
+          timeOutPerLine: 5000,
           pageSize: '58mm',
         }
 
+        console.log('SHEREES 4: ', option, data);
         const res = await PosPrinter.print(data, option);
 
         console.log('PRINT: ', res);

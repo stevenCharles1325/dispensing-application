@@ -1,6 +1,5 @@
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
-import useAlert from 'UI/hooks/useAlert';
 import PrinterDTO from 'App/data-transfer-objects/printer.dto';
 import getTemplate from 'UI/helpers/getTemplate';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
@@ -36,7 +35,8 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
     margin: '0 0 0 0',
     copies: 1,
     printerName: selectedDevice?.displayName,
-    styleSheet: 'td:last-child { text-align: right !important; }'
+    pageSize: 'A4',
+    styleSheet: "body,#container { height: 10000px; } td:last-child { text-align: right !important; }"
   }
 
   const getDevices = async () => {
@@ -55,28 +55,25 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
   }
 
   const print = async (transactionId: string) => {
-    const res = await window.payment.getPayments({
-      id: transactionId
-    });
+    // const data = res.data as IPagination<TransactionDTO>;
+    // const transaction = data.data[0] as TransactionDTO;
 
-    if (res.errors) {
-      errorHandler({
-        errors: res.errors,
-      });
-
-      return;
-    }
-
-    const data = res.data as IPagination<TransactionDTO>;
-    const transaction = data.data[0] as TransactionDTO;
-
-    const template = getTemplate({
-      store_name: transaction.system?.store_name ?? 'X-GEN',
-      ...transaction as any,
-    });
+    // const template = getTemplate({
+    //   store_name: transaction.system?.store_name ?? 'X-GEN',
+    //   ...transaction as any,
+    // });
 
     try {
-      await window.securePOSPrinter.print(template, option);
+      // await window.securePOSPrinter.print(template, option);
+      const res = await window.printer.print(transactionId);
+
+      if (res.errors) {
+        errorHandler({
+          errors: res.errors,
+        });
+
+        return;
+      }
     } catch (err) {
       console.log('PRINTING ERROR');
     }

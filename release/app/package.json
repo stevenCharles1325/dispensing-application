@@ -30,7 +30,6 @@
     "bullmq": "^4.12.5",
     "class-validator": "^0.14.0",
     "convert-excel-to-json": "^1.7.0",
-    "electron-secure-pos-printer": "^1.1.4",
     "jsonwebtoken": "^9.0.1",
     "node-schedule": "^2.1.1",
     "reflect-metadata": "^0.1.13",
