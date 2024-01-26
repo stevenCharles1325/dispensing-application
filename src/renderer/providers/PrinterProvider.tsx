@@ -1,9 +1,10 @@
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import PrinterDTO from 'App/data-transfer-objects/printer.dto';
-import getTemplate from 'UI/helpers/getTemplate';
+import getTemplate, { getTemplateV2 } from 'UI/helpers/getTemplate';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
+import { toHtmlText } from "from-json-to-html";
 
 
 interface IPrinterContext {
@@ -55,17 +56,23 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
   }
 
   const print = async (transactionId: string) => {
-    // const data = res.data as IPagination<TransactionDTO>;
-    // const transaction = data.data[0] as TransactionDTO;
+    const res = await window.payment.getPayments({
+      id: transactionId
+    });
 
-    // const template = getTemplate({
-    //   store_name: transaction.system?.store_name ?? 'X-GEN',
-    //   ...transaction as any,
-    // });
+    const data = res.data as IPagination<TransactionDTO>;
+    const transaction = data.data[0] as TransactionDTO;
+
+    const template = getTemplateV2({
+      store_name: transaction.system?.store_name ?? 'X-GEN',
+      ...transaction as any,
+    });
+
+    const htmlString = toHtmlText(template);
 
     try {
       // await window.securePOSPrinter.print(template, option);
-      const res = await window.printer.print(transactionId);
+      const res = await window.printer.print(htmlString);
 
       if (res.errors) {
         errorHandler({

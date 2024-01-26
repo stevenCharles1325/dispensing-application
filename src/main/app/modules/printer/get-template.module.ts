@@ -1,6 +1,6 @@
 import OrderDTO from 'App/data-transfer-objects/order.dto';
-import { PosPrintData } from 'electron-pos-printer';
 import titleCase from '../title-case.module';
+import { IPrintData } from 'App/interfaces/pos/pos.printer.interface';
 
 export interface IPrintTemplate {
   store_name: string;
@@ -17,7 +17,7 @@ export interface IPrintTemplate {
   orders: OrderDTO[];
 }
 
-export default function getTemplate (data: IPrintTemplate): PosPrintData[] {
+export function getTemplate (data: IPrintTemplate) {
   return [
     {
       type: 'text',
@@ -139,4 +139,53 @@ export default function getTemplate (data: IPrintTemplate): PosPrintData[] {
       tableBodyStyle: 'border: none;',
     },
   ]
+}
+
+export function getTemplateV2 (data: IPrintTemplate): IPrintData {
+  return {
+    element: 'div',
+    attributes: {
+      style: 'width: 58mm; height: 210mm;',
+    },
+    children: [
+      {
+        element: 'h1',
+        htmlText: data.store_name?.toLocaleUpperCase(),
+        attributes: {
+          style: 'font-weight: 700; text-align: center; font-size: 25px',
+        }
+      },
+      {
+        element: 'h4',
+        htmlText: 'RAW MATERIAL DISPENSING SLIP',
+        attributes: {
+          style: 'font-weight: 700; text-align: center; font-size: 25px',
+        }
+      },
+      {
+        element: 'table',
+        children: [
+          {
+            element: 'tr',
+            children: [
+              {
+                element: 'td',
+                htmlText: 'Item Number',
+                attributes: {
+                  style: 'text-align: center;'
+                }
+              },
+              {
+                element: 'td',
+                htmlText: data?.orders?.[0]?.item.item_code,
+                attributes: {
+                  style: 'text-align: right;'
+                }
+              },
+            ]
+          }
+        ],
+      },
+    ]
+  }
 }

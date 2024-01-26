@@ -5,7 +5,7 @@ import IEventListenerProperties from 'App/interfaces/event/event.listener-props.
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
-import concatDateToName from 'App/modules/concatDateToName.module';
+import concatDateToName from 'App/modules/concat-date-to-name.module';
 import handleError from 'App/modules/error-handler.module';
 import InventoryRecordRepository from 'App/repositories/inventory-record.repository';
 import { app } from "electron";

@@ -16,7 +16,7 @@
 import 'reflect-metadata';
 import dotenv from 'dotenv';
 import path, { join } from 'path';
-import Electron, { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -33,8 +33,8 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs, { Bull } from './jobs';
 import policies from './data/defaults/object-storage/policies';
-import './scheduler';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
+import './scheduler';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -86,6 +86,7 @@ const installExtensions = async () => {
     )
     .catch(console.log);
 };
+
 
 const createWindow = async () => {
   if (isDebug) {
@@ -293,8 +294,10 @@ app
   .whenReady()
   .then(async () => {
     // Initialize database
+
     try {
       const storage = GlobalStorage();
+
       const datasource = await SqliteDataSource.initialize();
       console.log('[DB]: Initialized Successfully');
 
@@ -316,7 +319,9 @@ app
         await runSeeders(datasource);
         console.log('[DB]: Seeded Successfully');
       } finally {
-        const binaryProcesses = executeBinaries();
+        const binaryProcesses = executeBinaries({
+          storage,
+        });
 
         if (binaryProcesses) {
           global.binaryProcesses = binaryProcesses;

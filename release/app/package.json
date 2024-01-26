@@ -32,6 +32,7 @@
     "convert-excel-to-json": "^1.7.0",
     "jsonwebtoken": "^9.0.1",
     "node-schedule": "^2.1.1",
+    "pdf-to-printer": "github:Yuri-Lima/pdf-to-printer",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.1.6",
     "typeorm": "^0.3.17",

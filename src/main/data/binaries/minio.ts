@@ -1,9 +1,9 @@
+import getBinaryPath from 'App/modules/get-binary-path.module';
 import { getPlatform } from 'App/modules/get-platform.module';
-import AppRootDir from 'app-root-dir';
+import { IBinaryOptions } from 'Main/binaries';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import dotenv from 'dotenv';
 import { app } from 'electron';
-import path from 'path';
 
 dotenv.config();
 
@@ -11,15 +11,9 @@ const MINIO_USER = process.env.MINIO_USER ?? 'admin';
 const MINIO_PASSWORD = process.env.MINIO_PASSWORD ?? 'password';
 const MINIO_PORT = process.env.MINIO_PORT ?? 9001;
 
-const IS_PROD = process.env.NODE_ENV === 'production';
-const EXEC_PATH = IS_PROD
-  ? path.join(
-      AppRootDir.get(),
-      `../../assets/binaries/object-storage/${getPlatform()}/bin`
-    )
-  : `${AppRootDir.get()}/assets/binaries/object-storage/${getPlatform()}/bin`;
+const EXEC_PATH = getBinaryPath('object-storage');
 
-const executeMinioBinary = () => {
+const executeMinioBinary = (option?: IBinaryOptions) => {
   try {
     console.log('[MINIO-BINARY]: Running minio-binary');
     const os = getPlatform();
@@ -45,12 +39,12 @@ const executeMinioBinary = () => {
 
     if (minioProcess) {
       minioProcess.stdout.on('data', (data) => {
-        console.log('[STDOUT]: ----------------------');
+        console.log('[MINIO STDOUT]: ----------------------');
         console.log(data.toString());
       });
 
       minioProcess.stderr.on('data', (data) => {
-        console.log('[STDERR]: ----------------------');
+        console.log('[MINIO STDERR]: ----------------------');
         console.log(data.toString());
       });
 

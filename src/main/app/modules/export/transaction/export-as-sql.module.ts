@@ -3,7 +3,7 @@ import { app } from 'electron';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import handleError from 'App/modules/error-handler.module';
-import concatDateToName from 'App/modules/concatDateToName.module';
+import concatDateToName from 'App/modules/concat-date-to-name.module';
 import path from 'path';
 import { getPlatform } from 'App/modules/get-platform.module';
 import AppRootDir from 'app-root-dir';

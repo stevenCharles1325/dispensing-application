@@ -2,7 +2,7 @@ import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import UploadChunkDTO from 'App/data-transfer-objects/upload-chunk.dto';
 import IJob from 'App/interfaces/job/job.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
-import concatDateToName from 'App/modules/concatDateToName.module';
+import concatDateToName from 'App/modules/concat-date-to-name.module';
 import { Job } from 'bullmq';
 import { app } from 'electron';
 import { Bull } from 'Main/jobs';

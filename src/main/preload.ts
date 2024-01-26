@@ -91,8 +91,8 @@ const printerHandler = {
     ipcRenderer.invoke('printer:devices'),
   select: async (device: PrinterDTO | null): Promise<IResponse<string[] | IPOSError[] | void>> =>
     ipcRenderer.invoke('printer:select', device),
-  print: async (id: string): Promise<IResponse<string[] | IPOSError[] | void>> =>
-    ipcRenderer.invoke('printer:print', id),
+  print: async (data: string): Promise<IResponse<string[] | IPOSError[] | void>> =>
+    ipcRenderer.invoke('printer:print', data),
 };
 
 /* ================================
