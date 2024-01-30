@@ -1,8 +1,9 @@
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
-import UploadChunkDTO from 'App/data-transfer-objects/upload-chunk.dto';
+import UploadDataDTO from 'App/data-transfer-objects/upload-data.dto';
 import IJob from 'App/interfaces/job/job.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import concatDateToName from 'App/modules/concatDateToName.module';
+import handleError from 'App/modules/error-handler.module';
 import { Job } from 'bullmq';
 import { app } from 'electron';
 import { Bull } from 'Main/jobs';
@@ -19,7 +20,7 @@ export default class InventoryRecordImportJob implements IJob {
         global.datasource.getRepository('inventory_records');
       const ItemRepository = global.datasource.getRepository('items');
       const UserRepository = global.datasource.getRepository('users');
-      const UploadChunkRepository = global.datasource.getRepository('upload_chunks');
+      const UploadDataRepository = global.datasource.getRepository('upload_datas');
 
       const {
         chunk,
@@ -27,9 +28,11 @@ export default class InventoryRecordImportJob implements IJob {
         uploadId,
       } = data;
 
-      const errored = [];
+      const queryRunner = global.datasource.createQueryRunner();
 
       for await (const record of chunk) {
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
         const systemID = record['Device ID'];
 
         const item = await ItemRepository.createQueryBuilder()
@@ -46,72 +49,74 @@ export default class InventoryRecordImportJob implements IJob {
           .getOne();
 
         if (!item) {
-          record['Error'] = "Item does not exist, please create the item manually first";
-          errored.push(record);
-
-          continue;
+          record['Error'] = "Item does not exist, please create the item manually first.";
         }
 
         if (!user) {
-          record['Error'] = "User does not exist, please create the user manually first";
-          errored.push(record);
-
-          continue;
+          record['Error'] = "User does not exist, please create the user manually first.";
         }
 
-        if (item.system_id === systemID && user.system_id === systemID) {
-          record['Error'] = "This record came from this device, and might cause conflict";
-          errored.push(record);
-
-          continue;
+        if (item?.system_id === systemID && user?.system_id === systemID) {
+          record['Error'] = "This record came from this device, and might cause conflict.";
         }
 
-        const inventoryRecord: Omit<
-          InventoryRecordDTO,
-          'id' | 'creator' | 'item'
-        > = {
-          purpose: record['Purpose'],
-          item_id: item.id,
-          note: record['Note'],
-          type: record['Type'],
-          quantity: record['Quantity'],
-          creator_id: user.id,
-          created_at: record['Date Created'],
-        }
-
-        if (inventoryRecord.type === 'stock-in') {
-          item.stock_quantity += inventoryRecord.quantity;
-        }
-
-        if (inventoryRecord.type === 'stock-out') {
-          item.stock_quantity -= inventoryRecord.quantity;
-        }
-
-        await ItemRepository.save(item);
-        await InventoryRecordRepository.save(inventoryRecord);
-      }
-
-      if (errored.length) {
-        console.log('ERRORS: ', errored);
-        const stringifyErrors = JSON.stringify(errored);
-
-        const uploadChunk: Omit<UploadChunkDTO, 'id' | 'created_at'> = {
+        const uploadData: Omit<UploadDataDTO, 'id' | 'created_at' | 'upload'> = {
           upload_id: uploadId,
-          content: stringifyErrors,
+          content: JSON.stringify(record),
+          status: record['Error'] ? 'error' : 'success',
         }
 
-        await UploadChunkRepository.save(uploadChunk);
+        await queryRunner.manager.save(uploadData);
+
+        if (record['Error']) continue;
+
+        if (item && user) {
+          const inventoryRecord: Omit<
+            InventoryRecordDTO,
+            'id' | 'creator' | 'item'
+          > = {
+            purpose: record['Purpose'],
+            item_id: item.id,
+            note: record['Note'],
+            type: record['Type'],
+            quantity: record['Quantity'],
+            creator_id: user.id,
+            created_at: record['Date Created'],
+          }
+
+          if (inventoryRecord.type === 'stock-in') {
+            item.stock_quantity += inventoryRecord.quantity;
+          }
+
+          if (inventoryRecord.type === 'stock-out') {
+            item.stock_quantity -= inventoryRecord.quantity;
+          }
+
+          try {
+            await ItemRepository.save(item);
+            await InventoryRecordRepository.save(inventoryRecord);
+            await queryRunner.commitTransaction();
+          } catch (err) {
+            const error = handleError(err);
+
+            record['Error'] = error;
+            await queryRunner.rollbackTransaction();
+          }
+        }
+
+        await queryRunner.release();
       }
 
       if (isDone) {
-        const uploadChunks = await UploadChunkRepository.createQueryBuilder()
+        const uploadChunks = await UploadDataRepository.createQueryBuilder()
           .where({
             upload_id: uploadId,
+            status: 'error',
           })
           .getMany();
 
         const result = uploadChunks.reduce((prev: Record<string, any>[], { content }) => {
-          return [...prev, ...JSON.parse(content)]
+          return [...prev, JSON.parse(content)]
         }, []);
 
         if (result.length) {

@@ -16,10 +16,11 @@ import { Transaction } from './database/models/transaction.model';
 import { User } from './database/models/user.model';
 import { Notification } from './database/models/notification.model';
 import { InventoryRecord } from './database/models/inventory-record.model';
-import MainSeeder from './database/seeders/main.seeder';
 import { ShortcutKey } from './database/models/shortcut-key.model';
 import { Discount } from './database/models/discount.model';
-import { UploadChunk } from './database/models/upload-chunk.model';
+import { Upload } from './database/models/upload.model';
+import { UploadData } from './database/models/upload-data.model';
+import MainSeeder from './database/seeders/main.seeder';
 
 type DataSourceWithSeederOption = DataSourceOptions & SeederOptions;
 
@@ -48,7 +49,8 @@ export const options: DataSourceWithSeederOption = {
     InventoryRecord,
     ShortcutKey,
     Discount,
-    UploadChunk
+    Upload,
+    UploadData,
   ],
   migrations: [
     MIGRATION_PATH,

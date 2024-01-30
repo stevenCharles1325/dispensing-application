@@ -1,14 +1,15 @@
 import {
   MigrationInterface,
+  TableForeignKey,
   QueryRunner,
   Table,
 } from 'typeorm';
 
-export class UploadChunk1704876174389 implements MigrationInterface {
+export class UploadData1706641420994 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'upload_chunks',
+        name: 'upload_datas',
         columns: [
           {
             name: 'id',
@@ -20,10 +21,18 @@ export class UploadChunk1704876174389 implements MigrationInterface {
             name: 'upload_id',
             type: 'varchar',
             isNullable: true,
+            foreignKeyConstraintName: "upload",
           },
           {
             name: 'content',
             type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'status',
+            type: 'varchar',
+            enum: ['success', 'error'],
+            default: "'success'",
             isNullable: false,
           },
           {
@@ -35,9 +44,21 @@ export class UploadChunk1704876174389 implements MigrationInterface {
       }),
       true
     );
+
+    await queryRunner.createForeignKey(
+      'upload_datas',
+      new TableForeignKey({
+        name: 'upload',
+        columnNames: ['upload_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'uploads',
+        onDelete: 'CASCADE',
+      })
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('upload_chunks');
+    await queryRunner.dropForeignKey('upload_datas', 'upload');
+    await queryRunner.dropTable('upload_datas');
   }
 }

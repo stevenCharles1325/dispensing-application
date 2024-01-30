@@ -41,6 +41,7 @@ export default class ImportInventoryRecordEvent implements IEvent {
         chunkImport(
           list,
           {
+            filePath,
             processorName: 'INVENTORY_RECORD_IMPORT_JOB'
           }
         );

@@ -18,6 +18,7 @@ import type { Image } from './image.model';
 import type { System } from './system.model';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 @Entity('suppliers')
 export class Supplier {
