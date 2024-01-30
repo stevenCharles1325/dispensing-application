@@ -92,6 +92,7 @@ export default class InventoryRecordImportJob implements IJob {
       }
 
       if (errored.length) {
+        console.log('ERRORS: ', errored);
         const stringifyErrors = JSON.stringify(errored);
 
         const uploadChunk: Omit<UploadChunkDTO, 'id' | 'created_at'> = {

@@ -33,9 +33,9 @@ import IObjectStorageService from 'App/interfaces/service/service.object-storage
 import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs, { Bull } from './jobs';
 import policies from './data/defaults/object-storage/policies';
-import HID from 'node-hid';
-import './scheduler';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
+// import HID from 'node-hid';
+import './scheduler';
 
 // Initializing .ENV
 const myEnv = dotenv.config();
@@ -144,7 +144,7 @@ const createWindow = async () => {
       console.log('CLOSING DEVICE');
 
       const [vendorId, productId] = cachedHIDInfo.id.split(':');
-      const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
+      // const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
 
       try {
         cachedHIDInfo.status = 'WAIT';
@@ -223,7 +223,7 @@ app.on('window-all-closed', async () => {
     console.log('CLOSING DEVICE');
 
     const [vendorId, productId] = cachedHIDInfo.id.split(':');
-    const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
+    // const device = await HID.HIDAsync.open(Number(vendorId), Number(productId));
 
     try {
       cachedHIDInfo.status = 'WAIT';

@@ -20,40 +20,40 @@ export default class BarcodeStatusEvent implements IEvent {
 
       if (cachedInfo && cachedInfo.id && cachedInfo.status !== 'SUCCESS') {
         const [vendorId, productId] = cachedInfo.id.split(':');
-        let selectedDevice = await HID.HIDAsync.open(Number(vendorId), Number(productId));
+        // let selectedDevice = await HID.HIDAsync.open(Number(vendorId), Number(productId));
 
         global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
 
         let barcodeNumber = '';
 
-        selectedDevice.on('data', (data) => {
-          cachedInfo.status = 'SUCCESS';
-          const mappedNumber  = barcodeMap[data[2].toString()];
+        // selectedDevice.on('data', (data) => {
+        //   cachedInfo.status = 'SUCCESS';
+        //   const mappedNumber  = barcodeMap[data[2].toString()];
 
-          if (mappedNumber && mappedNumber !== 'ENTER') {
-            barcodeNumber += mappedNumber;
-          }
+        //   if (mappedNumber && mappedNumber !== 'ENTER') {
+        //     barcodeNumber += mappedNumber;
+        //   }
 
-          if (mappedNumber === 'ENTER') {
-            console.log('FROM HERE 2: ', barcodeNumber);
-            global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
-            global.emitToRenderer('BARCODE:DATA', barcodeNumber);
-            barcodeNumber = '';
-            return
-          }
-        });
+        //   if (mappedNumber === 'ENTER') {
+        //     console.log('FROM HERE 2: ', barcodeNumber);
+        //     global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
+        //     global.emitToRenderer('BARCODE:DATA', barcodeNumber);
+        //     barcodeNumber = '';
+        //     return
+        //   }
+        // });
 
-        selectedDevice.on('error', async (err: any) => {
-          cachedInfo.status = 'ERROR';
-          globalStorage.set('HID:SELECTED', cachedInfo);
+        // selectedDevice.on('error', async (err: any) => {
+        //   cachedInfo.status = 'ERROR';
+        //   globalStorage.set('HID:SELECTED', cachedInfo);
 
-          console.log('HID ERROR: ', err);
+        //   console.log('HID ERROR: ', err);
 
-          global.emitToRenderer('BARCODE:STATUS', 'ERROR');
-          global.emitToRenderer('BARCODE:ERROR', err);
+        //   global.emitToRenderer('BARCODE:STATUS', 'ERROR');
+        //   global.emitToRenderer('BARCODE:ERROR', err);
 
-          return await selectedDevice.close();
-        });
+        //   return await selectedDevice.close();
+        // });
 
         return {
           data: cachedInfo,

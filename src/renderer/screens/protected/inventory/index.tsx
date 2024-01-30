@@ -285,6 +285,7 @@ export default function Inventory() {
           if (agreed) {
             const res = await window.import.importInventoryRecords(file.path);
 
+            console.log(res);
             if (res.status === 'ERROR') {
               errorHandler({
                 errors: res.errors,

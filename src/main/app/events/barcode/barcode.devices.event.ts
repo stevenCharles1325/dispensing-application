@@ -1,4 +1,4 @@
-import HID from "node-hid";
+// import HID from "node-hid";
 import IEvent from "App/interfaces/event/event.interface";
 import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IResponse from "App/interfaces/pos/pos.response.interface";
@@ -16,14 +16,15 @@ export default class BarcodeDevicesEvent implements IEvent {
   > {
     try {
       const selectedDevice = globalStorage.get('HID:SELECTED');
-      const result = await HID.devicesAsync();
-      const devices = result.map(device => ({
-        ...device,
-        selected: selectedDevice?.id === `${device.vendorId}:${device.productId}`
-      }));
+      // const result = await HID.devicesAsync();
+      // const devices = result.map(device => ({
+      //   ...device,
+      //   selected: selectedDevice?.id === `${device.vendorId}:${device.productId}`
+      // }));
 
       return {
-        data: devices,
+        // data: devices,
+        data: [],
         code: 'REQ_OK',
         status: 'SUCCESS',
       };
