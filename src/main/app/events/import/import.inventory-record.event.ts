@@ -38,7 +38,7 @@ export default class ImportInventoryRecordEvent implements IEvent {
 
         const list = result['Stock-records'].slice(1);
 
-        chunkImport(
+        await chunkImport(
           list,
           {
             filePath,

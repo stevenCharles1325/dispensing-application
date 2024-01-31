@@ -24,29 +24,32 @@ export default async function chunkImport (
   if (!list.length || !options.processorName?.length ) return;
   const chunkedList = chunkArray(list, options.chunkSize);
   const uploadId = Date.now();
-  const total = chunkedList.length;
+  const total = list.length;
+  const fileName = (
+    options.filePath
+      ?.replace(/\\/g, '/')
+      ?.split?.('/')
+      ?.reverse()
+      ?.[0]
+    ) ?? options.filePath;
 
   await UploadRepository.save({
     id: uploadId.toString(),
     total,
-    file_name: (
-      options.filePath
-        ?.replace(/\\/g, '/')
-        ?.split?.('/')
-        ?.reverse()
-        ?.[0]
-      ) ?? options.filePath,
+    file_name: fileName,
   });
 
   for await (const [index, chunk] of chunkedList.entries()) {
-    const isDone = total === index + 1;
+    const isLastChunk = chunkedList.length === index + 1;
 
     await Bull(
       options.processorName,
       {
         chunk,
-        isDone,
+        total,
+        fileName,
         uploadId,
+        isLastChunk,
       }
     );
   }

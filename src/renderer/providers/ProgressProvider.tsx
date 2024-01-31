@@ -21,8 +21,9 @@ export default function ProgressProvider({ children }: React.PropsWithChildren) 
   const [open, setOpen] = useState<boolean>(false);
 
   const handleProgressFromMain = (_, payload) => {
-    if (payload.data === 0) setOpen(true);
-    if (payload.data === 100) {
+    console.log(payload);
+    if (payload.data.progress >= 0 && payload.data.progress < 100) setOpen(true);
+    if (payload.data.progress >= 100) {
       setTimeout(() => {
         setOpen(false);
       }, 2000);
@@ -66,13 +67,13 @@ export default function ProgressProvider({ children }: React.PropsWithChildren) 
         message={
           <div className="flex flex-row justify-between items-center">
             <div>{capitalizeCase(content?.message ?? '')}</div>
-            {(content?.progress ?? 0) === 100
+            {(content?.progress ?? 0) >= 100
             ? <CheckCircleOutlineOutlinedIcon fontSize='large' color='success'/>
             : <CircularProgress
                 value={content?.progress ?? 0}
                 variant='determinate'
                 color={
-                  (content?.progress ?? 0) >= 99
+                  (content?.progress ?? 0) >= 100
                   ? 'success'
                   : 'secondary'
                 }

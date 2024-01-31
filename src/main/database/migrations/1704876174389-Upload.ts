@@ -18,6 +18,12 @@ export class Upload1704876174389 implements MigrationInterface {
             isPrimary: true,
           },
           {
+            name: 'system_id',
+            type: 'varchar',
+            isNullable: true,
+            foreignKeyConstraintName: "system",
+          },
+          {
             name: 'uploader_id',
             type: 'varchar',
             isNullable: true,
@@ -48,8 +54,9 @@ export class Upload1704876174389 implements MigrationInterface {
           {
             name: 'status',
             type: 'varchar',
-            enum: ['successful', 'failed'],
-            isNullable: false,
+            enum: ['successful', 'failed', 'pending'],
+            default: "'pending'",
+            isNullable: true,
           },
           {
             name: 'created_at',
@@ -71,9 +78,21 @@ export class Upload1704876174389 implements MigrationInterface {
         onDelete: 'SET NULL',
       })
     );
+
+    await queryRunner.createForeignKey(
+      'uploads',
+      new TableForeignKey({
+        name: 'system',
+        columnNames: ['system_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'systems',
+        onDelete: 'SET NULL',
+      })
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropForeignKey('uploads', 'system');
     await queryRunner.dropForeignKey('uploads', 'uploader');
     await queryRunner.dropTable('uploads');
   }

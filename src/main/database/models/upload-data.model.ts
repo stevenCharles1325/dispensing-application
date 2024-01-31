@@ -2,41 +2,35 @@
 import {
   Column,
   Entity,
-  ManyToOne,
-  Relation,
-  AfterLoad,
-  JoinColumn,
-  BeforeInsert,
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import type { Upload } from './upload.model';
 
 @Entity('upload_datas')
 export class UploadData {
-  @AfterLoad()
-  async getUpload() {
-    const UploadRepository = global.datasource.getRepository('uploads');
-    const upload = await UploadRepository.findOneByOrFail({ id: this.upload_id });
+  // @AfterLoad()
+  // async getUpload() {
+  //   const UploadRepository = global.datasource.getRepository('uploads');
+  //   const upload = await UploadRepository.findOneByOrFail({ id: this.upload_id });
 
-    this.upload = upload as Upload;
-  }
+  //   this.upload = upload as Upload;
+  // }
 
-  @BeforeInsert()
-  async updateUploadStateCounts () {
-    const UploadRepository = global.datasource.getRepository('uploads');
-    const upload = await UploadRepository.findOneByOrFail({
-      id: this.upload_id
-    }) as Upload;
+  // @BeforeInsert()
+  // async updateUploadStateCounts () {
+  //   const UploadRepository = global.datasource.getRepository('uploads');
+  //   const upload = await UploadRepository.findOneByOrFail({
+  //     id: this.upload_id
+  //   }) as Upload;
 
-    if (this.status === 'error') {
-      upload.error_count += 1;
-    } else {
-      upload.success_count += 1;
-    }
+  //   if (this.status === 'error') {
+  //     upload.error_count += 1;
+  //   } else {
+  //     upload.success_count += 1;
+  //   }
 
-    await UploadRepository.save(upload);
-  }
+  //   await UploadRepository.save(upload);
+  // }
 
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -53,9 +47,9 @@ export class UploadData {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne('Upload', {
-    eager: true,
-  })
-  @JoinColumn({ name: 'upload_id', referencedColumnName: 'id' })
-  upload: Relation<Upload>;
+  // @ManyToOne('Upload', {
+  //   eager: true,
+  // })
+  // @JoinColumn({ name: 'upload_id', referencedColumnName: 'id' })
+  // upload: Relation<Upload>;
 }

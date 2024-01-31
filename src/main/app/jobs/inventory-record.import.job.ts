@@ -1,11 +1,18 @@
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
+import ItemDTO from 'App/data-transfer-objects/item.dto';
 import UploadDataDTO from 'App/data-transfer-objects/upload-data.dto';
+import UploadDTO from 'App/data-transfer-objects/upload.dto';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 import IJob from 'App/interfaces/job/job.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import concatDateToName from 'App/modules/concatDateToName.module';
 import handleError from 'App/modules/error-handler.module';
 import { Job } from 'bullmq';
 import { app } from 'electron';
+import { InventoryRecord } from 'Main/database/models/inventory-record.model';
+import { Item } from 'Main/database/models/item.model';
+import { UploadData } from 'Main/database/models/upload-data.model';
+import { Upload } from 'Main/database/models/upload.model';
 import { Bull } from 'Main/jobs';
 import process from 'node:process';
 import { parentPort } from 'node:worker_threads';
@@ -15,38 +22,59 @@ export default class InventoryRecordImportJob implements IJob {
   readonly key = 'INVENTORY_RECORD_IMPORT_JOB';
 
   async handler({ data }: Job) {
-    try {
-      const InventoryRecordRepository =
-        global.datasource.getRepository('inventory_records');
-      const ItemRepository = global.datasource.getRepository('items');
-      const UserRepository = global.datasource.getRepository('users');
-      const UploadDataRepository = global.datasource.getRepository('upload_datas');
+    const queryRunner = global.datasource.createQueryRunner();
 
+    try {
       const {
         chunk,
-        isDone,
+        total,
+        fileName,
+        isLastChunk,
         uploadId,
       } = data;
 
-      const queryRunner = global.datasource.createQueryRunner();
+      await queryRunner.connect();
+
+      const progress = (await queryRunner.query(
+        `SELECT
+          COUNT(*) as processed,
+          SUM(status = 'success') as success_count,
+          SUM(status = 'error') as error_count
+        FROM upload_datas
+        WHERE upload_id = '${uploadId}'
+      `))?.[0];
+
+      let processed = progress.processed ?? 0;
+      let successCount = progress.success_count ?? 0;
+      let errorCount = progress.error_count ?? 0;
+
+      global.emitToRenderer('PROGRESS:DATA', {
+        message: `Uploading ${fileName} with (${successCount}) succeeded and (${errorCount}) failed`,
+        progress: (processed / total) * 100,
+      });
 
       for await (const record of chunk) {
-        await queryRunner.connect();
         await queryRunner.startTransaction();
+        processed += 1;
+
+        record['Error'] = undefined;
+
+        const upload = (await queryRunner.query(
+          `SELECT * FROM uploads WHERE id = '${uploadId}'`
+        ))?.[0];
+        const item = (await queryRunner.query(
+          `SELECT *
+          FROM items
+          WHERE item_code = '${record['Item ID']}'
+          AND name = '${record['Item Name']}'
+        `))?.[0] as Item;
+        const user = (await queryRunner.query(
+          `SELECT *
+          FROM users
+          WHERE email = '${record['Creator Email']}'
+        `))?.[0] as UserDTO;
+
         const systemID = record['Device ID'];
-
-        const item = await ItemRepository.createQueryBuilder()
-          .where({
-            item_code: record['Item ID'],
-            name: record['Item Name'],
-          })
-          .getOne();
-
-        const user = await UserRepository.createQueryBuilder()
-          .where({
-            email: record['Creator Email'],
-          })
-          .getOne();
 
         if (!item) {
           record['Error'] = "Item does not exist, please create the item manually first.";
@@ -60,62 +88,86 @@ export default class InventoryRecordImportJob implements IJob {
           record['Error'] = "This record came from this device, and might cause conflict.";
         }
 
-        const uploadData: Omit<UploadDataDTO, 'id' | 'created_at' | 'upload'> = {
-          upload_id: uploadId,
-          content: JSON.stringify(record),
-          status: record['Error'] ? 'error' : 'success',
-        }
+        const uploadData = new UploadData();
+        uploadData.upload_id = uploadId;
+        uploadData.content = JSON.stringify(record);
+        uploadData.status = record['Error'] ? 'error' : 'success';
 
         await queryRunner.manager.save(uploadData);
+        if (uploadData.status === 'error') {
+          upload.error_count += 1;
+        } else {
+          upload.success_count += 1;
+        }
 
-        if (record['Error']) continue;
+        await queryRunner.manager.save(Upload, upload as unknown as Upload);
+
+        if (record['Error']) {
+          await queryRunner.commitTransaction();
+          errorCount += 1;
+          continue;
+        };
 
         if (item && user) {
-          const inventoryRecord: Omit<
-            InventoryRecordDTO,
-            'id' | 'creator' | 'item'
-          > = {
-            purpose: record['Purpose'],
-            item_id: item.id,
-            note: record['Note'],
-            type: record['Type'],
-            quantity: record['Quantity'],
-            creator_id: user.id,
-            created_at: record['Date Created'],
-          }
+          const itemClone = new Item();
+          const inventoryRecord = new InventoryRecord();
+
+          inventoryRecord.purpose = record['Purpose'];
+          inventoryRecord.item_id = item.id;
+          inventoryRecord.note = record['Note'];
+          inventoryRecord.type = record['Type'];
+          inventoryRecord.quantity = record['Quantity'];
+          inventoryRecord.creator_id = user.id;
+          inventoryRecord.created_at = record['Date Created'];
+
+          Object.assign(itemClone, item);
 
           if (inventoryRecord.type === 'stock-in') {
-            item.stock_quantity += inventoryRecord.quantity;
+            itemClone.stock_quantity += inventoryRecord.quantity;
           }
 
           if (inventoryRecord.type === 'stock-out') {
-            item.stock_quantity -= inventoryRecord.quantity;
+            itemClone.stock_quantity -= inventoryRecord.quantity;
           }
 
           try {
-            await ItemRepository.save(item);
-            await InventoryRecordRepository.save(inventoryRecord);
+            await queryRunner.manager.save(itemClone);
+            await queryRunner.manager.save(inventoryRecord);
             await queryRunner.commitTransaction();
+            successCount += 1;
           } catch (err) {
             const error = handleError(err);
 
             record['Error'] = error;
             await queryRunner.rollbackTransaction();
+            errorCount += 1;
           }
         }
-
-        await queryRunner.release();
       }
 
-      if (isDone) {
-        const uploadChunks = await UploadDataRepository.createQueryBuilder()
-          .where({
-            upload_id: uploadId,
-            status: 'error',
-          })
-          .getMany();
+      if (isLastChunk) {
+        await queryRunner.startTransaction();
 
-        const result = uploadChunks.reduce((prev: Record<string, any>[], { content }) => {
+        const erroredRows = (await queryRunner.query(
+          `SELECT *
+          FROM upload_datas
+          WHERE upload_id = '${uploadId}' AND status = 'error'
+          `)) as UploadDataDTO[];
+
+        const uploadClone = new Upload();
+        const upload = (await queryRunner.query(
+          `SELECT * FROM uploads WHERE id = '${uploadId}'`
+          ))?.[0];
+
+        Object.assign(uploadClone, {
+          ...upload,
+          status: erroredRows.length ? 'failed' : 'successful'
+        });
+
+        await queryRunner.manager.save(uploadClone);
+        await queryRunner.commitTransaction();
+
+        const result = erroredRows.reduce((prev: Record<string, any>[], { content }) => {
           return [...prev, JSON.parse(content)]
         }, []);
 
@@ -144,10 +196,17 @@ export default class InventoryRecordImportJob implements IJob {
         }
       }
 
+      global.emitToRenderer('PROGRESS:DATA', {
+        message: `Uploading ${fileName} with (${successCount}) succeeded and (${errorCount}) failed`,
+        progress: (isLastChunk ? total : processed / total) * 100,
+      });
+
       parentPort?.postMessage('done');
     } catch (error) {
       console.log('ERROR:  ', error);
       return Promise.reject(error);
+    } finally {
+      await queryRunner.release();
     }
   }
 

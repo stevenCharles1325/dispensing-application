@@ -7,7 +7,7 @@ export default interface UploadDTO {
   total: number;
   success_count: number;
   error_count: number;
-  status: 'successfull' | 'failed';
+  status: 'successful' | 'failed';
   created_at: Date;
 
   uploader: UserDTO;
