@@ -604,6 +604,10 @@ const importHandler = {
     filePath: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('inventory-record:import', filePath),
+  importInventory: async (
+    filePath: string
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('inventory:import', filePath),
 };
 
 // EXPOSING HANDLERS

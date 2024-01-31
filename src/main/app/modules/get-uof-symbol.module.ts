@@ -42,7 +42,7 @@ export default function getUOFSymbol(name: string, longName: boolean = false) {
   const measurementsReversed: Record<string, any> = {};
 
   // Reversing key as the new value and so on
-  for (const key in Object.keys(measurementSymbols)) {
+  for (const key of Object.keys(measurementSymbols)) {
     const value = measurementSymbols[key];
     measurementsReversed[value] = key;
   }

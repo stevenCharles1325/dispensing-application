@@ -10,7 +10,9 @@ import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 import InventoryRecordRepository from 'App/repositories/inventory-record.repository';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import ItemRepository from 'App/repositories/item.repository';
-import UserRepository from 'App/repositories/user.repository';
+import unit from 'unitmath';
+import getUOFSymbol from 'App/modules/get-uof-symbol.module';
+import unitQuantityCalculator from 'App/modules/unit-quantity-calculator.module';
 
 export default class InventoryRecordCreateEvent implements IEvent {
   public channel: string = 'inventory-record:create';
@@ -55,12 +57,30 @@ export default class InventoryRecordCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
+        const itemQuantity = {
+          quantity: item.stock_quantity,
+          unit: item.unit_of_measurement,
+        }
+        const recordQuantity = {
+          quantity: record.quantity,
+          unit: record.unit_of_measurement,
+        }
+
+        const [quantity, um] = unitQuantityCalculator(
+          itemQuantity,
+          recordQuantity,
+          getUOFSymbol,
+          record.type === 'stock-in' ? 'add' : 'sub',
+        );
+
         if (record.type === 'stock-in') {
-          item.stock_quantity += record.quantity;
+          item.stock_quantity = quantity;
+          item.unit_of_measurement = um;
         }
 
         if (record.type === 'stock-out') {
-          item.stock_quantity -= record.quantity;
+          item.stock_quantity = quantity;
+          item.unit_of_measurement = um;
         }
 
         await ItemRepository.save(item);

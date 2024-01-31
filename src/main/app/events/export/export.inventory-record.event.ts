@@ -50,6 +50,7 @@ export default class ExportInventoryRecordsEvent implements IEvent {
             Note: record.note,
             Type: record.type,
             Quantity: record.quantity,
+            UM: record.unit_of_measurement,
             'Created By': `${record.creator.first_name} ${record.creator.last_name}`,
             'Creator Email': record.creator.email,
             'Date Created': new Date(record.created_at).toLocaleDateString(),

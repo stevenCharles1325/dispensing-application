@@ -6,25 +6,27 @@ import React, { createContext, useEffect, useState } from 'react';
 import capitalizeCase from 'UI/helpers/capitalCase';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import { CircularProgress } from '@mui/material';
+import useAlert from 'UI/hooks/useAlert';
 
 interface IContent {
   message: string;
   progress: number;
 }
 
-const DURATION = 20000;
+const DURATION = 50000;
 
 export const ProgressContext = createContext<null>(null);
 
 export default function ProgressProvider({ children }: React.PropsWithChildren) {
+  const { displayAlert } = useAlert();
   const [content, setContent] = useState<IContent | null>();
   const [open, setOpen] = useState<boolean>(false);
 
   const handleProgressFromMain = (_, payload) => {
-    console.log(payload);
     if (payload.data.progress >= 0 && payload.data.progress < 100) setOpen(true);
     if (payload.data.progress >= 100) {
       setTimeout(() => {
+        displayAlert?.('Successfully imported', 'success');
         setOpen(false);
       }, 2000);
     }

@@ -12,7 +12,7 @@ import { Bull } from 'Main/jobs';
 const excelToJson = require('convert-excel-to-json');
 
 export default class ImportInventoryRecordEvent implements IEvent {
-  public channel: string = 'inventory-record:import';
+  public channel: string = 'inventory:import';
 
   public middlewares = ['auth.middleware'];
 
@@ -42,20 +42,20 @@ export default class ImportInventoryRecordEvent implements IEvent {
           list,
           {
             filePath,
-            processorName: 'INVENTORY_RECORD_IMPORT_JOB'
+            processorName: 'INVENTORY_IMPORT_JOB'
           }
         );
 
         await Bull('AUDIT_JOB', {
           user_id: user.id as unknown as string,
           resource_id: null,
-          resource_table: 'inventory_records',
+          resource_table: 'items',
           resource_id_type: null,
           action: 'import',
           status: 'SUCCEEDED',
           description: `User ${
             user.fullName
-          } has successfully imported a stock records`,
+          } has successfully imported items`,
         });
 
         return {
@@ -66,7 +66,7 @@ export default class ImportInventoryRecordEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to import stock records'],
+        errors: ['You are not allowed to import items'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

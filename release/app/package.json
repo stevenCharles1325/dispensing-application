@@ -38,6 +38,7 @@
     "sqlite3": "^5.1.6",
     "typeorm": "^0.3.17",
     "typeorm-extension": "^3.0.1",
+    "unitmath": "^1.0.2",
     "xlsx": "^0.18.5"
   }
 }

@@ -19,7 +19,6 @@ import {
 
 import {
   Length,
-  IsPositive,
   IsNotEmpty,
   IsIn,
   ValidateIf,
@@ -118,6 +117,7 @@ export class Item {
         item_id: this.id,
         purpose: 'initial-stock',
         quantity: this.stock_quantity,
+        unit_of_measurement: this.unit_of_measurement,
         type: 'stock-in',
       }
     );
@@ -323,6 +323,7 @@ export class Item {
           item_id: this.id,
           purpose: 'sold (buy-one-get-one)',
           quantity,
+          // unit_of_measurement: this.unit_of_measurement,
           type: 'stock-out',
         }
       );

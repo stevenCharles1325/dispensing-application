@@ -1,24 +1,22 @@
 import UploadDataDTO from 'App/data-transfer-objects/upload-data.dto';
-import UserDTO from 'App/data-transfer-objects/user.dto';
 import IJob from 'App/interfaces/job/job.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import concatDateToName from 'App/modules/concatDateToName.module';
 import handleError from 'App/modules/error-handler.module';
 import getUOFSymbol from 'App/modules/get-uof-symbol.module';
-import unitQuantityCalculator from 'App/modules/unit-quantity-calculator.module';
 import { Job } from 'bullmq';
 import { app } from 'electron';
 import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 import { Item } from 'Main/database/models/item.model';
-import { UploadData } from 'Main/database/models/upload-data.model';
 import { Upload } from 'Main/database/models/upload.model';
 import { Bull } from 'Main/jobs';
 import process from 'node:process';
 import { parentPort } from 'node:worker_threads';
+import unit from 'unitmath';
 import xlsx from 'xlsx';
 
-export default class InventoryRecordImportJob implements IJob {
-  readonly key = 'INVENTORY_RECORD_IMPORT_JOB';
+export default class InventoryImportJob implements IJob {
+  readonly key = 'INVENTORY_IMPORT_JOB';
 
   async handler({ data }: Job) {
     const queryRunner = global.datasource.createQueryRunner();
@@ -58,88 +56,48 @@ export default class InventoryRecordImportJob implements IJob {
 
         record['Error'] = undefined;
 
-        const upload = (await queryRunner.query(
-          `SELECT * FROM uploads WHERE id = '${uploadId}'`
-        ))?.[0];
         const item = (await queryRunner.query(
           `SELECT *
           FROM items
-          WHERE item_code = '${record['Item ID']}'
-          AND name = '${record['Item Name']}'
+          WHERE item_code = '${record['Item Number']}'
+          AND batch_code = '${record['Batch Number']}'
         `))?.[0] as Item;
-        const user = (await queryRunner.query(
-          `SELECT *
-          FROM users
-          WHERE email = '${record['Creator Email']}'
-        `))?.[0] as UserDTO;
 
-        const systemID = record['Device ID'];
+        const itemClone = new Item();
+        const inventoryRecord = new InventoryRecord();
 
-        if (!item) {
-          record['Error'] = "Item does not exist, please create the item manually first.";
-        }
-
-        if (!user) {
-          record['Error'] = "User does not exist, please create the user manually first.";
-        }
-
-        if (item?.system_id === systemID && user?.system_id === systemID) {
-          record['Error'] = "This record came from this device, and might cause conflict.";
-        }
-
-        const uploadData = new UploadData();
-        uploadData.upload_id = uploadId;
-        uploadData.content = JSON.stringify(record);
-        uploadData.status = record['Error'] ? 'error' : 'success';
-
-        await queryRunner.manager.save(uploadData);
-        if (uploadData.status === 'error') {
-          upload.error_count += 1;
-        } else {
-          upload.success_count += 1;
-        }
-
-        await queryRunner.manager.save(Upload, upload as unknown as Upload);
-
-        if (record['Error']) {
-          await queryRunner.commitTransaction();
-          errorCount += 1;
-          continue;
-        };
-
-        if (item && user) {
-          const itemClone = new Item();
-          const inventoryRecord = new InventoryRecord();
-
-          inventoryRecord.purpose = record['Purpose'];
+        if (item) {
+          inventoryRecord.purpose = record['Purpose'] ?? 'Import purposes';
           inventoryRecord.item_id = item.id;
-          inventoryRecord.note = record['Note'];
-          inventoryRecord.type = record['Type'];
+          inventoryRecord.note = record['Remarks'] ?? 'Imported data';
+          inventoryRecord.type = 'stock-in';
           inventoryRecord.quantity = record['Quantity'];
-          inventoryRecord.unit_of_measurement = record['UM'];
-          inventoryRecord.creator_id = user.id;
-          inventoryRecord.created_at = record['Date Created'];
+          inventoryRecord.unit_of_measurement = getUOFSymbol(record['UM'], true); // Unit of Measurement
 
           Object.assign(itemClone, item);
 
-          const itemQuantity = {
-            quantity: itemClone.stock_quantity,
-            unit: itemClone.unit_of_measurement,
-          }
-          const otherQuantity = {
-            quantity: inventoryRecord.quantity,
-            unit: inventoryRecord.unit_of_measurement,
+          const recordQuantity = `${inventoryRecord.quantity} ${getUOFSymbol(inventoryRecord.unit_of_measurement)}`;
+          const itemQuantity = `${item.stock_quantity} ${getUOFSymbol(item.unit_of_measurement)}`;
+
+          if (inventoryRecord.type === 'stock-in') {
+            const resultQuantity = unit(itemQuantity)
+              .add(recordQuantity)
+              .toString({ precision: 4 });
+            const [quantity, um] = resultQuantity.split(' ');
+
+            itemClone.stock_quantity += (Number(quantity) ?? 0);
+            itemClone.unit_of_measurement = getUOFSymbol(um);
           }
 
-          const [quantity, um] = unitQuantityCalculator(
-            itemQuantity,
-            otherQuantity,
-            getUOFSymbol,
-            inventoryRecord.type === 'stock-in' ? 'add' : 'sub',
-          );
+          if (inventoryRecord.type === 'stock-in') {
+            const resultQuantity = unit(itemQuantity)
+              .sub(recordQuantity)
+              .toString({ precision: 4 });
+            const [quantity, um] = resultQuantity.split(' ');
 
-          itemClone.stock_quantity = quantity;
-          itemClone.unit_of_measurement = um;
+            itemClone.stock_quantity -= (Number(quantity) ?? 0);
+            itemClone.unit_of_measurement = getUOFSymbol(um);
+          }
 
           try {
             await queryRunner.manager.save(itemClone);
@@ -153,6 +111,25 @@ export default class InventoryRecordImportJob implements IJob {
             await queryRunner.rollbackTransaction();
             errorCount += 1;
           }
+        } else {
+          itemClone.name = record['Item Name']
+          itemClone.item_code = record['Item Number']
+          itemClone.batch_code = record['Batch Number']
+          itemClone.stock_quantity = record['Quantity']
+          itemClone.unit_of_measurement = getUOFSymbol(record['UM'], true);
+
+          const data = await queryRunner.manager.save(itemClone);
+
+          inventoryRecord.purpose = record['Purpose'] ?? 'Import purposes';
+          inventoryRecord.item_id = data.id;
+          inventoryRecord.note = record['Remarks'] ?? 'Imported data';
+          inventoryRecord.type = 'stock-in';
+          inventoryRecord.quantity = record['Quantity'];
+          inventoryRecord.unit_of_measurement = getUOFSymbol(record['UM'], true); // Unit of Measurement
+
+          await queryRunner.manager.save(inventoryRecord);
+          await queryRunner.commitTransaction();
+          successCount += 1;
         }
       }
 
@@ -209,7 +186,7 @@ export default class InventoryRecordImportJob implements IJob {
 
       global.emitToRenderer('PROGRESS:DATA', {
         message: `Uploading ${fileName} with (${successCount}) succeeded and (${errorCount}) failed`,
-        progress: ((isLastChunk ? total : processed) / total) * 100,
+        progress: (isLastChunk ? total : processed / total) * 100,
       });
 
       parentPort?.postMessage('done');
