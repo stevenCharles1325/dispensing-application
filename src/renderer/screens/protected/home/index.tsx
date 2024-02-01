@@ -4,7 +4,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable react/function-component-definition */
 /* eslint-disable react/no-unstable-nested-components */
-import { Button, Chip, Dialog, DialogActions, IconButton, TextField } from '@mui/material';
+import { Autocomplete, Button, Chip, Dialog, DialogActions, IconButton, MenuItem, Select, TextField } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
@@ -12,7 +12,6 @@ import ItemCard from 'UI/components/Cards/ItemCard';
 import useAlert from 'UI/hooks/useAlert';
 import useSearch from 'UI/hooks/useSearch';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NumericFormat } from 'react-number-format';
 import { AutoSizer, List } from 'react-virtualized';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -27,6 +26,9 @@ import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import { DeleteOutline } from '@mui/icons-material';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
 import titleCase from 'UI/helpers/titleCase';
+import { NumericFormatProps, NumericFormat } from 'react-number-format';
+import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
+import useBarcode from 'UI/hooks/useBarcode';
 
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 215;
@@ -93,38 +95,65 @@ interface CustomProps {
   name: string;
 }
 
-// const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
-//   function PesoNumberFormat(props, ref) {
-//     const { onChange, ...other } = props;
+const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
+  function PesoNumberFormat(props, ref) {
+    const { onChange, ...other } = props;
 
-//     return (
-//       <NumericFormat
-//         {...other}
-//         getInputRef={ref}
-//         onValueChange={(values) => {
-//           onChange({
-//             target: {
-//               name: props.name,
-//               value: values.value,
-//             },
-//           });
-//         }}
-//         decimalScale={2}
-//         accept="enter"
-//         thousandSeparator
-//         valueIsNumericString
-//         prefix="₱"
-//       />
-//     );
-//   }
-// );
+    return (
+      <NumericFormat
+        {...other}
+        getInputRef={ref}
+        onValueChange={(values) => {
+          onChange({
+            target: {
+              name: props.name,
+              value: values.value,
+            },
+          });
+        }}
+        decimalScale={2}
+        accept="enter"
+        thousandSeparator
+        valueIsNumericString
+      />
+    );
+  }
+);
+
+const inputStyle = {
+  '& .MuiSvgIcon-root': {
+    color: 'white',
+  },
+  '& .MuiFormLabel-root': {
+    color: 'white !important',
+  },
+  '& .MuiInput-input': {
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  '& .MuiInputBase-root:before': {
+    borderBottom: '1px solid rgba(255, 255, 255, 0.3)'
+  },
+  '& .MuiInputBase-root:after': {
+    borderBottom: '1px solid rgba(255, 255, 255, 1)'
+  }
+};
+
 
 type OrderType = {
   unit_of_measurement: string;
   quantity: number;
 };
 
+type WeightType = OrderType;
+
+const weightsInit = {
+  quantity: 0,
+  unit_of_measurement: 'Kilograms'
+}
+
 export default function Home() {
+  // const { print } = usePrinter();
+  // const { setDictionary } = useBarcode();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
@@ -141,6 +170,17 @@ export default function Home() {
   const [barcodeNumber, setBarcodeNumber] = useState<string | null>(null);
   const [productUsed, setProductUsed] = useState<string>('');
   const [productLotNumber, setProductLotNumber] = useState<string>('');
+  const [tareWeight, setTareWeight] = useState<WeightType>(weightsInit);
+  const [netWeight, setNetWeight] = useState<WeightType>(weightsInit);
+  const [grossWeight, setGrossWeight] = useState<WeightType>(weightsInit);
+
+  const weights = useMemo(() => {
+    return {
+      tare_weight: `${tareWeight.quantity} ${getUOFSymbol(tareWeight.unit_of_measurement)}`,
+      net_weight: `${netWeight.quantity} ${getUOFSymbol(netWeight.unit_of_measurement)}`,
+      gross_weight: `${grossWeight.quantity} ${getUOFSymbol(grossWeight.unit_of_measurement)}`,
+    }
+  }, [tareWeight, netWeight, grossWeight]);
   // const [couponCode, setCouponCode] = useState<string>('');
   // const [discount, setDiscount] = useState<DiscountDTO | null>(null);
 
@@ -296,6 +336,7 @@ export default function Home() {
       })),
       total: 0,
       product_used: productUsed,
+      ...weights,
       product_lot_number: productLotNumber,
       payment_method: selectedPaymentMethod,
       amount_received: 0,
@@ -304,6 +345,7 @@ export default function Home() {
     [
       orders,
       selectedItems,
+      weights,
       productUsed,
       productLotNumber,
       selectedPaymentMethod,
@@ -335,6 +377,9 @@ export default function Home() {
     confirm?.('Are you sure you want to cancel the orders?', async (agreed) => {
       if (agreed) {
         setSelectedItemIds([]);
+        setTareWeight(weightsInit);
+        setNetWeight(weightsInit);
+        setGrossWeight(weightsInit);
         setOrders({});
         setProductUsed('');
         setProductLotNumber('');
@@ -368,15 +413,22 @@ export default function Home() {
           return;
         }
 
+        const transaction = res.data as unknown as TransactionDTO;
+
         // setDiscount(null);
         // setCouponCode('');
         // setPayment(0);
+        setTareWeight(weightsInit);
+        setNetWeight(weightsInit);
+        setGrossWeight(weightsInit);
         setProductUsed('');
         setProductLotNumber('');
         setSelectedItemIds([]);
         setOrders({});
         refetchItems();
         displayAlert?.('Purchased successfully', 'success');
+
+        // print(transaction.id);
       }
     });
   }, [orderDetails, displayAlert, refetchItems]);
@@ -596,6 +648,18 @@ export default function Home() {
     }
   }, [items, barcodeNumber, orders, handleSelectItem]);
 
+  // useEffect(() => {
+  //   setDictionary(
+  //     items?.reduce((prev, curr) => {
+  //       return {
+  //         ...prev,
+  //         [curr.barcode]: curr.barcode
+  //       };
+  //     }, {})
+  //     ?? {}
+  //   );
+  // }, [items]);
+
   return (
     <>
       <div className="w-full h-full flex">
@@ -609,6 +673,7 @@ export default function Home() {
               onClick={handleFilterClick}
             />
             <BarcodeIndicator />
+            {/* <PrinterIndicator /> */}
           </div>
           <div className="grow">
             {items?.length ? (
@@ -786,7 +851,6 @@ export default function Home() {
               </div>
             </div>
             <div className="w-full h-fit flex flex-col text-white">
-              <br />
               {/* <b style={{ color: 'white' }}>BILL</b> */}
               {/* <div className="flex flex-row justify-between">
                 <p>Sub-total:</p>
@@ -836,8 +900,8 @@ export default function Home() {
                   />
                 </div>
               </div> */}
-              <br />
               <div className="grow w-full border-t-4 pt-3 flex flex-col justify-between">
+                <br />
                 <div
                   className={`flex flex-col gap-5 mt-3 py-3 px-3 pb-5 border ${
                     !selectedItemIds.length
@@ -846,7 +910,9 @@ export default function Home() {
                   } rounded`}
                 >
                   <TextField
+                    autoFocus
                     disabled={!selectedItemIds.length}
+                    value={productUsed}
                     label="Product Used:"
                     color="secondary"
                     fullWidth
@@ -856,24 +922,12 @@ export default function Home() {
                     onChange={(e) => {
                       setProductUsed(e.target.value);
                     }}
-                    sx={{
-                      '& .MuiFormLabel-root': {
-                        color: 'white !important',
-                      },
-                      '& .MuiInput-input': {
-                        color: 'rgba(255, 255, 255, 0.6)',
-                      },
-                      '& .MuiInputBase-root:before': {
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.3)'
-                      },
-                      '& .MuiInputBase-root:after': {
-                        borderBottom: '1px solid rgba(255, 255, 255, 1)'
-                      }
-                    }}
+                    sx={inputStyle}
                   />
                   <TextField
                     disabled={!selectedItemIds.length}
                     label="Product Lot No.:"
+                    value={productLotNumber}
                     color="secondary"
                     fullWidth
                     size="small"
@@ -881,21 +935,134 @@ export default function Home() {
                     onChange={(e) => {
                       setProductLotNumber(e.target.value);
                     }}
-                    sx={{
-                      '& .MuiFormLabel-root': {
-                        color: 'white !important',
-                      },
-                      '& .MuiInput-input': {
-                        color: 'rgba(255, 255, 255, 0.6)',
-                      },
-                      '& .MuiInputBase-root:before': {
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.3)'
-                      },
-                      '& .MuiInputBase-root:after': {
-                        borderBottom: '1px solid rgba(255, 255, 255, 1)'
-                      }
-                    }}
+                    sx={inputStyle}
                   />
+                  <div className='flex'>
+                    <TextField
+                      disabled={!selectedItemIds.length}
+                      label="Tare Weight:"
+                      color="secondary"
+                      size="small"
+                      fullWidth
+                      value={tareWeight.quantity}
+                      variant="standard"
+                      InputProps={{
+                        inputComponent: PesoNumberFormat as any,
+                      }}
+                      onChange={(e) => {
+                        setTareWeight((tareW) => ({
+                          ...tareW,
+                          quantity: Number(e.target.value),
+                        }));
+                      }}
+                      sx={inputStyle}
+                    />
+                    <Autocomplete
+                      fullWidth
+                      disabled={!selectedItemIds.length}
+                      options={['Kilograms', 'Grams', 'Pieces']}
+                      size="small"
+                      value={tareWeight.unit_of_measurement}
+                      renderInput={(params) =>
+                        <TextField
+                          {...params}
+                          sx={inputStyle}
+                          variant="standard"
+                          label="Unit of Measurement"
+                        />
+                      }
+                      onChange={(e, newValue) => {
+                        setTareWeight((tareW) => ({
+                          ...tareW,
+                          unit_of_measurement: newValue ?? 'Kilograms',
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div className='flex'>
+                    <TextField
+                      disabled={!selectedItemIds.length}
+                      label="Net Weight:"
+                      color="secondary"
+                      value={netWeight.quantity}
+                      size="small"
+                      fullWidth
+                      variant="standard"
+                      InputProps={{
+                        inputComponent: PesoNumberFormat as any,
+                      }}
+                      onChange={(e) => {
+                        setNetWeight((netW) => ({
+                          ...netW,
+                          quantity: Number(e.target.value),
+                        }));
+                      }}
+                      sx={inputStyle}
+                    />
+                    <Autocomplete
+                      fullWidth
+                      disabled={!selectedItemIds.length}
+                      options={['Kilograms', 'Grams', 'Pieces']}
+                      size="small"
+                      value={netWeight.unit_of_measurement}
+                      renderInput={(params) =>
+                        <TextField
+                          {...params}
+                          sx={inputStyle}
+                          variant="standard"
+                          label="Unit of Measurement"
+                        />
+                      }
+                      onChange={(e, newValue) => {
+                        setNetWeight((netW) => ({
+                          ...netW,
+                          unit_of_measurement: newValue ?? 'Kilograms',
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div className='flex'>
+                    <TextField
+                      disabled={!selectedItemIds.length}
+                      label="Gross Weight:"
+                      color="secondary"
+                      size="small"
+                      fullWidth
+                      variant="standard"
+                      value={grossWeight.quantity}
+                      InputProps={{
+                        inputComponent: PesoNumberFormat as any,
+                      }}
+                      onChange={(e) => {
+                        setGrossWeight((grossW) => ({
+                          ...grossW,
+                          quantity: Number(e.target.value),
+                        }));
+                      }}
+                      sx={inputStyle}
+                    />
+                    <Autocomplete
+                      disabled={!selectedItemIds.length}
+                      fullWidth
+                      options={['Kilograms', 'Grams', 'Pieces']}
+                      size="small"
+                      value={grossWeight.unit_of_measurement}
+                      renderInput={(params) =>
+                        <TextField
+                          {...params}
+                          sx={inputStyle}
+                          variant="standard"
+                          label="Unit of Measurement"
+                        />
+                      }
+                      onChange={(e, newValue) => {
+                        setGrossWeight((grossW) => ({
+                          ...grossW,
+                          unit_of_measurement: newValue ?? 'Kilograms',
+                        }));
+                      }}
+                    />
+                  </div>
                   {/*
                     <p>Total:</p>
                   <div>
@@ -966,6 +1133,7 @@ export default function Home() {
                   </div>
                   */}
                 </div>
+                <br/>
                 <div className='w-full mt-5 flex flex-col gap-2'>
                   <Button
                     fullWidth
