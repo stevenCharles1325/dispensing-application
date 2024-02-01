@@ -19,7 +19,9 @@ import {
   DialogActions,
   DialogTitle,
   Divider,
+  FormControl,
   IconButton,
+  InputLabel,
   ListItem,
   ListItemButton,
   ListItemIcon,
@@ -28,8 +30,8 @@ import {
   MenuItem,
   TextField,
   Tooltip,
+  Input,
 } from '@mui/material';
-import Input, { InputRef } from '../TextField/Input';
 import useSearch from 'UI/hooks/useSearch';
 import debounce from 'lodash.debounce';
 import { List, ListRowRenderer } from 'react-virtualized';
@@ -139,7 +141,7 @@ const getNotifs = async (
 };
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
-  const inputRef = useRef<InputRef>(null);
+  const inputRef = useRef<any>(null);
 
   const { date, time } = useDateTime();
   const hasPermission = usePermission();
@@ -521,7 +523,10 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         },
         {
           key: 'search-bar',
-          handler: () => inputRef.current?.focus?.(),
+          handler: () => {
+            console.log('SHEES: ', inputRef.current);
+            inputRef.current?.focus?.();
+          },
         },
         {
           key: 'log-out',
@@ -529,7 +534,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         }
       ]);
     }
-  }, []);
+  }, [inputRef.current]);
 
   return (
     <>
@@ -597,36 +602,37 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           ))}
         </div>
         <div className="navigation-screen-container grow my-5 mr-5 bg-white rounded-2xl p-5 flex flex-col overflow-auto">
-          <div className="w-full h-[50px] flex justify-between pr-5">
-            <Input
-              ref={inputRef as Ref<InputRef>}
-              opacity="clear"
-              disabled={disabled}
-              leftIcon={
-                <IconButton disabled>
-                  <SearchOutlinedIcon />
-                </IconButton>
-              }
-              rightIcon={
-                <IconButton
-                  disabled={!text?.length}
-                  onClick={() => {
-                    setText('');
-                    setSearchText?.('');
+          <div className="w-full h-[50px] flex justify-between pr-5 mb-3">
+            <div className='flex w-fit h-fit'>
+              <div className='flex justify-center items-center'>
+                <SearchOutlinedIcon fontSize="large" sx={{ color: 'action.active' }}/>
+              </div>
+              <FormControl sx={{ m: 1, width: 300 }} variant="standard">
+                <Input
+                  id="search-box"
+                  disabled={disabled}
+                  color="secondary"
+                  inputRef={inputRef}
+                  endAdornment={
+                    <IconButton
+                      disabled={!text?.length}
+                      onClick={() => {
+                        setText('');
+                        setSearchText?.('');
+                      }}
+                    >
+                      {text?.length ? <CloseOutlinedIcon /> : null}
+                    </IconButton>
+                  }
+                  value={text}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    handleDebouncedSearching(e.target.value);
                   }}
-                >
-                  {text?.length ? <CloseOutlinedIcon /> : null}
-                </IconButton>
-              }
-              placeholder={`${placeHolder} ${!disabled ? `(${getCommand?.('search-bar')?.toLocaleUpperCase()})` : '' }`}
-              width={300}
-              height="full"
-              value={text}
-              onChange={(e) => {
-                setText(e.target.value);
-                handleDebouncedSearching(e.target.value);
-              }}
-            />
+                  placeholder={`${placeHolder} ${!disabled ? `(${getCommand?.('search-bar')?.toLocaleUpperCase()})` : '' }`}
+                />
+              </FormControl>
+            </div>
             <div className='flex flex-row gap-10 items-center'>
               {/* <div className='p-1 border rounded-full border-[#9c27b0] flex gap-4'>
                 <CircleIcon

@@ -1,7 +1,7 @@
 import UploadDataDTO from 'App/data-transfer-objects/upload-data.dto';
 import IJob from 'App/interfaces/job/job.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
-import concatDateToName from 'App/modules/concatDateToName.module';
+import concatDateToName from 'App/modules/concat-date-to-name.module';
 import handleError from 'App/modules/error-handler.module';
 import getUOFSymbol from 'App/modules/get-uof-symbol.module';
 import { Job } from 'bullmq';

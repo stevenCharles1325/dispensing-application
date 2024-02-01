@@ -4,7 +4,7 @@ import IResponse from "App/interfaces/pos/pos.response.interface";
 import handleError from "App/modules/error-handler.module";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
 import IDeviceInfo from "App/interfaces/barcode/barcode.device-info.interface";
-import HID from "node-hid";
+// import HID from "node-hid";
 import barcodeMap from "Main/data/defaults/map/barcode-map";
 
 export default class BarcodeStatusEvent implements IEvent {
@@ -16,7 +16,7 @@ export default class BarcodeStatusEvent implements IEvent {
     IResponse<string[] | IPOSError[] | IDeviceInfo | any>
   > {
     try {
-      const cachedInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+      const cachedInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:BARCODE');
 
       if (cachedInfo && cachedInfo.id && cachedInfo.status !== 'SUCCESS') {
         const [vendorId, productId] = cachedInfo.id.split(':');
@@ -45,7 +45,7 @@ export default class BarcodeStatusEvent implements IEvent {
 
         // selectedDevice.on('error', async (err: any) => {
         //   cachedInfo.status = 'ERROR';
-        //   globalStorage.set('HID:SELECTED', cachedInfo);
+        //   globalStorage.set('HID:SELECTED:BARCODE', cachedInfo);
 
         //   console.log('HID ERROR: ', err);
 
@@ -73,7 +73,7 @@ export default class BarcodeStatusEvent implements IEvent {
         id: null,
         status: 'ERROR',
       }
-      globalStorage.set('HID:SELECTED', deviceCachedInfo);
+      globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
       global.emitToRenderer('BARCODE:STATUS', 'ERROR');
       global.emitToRenderer('BARCODE:ERROR', error);
       console.log('ERROR HANDLER OUTPUT: ', error);

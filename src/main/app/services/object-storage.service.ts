@@ -15,8 +15,7 @@ import putObject from 'App/modules/adaptor/object-storage/object-storage.put-obj
 import removeObject from 'App/modules/adaptor/object-storage/object-storage.remove-object.module';
 import setBucketPolicy from 'App/modules/adaptor/object-storage/object-storage.set-bucket-policy.module';
 
-export default class ObjectStorageService
-  implements Partial<IObjectStorageService>
+export default class ObjectStorageService implements Partial<IObjectStorageService>
 {
   public readonly SERVICE_NAME: 'OBJECT_STORAGE_SERVICE';
 

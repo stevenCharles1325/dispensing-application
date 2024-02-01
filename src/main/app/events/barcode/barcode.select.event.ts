@@ -19,7 +19,7 @@ export default class BarcodeSelectEvent implements IEvent {
   > {
     try {
       const device: HidDTO = eventData.payload[0];
-      const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+      const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:BARCODE');
 
       if (
         device &&
@@ -43,7 +43,7 @@ export default class BarcodeSelectEvent implements IEvent {
           id: `${device.vendorId}:${device.productId}`,
           status: 'SUCCESS',
         }
-        globalStorage.set('HID:SELECTED', deviceCachedInfo);
+        globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
 
         global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
 
@@ -67,7 +67,7 @@ export default class BarcodeSelectEvent implements IEvent {
 
         // selectedDevice.on('error', async (err: any) => {
         //   deviceCachedInfo.status = 'ERROR';
-        //   globalStorage.set('HID:SELECTED', deviceCachedInfo);
+        //   globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
 
         //   console.log('HID ERROR: ', err);
 
@@ -86,7 +86,7 @@ export default class BarcodeSelectEvent implements IEvent {
           id: `${device.vendorId}:${device.productId}`,
           status: 'ERROR',
         }
-        globalStorage.set('HID:SELECTED', deviceCachedInfo);
+        globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
         global.emitToRenderer('BARCODE:STATUS', 'ERROR');
 
         return {
@@ -103,7 +103,7 @@ export default class BarcodeSelectEvent implements IEvent {
         id: null,
         status: 'ERROR',
       }
-      globalStorage.set('HID:SELECTED', deviceCachedInfo);
+      globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
       global.emitToRenderer('BARCODE:STATUS', 'ERROR');
 
       return {

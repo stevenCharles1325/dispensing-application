@@ -26,9 +26,14 @@ import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import { DeleteOutline } from '@mui/icons-material';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
 import titleCase from 'UI/helpers/titleCase';
+import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
+import usePrinter from 'UI/hooks/usePrinter';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 import useBarcode from 'UI/hooks/useBarcode';
+import unitQuantityCalculator from 'UI/helpers/unitQuantityCalculator';
+import capitalizeCase from 'UI/helpers/capitalCase';
+import measurements from 'UI/data/defaults/unit-of-measurements';
 
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 215;
@@ -152,8 +157,8 @@ const weightsInit = {
 }
 
 export default function Home() {
-  // const { print } = usePrinter();
-  // const { setDictionary } = useBarcode();
+  const { print } = usePrinter();
+  const { setDictionary } = useBarcode();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
@@ -648,17 +653,50 @@ export default function Home() {
     }
   }, [items, barcodeNumber, orders, handleSelectItem]);
 
-  // useEffect(() => {
-  //   setDictionary(
-  //     items?.reduce((prev, curr) => {
-  //       return {
-  //         ...prev,
-  //         [curr.barcode]: curr.barcode
-  //       };
-  //     }, {})
-  //     ?? {}
-  //   );
-  // }, [items]);
+  useEffect(() => {
+    setDictionary(
+      items?.reduce((prev, curr) => {
+        return {
+          ...prev,
+          [curr.barcode]: curr.barcode
+        };
+      }, {})
+      ?? {}
+    );
+  }, [items]);
+
+  useEffect(() => {
+    const leftOperand = {
+      quantity: netWeight.quantity,
+      unit: netWeight.unit_of_measurement,
+    };
+
+    const rightOperand = {
+      quantity: tareWeight.quantity,
+      unit: tareWeight.unit_of_measurement,
+    };
+
+    const getGrossQuantity = async () => {
+      const res = await window.pos.unitQuantityCalculator(
+        leftOperand,
+        rightOperand,
+        'add'
+      );
+
+      if (res.data) {
+        const [quantity, um] = res.data;
+
+        if (quantity && um) {
+          setGrossWeight({
+            quantity: quantity as number,
+            unit_of_measurement: um as string,
+          });
+        }
+      }
+    };
+
+    getGrossQuantity();
+  }, [netWeight, tareWeight]);
 
   return (
     <>
@@ -673,7 +711,7 @@ export default function Home() {
               onClick={handleFilterClick}
             />
             <BarcodeIndicator />
-            {/* <PrinterIndicator /> */}
+            <PrinterIndicator />
           </div>
           <div className="grow">
             {items?.length ? (
@@ -960,7 +998,7 @@ export default function Home() {
                     <Autocomplete
                       fullWidth
                       disabled={!selectedItemIds.length}
-                      options={['Kilograms', 'Grams', 'Pieces']}
+                      options={measurements}
                       size="small"
                       value={tareWeight.unit_of_measurement}
                       renderInput={(params) =>
@@ -1002,7 +1040,7 @@ export default function Home() {
                     <Autocomplete
                       fullWidth
                       disabled={!selectedItemIds.length}
-                      options={['Kilograms', 'Grams', 'Pieces']}
+                      options={measurements}
                       size="small"
                       value={netWeight.unit_of_measurement}
                       renderInput={(params) =>
@@ -1044,7 +1082,7 @@ export default function Home() {
                     <Autocomplete
                       disabled={!selectedItemIds.length}
                       fullWidth
-                      options={['Kilograms', 'Grams', 'Pieces']}
+                      options={measurements}
                       size="small"
                       value={grossWeight.unit_of_measurement}
                       renderInput={(params) =>

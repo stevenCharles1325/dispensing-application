@@ -1,7 +1,7 @@
 import { IItemMeasurement } from 'App/interfaces/item/item.measurements.interface';
 import unit from 'unitmath';
 
-interface IUnitQuantity {
+export interface IUnitCalculatorOperands {
   quantity: number;
   unit: IItemMeasurement | string;
 }
@@ -10,38 +10,41 @@ const AVAILABLE_OPERATIONS = [
   'add',
   'sub'
 ];
+
 const NORMAL_UNITS = [
   'each',
   'gross',
   'pack',
   'dozen',
   'pair',
+  'pieces',
+  'piece',
 ];
 
 export default function unitQuantityCalculator (
-  item: IUnitQuantity,
-  other: IUnitQuantity,
+  leftOperand: IUnitCalculatorOperands,
+  rightOperand: IUnitCalculatorOperands,
   unitFormatter: (data: string, longName?: boolean) => string,
   operation: 'add' | 'sub' = 'add',
 ): [number, string] {
   if (
-    !item ||
-    !other ||
+    !leftOperand ||
+    !rightOperand ||
     !AVAILABLE_OPERATIONS.includes(operation)
   ) throw new Error('Unit Calculator Error: Invalid argument');
 
   if (
-    NORMAL_UNITS.includes(item.unit.toLocaleLowerCase()) ||
-    NORMAL_UNITS.includes(other.unit.toLocaleLowerCase())
+    NORMAL_UNITS.includes(leftOperand.unit.toLocaleLowerCase()) ||
+    NORMAL_UNITS.includes(rightOperand.unit.toLocaleLowerCase())
     ) {
     return [
-      (Number(item.quantity) - Number(other.quantity)) ?? 0,
-      unitFormatter(item.unit, true),
+      (Number(leftOperand.quantity) - Number(rightOperand.quantity)) ?? 0,
+      unitFormatter(leftOperand.unit, true),
     ];
   }
 
-  const itemQuantity = `${item.quantity} ${unitFormatter(item.unit)}`;
-  const otherQuantity = `${other.quantity} ${unitFormatter(other.unit)}`;
+  const itemQuantity = `${leftOperand.quantity} ${unitFormatter(leftOperand.unit)}`;
+  const otherQuantity = `${rightOperand.quantity} ${unitFormatter(rightOperand.unit)}`;
 
   const result = unit(itemQuantity)
     [operation](otherQuantity)

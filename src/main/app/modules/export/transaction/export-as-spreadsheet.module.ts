@@ -1,4 +1,4 @@
-import concatDateToName from "App/modules/concatDateToName.module";
+import concatDateToName from "App/modules/concat-date-to-name.module";
 import TransactionRepository from "App/repositories/transaction.repository";
 import { app } from "electron";
 import { Transaction } from "Main/database/models/transaction.model";

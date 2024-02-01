@@ -34,7 +34,6 @@ import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs, { Bull } from './jobs';
 import policies from './data/defaults/object-storage/policies';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
-// import HID from 'node-hid';
 import './scheduler';
 
 // Initializing .ENV
@@ -56,7 +55,7 @@ class AppUpdater {
   }
 }
 
-let mainWindow: BrowserWindow | null = null;
+export let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -88,6 +87,7 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
+
 const createWindow = async () => {
   if (isDebug) {
     await installExtensions();
@@ -103,9 +103,9 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1130,
+    width: 1200,
     height: 850,
-    minWidth: 1130,
+    minWidth: 1200,
     minHeight: 850,
     autoHideMenuBar: true,
     frame: true,
@@ -113,6 +113,7 @@ const createWindow = async () => {
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
+      contextIsolation: true,
       sandbox: false,
       webSecurity: false,
       preload: process.env.NODE_ENV === 'production'
@@ -127,6 +128,7 @@ const createWindow = async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
@@ -138,7 +140,7 @@ const createWindow = async () => {
     console.log('CLOSING APP');
     const globalStorage = GlobalStorage();
 
-    const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+    const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:BARCODE');
 
     if (cachedHIDInfo && cachedHIDInfo.id) {
       console.log('CLOSING DEVICE');
@@ -148,9 +150,9 @@ const createWindow = async () => {
 
       try {
         cachedHIDInfo.status = 'WAIT';
-        globalStorage.set('HID:SELECTED', cachedHIDInfo);
+        globalStorage.set('HID:SELECTED:BARCODE', cachedHIDInfo);
 
-        await device.close();
+        // await device.close();
       } catch (err) {
         console.log('ERROR CLOSING THE HID DEVICE: ', err);
       }
@@ -166,11 +168,36 @@ const createWindow = async () => {
 
   app.commandLine.appendSwitch('disable-hid-blocklist');
 
+  let grantedDeviceThroughPermHandler:
+    | globalThis.Electron.USBDevice
+    | globalThis.Electron.HIDDevice
+    | globalThis.Electron.SerialPort
+    | null;
+
   if (mainWindow) {
-    mainWindow.webContents.session.on('select-hid-device', (event, details, callback) => {
+    mainWindow.webContents.session.on('select-usb-device', (event, details, callback) => {
+      // Add events to handle devices being added or removed before the callback on
+      // `select-usb-device` is called.
+      mainWindow!.webContents.session.on('usb-device-added', (event, device) => {
+        console.log('usb-device-added FIRED WITH', device)
+        // Optionally update details.deviceList
+      })
+
+      mainWindow!.webContents.session.on('usb-device-removed', (event, device) => {
+        console.log('usb-device-removed FIRED WITH', device)
+        // Optionally update details.deviceList
+      })
+
       event.preventDefault()
       if (details.deviceList && details.deviceList.length > 0) {
-        callback(details.deviceList[0].deviceId)
+        const deviceToReturn = details.deviceList.find((device) => {
+          return !grantedDeviceThroughPermHandler || (device.deviceId !== grantedDeviceThroughPermHandler.deviceId)
+        })
+        if (deviceToReturn) {
+          callback(deviceToReturn.deviceId)
+        } else {
+          callback()
+        }
       }
     });
 
@@ -179,16 +206,31 @@ const createWindow = async () => {
       permission,
       requestingOrigin,
       details
-      ) => {
-      if (permission === 'hid') {
-        return true
-      }
+    ) => {
+      return true
+      // if (permission === 'usb') {
+      // }
     })
 
     mainWindow.webContents.session.setDevicePermissionHandler((details) => {
-      if (details.deviceType === 'hid') {
-        return true
-      }
+      return true;
+      // if (details.deviceType === 'usb') {
+      //   // if (!grantedDeviceThroughPermHandler) {
+      //   //   grantedDeviceThroughPermHandler = details.device
+      //   //   return true
+      //   // } else {
+      //   //   return false
+      //   // }
+      // }
+    })
+
+    mainWindow.webContents.session.setUSBProtectedClassesHandler((details) => {
+      // return details.protectedClasses.filter((usbClass) => {
+      //   // Exclude classes except for audio classes
+      //   return usbClass.indexOf('audio') === -1
+      // })
+
+      return [];
     })
   }
 
@@ -206,6 +248,7 @@ const createWindow = async () => {
     mainWindow?.webContents.send('main-message', { channel, data });
   }
 
+  mainWindow.webContents.openDevTools();
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
@@ -217,7 +260,7 @@ const createWindow = async () => {
 app.on('window-all-closed', async () => {
   const globalStorage = GlobalStorage();
 
-  const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+  const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:BARCODE');
 
   if (cachedHIDInfo && cachedHIDInfo.id) {
     console.log('CLOSING DEVICE');
@@ -227,9 +270,9 @@ app.on('window-all-closed', async () => {
 
     try {
       cachedHIDInfo.status = 'WAIT';
-      globalStorage.set('HID:SELECTED', cachedHIDInfo);
+      globalStorage.set('HID:SELECTED:BARCODE', cachedHIDInfo);
 
-      await device.close();
+      // await device.close();
     } catch (err) {
       console.log('ERROR CLOSING THE HID DEVICE: ', err);
     }
@@ -251,8 +294,10 @@ app
   .whenReady()
   .then(async () => {
     // Initialize database
+
     try {
       const storage = GlobalStorage();
+
       const datasource = await SqliteDataSource.initialize();
       console.log('[DB]: Initialized Successfully');
 
@@ -274,7 +319,9 @@ app
         await runSeeders(datasource);
         console.log('[DB]: Seeded Successfully');
       } finally {
-        const binaryProcesses = executeBinaries();
+        const binaryProcesses = executeBinaries({
+          storage,
+        });
 
         if (binaryProcesses) {
           global.binaryProcesses = binaryProcesses;
@@ -337,8 +384,7 @@ app
 
         // STORAGE HANDLERS
         ipcMain.on('storage:set', (event, ...payload: any[]) => {
-          const key = payload[0];
-          const value = payload[1];
+          const [key, value] = payload;
 
           try {
             storage.set(key, value);
@@ -350,7 +396,7 @@ app
         });
 
         ipcMain.on('storage:get', (event, ...payload: any[]) => {
-          const key = payload[0];
+          const [key] = payload;
 
           try {
             event.returnValue = storage.get(key);
@@ -361,7 +407,7 @@ app
         });
 
         ipcMain.on('storage:remove', (event, ...payload: any[]) => {
-          const key = payload[0];
+          const [key] = payload;
 
           try {
             storage.delete(key);
@@ -382,12 +428,19 @@ app
           }
         });
 
+        ipcMain.handle('broadcast-message', (_, ...payload: any[]) => {
+          const [channel, data] = payload;
+
+          global.emitToRenderer(channel, data);
+        });
+
         await Bull('DISCOUNT_JOB', {});
         await Bull('EXPIRATION_JOB', {});
         await createWindow();
 
-        app.on('activate', () => {
+        app.on('activate', async () => {
           console.log('APP IS ACTIVE');
+
           // On macOS it's common to re-create a window in the app when the
           // dock icon is clicked and there are no other windows open.
           if (mainWindow === null) createWindow();

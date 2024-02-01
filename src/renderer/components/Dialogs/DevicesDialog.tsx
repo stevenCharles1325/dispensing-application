@@ -2,7 +2,6 @@ import {
   Button,
   DialogActions,
   DialogTitle,
-  IconButton,
   List,
   ListItem,
   ListItemAvatar,
@@ -11,7 +10,6 @@ import {
   Tooltip
 } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
-import HidDTO from "App/data-transfer-objects/hid.dto";
 
 import UsbIcon from '@mui/icons-material/Usb';
 import Loading from "../Loading";
@@ -19,11 +17,11 @@ import { InfoOutlined } from "@mui/icons-material";
 
 interface DeviceDialogProps {
   open: boolean;
-  devices?: HidDTO[];
+  devices?: USBDevice[];
   loading: boolean;
   refresh: () => void;
   onClose: () => void;
-  onChange?: (device: HidDTO) => void;
+  onChange?: (device: USBDevice) => void;
 }
 
 export default function DeviceDialog ({
@@ -66,12 +64,18 @@ export default function DeviceDialog ({
         <div className="h-[500px] overflow-auto">
           <List>
             {devices?.map?.((device, index) => (
-              <ListItem key={index} onClick={() => onChange?.(device)}>
-                <ListItemButton selected={device.selected}>
+              <ListItem
+                key={index}
+                onClick={() => {
+                  onChange?.(device);
+                  onClose?.();
+                }}
+              >
+                <ListItemButton>
                   <ListItemAvatar>
                     <UsbIcon fontSize="small" color="secondary" />
                   </ListItemAvatar>
-                  <ListItemText primary={device.product ?? 'Unknown'} />
+                  <ListItemText primary={device.productName ?? 'Unknown'} />
                 </ListItemButton>
               </ListItem>
             ))}
@@ -80,11 +84,13 @@ export default function DeviceDialog ({
       )
       : <Loading />}
       <DialogActions>
-        <Button size="small" onClick={refresh}>
+        <Button
+          size="small"
+          variant="text"
+          color="secondary"
+          onClick={refresh}
+        >
           Refresh
-        </Button>
-        <Button size="small" color="error" onClick={onClose}>
-          Close
         </Button>
       </DialogActions>
     </Dialog>

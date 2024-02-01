@@ -57,18 +57,18 @@ export default class InventoryRecordCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
-        const itemQuantity = {
+        const leftOperand = {
           quantity: item.stock_quantity,
           unit: item.unit_of_measurement,
         }
-        const recordQuantity = {
+        const rightOperand = {
           quantity: record.quantity,
           unit: record.unit_of_measurement,
         }
 
         const [quantity, um] = unitQuantityCalculator(
-          itemQuantity,
-          recordQuantity,
+          leftOperand,
+          rightOperand,
           getUOFSymbol,
           record.type === 'stock-in' ? 'add' : 'sub',
         );

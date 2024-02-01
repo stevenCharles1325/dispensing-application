@@ -29,9 +29,10 @@ import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
 import SystemDTO from 'App/data-transfer-objects/system.dto';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import PrinterDTO from 'App/data-transfer-objects/printer.dto';
+import { IUnitCalculatorOperands } from 'App/modules/unit-quantity-calculator.module';
 
 export type Channels = 'ipc-pos';
-
 
 /* ================================
 +
@@ -61,6 +62,35 @@ const mainHandler = {
       }
     ) => void
   ) => ipcRenderer.on('main-message', callback),
+  globalEmit: (
+    channel: string,
+    data: any
+  ) => ipcRenderer.invoke('broadcast-message', channel, data),
+}
+
+/* ================================
++
++         POS EVENT HANDLER
++
++ ================================ */
+const posHandler = {
+  unitQuantityCalculator: async (
+    leftOperand: IUnitCalculatorOperands,
+    rightOperand: IUnitCalculatorOperands,
+    operation: 'add' | 'sub' = 'add',
+  ): Promise<
+    IResponse<
+      | string[]
+      | IPOSError[]
+      | [quantity: number, unit: string]
+    >
+  > =>
+    ipcRenderer.invoke(
+      'pos:unit-calculator',
+      leftOperand,
+      rightOperand,
+      operation,
+    ),
 }
 
 /* ================================
@@ -77,7 +107,19 @@ const barcodeHandler = {
     ipcRenderer.invoke('barcode:select', device),
 };
 
-
+/* ================================
++
++       BARCODE EVENT HANDLER
++
++ ================================ */
+const printerHandler = {
+  devices: async (): Promise<IResponse<string[] | IPOSError[] | PrinterDTO[]>> =>
+    ipcRenderer.invoke('printer:devices'),
+  select: async (device: PrinterDTO | null): Promise<IResponse<string[] | IPOSError[] | void>> =>
+    ipcRenderer.invoke('printer:select', device),
+  print: async (data: string): Promise<IResponse<string[] | IPOSError[] | void>> =>
+    ipcRenderer.invoke('printer:print', data),
+};
 
 /* ================================
 +
@@ -611,8 +653,10 @@ const importHandler = {
 };
 
 // EXPOSING HANDLERS
+contextBridge.exposeInMainWorld('pos', posHandler);
 contextBridge.exposeInMainWorld('storage', storageHandler);
 contextBridge.exposeInMainWorld('barcode', barcodeHandler);
+contextBridge.exposeInMainWorld('printer', printerHandler);
 contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
@@ -635,8 +679,10 @@ contextBridge.exposeInMainWorld('system', systemHandler);
 contextBridge.exposeInMainWorld('export', exportHandler);
 contextBridge.exposeInMainWorld('import', importHandler);
 
+export type POSHandler = typeof posHandler;
 export type StorageHandler = typeof storageHandler;
 export type BarcodeHandler = typeof barcodeHandler;
+export type PrinterHandler = typeof printerHandler;
 export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;

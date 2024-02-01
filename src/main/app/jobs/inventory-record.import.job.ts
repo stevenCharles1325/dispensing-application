@@ -2,7 +2,7 @@ import UploadDataDTO from 'App/data-transfer-objects/upload-data.dto';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import IJob from 'App/interfaces/job/job.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
-import concatDateToName from 'App/modules/concatDateToName.module';
+import concatDateToName from 'App/modules/concat-date-to-name.module';
 import handleError from 'App/modules/error-handler.module';
 import getUOFSymbol from 'App/modules/get-uof-symbol.module';
 import unitQuantityCalculator from 'App/modules/unit-quantity-calculator.module';
@@ -122,18 +122,18 @@ export default class InventoryRecordImportJob implements IJob {
 
           Object.assign(itemClone, item);
 
-          const itemQuantity = {
+          const leftOperand = {
             quantity: itemClone.stock_quantity,
             unit: itemClone.unit_of_measurement,
           }
-          const otherQuantity = {
+          const rightOperand = {
             quantity: inventoryRecord.quantity,
             unit: inventoryRecord.unit_of_measurement,
           }
 
           const [quantity, um] = unitQuantityCalculator(
-            itemQuantity,
-            otherQuantity,
+            leftOperand,
+            rightOperand,
             getUOFSymbol,
             inventoryRecord.type === 'stock-in' ? 'add' : 'sub',
           );

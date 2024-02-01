@@ -44,7 +44,6 @@ import BrandDTO from 'App/data-transfer-objects/brand.dto';
 @Entity('items')
 export class Item {
   discounted_selling_price: number;
-  brand: BrandDTO;
 
   @AfterLoad()
   async getDiscount() {
