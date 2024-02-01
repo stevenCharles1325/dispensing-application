@@ -19,7 +19,7 @@ export default class ExpirationJob implements IJob {
         .getMany();
 
       const updatedItems = items.map((item) => ({
-        ...item,
+        id: item.id,
         status: 'expired',
       })) as any[];
 

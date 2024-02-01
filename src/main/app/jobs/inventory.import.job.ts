@@ -1,3 +1,4 @@
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import UploadDataDTO from 'App/data-transfer-objects/upload-data.dto';
 import IJob from 'App/interfaces/job/job.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
@@ -8,12 +9,17 @@ import { Job } from 'bullmq';
 import { app } from 'electron';
 import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 import { Item } from 'Main/database/models/item.model';
+import { UploadData } from 'Main/database/models/upload-data.model';
 import { Upload } from 'Main/database/models/upload.model';
 import { Bull } from 'Main/jobs';
 import process from 'node:process';
 import { parentPort } from 'node:worker_threads';
+import { capitalize } from 'lodash';
+import validator from 'App/modules/validator.module';
 import unit from 'unitmath';
 import xlsx from 'xlsx';
+import { Brand } from 'Main/database/models/brand.model';
+import { Category } from 'Main/database/models/category.model';
 
 export default class InventoryImportJob implements IJob {
   readonly key = 'INVENTORY_IMPORT_JOB';
@@ -31,6 +37,85 @@ export default class InventoryImportJob implements IJob {
       } = data;
 
       await queryRunner.connect();
+
+      const createUploadData = async (
+        record: Record<string, any>,
+        status: 'error' | 'success' | null | undefined = null
+      ) => {
+        if (status) {
+          const uploadData = new UploadData();
+          uploadData.upload_id = uploadId;
+          uploadData.content = JSON.stringify(record);
+          uploadData.status = record['Error'] ? 'error' : status;
+
+          await queryRunner.manager.save(uploadData);
+
+          return uploadData;
+        }
+      }
+
+      const updateUploadStatusCount = async (
+        record: Record<string, any>,
+        status: 'error' | 'success' = 'error'
+      ) => {
+        const upload = (await queryRunner.query(
+          `SELECT * FROM uploads WHERE id = '${uploadId}'`
+        ))?.[0];
+        const uploadData = await createUploadData(record, status);
+
+        if (!uploadData) return;
+        if (uploadData.status === 'error') {
+          upload.error_count += 1;
+        } else {
+          upload.success_count += 1;
+        }
+
+        await queryRunner.manager.save(Upload, upload as unknown as Upload);
+      }
+
+      const validate = async (data: object, record: Record<string, any>) => {
+        const errors = await validator(data) as IPOSValidationError[];
+
+        if (errors && errors.length) {
+          if (queryRunner.isTransactionActive) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.startTransaction();
+          }
+
+          record['Error'] = errors
+            .map(({ field, message }) =>
+              capitalize(`${field} ${message}`?.toLocaleLowerCase())
+            )
+            .join(', ') + '.';
+
+          await updateUploadStatusCount(record, 'error');
+          await queryRunner.commitTransaction();
+        }
+      }
+
+      const validationField = async (record: Record<string, any>) => {
+        const requiredColumns = [
+          'Device ID',
+          'Item Name',
+          'Item Number',
+          'Batch Number',
+          'Brand',
+          'Category',
+          'Quantity',
+          'UM'
+        ];
+
+        const errors = [];
+        for (const column of requiredColumns) {
+          if (!(column in record)) {
+            errors.push(`"${column}" column is missing`);
+          }
+        }
+
+        if (errors.length) {
+          record['Error'] = errors.join(', ') + '.';
+        }
+      }
 
       const progress = (await queryRunner.query(
         `SELECT
@@ -56,6 +141,15 @@ export default class InventoryImportJob implements IJob {
 
         record['Error'] = undefined;
 
+        await validationField(record);
+
+        if (record['Error']) {
+          errorCount += 1;
+          await updateUploadStatusCount(record, 'error');
+          await queryRunner.commitTransaction();
+          continue;
+        }
+
         const item = (await queryRunner.query(
           `SELECT *
           FROM items
@@ -72,7 +166,7 @@ export default class InventoryImportJob implements IJob {
           inventoryRecord.note = record['Remarks'] ?? 'Imported data';
           inventoryRecord.type = 'stock-in';
           inventoryRecord.quantity = record['Quantity'];
-          inventoryRecord.unit_of_measurement = getUOFSymbol(record['UM'], true); // Unit of Measurement
+          inventoryRecord.unit_of_measurement = getUOFSymbol(record['UM'], true) ?? record['UM']; // Unit of Measurement
 
           Object.assign(itemClone, item);
 
@@ -100,36 +194,112 @@ export default class InventoryImportJob implements IJob {
           }
 
           try {
+            await validate(itemClone, record);
+            await validate(inventoryRecord, record);
+
+            if (record['Error']) {
+              errorCount += 1;
+              continue;
+            }
+
             await queryRunner.manager.save(itemClone);
             await queryRunner.manager.save(inventoryRecord);
+            await queryRunner.commitTransaction();
+            await updateUploadStatusCount(record, 'success');
+
+            successCount += 1;
+          } catch (err) {
+            const error = handleError(err);
+
+            errorCount += 1;
+            record['Error'] = error;
+            await queryRunner.rollbackTransaction();
+
+            await updateUploadStatusCount(record, 'error');
+            await queryRunner.commitTransaction();
+          }
+        } else {
+          try {
+            const existingBrand = (await queryRunner.query(
+              `SELECT *
+              FROM brands
+              WHERE name LIKE '%${record['Brand']}%'
+            `))?.[0] as Brand;
+
+            const existingCategory = (await queryRunner.query(
+              `SELECT *
+              FROM categories
+              WHERE name LIKE '%${record['Category']}%'
+            `))?.[0] as Category;
+
+            if (existingBrand) {
+              itemClone.brand_id = existingBrand.id;
+            } else {
+              const brand = new Brand();
+              brand.name = record['Brand'];
+
+              await validate(brand, record);
+
+              if (record['Error']) {
+                errorCount += 1;
+                continue;
+              }
+
+              const brandData = await queryRunner.manager.save(brand);
+              itemClone.brand_id = brandData.id;
+            }
+
+            if (existingCategory) {
+              itemClone.category_id = existingCategory.id;
+            } else {
+              const category = new Category();
+              category.name = record['Category'];
+
+              await validate(category, record);
+
+              if (record['Error']) {
+                errorCount += 1;
+                continue;
+              }
+
+              const categoryData = await queryRunner.manager.save(category);
+              itemClone.category_id = categoryData.id;
+            }
+
+            const date = new Date();
+            date.setDate(date.getDate() + 1);
+
+            itemClone.name = record['Item Name']
+            itemClone.item_code = record['Item Number']
+            itemClone.batch_code = record['Batch Number'];
+            itemClone.stock_quantity = record['Quantity'];
+            itemClone.unit_of_measurement = getUOFSymbol(record['UM'], true) ?? record['UM'];
+            itemClone.status = record['Quantity'] === 0 ? 'out-of-stock' : 'available';
+            itemClone.expired_at = date;
+
+            await validate(itemClone, record);
+
+            if (record['Error']) {
+              errorCount += 1;
+              continue;
+            }
+
+            await queryRunner.manager.save(itemClone);
+
+            await updateUploadStatusCount(record, 'success');
             await queryRunner.commitTransaction();
             successCount += 1;
           } catch (err) {
             const error = handleError(err);
 
+            errorCount += 1;
             record['Error'] = error;
             await queryRunner.rollbackTransaction();
-            errorCount += 1;
+            await queryRunner.startTransaction();
+
+            await updateUploadStatusCount(record, 'error');
+            await queryRunner.commitTransaction();
           }
-        } else {
-          itemClone.name = record['Item Name']
-          itemClone.item_code = record['Item Number']
-          itemClone.batch_code = record['Batch Number']
-          itemClone.stock_quantity = record['Quantity']
-          itemClone.unit_of_measurement = getUOFSymbol(record['UM'], true);
-
-          const data = await queryRunner.manager.save(itemClone);
-
-          inventoryRecord.purpose = record['Purpose'] ?? 'Import purposes';
-          inventoryRecord.item_id = data.id;
-          inventoryRecord.note = record['Remarks'] ?? 'Imported data';
-          inventoryRecord.type = 'stock-in';
-          inventoryRecord.quantity = record['Quantity'];
-          inventoryRecord.unit_of_measurement = getUOFSymbol(record['UM'], true); // Unit of Measurement
-
-          await queryRunner.manager.save(inventoryRecord);
-          await queryRunner.commitTransaction();
-          successCount += 1;
         }
       }
 
@@ -161,13 +331,13 @@ export default class InventoryImportJob implements IJob {
 
         if (result.length) {
           const fileName = app.getPath('downloads') + `/${
-            concatDateToName(`xgen_stock_records_import_errors`)
+            concatDateToName(`xgen_inventory_import_errors`)
           }.xlsx`;
 
           const worksheet = xlsx.utils.json_to_sheet(result);
           const workbook = xlsx.utils.book_new();
 
-          xlsx.utils.book_append_sheet(workbook, worksheet, 'Stock-records');
+          xlsx.utils.book_append_sheet(workbook, worksheet);
           xlsx.writeFile(workbook, fileName);
 
           await Bull(

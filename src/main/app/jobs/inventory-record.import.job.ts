@@ -1,3 +1,4 @@
+import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import UploadDataDTO from 'App/data-transfer-objects/upload-data.dto';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import IJob from 'App/interfaces/job/job.interface';
@@ -15,6 +16,8 @@ import { Upload } from 'Main/database/models/upload.model';
 import { Bull } from 'Main/jobs';
 import process from 'node:process';
 import { parentPort } from 'node:worker_threads';
+import { capitalize } from 'lodash';
+import validator from 'App/modules/validator.module';
 import xlsx from 'xlsx';
 
 export default class InventoryRecordImportJob implements IJob {
@@ -33,6 +36,87 @@ export default class InventoryRecordImportJob implements IJob {
       } = data;
 
       await queryRunner.connect();
+
+      const createUploadData = async (
+        record: Record<string, any>,
+        status: 'error' | 'success' | null | undefined = null
+      ) => {
+        if (status) {
+          const uploadData = new UploadData();
+          uploadData.upload_id = uploadId;
+          uploadData.content = JSON.stringify(record);
+          uploadData.status = record['Error'] ? 'error' : status;
+
+          await queryRunner.manager.save(uploadData);
+
+          return uploadData;
+        }
+      }
+
+      const updateUploadStatusCount = async (
+        record: Record<string, any>,
+        status: 'error' | 'success' = 'error'
+      ) => {
+        const upload = (await queryRunner.query(
+          `SELECT * FROM uploads WHERE id = '${uploadId}'`
+        ))?.[0];
+        const uploadData = await createUploadData(record, status);
+
+        if (!uploadData) return;
+        if (uploadData.status === 'error') {
+          upload.error_count += 1;
+        } else {
+          upload.success_count += 1;
+        }
+
+        await queryRunner.manager.save(Upload, upload as unknown as Upload);
+      }
+
+      const validate = async (data: object, record: Record<string, any>) => {
+        const errors = await validator(data) as IPOSValidationError[];
+
+        if (errors && errors.length) {
+          if (queryRunner.isTransactionActive) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.startTransaction();
+          }
+
+          record['Error'] = errors
+            .map(({ field, message }) =>
+              capitalize(`${field} ${message}`?.toLocaleLowerCase())
+            )
+            .join(', ') + '.';
+
+          await updateUploadStatusCount(record, 'error');
+          await queryRunner.commitTransaction();
+        }
+      }
+
+      const validationField = async (record: Record<string, any>) => {
+        const requiredColumns = [
+          'Device ID',
+          'Item Name',
+          'Item Number',
+          'Batch Number',
+          'Creator Email',
+          'Quantity',
+          'Purpose',
+          'Type',
+          'Date Created',
+          'UM'
+        ];
+
+        const errors = [];
+        for (const column of requiredColumns) {
+          if (!(column in record)) {
+            errors.push(`"${column}" column is missing`);
+          }
+        }
+
+        if (errors.length) {
+          record['Error'] = errors.join(', ') + '.';
+        }
+      }
 
       const progress = (await queryRunner.query(
         `SELECT
@@ -58,14 +142,21 @@ export default class InventoryRecordImportJob implements IJob {
 
         record['Error'] = undefined;
 
-        const upload = (await queryRunner.query(
-          `SELECT * FROM uploads WHERE id = '${uploadId}'`
-        ))?.[0];
+        await validationField(record);
+
+        if (record['Error']) {
+          errorCount += 1;
+          await updateUploadStatusCount(record, 'error');
+          await queryRunner.commitTransaction();
+          continue;
+        }
+
         const item = (await queryRunner.query(
           `SELECT *
           FROM items
-          WHERE item_code = '${record['Item ID']}'
+          WHERE item_code = '${record['Item Number']}'
           AND name = '${record['Item Name']}'
+          AND batch_code = '${record['Batch Number']}'
         `))?.[0] as Item;
         const user = (await queryRunner.query(
           `SELECT *
@@ -87,23 +178,11 @@ export default class InventoryRecordImportJob implements IJob {
           record['Error'] = "This record came from this device, and might cause conflict.";
         }
 
-        const uploadData = new UploadData();
-        uploadData.upload_id = uploadId;
-        uploadData.content = JSON.stringify(record);
-        uploadData.status = record['Error'] ? 'error' : 'success';
-
-        await queryRunner.manager.save(uploadData);
-        if (uploadData.status === 'error') {
-          upload.error_count += 1;
-        } else {
-          upload.success_count += 1;
-        }
-
-        await queryRunner.manager.save(Upload, upload as unknown as Upload);
 
         if (record['Error']) {
-          await queryRunner.commitTransaction();
           errorCount += 1;
+          await updateUploadStatusCount(record, 'error');
+          await queryRunner.commitTransaction();
           continue;
         };
 
@@ -116,7 +195,7 @@ export default class InventoryRecordImportJob implements IJob {
           inventoryRecord.note = record['Note'];
           inventoryRecord.type = record['Type'];
           inventoryRecord.quantity = record['Quantity'];
-          inventoryRecord.unit_of_measurement = record['UM'];
+          inventoryRecord.unit_of_measurement = record['UM']?.toLocaleLowerCase();
           inventoryRecord.creator_id = user.id;
           inventoryRecord.created_at = record['Date Created'];
 
@@ -142,16 +221,31 @@ export default class InventoryRecordImportJob implements IJob {
           itemClone.unit_of_measurement = um;
 
           try {
+            await validate(itemClone, record);
+            await validate(inventoryRecord, record);
+
+            if (record['Error']) {
+              errorCount += 1;
+              await queryRunner.commitTransaction();
+              continue;
+            };
+
             await queryRunner.manager.save(itemClone);
             await queryRunner.manager.save(inventoryRecord);
+            await updateUploadStatusCount(record, 'success');
             await queryRunner.commitTransaction();
+
             successCount += 1;
           } catch (err) {
             const error = handleError(err);
 
+            errorCount += 1;
             record['Error'] = error;
             await queryRunner.rollbackTransaction();
-            errorCount += 1;
+            await queryRunner.startTransaction();
+
+            await updateUploadStatusCount(record, 'error');
+            await queryRunner.commitTransaction();
           }
         }
       }

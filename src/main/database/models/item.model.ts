@@ -182,7 +182,7 @@ export class Item {
   name: string;
 
   @Column()
-  @ValidateIf((item: ItemDTO) => Boolean(item.description.length))
+  @ValidateIf((item: ItemDTO) => Boolean(item?.description?.length))
   @Length(5, 1000, {
     message: ValidationMessage.maxLength,
   })
@@ -194,8 +194,9 @@ export class Item {
     scale: 2,
     transformer: {
       to: (data: number): number => data,
-      from: (data: string): number => parseFloat(data),
+      from: (data: string): number => parseFloat(data ?? '0'),
     },
+    default: 0,
   })
   cost_price: number;
 
@@ -205,8 +206,9 @@ export class Item {
     scale: 2,
     transformer: {
       to: (data: number): number => data,
-      from: (data: string): number => parseFloat(data),
+      from: (data: string): number => parseFloat(data  ?? '0'),
     },
+    default: 0,
   })
   selling_price: number;
 
@@ -216,8 +218,9 @@ export class Item {
     scale: 2,
     transformer: {
       to: (data: number): number => data,
-      from: (data: string): number => parseFloat(data),
+      from: (data: string): number => parseFloat(data ?? '0'),
     },
+    default: 0,
   })
   tax_rate: number;
 
@@ -228,7 +231,7 @@ export class Item {
   unit_of_measurement: string;
 
   @Column({ nullable: true })
-  @ValidateIf((item: ItemDTO) => Boolean(item.barcode.length))
+  @ValidateIf((item: ItemDTO) => Boolean(item?.barcode?.length))
   @IsBarcode({
     message: ValidationMessage.invalid,
   })

@@ -434,7 +434,7 @@ app
           global.emitToRenderer(channel, data);
         });
 
-        await Bull('DISCOUNT_JOB', {});
+        // await Bull('DISCOUNT_JOB', {});
         await Bull('EXPIRATION_JOB', {});
         await createWindow();
 

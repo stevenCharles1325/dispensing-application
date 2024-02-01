@@ -28,7 +28,7 @@ export default class DiscountJob implements IJob {
         .getMany();
 
       const updatedItems = items.map((item) => ({
-        ...item,
+        id: item.id,
         discount_id: null,
       })) as any[];
 

@@ -44,7 +44,8 @@ export default class ExportInventoryRecordsEvent implements IEvent {
         const extractedTransaction = records.map((record) => {
           return ({
             'Device ID': record.item.system_id,
-            'Item ID': record.item.item_code,
+            'Item Number': record.item.item_code,
+            'Batch Number': record.item.batch_code,
             'Item Name': record.item.name,
             Purpose: record.purpose,
             Note: record.note,

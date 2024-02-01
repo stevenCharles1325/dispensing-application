@@ -63,14 +63,14 @@ export default class ItemDeleteEvent implements IEvent {
           updatedItem.supplier = undefined;
         }
 
-        if (itemUpdate.discount_id) {
-          const discount = await DiscountRepository.findOneByOrFail({
-            id: itemUpdate.discount_id
-          });
-          updatedItem.discount = discount;
-        } else {
-          updatedItem.discount = undefined;
-        }
+        // if (itemUpdate.discount_id) {
+        //   const discount = await DiscountRepository.findOneByOrFail({
+        //     id: itemUpdate.discount_id
+        //   });
+        //   updatedItem.discount = discount;
+        // } else {
+        //   updatedItem.discount = undefined;
+        // }
 
         updatedItem.brand = await BrandRepository.findOneByOrFail({
           id: itemUpdate.brand_id,
