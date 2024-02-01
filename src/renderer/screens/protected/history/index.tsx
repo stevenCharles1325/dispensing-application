@@ -567,7 +567,7 @@ export default function Logs() {
             open={Boolean(receiptDialogOpen && selectedPayment)}
           >
             {selectedPayment ? (
-              <div className="w-[400px] h-[590px] overflow-auto">
+              <div className="w-[400px] h-[650px] overflow-auto">
                 <div
                   className="w-full p-5"
                 >
@@ -679,6 +679,14 @@ export default function Logs() {
                             hour: '2-digit'
                           }
                         )}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Transaction Number:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.transaction_code}
                       </p>
                     </div>
                   </div>
