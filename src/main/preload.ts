@@ -95,6 +95,23 @@ const posHandler = {
 
 /* ================================
 +
++         PDF EVENT HANDLER
++
++ ================================ */
+const pdfHandler = {
+  download: async (
+    pdfFileName: string,
+    pdfContent: string,
+  ): Promise<IResponse< string[] | IPOSError[]>> =>
+    ipcRenderer.invoke(
+      'pdf:download',
+      pdfFileName,
+      pdfContent,
+    ),
+}
+
+/* ================================
++
 +       BARCODE EVENT HANDLER
 +
 + ================================ */
@@ -654,6 +671,7 @@ const importHandler = {
 
 // EXPOSING HANDLERS
 contextBridge.exposeInMainWorld('pos', posHandler);
+contextBridge.exposeInMainWorld('pdf', pdfHandler);
 contextBridge.exposeInMainWorld('storage', storageHandler);
 contextBridge.exposeInMainWorld('barcode', barcodeHandler);
 contextBridge.exposeInMainWorld('printer', printerHandler);
@@ -680,6 +698,7 @@ contextBridge.exposeInMainWorld('export', exportHandler);
 contextBridge.exposeInMainWorld('import', importHandler);
 
 export type POSHandler = typeof posHandler;
+export type PDFHandler= typeof pdfHandler;
 export type StorageHandler = typeof storageHandler;
 export type BarcodeHandler = typeof barcodeHandler;
 export type PrinterHandler = typeof printerHandler;

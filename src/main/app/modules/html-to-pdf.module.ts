@@ -8,7 +8,24 @@ export default async function htmlToPDF(htmlPath: string, outputPath: string){
   const os = getPlatform();
 
   if (os === 'linux') {
-    return;
+    const {
+      stdout,
+      stderr
+    } = await asyncExec(`wkhtmltopdf --margin-top 5mm --margin-bottom 0 --margin-right 0 --margin-left 0 ${
+      htmlPath
+    } ${
+      outputPath
+    }`);
+
+    if (stdout) {
+      console.log('[HTML-TO-PDF SUCCESS]: ', stdout);
+      return;
+    }
+
+    if (stderr) {
+      console.log('[HTML-TO-PDF ERROR]: ', stderr);
+      return;
+    }
   }
 
   if (os === 'win') {

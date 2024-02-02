@@ -17,7 +17,7 @@ const executeMKHTMLTOPDFBinary = (option?: IBinaryOptions) => {
       let mkhtmltopdfProcess: ChildProcessWithoutNullStreams | null = null;
 
       if (os === 'linux') {
-        cmd = `"cd ${EXEC_PATH} && sudo apt install wkhtmltox_0.12.6.1-2.jammy_amd64.deb`;
+        cmd = `"cd ${EXEC_PATH} && sudo dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb && sudo apt --fix-broken install`;
 
         /*
           The /C option is to run command then terminate command prompt

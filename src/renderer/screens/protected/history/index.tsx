@@ -20,7 +20,7 @@ import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 import useAlert from 'UI/hooks/useAlert';
 
@@ -29,13 +29,18 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
-import OrderDTO from 'App/data-transfer-objects/order.dto';
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
+
 import getDiscount from 'UI/helpers/getDiscount';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import titleCase from 'UI/helpers/titleCase';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 import usePrinter from 'UI/hooks/usePrinter';
+import usePDF from 'UI/hooks/usePDF';
+import { getTemplateV3 } from 'UI/helpers/getTemplate';
+import OrderDTO from 'App/data-transfer-objects/order.dto';
+import { toHtmlText } from 'from-json-to-html';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -155,6 +160,7 @@ function a11yProps(index: number) {
 export default function Logs() {
   const { print } = usePrinter();
   const { displayAlert } = useAlert();
+  const { downloadPDF } = usePDF()
   const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const { searchText, setPlaceHolder } = useSearch();
@@ -199,34 +205,51 @@ export default function Logs() {
     return payments.find(({ id }) => id === selectedId);
   }, [selectedId, payments]);
 
-  const subTotal = useMemo(() => {
-    if (selectedPayment) {
-      return selectedPayment?.orders?.reduce?.((prev, curr) => {
-        const { discount } = getDiscount(
-          curr.price,
-          curr?.discount?.discount_type,
-          curr?.discount?.discount_value
-        );
+  // const subTotal = useMemo(() => {
+  //   if (selectedPayment) {
+  //     return selectedPayment?.orders?.reduce?.((prev, curr) => {
+  //       const { discount } = getDiscount(
+  //         curr.price,
+  //         curr?.discount?.discount_type,
+  //         curr?.discount?.discount_value
+  //       );
 
-        const price = curr.price - discount;
-        return prev + (price * curr.quantity);
-      }, 0) ?? 0;
+  //       const price = curr.price - discount;
+  //       return prev + (price * curr.quantity);
+  //     }, 0) ?? 0;
+  //   }
+
+  //   return 0;
+  // }, [selectedPayment]);
+
+  // const computedTax = selectedPayment?.orders?.reduce?.((prev, curr) => {
+  //   return prev + curr.tax_rate;
+  // }, 0) ?? 0;
+
+  // const tax = useMemo(() => {
+  //   if (selectedPayment?.orders?.length) {
+  //     return subTotal * (computedTax / 100);
+  //   }
+
+  //   return 0;
+  // }, [computedTax, selectedPayment, subTotal]);
+
+  const handlePDFDownload = useCallback(async (transactionID: string) => {
+    const payment = payments.find(({ id }) => id === transactionID);
+
+    if (payment) {
+      const htmlJSON = getTemplateV3({
+        store_name: payment.system?.store_name ?? 'X-GEN POS',
+        orders: payment.orders as OrderDTO[],
+        ...payment
+      });
+
+      const htmlString = toHtmlText(htmlJSON);
+
+      const fileName = `xgen_transaction_${payment.transaction_code}`;
+      await downloadPDF(fileName, htmlString);
     }
-
-    return 0;
-  }, [selectedPayment]);
-
-  const computedTax = selectedPayment?.orders?.reduce?.((prev, curr) => {
-    return prev + curr.tax_rate;
-  }, 0) ?? 0;
-
-  const tax = useMemo(() => {
-    if (selectedPayment?.orders?.length) {
-      return subTotal * (computedTax / 100);
-    }
-
-    return 0;
-  }, [computedTax, selectedPayment, subTotal]);
+  }, [payments]);
 
   const paymentsColumns: Array<GridColDef> = [
     {
@@ -276,7 +299,11 @@ export default function Logs() {
           >
             <DownloadOutlinedIcon />
           </IconButton>
-
+          <IconButton
+            onClick={() => handlePDFDownload(params.id)}
+          >
+            <PictureAsPdfOutlinedIcon />
+          </IconButton>
         </div>
       ),
       sortable: false,

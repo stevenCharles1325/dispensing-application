@@ -24,12 +24,14 @@ import {
   SystemHandler,
   PrinterHandler,
   POSHandler,
+  PDFHandler,
 } from 'Main/preload';
 
 declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
     pos: POSHandler;
+    pdf: PDFHandler;
     storage: StorageHandler;
     barcode: BarcodeHandler;
     main: MainHandler;
