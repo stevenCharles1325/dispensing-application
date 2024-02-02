@@ -31,8 +31,6 @@ import usePrinter from 'UI/hooks/usePrinter';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 import useBarcode from 'UI/hooks/useBarcode';
-import unitQuantityCalculator from 'UI/helpers/unitQuantityCalculator';
-import capitalizeCase from 'UI/helpers/capitalCase';
 import measurements from 'UI/data/defaults/unit-of-measurements';
 
 const CARD_WIDTH = 360;
@@ -153,7 +151,7 @@ type WeightType = OrderType;
 
 const weightsInit = {
   quantity: 0,
-  unit_of_measurement: 'Kilograms'
+  unit_of_measurement: 'kilograms'
 }
 
 export default function Home() {
@@ -441,6 +439,13 @@ export default function Home() {
   const handleSelectItem = useCallback(
     (id: string) => {
       const item = items.find(item => item.id === id);
+
+      if (item) {
+        setNetWeight({
+          quantity: 1,
+          unit_of_measurement: item?.unit_of_measurement,
+        });
+      }
 
       if (selectedItemIds.includes(id)) {
         setOrders((userOrders) => ({
@@ -1012,7 +1017,7 @@ export default function Home() {
                       onChange={(e, newValue) => {
                         setTareWeight((tareW) => ({
                           ...tareW,
-                          unit_of_measurement: newValue ?? 'Kilograms',
+                          unit_of_measurement: newValue ?? 'kilograms',
                         }));
                       }}
                     />
@@ -1054,7 +1059,7 @@ export default function Home() {
                       onChange={(e, newValue) => {
                         setNetWeight((netW) => ({
                           ...netW,
-                          unit_of_measurement: newValue ?? 'Kilograms',
+                          unit_of_measurement: newValue ?? 'kilograms',
                         }));
                       }}
                     />
@@ -1096,7 +1101,7 @@ export default function Home() {
                       onChange={(e, newValue) => {
                         setGrossWeight((grossW) => ({
                           ...grossW,
-                          unit_of_measurement: newValue ?? 'Kilograms',
+                          unit_of_measurement: newValue ?? 'kilograms',
                         }));
                       }}
                     />
