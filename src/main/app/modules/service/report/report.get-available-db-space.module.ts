@@ -1,3 +1,4 @@
+import { IS_PROD } from 'Main/main';
 import checkDiskSpace from 'check-disk-space';
 import { app } from 'electron';
 
@@ -6,7 +7,6 @@ const convertBytesToMegabytes = (bytes: any) => {
 }
 
 const getAvailableDBSpace = async () => {
-  const IS_PROD = process.env.NODE_ENV === 'production';
   const DB_PATH = IS_PROD ? app.getPath('userData') : __dirname;
   const { free, size } = await checkDiskSpace(`${DB_PATH}/database/db.sqlite`)
 

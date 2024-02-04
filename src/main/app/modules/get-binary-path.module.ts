@@ -1,8 +1,7 @@
 import AppRootDir from "app-root-dir";
 import path from "path";
 import { getPlatform } from "./get-platform.module";
-
-const IS_PROD = process.env.NODE_ENV === 'production';
+import { IS_PROD } from "Main/main";
 
 export default function getBinaryPath(moduleName: string): string {
   return (

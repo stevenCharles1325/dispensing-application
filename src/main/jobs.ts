@@ -7,8 +7,8 @@ import IJob from 'App/interfaces/job/job.interface';
 import { Redis } from 'ioredis';
 import { getPlatform } from 'App/modules/get-platform.module';
 import { join } from 'path';
+import { IS_PROD } from './main';
 
-const IS_PROD = process.env.NODE_ENV === 'production';
 const QUEUE_NAME = 'main';
 
 const os = getPlatform();

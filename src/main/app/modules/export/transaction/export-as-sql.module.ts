@@ -1,4 +1,4 @@
-import { DB_PATH, IS_PROD } from 'Main/datasource';
+import { DB_PATH } from 'Main/datasource';
 import { app } from 'electron';
 import { promisify } from 'util';
 import { exec } from 'child_process';
@@ -7,6 +7,7 @@ import concatDateToName from 'App/modules/concat-date-to-name.module';
 import path from 'path';
 import { getPlatform } from 'App/modules/get-platform.module';
 import AppRootDir from 'app-root-dir';
+import { IS_PROD } from 'Main/main';
 
 const asyncExec = promisify(exec);
 

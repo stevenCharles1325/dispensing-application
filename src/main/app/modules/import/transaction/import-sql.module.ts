@@ -1,10 +1,11 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { DB_PATH, IS_PROD } from 'Main/datasource';
+import { DB_PATH } from 'Main/datasource';
 import handleError from 'App/modules/error-handler.module';
 import { getPlatform } from 'App/modules/get-platform.module';
 import AppRootDir from 'app-root-dir';
 import path from 'path';
+import { IS_PROD } from 'Main/main';
 
 const asyncExec = promisify(exec);
 
