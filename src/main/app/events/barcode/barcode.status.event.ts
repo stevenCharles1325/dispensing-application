@@ -4,8 +4,8 @@ import IResponse from "App/interfaces/pos/pos.response.interface";
 import handleError from "App/modules/error-handler.module";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
 import IDeviceInfo from "App/interfaces/barcode/barcode.device-info.interface";
-import HID from "node-hid";
 import barcodeMap from "Main/data/defaults/map/barcode-map";
+import HID from "node-hid";
 
 export default class BarcodeStatusEvent implements IEvent {
   public channel: string = 'barcode:status';
@@ -35,7 +35,6 @@ export default class BarcodeStatusEvent implements IEvent {
           }
 
           if (mappedNumber === 'ENTER') {
-            console.log('FROM HERE 2: ', barcodeNumber);
             global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
             global.emitToRenderer('BARCODE:DATA', barcodeNumber);
             barcodeNumber = '';
@@ -46,8 +45,6 @@ export default class BarcodeStatusEvent implements IEvent {
         selectedDevice.on('error', async (err: any) => {
           cachedInfo.status = 'ERROR';
           globalStorage.set('HID:SELECTED', cachedInfo);
-
-          console.log('HID ERROR: ', err);
 
           global.emitToRenderer('BARCODE:STATUS', 'ERROR');
           global.emitToRenderer('BARCODE:ERROR', err);

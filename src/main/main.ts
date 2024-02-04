@@ -167,29 +167,29 @@ const createWindow = async () => {
   app.commandLine.appendSwitch('disable-hid-blocklist');
 
   if (mainWindow) {
-    mainWindow.webContents.session.on('select-hid-device', (event, details, callback) => {
-      event.preventDefault()
-      if (details.deviceList && details.deviceList.length > 0) {
-        callback(details.deviceList[0].deviceId)
-      }
-    });
+    // mainWindow.webContents.session.on('select-hid-device', (event, details, callback) => {
+    //   event.preventDefault()
+    //   if (details.deviceList && details.deviceList.length > 0) {
+    //     callback(details.deviceList[0].deviceId)
+    //   }
+    // });
 
-    mainWindow.webContents.session.setPermissionCheckHandler((
-      webContents,
-      permission,
-      requestingOrigin,
-      details
-      ) => {
-      if (permission === 'hid') {
-        return true
-      }
-    })
+    // mainWindow.webContents.session.setPermissionCheckHandler((
+    //   webContents,
+    //   permission,
+    //   requestingOrigin,
+    //   details
+    //   ) => {
+    //   if (permission === 'hid') {
+    //     return true
+    //   }
+    // })
 
-    mainWindow.webContents.session.setDevicePermissionHandler((details) => {
-      if (details.deviceType === 'hid') {
-        return true
-      }
-    })
+    // mainWindow.webContents.session.setDevicePermissionHandler((details) => {
+    //   if (details.deviceType === 'hid') {
+    //     return true
+    //   }
+    // })
   }
 
 

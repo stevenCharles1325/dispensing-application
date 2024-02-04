@@ -83,7 +83,7 @@ export default class BarcodeSelectEvent implements IEvent {
         };
       } else {
         const deviceCachedInfo = {
-          id: `${device.vendorId}:${device.productId}`,
+          id: null,
           status: 'ERROR',
         }
         globalStorage.set('HID:SELECTED', deviceCachedInfo);
@@ -96,8 +96,8 @@ export default class BarcodeSelectEvent implements IEvent {
         } as unknown as IResponse<IPOSError[]>;
       }
     } catch (err) {
-      const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', err);
+      const error = handleError(err);
 
       const deviceCachedInfo = {
         id: null,
