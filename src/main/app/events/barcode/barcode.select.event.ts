@@ -74,7 +74,7 @@ export default class BarcodeSelectEvent implements IEvent {
           global.emitToRenderer('BARCODE:STATUS', 'ERROR');
           global.emitToRenderer('BARCODE:ERROR', err);
 
-          await selectedDevice.close();
+          // await selectedDevice.close();
         });
 
         return {
