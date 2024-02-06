@@ -30,7 +30,10 @@
     "bullmq": "^4.12.5",
     "class-validator": "^0.14.0",
     "convert-excel-to-json": "^1.7.0",
+    "jimp": "^0.22.10",
     "jsonwebtoken": "^9.0.1",
+    "node-hid": "^3.0.0",
+    "node-html-to-image": "^4.0.0",
     "node-schedule": "^2.1.1",
     "pdf-to-printer": "github:Yuri-Lima/pdf-to-printer",
     "reflect-metadata": "^0.1.13",
@@ -38,6 +41,7 @@
     "typeorm": "^0.3.17",
     "typeorm-extension": "^3.0.1",
     "unitmath": "^1.0.2",
+    "usb": "^2.11.0",
     "xlsx": "^0.18.5"
   }
 }

@@ -37,7 +37,7 @@ export default class BarcodeSelectEvent implements IEvent {
           }
         }
 
-        // let selectedDevice = await HID.HIDAsync.open(device.vendorId, device.productId);
+        let selectedDevice = await HID.HIDAsync.open(device.vendorId, device.productId);
 
         const deviceCachedInfo: IDeviceInfo = {
           id: `${device.vendorId}:${device.productId}`,

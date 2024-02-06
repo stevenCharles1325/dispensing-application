@@ -1,3 +1,5 @@
+import IStorage from "../storage/storage.interface";
+
 interface IPrintDataAttr {
   id?: string;
   class?: string;
@@ -26,6 +28,7 @@ export interface IPrintOptions {
   printDialog?: boolean;
   sumatraPdfPath?: string;
   copies?: number;
+  globalStorage?: IStorage;
 }
 
 export default interface IBasePrinter {
