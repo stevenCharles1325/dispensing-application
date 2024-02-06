@@ -156,7 +156,6 @@ const weightsInit = {
 
 export default function Home() {
   const { print } = usePrinter();
-  const { setDictionary } = useBarcode();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
@@ -657,18 +656,6 @@ export default function Home() {
       }
     }
   }, [items, barcodeNumber, orders, handleSelectItem]);
-
-  useEffect(() => {
-    setDictionary(
-      items?.reduce((prev, curr) => {
-        return {
-          ...prev,
-          [curr.barcode]: curr.barcode
-        };
-      }, {})
-      ?? {}
-    );
-  }, [items]);
 
   useEffect(() => {
     const leftOperand = {
