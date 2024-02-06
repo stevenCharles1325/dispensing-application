@@ -40,7 +40,7 @@ import './scheduler';
 const myEnv = dotenv.config();
 dotenvExpand(myEnv);
 
-export const IS_PROD = process.env.NODE_ENV === 'production';
+const IS_PROD = process.env.NODE_ENV === 'production';
 const providers = requireAll(
   IS_PROD
     ? require?.context?.('./app/providers', true, /\.(js|ts|json)$/)

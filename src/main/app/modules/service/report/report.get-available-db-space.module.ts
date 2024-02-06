@@ -1,6 +1,7 @@
-import { IS_PROD } from 'Main/main';
 import checkDiskSpace from 'check-disk-space';
 import { app } from 'electron';
+
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 const convertBytesToMegabytes = (bytes: any) => {
   return bytes / (1024 * 1024);

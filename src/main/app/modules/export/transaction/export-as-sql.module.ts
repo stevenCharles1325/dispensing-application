@@ -7,8 +7,8 @@ import concatDateToName from 'App/modules/concat-date-to-name.module';
 import path from 'path';
 import { getPlatform } from 'App/modules/get-platform.module';
 import AppRootDir from 'app-root-dir';
-import { IS_PROD } from 'Main/main';
 
+const IS_PROD = process.env.NODE_ENV === 'production';
 const asyncExec = promisify(exec);
 
 const EXEC_PATH = IS_PROD
