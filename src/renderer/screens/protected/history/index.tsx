@@ -657,9 +657,7 @@ export default function Logs() {
                       <p className='text-left'>
                         Checked By/Date:
                       </p>
-                      <p className='text-left'>
-                        {selectedPayment.orders?.[0]?.item?.item_code}
-                      </p>
+                      <div className='w-[80px] h-[15px] border-b-2 border-black/50'/>
                     </div>
                     <div className='w-[80%] flex justify-between'>
                       <p className='text-left'>

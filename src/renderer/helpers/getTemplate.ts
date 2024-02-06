@@ -326,9 +326,9 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
               },
               {
                 element: 'td',
-                htmlText: '__________',
+                htmlText: '',
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: right; width: 80px; height: 100%; border-bottom: 2px solid rgba(0, 0, 0, 0.5);'
                 }
               },
             ]
@@ -610,9 +610,9 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                   },
                   {
                     element: 'td',
-                    htmlText: '__________',
+                    htmlText: '',
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: right; height: 100%; border-bottom: 2px solid black;'
                     }
                   },
                 ]
