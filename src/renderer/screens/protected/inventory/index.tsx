@@ -312,6 +312,10 @@ export default function Inventory() {
     }
 
     setModuleName(null);
+
+    if (inputFileRef?.current) {
+      inputFileRef.current.value = '';
+    }
   }
 
   const handleImportInventory = (e: ChangeEvent<HTMLInputElement>) => {
@@ -346,6 +350,9 @@ export default function Inventory() {
     }
 
     setModuleName(null);
+    if (inputFileRef?.current) {
+      inputFileRef.current.value = '';
+    }
   }
 
   const handleExport = (ids: string[] | null = null) => {

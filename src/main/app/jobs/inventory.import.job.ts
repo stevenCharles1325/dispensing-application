@@ -170,8 +170,20 @@ export default class InventoryImportJob implements IJob {
 
           Object.assign(itemClone, item);
 
-          const recordQuantity = `${inventoryRecord.quantity} ${getUOFSymbol(inventoryRecord.unit_of_measurement)}`;
-          const itemQuantity = `${item.stock_quantity} ${getUOFSymbol(item.unit_of_measurement)}`;
+          const recordUM = getUOFSymbol(inventoryRecord.unit_of_measurement);
+          const itemUM = getUOFSymbol(item.unit_of_measurement);
+
+          if (!recordUM || !itemUM) record['Error'] = 'Unknown unit of measurement'
+
+          if (record['Error']) {
+            errorCount += 1;
+            await updateUploadStatusCount(record, 'error');
+            await queryRunner.commitTransaction();
+            continue;
+          }
+
+          const recordQuantity = `${inventoryRecord.quantity} ${recordUM}`;
+          const itemQuantity = `${item.stock_quantity} ${itemUM}`;
 
           if (inventoryRecord.type === 'stock-in') {
             const resultQuantity = unit(itemQuantity)
@@ -179,19 +191,19 @@ export default class InventoryImportJob implements IJob {
               .toString({ precision: 4 });
             const [quantity, um] = resultQuantity.split(' ');
 
-            itemClone.stock_quantity += (Number(quantity) ?? 0);
+            itemClone.stock_quantity = (Number(quantity) ?? 0);
             itemClone.unit_of_measurement = getUOFSymbol(um);
           }
 
-          if (inventoryRecord.type === 'stock-in') {
-            const resultQuantity = unit(itemQuantity)
-              .sub(recordQuantity)
-              .toString({ precision: 4 });
-            const [quantity, um] = resultQuantity.split(' ');
+          // if (inventoryRecord.type === 'stock-out') {
+          //   const resultQuantity = unit(itemQuantity)
+          //     .sub(recordQuantity)
+          //     .toString({ precision: 4 });
+          //   const [quantity, um] = resultQuantity.split(' ');
 
-            itemClone.stock_quantity -= (Number(quantity) ?? 0);
-            itemClone.unit_of_measurement = getUOFSymbol(um);
-          }
+          //   itemClone.stock_quantity = (Number(quantity) ?? 0);
+          //   itemClone.unit_of_measurement = getUOFSymbol(um);
+          // }
 
           try {
             await validate(itemClone, record);
@@ -204,8 +216,8 @@ export default class InventoryImportJob implements IJob {
 
             await queryRunner.manager.save(itemClone);
             await queryRunner.manager.save(inventoryRecord);
-            await queryRunner.commitTransaction();
             await updateUploadStatusCount(record, 'success');
+            await queryRunner.commitTransaction();
 
             successCount += 1;
           } catch (err) {
