@@ -178,12 +178,6 @@ export default function Home() {
   const [netWeight, setNetWeight] = useState<WeightType>(weightsInit);
   const [grossWeight, setGrossWeight] = useState<WeightType>(weightsInit);
 
-  const cachedProductLotNo = useMemo(() => {
-    return (localStorage.getItem('RELEASE:PLN') as string[] ?? [])
-      .map(value => ({ name: value }));
-  }, []);
-
-
   const weights = useMemo(() => {
     return {
       tare_weight: `${tareWeight.quantity} ${getUOFSymbol(tareWeight.unit_of_measurement)}`,
@@ -478,11 +472,11 @@ export default function Home() {
     (id: string) => {
       const item = items.find(item => item.id === id);
 
-      if (item) {
-        setNetWeight({
-          quantity: 1,
-          unit_of_measurement: item?.unit_of_measurement,
-        });
+      if (item || selectedItemIds.includes(id)) {
+        setNetWeight((netWeight) => ({
+          quantity: netWeight.quantity + 1,
+          unit_of_measurement: item?.unit_of_measurement ?? netWeight.unit_of_measurement,
+        }));
       }
 
       if (selectedItemIds.includes(id)) {
@@ -552,6 +546,11 @@ export default function Home() {
     id: string
   ) => {
     if (action === 'add') {
+      setNetWeight((netWeight) => ({
+        ...netWeight,
+        quantity: netWeight.quantity + 1,
+      }));
+
       setOrders((userOrders) => ({
         ...userOrders,
         [id]: {
@@ -575,6 +574,11 @@ export default function Home() {
           return setOrders(tempOrders);
         }
       }
+
+      setNetWeight((netWeight) => ({
+        ...netWeight,
+        quantity: netWeight.quantity - 1,
+      }));
 
       setOrders((userOrders) => ({
         ...userOrders,
@@ -728,6 +732,17 @@ export default function Home() {
 
     getGrossQuantity();
   }, [netWeight, tareWeight]);
+
+  useEffect(() => {
+    if (!selectedItemIds.length) {
+      setProductUsed('');
+      setProductLotNumber('');
+
+      setTareWeight(weightsInit);
+      setNetWeight(weightsInit);
+      setGrossWeight(weightsInit);
+    }
+  }, [selectedItemIds]);
 
   return (
     <>
@@ -887,6 +902,13 @@ export default function Home() {
                             width: `${(orders[item.id].quantity?.toString().length * 10) + 40}px`
                           }}
                           onChange={(e) => {
+                            setNetWeight((netWeight) => ({
+                              ...netWeight,
+                              quantity: Number(e.target.value) > item.stock_quantity
+                                ? item.stock_quantity
+                                : Number(e.target.value),
+                            }));
+
                             setOrders((userOrders) => ({
                               ...userOrders,
                               [item.id]: {
