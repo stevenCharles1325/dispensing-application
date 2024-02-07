@@ -32,6 +32,8 @@ import { NumericFormatProps, NumericFormat } from 'react-number-format';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 import useBarcode from 'UI/hooks/useBarcode';
 import measurements from 'UI/data/defaults/unit-of-measurements';
+import localStorage from 'UI/modules/storage';
+import CustomAutoComplete from 'UI/components/TextField/CustomAutoComplete';
 
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 215;
@@ -175,6 +177,12 @@ export default function Home() {
   const [tareWeight, setTareWeight] = useState<WeightType>(weightsInit);
   const [netWeight, setNetWeight] = useState<WeightType>(weightsInit);
   const [grossWeight, setGrossWeight] = useState<WeightType>(weightsInit);
+
+  const cachedProductLotNo = useMemo(() => {
+    return (localStorage.getItem('RELEASE:PLN') as string[] ?? [])
+      .map(value => ({ name: value }));
+  }, []);
+
 
   const weights = useMemo(() => {
     return {
@@ -415,11 +423,42 @@ export default function Home() {
           return;
         }
 
-        const transaction = res.data as unknown as TransactionDTO;
+        // const transaction = res.data as unknown as TransactionDTO;
 
         // setDiscount(null);
         // setCouponCode('');
         // setPayment(0);
+
+        // Caching Product-used and Product-lot-number
+        const productUsedCache = localStorage.getItem('RELEASE:PU') as string[] ?? [];
+        const productLotNoCache: string[] = localStorage.getItem('RELEASE:PLN') as string[] ?? [];
+
+        console.log(productUsedCache, productLotNoCache);
+
+        const elementToLowerCased = (arr: string[]) => {
+          return arr.map(str => str.toLocaleLowerCase());
+        }
+
+        if (
+          !elementToLowerCased(productUsedCache)
+          .includes(
+            orderDetails.product_used.toLocaleLowerCase()
+          )
+        ) {
+          productUsedCache.push(orderDetails.product_used);
+          localStorage.setItem('RELEASE:PU', productUsedCache);
+        }
+
+        if (
+          !elementToLowerCased(productLotNoCache)
+          .includes(
+            orderDetails.product_lot_number?.toLocaleLowerCase()
+          )
+        ) {
+          productLotNoCache.push(orderDetails.product_lot_number);
+          localStorage.setItem('RELEASE:PLN', productLotNoCache);
+        }
+
         setTareWeight(weightsInit);
         setNetWeight(weightsInit);
         setGrossWeight(weightsInit);
@@ -939,33 +978,39 @@ export default function Home() {
                     : 'border-white'
                   } rounded`}
                 >
-                  <TextField
-                    autoFocus
+                  <CustomAutoComplete
+                    variant="standard"
+                    fullWidth
                     disabled={!selectedItemIds.length}
                     value={productUsed}
+                    required
+                    options={(localStorage.getItem('RELEASE:PU') as string[] ?? [])
+                      .map(value => ({ name: value }))}
+                    onAdd={(value) => {
+                      setProductUsed(value);
+                    }}
+                    onChange={({ name }) => {
+                      setProductUsed(name);
+                    }}
                     label="Product Used:"
-                    color="secondary"
-                    fullWidth
-                    size="small"
-                    multiline
-                    variant="standard"
-                    onChange={(e) => {
-                      setProductUsed(e.target.value);
-                    }}
-                    sx={inputStyle}
+                    inputSX={inputStyle}
                   />
-                  <TextField
-                    disabled={!selectedItemIds.length}
-                    label="Product Lot No.:"
-                    value={productLotNumber}
-                    color="secondary"
+                  <CustomAutoComplete
+                    required
                     fullWidth
-                    size="small"
                     variant="standard"
-                    onChange={(e) => {
-                      setProductLotNumber(e.target.value);
+                    value={productLotNumber}
+                    disabled={!selectedItemIds.length}
+                    options={(localStorage.getItem('RELEASE:PLN') as string[] ?? [])
+                      .map(value => ({ name: value }))}
+                    onAdd={(value) => {
+                      setProductLotNumber(value);
                     }}
-                    sx={inputStyle}
+                    onChange={({ name }) => {
+                      setProductLotNumber(name);
+                    }}
+                    label="Product Lot No.:"
+                    inputSX={inputStyle}
                   />
                   <div className='flex'>
                     <TextField

@@ -6,15 +6,19 @@ import { Autocomplete, TextField, createFilterOptions } from '@mui/material';
 
 interface CustomAutoCompleteProps {
   disableAdd?: boolean;
+  fullWidth?: boolean;
   options: any[];
   label: string;
   value?: any;
+  variant?: 'filled' | 'outlined' | 'standard';
+  disabled?: boolean;
   required?: boolean;
   onChange?: (value: any) => void;
   onAdd?: (value: any) => void;
   helperText?: string;
   error?: boolean;
   sx?: Record<string, any>;
+  inputSX?: Record<string, any>;
 }
 
 interface OptionType {
@@ -26,6 +30,9 @@ const filter = createFilterOptions<OptionType>();
 
 export default function CustomAutoComplete({
   disableAdd = false,
+  disabled = false,
+  fullWidth = false,
+  variant = 'outlined',
   label,
   value: providedValue = null,
   options,
@@ -35,6 +42,7 @@ export default function CustomAutoComplete({
   helperText,
   error = false,
   sx,
+  inputSX,
 }: CustomAutoCompleteProps) {
   const [value, setValue] = useState<OptionType | null>(providedValue);
 
@@ -46,6 +54,8 @@ export default function CustomAutoComplete({
 
   return (
     <Autocomplete
+      fullWidth={fullWidth}
+      disabled={disabled}
       options={options}
       color="secondary"
       value={value}
@@ -110,18 +120,22 @@ export default function CustomAutoComplete({
         // Regular option
         return option.name;
       }}
-      renderOption={(props, option) => <li {...props}>{option.name}</li>}
-      sx={{ width: 300, ...sx }}
+      renderOption={(props, option) => {
+        return <li {...props}>{(option.name ?? option)}</li>;
+      }}
+      sx={{ width: fullWidth ? undefined : 300, ...sx }}
       freeSolo
       renderInput={(params) => (
         <TextField
           {...params}
+          variant={variant}
           required={required}
           color="secondary"
           size="small"
           label={label}
           helperText={helperText}
           error={error}
+          sx={inputSX}
         />
       )}
     />
