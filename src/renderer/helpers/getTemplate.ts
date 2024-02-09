@@ -770,15 +770,14 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Item Number:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.orders?.[0]?.item?.item_code ?? '—',
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
       }
     },
     {
@@ -787,15 +786,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Batch Number:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.orders?.[0]?.item?.batch_code ?? '—',
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -804,15 +803,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Tare Wt.:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.tare_weight ?? '—',
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -821,15 +820,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Net Wt.:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.net_weight ?? '—',
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -838,15 +837,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Gross Wt.:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.gross_weight ?? '—',
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -855,15 +854,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Dispensing By:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: titleCase(data.source_name ?? '—'),
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -872,15 +871,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Checked By/Date:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: '_________',
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -889,15 +888,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Product Lot No.:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.product_lot_number,
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -906,15 +905,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'For Product:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.product_used,
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -923,6 +922,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Date:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.created_at.toLocaleDateString(
@@ -934,11 +934,10 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
               }
             ),
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -947,6 +946,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Time:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.created_at.toLocaleTimeString(
@@ -959,11 +959,10 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
               }
             ),
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
@@ -972,15 +971,15 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           {
             text: 'Transaction No.:',
             align: 'LEFT',
+            width: 0.5,
           },
           {
             text: data.transaction_code,
             align: 'LEFT',
+            width: 1.5,
           },
         ],
-        options: {
-          size: [0.33, 0.33]
-        }
+
       }
     },
     {
