@@ -20,7 +20,7 @@ import AuditTrailDTO from 'App/data-transfer-objects/audit-trail.dto';
 import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 import useAlert from 'UI/hooks/useAlert';
 
@@ -29,12 +29,18 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
-import OrderDTO from 'App/data-transfer-objects/order.dto';
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
+
 import getDiscount from 'UI/helpers/getDiscount';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import titleCase from 'UI/helpers/titleCase';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import usePrinter from 'UI/hooks/usePrinter';
+import usePDF from 'UI/hooks/usePDF';
+import { getTemplateV3 } from 'UI/helpers/getTemplate';
+import OrderDTO from 'App/data-transfer-objects/order.dto';
+import { toHtmlText } from 'from-json-to-html';
 
 const logsColumns: Array<GridColDef> = [
   {
@@ -85,62 +91,6 @@ const logsColumns: Array<GridColDef> = [
       return new Date(params.value).toLocaleString();
     },
     sortingOrder: ['desc', 'asc'],
-  },
-];
-
-const paymentsColumns: Array<GridColDef> = [
-  {
-    field: 'source_name',
-    headerName: 'Personnel',
-    width: 250,
-    type: 'string',
-    align: 'left',
-    headerAlign: 'left',
-    valueFormatter(params) {
-      return titleCase(params.value);
-    },
-  },
-  {
-    field: 'recipient_name',
-    headerName: 'Customer',
-    flex: 250,
-    type: 'string',
-  },
-  {
-    field: 'created_at',
-    headerName: 'Date',
-    width: 250,
-    type: 'string',
-    valueFormatter(params) {
-      return new Date(params.value).toLocaleString();
-    },
-    sortingOrder: ['desc', 'asc'],
-  },
-  {
-    field: '',
-    headerName: 'Actions',
-    width: 150,
-    type: 'string',
-    renderCell: (params) => (
-      <div className='w-full flex justify-around'>
-        <IconButton
-          onClick={() => params.api.setRowSelectionModel([params.id])}
-        >
-          <VisibilityOutlinedIcon />
-        </IconButton>
-        <IconButton
-          onClick={() => params.api.setRowSelectionModel([params.id])}
-        >
-          <DownloadOutlinedIcon />
-        </IconButton>
-        {/* <IconButton onClick={() => params.api.setRowSelectionModel([params.id])}>
-          <DownloadOutlinedIcon />
-        </IconButton> */}
-      </div>
-    ),
-    sortable: false,
-    filterable: false,
-    hideable: false,
   },
 ];
 
@@ -208,7 +158,9 @@ function a11yProps(index: number) {
 }
 
 export default function Logs() {
+  const { print } = usePrinter();
   const { displayAlert } = useAlert();
+  const { downloadPDF } = usePDF()
   const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const { searchText, setPlaceHolder } = useSearch();
@@ -253,34 +205,112 @@ export default function Logs() {
     return payments.find(({ id }) => id === selectedId);
   }, [selectedId, payments]);
 
-  const subTotal = useMemo(() => {
-    if (selectedPayment) {
-      return selectedPayment?.orders?.reduce?.((prev, curr) => {
-        const { discount } = getDiscount(
-          curr.price,
-          curr?.discount?.discount_type,
-          curr?.discount?.discount_value
-        );
+  // const subTotal = useMemo(() => {
+  //   if (selectedPayment) {
+  //     return selectedPayment?.orders?.reduce?.((prev, curr) => {
+  //       const { discount } = getDiscount(
+  //         curr.price,
+  //         curr?.discount?.discount_type,
+  //         curr?.discount?.discount_value
+  //       );
 
-        const price = curr.price - discount;
-        return prev + (price * curr.quantity);
-      }, 0) ?? 0;
+  //       const price = curr.price - discount;
+  //       return prev + (price * curr.quantity);
+  //     }, 0) ?? 0;
+  //   }
+
+  //   return 0;
+  // }, [selectedPayment]);
+
+  // const computedTax = selectedPayment?.orders?.reduce?.((prev, curr) => {
+  //   return prev + curr.tax_rate;
+  // }, 0) ?? 0;
+
+  // const tax = useMemo(() => {
+  //   if (selectedPayment?.orders?.length) {
+  //     return subTotal * (computedTax / 100);
+  //   }
+
+  //   return 0;
+  // }, [computedTax, selectedPayment, subTotal]);
+
+  const handlePDFDownload = useCallback(async (transactionID: string) => {
+    const payment = payments.find(({ id }) => id === transactionID);
+
+    if (payment) {
+      const htmlJSON = getTemplateV3({
+        store_name: payment.system?.store_name ?? 'X-GEN POS',
+        orders: payment.orders as OrderDTO[],
+        ...payment
+      });
+
+      const htmlString = toHtmlText(htmlJSON);
+
+      const fileName = `xgen_transaction_${payment.transaction_code}`;
+      await downloadPDF(fileName, htmlString);
     }
+  }, [payments]);
 
-    return 0;
-  }, [selectedPayment]);
-
-  const computedTax = selectedPayment?.orders?.reduce?.((prev, curr) => {
-    return prev + curr.tax_rate;
-  }, 0) ?? 0;
-
-  const tax = useMemo(() => {
-    if (selectedPayment?.orders?.length) {
-      return subTotal * (computedTax / 100);
-    }
-
-    return 0;
-  }, [computedTax, selectedPayment, subTotal]);
+  const paymentsColumns: Array<GridColDef> = [
+    {
+      field: 'source_name',
+      headerName: 'Personnel',
+      width: 250,
+      type: 'string',
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter(params) {
+        return titleCase(params.value);
+      },
+    },
+    {
+      field: 'recipient_name',
+      headerName: 'Customer',
+      flex: 250,
+      type: 'string',
+    },
+    {
+      field: 'created_at',
+      headerName: 'Date',
+      width: 250,
+      type: 'string',
+      valueFormatter(params) {
+        return new Date(params.value).toLocaleString();
+      },
+      sortingOrder: ['desc', 'asc'],
+    },
+    {
+      field: '',
+      headerName: 'Actions',
+      width: 150,
+      type: 'string',
+      renderCell: (params) => (
+        <div className='w-full flex justify-around'>
+          <IconButton
+            onClick={() => {
+              setSelectedId(params.id)
+              setReceiptDialogOpen(true);
+            }}
+          >
+            <VisibilityOutlinedIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => print(params.id)}
+          >
+            <DownloadOutlinedIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => handlePDFDownload(params.id)}
+          >
+            <PictureAsPdfOutlinedIcon />
+          </IconButton>
+        </div>
+      ),
+      sortable: false,
+      filterable: false,
+      hideable: false,
+    },
+  ];
 
   const data = currentTab === 0 ? auditData : paymentData;
   const selectedRows = currentTab === 0 ? audits : payments;
@@ -399,18 +429,18 @@ export default function Logs() {
       if (currentTab === 0) {
         setPlaceHolder('Search for audit description');
       } else {
-        setPlaceHolder('Search for payment receiver');
+        setPlaceHolder('Search for personnel');
       }
     }
   }, [currentTab, setPlaceHolder]);
 
-  const { discount } = useMemo(() => {
-    return getDiscount(
-      selectedPayment?.total,
-      selectedPayment?.discount?.discount_type,
-      selectedPayment?.discount?.discount_value,
-    );
-  }, [selectedPayment]);
+  // const { discount } = useMemo(() => {
+  //   return getDiscount(
+  //     selectedPayment?.total,
+  //     selectedPayment?.discount?.discount_type,
+  //     selectedPayment?.discount?.discount_value,
+  //   );
+  // }, [selectedPayment]);
 
   return (
     <>
@@ -564,187 +594,125 @@ export default function Logs() {
             open={Boolean(receiptDialogOpen && selectedPayment)}
           >
             {selectedPayment ? (
-              <div className="w-[600px] h-[850px] overflow-auto">
+              <div className="w-[400px] h-[650px] overflow-auto">
                 <div
-                  className="w-full min-h-[800px] h-fit p-5"
-                  style={{ color: 'var(--info-text-color)' }}
+                  className="w-full p-5"
                 >
-                  <div className="w-full h-[60px] flex flex-row justify-between">
-                    <div className="font-bold">
-                      <p>Date: </p>
-                    </div>
-                    <div>
-                      <p>
-                        {`${new Date(
-                          selectedPayment.created_at
-                        ).toLocaleString()}`}
+                  <p className='font-bold text-center text-2xl'>
+                    {selectedPayment.system?.store_name?.toLocaleUpperCase()}
+                  </p>
+                  <p className='text-center text-md py-3 border-y mt-3'>
+                    RAW MATERIAL DISPENSING SLIP
+                  </p>
+                  <div className='w-full text-sm h-fit flex flex-col gap-5 mt-5 items-center text-black/70'>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Item Number:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.orders?.[0]?.item?.item_code}
                       </p>
                     </div>
-                  </div>
-                  <div className="w-full bg-gray-200 h-[60px] p-5 font-bold border-gray-400 border-b-2">
-                    <p>Product Description</p>
-                  </div>
-                  <div className="w-full h-[50px] flex py-5 px-2">
-                    <div className="grow font-bold">Name</div>
-                    <div className="w-[100px] font-bold">Qty</div>
-                    <div className="w-[100px] font-bold">Discount</div>
-                    <div className="w-[100px] font-bold">Sub Price</div>
-                    <div className="w-[100px] font-bold">Price</div>
-                  </div>
-                  <div className="w-full h-[400px] overflow-auto border-b-2">
-                    <div className="w-full h-fit">
-                      {selectedPayment.orders?.map((order: OrderDTO) => {
-                        const {
-                          discountedPrice,
-                          formattedDiscount
-                        } = getDiscount(
-                          order.price,
-                          order?.discount?.discount_type,
-                          order?.discount?.discount_value
-                        );
-
-                        return (
-                          <div
-                            key={order.id}
-                            className="w-full h-[50px] flex py-5 px-2"
-                          >
-                            <div className="grow">{order.item.name}</div>
-                            <div className="w-[100px]">{order.quantity}</div>
-                            <div className="w-[100px]">{formattedDiscount}</div>
-                            <div className="w-[100px]">
-                              <NumericFormat
-                                style={{ width: '100%', textAlign: 'left' }}
-                                className="mb-2 px-1 bg-transparent grow text-end"
-                                value={order.price * order.quantity}
-                                prefix="₱ "
-                                thousandSeparator
-                                valueIsNumericString
-                                decimalSeparator="."
-                                decimalScale={2}
-                                fixedDecimalScale
-                                disabled
-                              />
-                            </div>
-                            <div className="w-[100px]">
-                              <NumericFormat
-                                style={{ width: '100%', textAlign: 'left' }}
-                                className="mb-2 px-1 bg-transparent grow text-end"
-                                value={discountedPrice * order.quantity}
-                                prefix="₱ "
-                                thousandSeparator
-                                valueIsNumericString
-                                decimalSeparator="."
-                                decimalScale={2}
-                                fixedDecimalScale
-                                disabled
-                              />
-                            </div>
-                          </div>
-                        )
-                      })}
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Batch Number:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.orders?.[0]?.item?.batch_code}
+                      </p>
                     </div>
-                  </div>
-                  <div className="w-full flex justify-end mt-5">
-                    <div className="w-[350px] h-fit">
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Sub-total:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={subTotal}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Discount:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={discount}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">{`Tax ${`${computedTax}%`} (VAT included):`}</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={tax}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Total:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={selectedPayment.total}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Amount Received:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={selectedPayment.amount_received}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
-                      <div className="w-full flex justify-between">
-                        <div className="font-bold">Change:</div>
-                        <div>
-                          <NumericFormat
-                            style={{ width: '150px', textAlign: 'center' }}
-                            className="mb-2 px-1 bg-transparent grow text-end"
-                            value={selectedPayment.change}
-                            prefix="₱ "
-                            thousandSeparator
-                            valueIsNumericString
-                            decimalSeparator="."
-                            decimalScale={2}
-                            fixedDecimalScale
-                            disabled
-                          />
-                        </div>
-                      </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Tare Wt.:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.tare_weight}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Net Wt.:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.net_weight}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Gross Wt.:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.gross_weight}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Dispensing By:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.source_name}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Checked By/Date:
+                      </p>
+                      <div className='w-[80px] h-[15px] border-b-2 border-black/50'/>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Product Lot No.:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.product_lot_number}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        For Product:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.product_used}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Date:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.created_at.toLocaleDateString(
+                          'default',
+                          {
+                            month: '2-digit',
+                            day: '2-digit',
+                            year: 'numeric'
+                          }
+                        )}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Time:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.created_at.toLocaleTimeString(
+                          'default',
+                          {
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true,
+                            hour: '2-digit'
+                          }
+                        )}
+                      </p>
+                    </div>
+                    <div className='w-[80%] flex justify-between'>
+                      <p className='text-left'>
+                        Transaction Number:
+                      </p>
+                      <p className='text-left'>
+                        {selectedPayment.transaction_code}
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -6,7 +6,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { ChangeEvent, ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Chip, Collapse, Dialog, IconButton, Slide, styled, useMediaQuery, useTheme } from '@mui/material';
+import { Chip, Collapse, Dialog, Divider, IconButton, Slide, styled, useMediaQuery, useTheme } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
 import { TransitionProps } from '@mui/material/transitions';
 import { useQuery } from '@tanstack/react-query';
@@ -30,6 +30,9 @@ import useConfirm from 'UI/hooks/useConfirm';
 import { ChevronLeftOutlined, ChevronRightOutlined, DownloadOutlined, UploadOutlined } from '@mui/icons-material';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
+
+type IImportModule = 'INVENTORY' | 'STOCKS';
 
 const columns: Array<GridColDef> = [
   {
@@ -149,6 +152,8 @@ export default function Inventory() {
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
 
+  const [moduleName, setModuleName] = useState<IImportModule | null>(null);
+
   const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>(
@@ -204,8 +209,9 @@ export default function Inventory() {
 
   const inputFileRef = useRef<HTMLInputElement>(null);
 
-  const handleSelectFileToImport = () => {
+  const handleSelectFileToImport = (moduleName: IImportModule = 'INVENTORY') => {
     inputFileRef.current?.click();
+    setModuleName(moduleName);
   }
 
   useEffect(() => {
@@ -275,7 +281,7 @@ export default function Inventory() {
     }
   }, [items, displayAlert]);
 
-  const handleImport = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImportStocks = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (file) {
@@ -296,13 +302,56 @@ export default function Inventory() {
 
             refetchItems();
             displayAlert?.(
-              `Successfully imported file`,
-              'success'
+              `Processing file...`,
+              'info'
             );
             return;
           }
         }
       );
+    }
+
+    setModuleName(null);
+
+    if (inputFileRef?.current) {
+      inputFileRef.current.value = '';
+    }
+  }
+
+  const handleImportInventory = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      confirm?.(
+        'Are you sure you want to import this file?',
+        async (agreed) => {
+          if (agreed) {
+            const res = await window.import.importInventory(file.path);
+
+            console.log(res);
+            if (res.status === 'ERROR') {
+              errorHandler({
+                errors: res.errors,
+              });
+
+              refetchItems();
+              return;
+            }
+
+            refetchItems();
+            displayAlert?.(
+              `Processing file...`,
+              'info'
+            );
+            return;
+          }
+        }
+      );
+    }
+
+    setModuleName(null);
+    if (inputFileRef?.current) {
+      inputFileRef.current.value = '';
     }
   }
 
@@ -397,7 +446,7 @@ export default function Inventory() {
         /> */}
       </div>
       <div className="w-full h-[650px]">
-        <div className="w-full flex flex-row justify-between py-3 h-fit">
+        <div className="w-full flex flex-row justify-between items-center py-3 h-fit">
           <div className={`w-fit flex flex-row items-center h-fit`}>
             <Collapse in={!fullScreen || collapse} collapsedSize={150} orientation='horizontal'>
               <div className="flex flex-row gap-3 w-fit bg-white pr-5">
@@ -425,6 +474,7 @@ export default function Inventory() {
                   disabled={selectedIds.length === 0}
                 />
                 <BarcodeIndicator />
+                {/* <PrinterIndicator /> */}
               </div>
             </Collapse>
             {
@@ -446,7 +496,7 @@ export default function Inventory() {
             className={
               `h-fit flex items-center ${
                 !fullScreen
-                ? 'w-full justify-end'
+                ? 'w-full h-fit justify-end'
                 : ''
               }`
             }
@@ -460,8 +510,16 @@ export default function Inventory() {
                 variant="outlined"
                 color="secondary"
                 icon={<UploadOutlined />}
+                label="Import Inventory"
+                onClick={() => handleSelectFileToImport('INVENTORY')}
+              />
+              <Divider orientation='vertical' flexItem />
+              <Chip
+                variant="outlined"
+                color="secondary"
+                icon={<UploadOutlined />}
                 label="Import Stock Records"
-                onClick={() => handleSelectFileToImport()}
+                onClick={() => handleSelectFileToImport('STOCKS')}
               />
               <Chip
                 variant="outlined"
@@ -491,7 +549,11 @@ export default function Inventory() {
           ref={inputFileRef}
           type="file"
           multiple
-          onChange={handleImport}
+          onChange={
+            moduleName === 'INVENTORY'
+            ? handleImportInventory
+            : handleImportStocks
+          }
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
         />
         <Dialog
@@ -512,7 +574,7 @@ export default function Inventory() {
             getSuppliers={getSuppliers}
             onClose={handleOnClose}
             handleExport={handleExport}
-            handleImport={handleImport}
+            handleImport={handleImportStocks}
           />
         </Dialog>
       </div>

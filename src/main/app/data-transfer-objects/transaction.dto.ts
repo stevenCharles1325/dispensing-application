@@ -35,6 +35,12 @@ export interface IncomeDTO {
 
   total: number;
 
+  tare_weight: string;
+
+  net_weight: string;
+
+  gross_weight: string;
+
   created_at: Date;
 
   updated_at: Date;

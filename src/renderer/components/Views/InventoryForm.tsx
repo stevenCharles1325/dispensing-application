@@ -1325,6 +1325,7 @@ export default function InventoryForm({
                     onRowSelectionModelChange={(recordIds) =>
                       setSelectedRecordIds(recordIds as string[])
                     }
+                    sortingMode='client'
                   />
                 </>
               )
@@ -1357,6 +1358,7 @@ export default function InventoryForm({
               }
               <div className='w-[500px] h-[600px] p-5 flex flex-col gap-3'>
                 <TextField
+                  required
                   color="secondary"
                   disabled={recordAction === 'view'}
                   fullWidth
@@ -1367,8 +1369,8 @@ export default function InventoryForm({
                   error={Boolean(recordFormErrors['purpose'])}
                   helperText={recordFormErrors['purpose']}
                 />
-
                 <TextField
+                  required
                   color="secondary"
                   disabled={recordAction === 'view'}
                   fullWidth
@@ -1386,6 +1388,31 @@ export default function InventoryForm({
                   }}
                   value={recordForm?.quantity ?? 0}
                   onChange={handleRecordFormUpdate('quantity')}
+                />
+                <Autocomplete
+                  size="small"
+                  disabled={recordAction === 'view'}
+                  color="secondary"
+                  options={measurements}
+                  value={recordForm.unit_of_measurement}
+                  onChange={(_, value: string | null) => {
+                    handleRecordFormUpdate('unit_of_measurement')({
+                      target: {
+                        value,
+                      }
+                    } as any);
+                  }}
+                  fullWidth
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      color="secondary"
+                      label="Unit of measurement"
+                      helperText={recordFormErrors.unit_of_measurement}
+                      error={Boolean(recordFormErrors.unit_of_measurement)}
+                    />
+                  )}
                 />
                 <FormControl
                   fullWidth

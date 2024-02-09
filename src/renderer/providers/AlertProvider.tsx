@@ -29,7 +29,7 @@ export default function AlertProvider({ children }: React.PropsWithChildren) {
   const [open, setOpen] = useState<boolean>(false);
 
   const displayAlert = (msg: string, type: AlertType = 'info') => {
-    if (message) return;
+    // if (message) return;
 
     setMessage({
       content: msg,

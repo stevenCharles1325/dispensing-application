@@ -1,4 +1,4 @@
-import HID from "node-hid";
+// import HID from "node-hid";
 import IEvent from "App/interfaces/event/event.interface";
 import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IResponse from "App/interfaces/pos/pos.response.interface";
@@ -19,7 +19,7 @@ export default class BarcodeSelectEvent implements IEvent {
   > {
     try {
       const device: HidDTO = eventData.payload[0];
-      const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED');
+      const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:BARCODE');
 
       if (
         device &&
@@ -43,39 +43,39 @@ export default class BarcodeSelectEvent implements IEvent {
           id: `${device.vendorId}:${device.productId}`,
           status: 'SUCCESS',
         }
-        globalStorage.set('HID:SELECTED', deviceCachedInfo);
+        globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
 
         global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
 
         let barcodeNumber = '';
 
-        selectedDevice.on('data', async (data) => {
-          deviceCachedInfo.status = 'SUCCESS';
-          const mappedNumber  = barcodeMap[data[2].toString()];
+        // selectedDevice.on('data', async (data) => {
+        //   deviceCachedInfo.status = 'SUCCESS';
+        //   const mappedNumber  = barcodeMap[data[2].toString()];
 
-          if (mappedNumber && mappedNumber !== 'ENTER') {
-            barcodeNumber += mappedNumber;
-          }
+        //   if (mappedNumber && mappedNumber !== 'ENTER') {
+        //     barcodeNumber += mappedNumber;
+        //   }
 
-          if (mappedNumber === 'ENTER') {
-            global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
-            global.emitToRenderer('BARCODE:DATA', barcodeNumber);
-            barcodeNumber = '';
-            return;
-          }
-        });
+        //   if (mappedNumber === 'ENTER') {
+        //     global.emitToRenderer('BARCODE:STATUS', 'SUCCESS');
+        //     global.emitToRenderer('BARCODE:DATA', barcodeNumber);
+        //     barcodeNumber = '';
+        //     return;
+        //   }
+        // });
 
-        selectedDevice.on('error', async (err: any) => {
-          deviceCachedInfo.status = 'ERROR';
-          globalStorage.set('HID:SELECTED', deviceCachedInfo);
+        // selectedDevice.on('error', async (err: any) => {
+        //   deviceCachedInfo.status = 'ERROR';
+        //   globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
 
-          console.log('HID ERROR: ', err);
+        //   console.log('HID ERROR: ', err);
 
-          global.emitToRenderer('BARCODE:STATUS', 'ERROR');
-          global.emitToRenderer('BARCODE:ERROR', err);
+        //   global.emitToRenderer('BARCODE:STATUS', 'ERROR');
+        //   global.emitToRenderer('BARCODE:ERROR', err);
 
-          await selectedDevice.close();
-        });
+        //   await selectedDevice.close();
+        // });
 
         return {
           code: 'REQ_OK',
@@ -86,7 +86,7 @@ export default class BarcodeSelectEvent implements IEvent {
           id: `${device.vendorId}:${device.productId}`,
           status: 'ERROR',
         }
-        globalStorage.set('HID:SELECTED', deviceCachedInfo);
+        globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
         global.emitToRenderer('BARCODE:STATUS', 'ERROR');
 
         return {
@@ -103,7 +103,7 @@ export default class BarcodeSelectEvent implements IEvent {
         id: null,
         status: 'ERROR',
       }
-      globalStorage.set('HID:SELECTED', deviceCachedInfo);
+      globalStorage.set('HID:SELECTED:BARCODE', deviceCachedInfo);
       global.emitToRenderer('BARCODE:STATUS', 'ERROR');
 
       return {

@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { DB_PATH, IS_PROD } from 'Main/datasource';
+import { DB_PATH } from 'Main/datasource';
 import handleError from 'App/modules/error-handler.module';
 import { getPlatform } from 'App/modules/get-platform.module';
 import AppRootDir from 'app-root-dir';
@@ -8,6 +8,7 @@ import path from 'path';
 
 const asyncExec = promisify(exec);
 
+const IS_PROD = process.env.NODE_ENV === 'production';
 const EXEC_PATH = IS_PROD
   ? path.join(
       AppRootDir.get(),

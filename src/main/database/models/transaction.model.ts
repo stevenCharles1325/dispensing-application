@@ -43,8 +43,6 @@ export class Transaction {
     if (authResponse.status === 'SUCCESS' && !this.system_id) {
       const user = authResponse.data as UserDTO;
       this.system_id = user.system_id;
-
-      console.log('THIS: ', this);
     }
   }
 
@@ -153,6 +151,18 @@ export class Transaction {
     }
   }
 
+  @AfterLoad()
+  async getSystem() {
+    if (!this.system) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'systems' WHERE id = '${this.system_id}'`
+      );
+
+      this.system = rawData[0] as System;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -209,6 +219,30 @@ export class Transaction {
     message: ValidationMessage.notEmpty
   })
   product_lot_number: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  tare_weight: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  net_weight: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  gross_weight: string;
 
   @Column()
   @IsIn(paymentTypes, {

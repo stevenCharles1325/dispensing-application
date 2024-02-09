@@ -38,9 +38,10 @@ export default class ImportInventoryRecordEvent implements IEvent {
 
         const list = result['Stock-records'].slice(1);
 
-        chunkImport(
+        await chunkImport(
           list,
           {
+            filePath,
             processorName: 'INVENTORY_RECORD_IMPORT_JOB'
           }
         );
@@ -65,7 +66,7 @@ export default class ImportInventoryRecordEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to import transaction history'],
+        errors: ['You are not allowed to import stock records'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

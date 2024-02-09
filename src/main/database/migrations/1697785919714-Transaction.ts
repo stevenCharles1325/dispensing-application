@@ -80,6 +80,21 @@ export class Transaction1697785919714 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: 'tare_weight',
+            type: 'string',
+            isNullable: false,
+          },
+          {
+            name: 'net_weight',
+            type: 'string',
+            isNullable: false,
+          },
+          {
+            name: 'gross_weight',
+            type: 'string',
+            isNullable: false,
+          },
+          {
             name: 'method',
             type: 'varchar',
             isNullable: false,

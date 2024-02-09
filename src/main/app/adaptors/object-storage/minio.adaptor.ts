@@ -59,7 +59,15 @@ export class MinioAdaptor implements Partial<IObjectStorageAdaptor> {
   }
 
   getFilePath(params: GetFilePathParams): string {
-    return `http://${this.config.object_storage_client_endpoint}:${this.config.object_storage_client_port}/${params.bucketName}/${params.fileName}`;
+    return `http://${
+      this.config.object_storage_client_endpoint
+    }:${
+      this.config.object_storage_client_port
+    }/${
+      params.bucketName
+    }/${
+      params.fileName
+    }`;
   }
 
   presignedGetObject(

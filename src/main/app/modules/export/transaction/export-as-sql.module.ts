@@ -1,13 +1,14 @@
-import { DB_PATH, IS_PROD } from 'Main/datasource';
+import { DB_PATH } from 'Main/datasource';
 import { app } from 'electron';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import handleError from 'App/modules/error-handler.module';
-import concatDateToName from 'App/modules/concatDateToName.module';
+import concatDateToName from 'App/modules/concat-date-to-name.module';
 import path from 'path';
 import { getPlatform } from 'App/modules/get-platform.module';
 import AppRootDir from 'app-root-dir';
 
+const IS_PROD = process.env.NODE_ENV === 'production';
 const asyncExec = promisify(exec);
 
 const EXEC_PATH = IS_PROD

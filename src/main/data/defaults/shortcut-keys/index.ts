@@ -28,6 +28,12 @@ const shortcutKeys: Omit<
   //   description: '—'
   // },
   {
+    key: 'barcode-start',
+    key_combination: 'ctrl+b',
+    title: 'Start Barcode Scanning',
+    description: '—'
+  },
+  {
     key: 'cancel-order',
     key_combination: 'f4',
     title: 'Cancel Order',

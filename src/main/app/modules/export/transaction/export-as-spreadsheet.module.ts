@@ -1,4 +1,4 @@
-import concatDateToName from "App/modules/concatDateToName.module";
+import concatDateToName from "App/modules/concat-date-to-name.module";
 import TransactionRepository from "App/repositories/transaction.repository";
 import { app } from "electron";
 import { Transaction } from "Main/database/models/transaction.model";
@@ -42,12 +42,15 @@ export default async function exportAsSpreadsheet (recordType: string) {
 
   if (transactions) {
     const extractedTransaction = transactions.map((transaction) => {
-      const ordersQuantity = transaction.orders.length;
+      // const ordersQuantity = transaction.orders.length;
 
       return ({
         Personnel: transaction.source_name,
         Customer: transaction.recipient_name,
-        'Total Item Quantity': ordersQuantity,
+        'Item Number': transaction.orders[0]?.item.item_code,
+        'Batch Number': transaction.orders[0]?.item.batch_code,
+        'Product Used': transaction.product_used,
+        'Product Lot No.': transaction.product_lot_number,
         'Date of Transaction': new Date(transaction.created_at).toLocaleDateString(),
       })
     });

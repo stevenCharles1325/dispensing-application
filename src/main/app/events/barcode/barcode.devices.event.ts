@@ -1,4 +1,3 @@
-import HID from "node-hid";
 import IEvent from "App/interfaces/event/event.interface";
 import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IResponse from "App/interfaces/pos/pos.response.interface";
@@ -15,15 +14,19 @@ export default class BarcodeDevicesEvent implements IEvent {
     IResponse<string[] | IPOSError[] | HidDTO[] | any>
   > {
     try {
-      const selectedDevice = globalStorage.get('HID:SELECTED');
-      const result = await HID.devicesAsync();
-      const devices = result.map(device => ({
-        ...device,
-        selected: selectedDevice?.id === `${device.vendorId}:${device.productId}`
-      }));
+      // mainWindow?.webContents.getPrintersAsync().then((printers) => {
+      //   console.log('PRINTER: ', printers);
+      // });
+
+      const selectedDevice = globalStorage.get('HID:SELECTED:BARCODE:BARCODE');
+      // const result = await HID.devicesAsync();
+      // const devices = result.map(device => ({
+      //   ...device,
+      //   selected: selectedDevice?.id === `${device.vendorId}:${device.productId}`
+      // }));
 
       return {
-        data: devices,
+        data: [],
         code: 'REQ_OK',
         status: 'SUCCESS',
       };
