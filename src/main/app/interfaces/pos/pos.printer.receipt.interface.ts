@@ -18,10 +18,10 @@ interface IPrintReceiptDatum {
       style?: "A" | "B"
     }[],
     options?: {
-      encoding: string;
-      size: [
-        width: 1 | 2,
-        height: 1 | 2
+      encoding?: string;
+      size?: [
+        width: number,
+        height: number
       ];
     }
   }
