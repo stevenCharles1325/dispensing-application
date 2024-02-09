@@ -86,5 +86,5 @@ Or with debuggin on
   npx cross-env DEBUG_PROD=true npm run package -- --[linux, win]
 ```
 
-Note: Run in administrator mode in windows.
+Note: Run in administrator mode on Windows.
 
