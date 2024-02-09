@@ -1,3 +1,3 @@
-import IBasePrinter from "App/interfaces/pos/pos.printer.interface";
+import IBasePrinter from "App/interfaces/pos/pos.base-printer.interface";
 
 export default interface IPrinterAdaptor extends IBasePrinter {}

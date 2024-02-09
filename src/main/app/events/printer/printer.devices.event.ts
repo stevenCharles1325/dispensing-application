@@ -3,8 +3,9 @@ import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IResponse from "App/interfaces/pos/pos.response.interface";
 import handleError from "App/modules/error-handler.module";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
-import { mainWindow } from "Main/main";
 import PrinterDTO from "App/data-transfer-objects/printer.dto";
+import IDeviceInfo from "App/interfaces/barcode/barcode.device-info.interface";
+import { getDeviceList } from 'usb';
 
 export default class PrinterDevicesEvent implements IEvent {
   public channel: string = 'printer:devices';
@@ -15,20 +16,26 @@ export default class PrinterDevicesEvent implements IEvent {
     IResponse<string[] | IPOSError[] | PrinterDTO[] | any>
   > {
     try {
-      const cachedPrinterInfo: Partial<PrinterDTO> = globalStorage.get('PRINTER:SELECTED');
-      const result = await mainWindow?.webContents.getPrintersAsync() as PrinterDTO[] ?? [];
-      const devices = result.map((device) => {
-        if (cachedPrinterInfo) {
-          device.selected = device.displayName === cachedPrinterInfo?.displayName;
-        } else {
-          device.selected = device.isDefault;
-        }
+      const cachedPrinterInfo: Partial<IDeviceInfo> = globalStorage.get('PRINTER:SELECTED');
+      // const result = getDeviceList() as PrinterDTO[];
 
-        return device;
-      });
+      // const devices = result.map((device) => {
+      //   if (cachedPrinterInfo) {
+      //     device['selected'] = `${
+      //       device.deviceDescriptor.idVendor
+      //     }:${
+      //       device.deviceDescriptor.idProduct
+      //     }` === cachedPrinterInfo.id;
+
+      //     return device;
+      //   }
+
+      //   device['selected'] = false;
+      //   return device;
+      // });
 
       return {
-        data: devices,
+        data: [],
         code: 'REQ_OK',
         status: 'SUCCESS',
       };

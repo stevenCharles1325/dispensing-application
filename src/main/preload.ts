@@ -31,6 +31,7 @@ import SystemDTO from 'App/data-transfer-objects/system.dto';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 import PrinterDTO from 'App/data-transfer-objects/printer.dto';
 import { IUnitCalculatorOperands } from 'App/modules/unit-quantity-calculator.module';
+import { IPrintReceiptData } from 'App/interfaces/pos/pos.printer.receipt.interface';
 
 export type Channels = 'ipc-pos';
 
@@ -134,7 +135,7 @@ const printerHandler = {
     ipcRenderer.invoke('printer:devices'),
   select: async (device: PrinterDTO | null): Promise<IResponse<string[] | IPOSError[] | void>> =>
     ipcRenderer.invoke('printer:select', device),
-  print: async (data: string): Promise<IResponse<string[] | IPOSError[] | void>> =>
+  print: async (data: IPrintReceiptData): Promise<IResponse<string[] | IPOSError[] | void>> =>
     ipcRenderer.invoke('printer:print', data),
 };
 

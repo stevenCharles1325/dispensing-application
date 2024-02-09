@@ -1,6 +1,7 @@
 import OrderDTO from "App/data-transfer-objects/order.dto";
-import { IPrintData } from 'App/interfaces/pos/pos.printer.interface';
 import titleCase from "./titleCase";
+import { IPrintReceiptData } from "App/interfaces/pos/pos.printer.receipt.interface";
+import { IPrintData } from "App/interfaces/pos/pos.printer.pdf.interface";
 
 export interface IPrintTemplate {
   store_name: string;
@@ -202,7 +203,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.orders?.[0]?.item.item_code,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -223,7 +224,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.orders?.[0]?.item.batch_code,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -244,7 +245,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.tare_weight,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -265,7 +266,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.net_weight,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -286,7 +287,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.gross_weight,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -307,7 +308,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: titleCase(data?.source_name),
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -328,7 +329,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: '',
                 attributes: {
-                  style: 'text-align: right; width: 80px; height: 100%; border-bottom: 2px solid rgba(0, 0, 0, 0.5);'
+                  style: 'text-align: LEFT; width: 80px; height: 100%; border-bottom: 2px solid rgba(0, 0, 0, 0.5);'
                 }
               },
             ]
@@ -349,7 +350,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.product_lot_number,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -370,7 +371,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.product_used,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -398,7 +399,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                   }
                 ),
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -427,7 +428,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                   }
                 ),
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -486,7 +487,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.orders?.[0]?.item.item_code,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -507,7 +508,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.orders?.[0]?.item.batch_code,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -528,7 +529,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.tare_weight,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -549,7 +550,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.net_weight,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -570,7 +571,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.gross_weight,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -591,7 +592,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: titleCase(data?.source_name),
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -612,7 +613,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: '',
                     attributes: {
-                      style: 'text-align: right; height: 100%; border-bottom: 2px solid black;'
+                      style: 'text-align: LEFT; height: 100%; border-bottom: 2px solid black;'
                     }
                   },
                 ]
@@ -633,7 +634,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.product_lot_number,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -654,7 +655,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.product_used,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -682,7 +683,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                       }
                     ),
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -711,7 +712,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                       }
                     ),
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -732,7 +733,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data.transaction_code,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -743,4 +744,222 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
       }
     ],
   }
+}
+
+export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData {
+  return [
+    {
+      font: 'A',
+      align: 'CT',
+      style: 'B',
+      text: data?.store_name?.toLocaleUpperCase(),
+      drawLine: true,
+    },
+    {
+      align: 'CT',
+      style: 'B',
+      text: 'RAW MATERIAL DISPENSING SLIP',
+      drawLine: true,
+    },
+    {
+      style: 'NORMAL',
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Item Number:',
+            align: 'LEFT',
+          },
+          {
+            text: data.orders?.[0]?.item?.item_code ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Batch Number:',
+            align: 'LEFT',
+          },
+          {
+            text: data.orders?.[0]?.item?.batch_code ?? '—',
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Tare Wt.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.tare_weight ?? '—',
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Net Wt.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.net_weight ?? '—',
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Gross Wt.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.gross_weight ?? '—',
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Dispensing By:',
+            align: 'LEFT',
+          },
+          {
+            text: titleCase(data.source_name ?? '—'),
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Checked By/Date:',
+            align: 'LEFT',
+          },
+          {
+            text: '_________',
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Product Lot No.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.product_lot_number,
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'For Product:',
+            align: 'LEFT',
+          },
+          {
+            text: data.product_used,
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Date:',
+            align: 'LEFT',
+          },
+          {
+            text: data.created_at.toLocaleDateString(
+              'default',
+              {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
+              }
+            ),
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Time:',
+            align: 'LEFT',
+          },
+          {
+            text: data.created_at.toLocaleTimeString(
+              'default',
+              {
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+                hour: '2-digit'
+              }
+            ),
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Transaction No.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.transaction_code,
+            align: 'LEFT',
+          },
+        ],
+
+      }
+    },
+    {
+      feed: 2
+    },
+  ]
 }

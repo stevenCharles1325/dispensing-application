@@ -17,12 +17,8 @@ import SupplierFormV2 from "UI/components/Views/SupplierFormV2";
 import { TransitionProps } from "@mui/material/transitions";
 import React from "react";
 import RolesAndPermissionsForm from "UI/components/Views/RolesAndPermissionsForm";
-import useBarcode from "UI/hooks/useBarcode";
-import DeviceDialog from "UI/components/Dialogs/DevicesDialog";
 import ShortcutKeysForm from "UI/components/Views/ShortcutKeysForm";
 import usePermission from "UI/hooks/usePermission";
-import PrinterDialog from "UI/components/Dialogs/PrinterDialog";
-import usePrinter from "UI/hooks/usePrinter";
 
 type ModalNames =
   | 'BUSINESS DETAILS'
@@ -32,6 +28,7 @@ type ModalNames =
   | 'BRANDS'
   | 'SUPPLIERS'
   | 'DISCOUNTS'
+  | 'PRINTER'
   | null;
 
 const Transition = React.forwardRef(function Transition(
@@ -44,15 +41,10 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Settings () {
-  const {
-    devices,
-    refetchDevices,
-    select,
-  } = useBarcode();
   // const {
   //   devices: printers,
   //   refetchDevices: refetchPrinters,
-  //   select: selectPrinter,
+  //   selectDevice: selectPrinter,
   // } = usePrinter();
 
   const theme = useTheme();
@@ -324,7 +316,7 @@ export default function Settings () {
         open={modal === 'PRINTER'}
         refresh={refetchPrinters}
         devices={printers}
-        onChange={selectPrinter}
+        onChange={selectPrinter as any}
         onClose={handleCloseModal}
       /> */}
     </>

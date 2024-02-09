@@ -474,7 +474,7 @@ export default function Inventory() {
                   disabled={selectedIds.length === 0}
                 />
                 <BarcodeIndicator />
-                <PrinterIndicator />
+                {/* <PrinterIndicator /> */}
               </div>
             </Collapse>
             {

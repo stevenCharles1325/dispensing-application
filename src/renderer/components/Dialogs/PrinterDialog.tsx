@@ -31,6 +31,7 @@ export default function PrinterDialog ({
   onClose,
   onChange,
 }: PrinterDialogProps) {
+
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>
@@ -51,7 +52,13 @@ export default function PrinterDialog ({
                   <ListItemAvatar>
                     <UsbIcon fontSize="small" color="secondary" />
                   </ListItemAvatar>
-                  <ListItemText primary={device.displayName ?? 'Unknown'} />
+                  <ListItemText
+                    primary={`${
+                      (index + 1)
+                      }. ${
+                        (`Vendor ID: ${device.deviceDescriptor.idVendor} | Product ID: ${device.deviceDescriptor.idProduct}` ?? 'Unknown')
+                      }`}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}

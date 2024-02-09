@@ -463,7 +463,7 @@ export default function Home() {
         refetchItems();
         displayAlert?.('Purchased successfully', 'success');
 
-        // print(transaction.id);
+        print(transaction.id);
       }
     });
   }, [orderDetails, displayAlert, refetchItems]);
@@ -757,7 +757,7 @@ export default function Home() {
               onClick={handleFilterClick}
             />
             <BarcodeIndicator />
-            <PrinterIndicator />
+            {/* <PrinterIndicator /> */}
           </div>
           <div className="grow">
             {items?.length ? (
