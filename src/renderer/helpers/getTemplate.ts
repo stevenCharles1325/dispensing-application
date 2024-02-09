@@ -777,7 +777,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -794,7 +794,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -811,7 +811,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -828,7 +828,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -845,7 +845,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -862,7 +862,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -879,7 +879,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -896,7 +896,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -913,7 +913,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -937,7 +937,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -962,7 +962,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
@@ -979,7 +979,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
         ],
         options: {
-          size: [1, 3]
+          size: [0.33, 0.33]
         }
       }
     },
