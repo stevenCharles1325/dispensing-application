@@ -10,7 +10,7 @@ export default class PrinterReceipt implements Partial<IPrinterAdaptor> {
       escpos.USB = require('escpos-usb');
       const device = new escpos.USB();
       const printer = new escpos.Printer(device);
-      
+
       let error: any = null;
 
       device.open((err) => {
@@ -23,11 +23,11 @@ export default class PrinterReceipt implements Partial<IPrinterAdaptor> {
 
         for (const datum of data) {
           const keys = Object.keys(datum);
-  
+
           for (const key of keys) {
             type DatumKey = keyof (typeof datum);
             const value = datum[key as DatumKey] as any;
-  
+
             switch (key) {
               case 'text':
               case 'font':
@@ -37,35 +37,53 @@ export default class PrinterReceipt implements Partial<IPrinterAdaptor> {
               case 'lineSpace':
                 _printer = printer[key](value);
                 break;
-  
+
               case 'drawLine':
                 _printer = printer.drawLine();
                 break;
-  
+
               case 'size':
                 _printer = printer.size(value!.width, value!.height);
                 break;
-  
+
               case 'tableCustom':
                 _printer = printer.tableCustom(
                   value.rows,
                   value.options
                 );
                 break;
-  
+
               default:
                 _printer = printer.close((err) => {
-                  error = err;
-                  console.log('PRINT ERROR: (On default) ', err);
+                  if (err) {
+                    error = err;
+                    console.log('PRINT ERROR: ', err);
+                  }
+
+                  device.close((closeErr) => {
+                    if (closeErr) {
+                      error = closeErr;
+                      console.log('PRINT ERROR: ', closeErr);
+                    }
+                  });
                 });
                 break;
             }
           }
         }
-  
+
         _printer.close((err) => {
-          error = err;
-          console.log('PRINT ERROR: ', err);
+          if (err) {
+            error = err;
+            console.log('PRINT ERROR: ', err);
+          }
+
+          device.close((closeErr) => {
+            if (closeErr) {
+              error = closeErr;
+              console.log('PRINT ERROR: ', closeErr);
+            }
+          });
         });
       });
 
