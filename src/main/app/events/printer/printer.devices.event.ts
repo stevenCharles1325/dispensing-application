@@ -17,25 +17,25 @@ export default class PrinterDevicesEvent implements IEvent {
   > {
     try {
       const cachedPrinterInfo: Partial<IDeviceInfo> = globalStorage.get('PRINTER:SELECTED');
-      const result = getDeviceList() as PrinterDTO[];
+      // const result = getDeviceList() as PrinterDTO[];
 
-      const devices = result.map((device) => {
-        if (cachedPrinterInfo) {
-          device['selected'] = `${
-            device.deviceDescriptor.idVendor
-          }:${
-            device.deviceDescriptor.idProduct
-          }` === cachedPrinterInfo.id;
+      // const devices = result.map((device) => {
+      //   if (cachedPrinterInfo) {
+      //     device['selected'] = `${
+      //       device.deviceDescriptor.idVendor
+      //     }:${
+      //       device.deviceDescriptor.idProduct
+      //     }` === cachedPrinterInfo.id;
 
-          return device;
-        }
+      //     return device;
+      //   }
 
-        device['selected'] = false;
-        return device;
-      });
+      //   device['selected'] = false;
+      //   return device;
+      // });
 
       return {
-        data: devices,
+        data: [],
         code: 'REQ_OK',
         status: 'SUCCESS',
       };

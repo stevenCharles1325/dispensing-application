@@ -1,13 +1,19 @@
+/*====================
++
++     PRINTIN PDF
++
+======================*/
+
 import fs from "fs";
 import { print, getPrinters  } from "pdf-to-printer";
-import { IPrintOptions } from "App/interfaces/pos/pos.printer.interface";
 import IPrinterAdaptor from "App/interfaces/adaptor/printer/adaptor.printer.interface";
 import path from "path";
 import { app } from "electron";
 import concatDateToName from "App/modules/concat-date-to-name.module";
 import htmlToPDF from "App/modules/html-to-pdf.module";
+import { IPrintOptions } from "App/interfaces/pos/pos.printer.pdf.interface";
 
-export default class PrinterV1 implements Partial<IPrinterAdaptor> {
+export default class PrinterPDF implements Partial<IPrinterAdaptor> {
   async print (
     data: string,
     options?: IPrintOptions,
@@ -37,6 +43,7 @@ export default class PrinterV1 implements Partial<IPrinterAdaptor> {
 
       console.log('LOOKING FOR THE CREATED PDF FILE...');
       let timeTaken = 0;
+
       while (true) {
         timeTaken += 1;
         console.log('TIME TAKEN IN SECONDS: ', timeTaken / 1000);

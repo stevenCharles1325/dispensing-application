@@ -29,9 +29,7 @@ export interface IPrintOptions {
   sumatraPdfPath?: string;
   copies?: number;
   globalStorage?: IStorage;
+  [key: string]: any;
 }
 
-export default interface IBasePrinter {
-  getPrinters(): Promise<any[]>;
-  print(data: string, options?: IPrintOptions): Promise<void>;
-}
+

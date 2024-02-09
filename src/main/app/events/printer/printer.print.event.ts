@@ -5,6 +5,7 @@ import handleError from "App/modules/error-handler.module";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
 import IPrinterService from "App/interfaces/service/service.printer.interface";
 import Provider from "@IOC:Provider";
+import { IPrintReceiptData } from "App/interfaces/pos/pos.printer.receipt.interface";
 
 export default class PrinterPrintEvent implements IEvent {
   public channel: string = 'printer:print';
@@ -22,11 +23,11 @@ export default class PrinterPrintEvent implements IEvent {
       const printerService = Provider.ioc<IPrinterService>(
         'PrinterProvider'
       );
-      const htmlString = eventData.payload[0];
+      const printData: IPrintReceiptData = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.('download-data');
 
       if (requesterHasPermission || user.hasSystemKey) {
-        await printerService.print(htmlString);
+        await printerService.print(printData);
       }
 
       return {

@@ -1,10 +1,11 @@
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import PrinterDTO from 'App/data-transfer-objects/printer.dto';
-import { getTemplateV2 } from 'UI/helpers/getTemplate';
-import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
+import { getTemplateForReceipt, getTemplateV2 } from 'UI/helpers/getTemplate';
+import TransactionDTO, { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import { toHtmlText } from "from-json-to-html";
+import { IPrintReceiptData } from 'App/interfaces/pos/pos.printer.receipt.interface';
 
 interface IPrinterContext {
   devices: any[];
@@ -58,17 +59,21 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
     });
 
     const data = res.data as IPagination<TransactionDTO>;
-    const transaction = data.data[0] as TransactionDTO;
+    const transaction = data.data[0] as IncomeDTO;
 
-    const template = getTemplateV2({
+    // const template = getTemplateV2({
+    //   store_name: transaction.system?.store_name ?? 'X-GEN',
+    //   ...transaction as any,
+    // });
+
+    // const htmlString = toHtmlText(template);
+    const printData = getTemplateForReceipt({
       store_name: transaction.system?.store_name ?? 'X-GEN',
       ...transaction as any,
-    });
-
-    const htmlString = toHtmlText(template);
+    })
 
     try {
-      const res = await window.printer.print(htmlString);
+      const res = await window.printer.print(printData);
 
       if (res.errors) {
         errorHandler({
@@ -82,9 +87,9 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
     }
   }
 
-  useEffect(() => {
-    getDevices();
-  }, []);
+  // useEffect(() => {
+  //   getDevices();
+  // }, []);
 
   const value = useMemo(() => ({
     status,

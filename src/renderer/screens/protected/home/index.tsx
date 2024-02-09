@@ -155,7 +155,7 @@ const weightsInit = {
 }
 
 export default function Home() {
-  const { print } = usePrinter();
+  // const { print } = usePrinter();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
@@ -703,7 +703,7 @@ export default function Home() {
               onClick={handleFilterClick}
             />
             <BarcodeIndicator />
-            <PrinterIndicator />
+            {/* <PrinterIndicator /> */}
           </div>
           <div className="grow">
             {items?.length ? (

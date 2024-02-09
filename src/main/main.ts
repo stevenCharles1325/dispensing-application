@@ -34,27 +34,7 @@ import bucketNames from 'src/globals/object-storage/bucket-names';
 import initJobs, { Bull } from './jobs';
 import policies from './data/defaults/object-storage/policies';
 import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
-import escpos from 'escpos';
 import './scheduler';
-
-escpos.USB = require('escpos-usb');
-const device = new escpos.USB();
-const printer = new escpos.Printer(device);
-
-console.log(device);
-device.open(function (err) {
-  if (err) {
-    console.log('Printing Error 1: ', err);
-  }
-
-  printer
-    .font('A')
-    .align('CT')
-    .style('B')
-    .size(1, 1)
-    .text('The quick brown fox jumps over the lazy dogs')
-
-});
 
 // Initializing .ENV
 const myEnv = dotenv.config();

@@ -3,7 +3,6 @@ import IEvent from "App/interfaces/event/event.interface";
 import IPOSError from "App/interfaces/pos/pos.error.interface";
 import IResponse from "App/interfaces/pos/pos.response.interface";
 import handleError from "App/modules/error-handler.module";
-import HidDTO from "App/data-transfer-objects/hid.dto";
 import IEventListenerProperties from "App/interfaces/event/event.listener-props.interface";
 import IDeviceInfo from "App/interfaces/barcode/barcode.device-info.interface";
 import { findByIds, Device } from 'usb';
@@ -19,62 +18,69 @@ export default class PrinterSelectEvent implements IEvent {
   > {
     try {
       const device: Device = eventData.payload[0];
-      const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:PRINTER');
+      // const cachedHIDInfo: IDeviceInfo = globalStorage.get('HID:SELECTED:PRINTER');
 
       console.log(device);
-      if (
-        device &&
-        device.deviceDescriptor.idVendor &&
-        device.deviceDescriptor.idProduct
-      ) {
-        if (cachedHIDInfo && cachedHIDInfo.id) {
-          const [vendorId, productId] = cachedHIDInfo.id.split(':');
 
-          if (
-            device.deviceDescriptor.idVendor === Number(vendorId) &&
-            device.deviceDescriptor.idProduct === Number(productId)
-          ) {
-            return {
-              code: 'REQ_OK',
-              status: 'SUCCESS',
-            };
-          }
-        }
+      // Temporarily blocks this feature
+      return {
+        code: 'REQ_OK',
+        status: 'SUCCESS',
+      };
 
-        const selectedDevice = await findByIds(
-          device.deviceDescriptor.idVendor,
-          device.deviceDescriptor.idProduct
-        );
+      // if (
+      //   device &&
+      //   device.deviceDescriptor.idVendor &&
+      //   device.deviceDescriptor.idProduct
+      // ) {
+      //   if (cachedHIDInfo && cachedHIDInfo.id) {
+      //     const [vendorId, productId] = cachedHIDInfo.id.split(':');
 
-        selectedDevice?.__open();
-        selectedDevice?.__open();
+      //     if (
+      //       device.deviceDescriptor.idVendor === Number(vendorId) &&
+      //       device.deviceDescriptor.idProduct === Number(productId)
+      //     ) {
+      //       return {
+      //         code: 'REQ_OK',
+      //         status: 'SUCCESS',
+      //       };
+      //     }
+      //   }
 
-        const deviceCachedInfo: IDeviceInfo = {
-          id: `${device.deviceDescriptor.idVendor}:${device.deviceDescriptor.idProduct}`,
-          status: 'SUCCESS',
-        }
-        globalStorage.set('HID:SELECTED:PRINTER', deviceCachedInfo);
+      //   const selectedDevice = await findByIds(
+      //     device.deviceDescriptor.idVendor,
+      //     device.deviceDescriptor.idProduct
+      //   );
 
-        global.emitToRenderer('PRINTER:STATUS', 'SUCCESS');
+      //   selectedDevice?.__open();
+      //   selectedDevice?.__open();
 
-        return {
-          code: 'REQ_OK',
-          status: 'SUCCESS',
-        };
-      } else {
-        const deviceCachedInfo = {
-          id: `${device.deviceDescriptor.idVendor}:${device.deviceDescriptor.idProduct}`,
-          status: 'ERROR',
-        }
-        globalStorage.set('HID:SELECTED:PRINTER', deviceCachedInfo);
-        global.emitToRenderer('PRINTER:STATUS', 'ERROR');
+      //   const deviceCachedInfo: IDeviceInfo = {
+      //     id: `${device.deviceDescriptor.idVendor}:${device.deviceDescriptor.idProduct}`,
+      //     status: 'SUCCESS',
+      //   }
+      //   globalStorage.set('HID:SELECTED:PRINTER', deviceCachedInfo);
 
-        return {
-          errors: ['Cannot open selected device'],
-          code: 'REQ_ERR',
-          status: 'ERROR',
-        } as unknown as IResponse<IPOSError[]>;
-      }
+      //   global.emitToRenderer('PRINTER:STATUS', 'SUCCESS');
+
+      //   return {
+      //     code: 'REQ_OK',
+      //     status: 'SUCCESS',
+      //   };
+      // } else {
+      //   const deviceCachedInfo = {
+      //     id: `${device.deviceDescriptor.idVendor}:${device.deviceDescriptor.idProduct}`,
+      //     status: 'ERROR',
+      //   }
+      //   globalStorage.set('HID:SELECTED:PRINTER', deviceCachedInfo);
+      //   global.emitToRenderer('PRINTER:STATUS', 'ERROR');
+
+      //   return {
+      //     errors: ['Cannot open selected device'],
+      //     code: 'REQ_ERR',
+      //     status: 'ERROR',
+      //   } as unknown as IResponse<IPOSError[]>;
+      // }
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', err);

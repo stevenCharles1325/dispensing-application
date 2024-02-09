@@ -1,6 +1,7 @@
 import OrderDTO from "App/data-transfer-objects/order.dto";
-import { IPrintData } from 'App/interfaces/pos/pos.printer.interface';
 import titleCase from "./titleCase";
+import { IPrintReceiptData } from "App/interfaces/pos/pos.printer.receipt.interface";
+import { IPrintData } from "App/interfaces/pos/pos.printer.pdf.interface";
 
 export interface IPrintTemplate {
   store_name: string;
@@ -743,4 +744,208 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
       }
     ],
   }
+}
+
+export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData {
+  return [
+    {
+      font: 'A',
+      align: 'CT',
+      style: 'BU2',
+      text: data?.store_name?.toLocaleUpperCase(),
+      drawLine: true,
+    },
+    {
+      align: 'CT',
+      style: 'BU',
+      text: 'RAW MATERIAL DISPENSING SLIP',
+      drawLine: true,
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Item Number:',
+            align: 'LEFT',
+          },
+          {
+            text: data.orders?.[0]?.item?.item_code ?? '—',
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Batch Number:',
+            align: 'LEFT',
+          },
+          {
+            text: data.orders?.[0]?.item?.batch_code ?? '—',
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Tare Wt.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.tare_weight ?? '—',
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Net Wt.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.net_weight ?? '—',
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Gross Wt.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.gross_weight ?? '—',
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Dispensing By:',
+            align: 'LEFT',
+          },
+          {
+            text: titleCase(data.source_name ?? '—'),
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Checked By/Date:',
+            align: 'LEFT',
+          },
+          {
+            text: '_________',
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Product Lot No.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.product_lot_number,
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'For Product:',
+            align: 'LEFT',
+          },
+          {
+            text: data.product_used,
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Date:',
+            align: 'LEFT',
+          },
+          {
+            text: data.created_at.toLocaleDateString(
+              'default',
+              {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
+              }
+            ),
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Time:',
+            align: 'LEFT',
+          },
+          {
+            text: data.created_at.toLocaleTimeString(
+              'default',
+              {
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+                hour: '2-digit'
+              }
+            ),
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: 'Transaction No.:',
+            align: 'LEFT',
+          },
+          {
+            text: data.transaction_code,
+            align: 'RIGHT',
+          },
+        ]
+      }
+    },
+    {
+      feed: 2
+    },
+  ]
 }
