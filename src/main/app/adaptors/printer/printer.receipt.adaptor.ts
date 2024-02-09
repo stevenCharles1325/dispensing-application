@@ -3,72 +3,70 @@ import { IPrintReceiptData } from "App/interfaces/pos/pos.printer.receipt.interf
 import escpos from 'escpos';
 
 export default class PrinterReceipt implements Partial<IPrinterAdaptor> {
-  public device;
-  public printer;
-
-  constructor () {
-    try {
-      escpos.USB = require('escpos-usb');
-      this.device = new escpos.USB();
-      this.printer = new escpos.Printer(this.device);
-    } catch (err) {
-      console.log('[PRINTER INITIALIZATION ERROR]: ', err);
-      throw err;
-    }
-  }
-
   async print (
     data: IPrintReceiptData,
   ) {
     try {
+      escpos.USB = require('escpos-usb');
+      const device = new escpos.USB();
+      const printer = new escpos.Printer(device);
+      
       let error: any = null;
 
-      for (const datum of data) {
-        const keys = Object.keys(datum);
+      device.open((err) => {
+        if (err) {
+          error = err;
+          console.log('PRINT ERROR: ', err);
+        }
 
-        for (const key of keys) {
-          type DatumKey = keyof (typeof datum);
-          const value = datum[key as DatumKey] as any;
+        let _printer = printer;
 
-          switch (key) {
-            case 'text':
-            case 'font':
-            case 'feed':
-            case 'align':
-            case 'style':
-            case 'lineSpace':
-              if (value)
-                this.printer[key](value);
-              break;
-
-            case 'drawLine':
-              this.printer.drawLine();
-              break;
-
-            case 'size':
-              this.printer.size(value!.width, value!.height);
-              break;
-
-            case 'tableCustom':
-              this.printer.tableCustom(
-                value.rows,
-                value.options
-              );
-              break;
-
-            default:
-              this.printer.close((err) => {
-                error = err;
-                console.log('PRINT ERROR: (On default) ', err);
-              });
-              break;
+        for (const datum of data) {
+          const keys = Object.keys(datum);
+  
+          for (const key of keys) {
+            type DatumKey = keyof (typeof datum);
+            const value = datum[key as DatumKey] as any;
+  
+            switch (key) {
+              case 'text':
+              case 'font':
+              case 'feed':
+              case 'align':
+              case 'style':
+              case 'lineSpace':
+                _printer = printer[key](value);
+                break;
+  
+              case 'drawLine':
+                _printer = printer.drawLine();
+                break;
+  
+              case 'size':
+                _printer = printer.size(value!.width, value!.height);
+                break;
+  
+              case 'tableCustom':
+                _printer = printer.tableCustom(
+                  value.rows,
+                  value.options
+                );
+                break;
+  
+              default:
+                _printer = printer.close((err) => {
+                  error = err;
+                  console.log('PRINT ERROR: (On default) ', err);
+                });
+                break;
+            }
           }
         }
-      }
-
-      this.printer.close((err) => {
-        error = err;
-        console.log('PRINT ERROR: ', err);
+  
+        _printer.close((err) => {
+          error = err;
+          console.log('PRINT ERROR: ', err);
+        });
       });
 
       if (error) throw error;
