@@ -4,7 +4,7 @@ const getCurrentSalesReport = async (): Promise<
   Array<{ hour: string; count: number }>
 > => {
   // Current sales report
-  let hours = Array(20)
+  let hours = Array(24)
     .fill(null)
     .map((_, index) => ({
       hour: `${(index + 1).toString().padStart(2, '0')}`,
@@ -19,7 +19,7 @@ const getCurrentSalesReport = async (): Promise<
       'count(*) as amount',
     ])
     .where(`transaction.type = 'customer-payment'`)
-    .where(`DATE(transaction.created_at) = DATE('now')`)
+    .where(`DATE(transaction.created_at, 'localtime') = DATE('now', 'localtime')`)
     .groupBy('hour')
     .orderBy('hour')
     .getRawMany();

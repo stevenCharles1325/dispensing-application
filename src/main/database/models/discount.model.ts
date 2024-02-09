@@ -5,16 +5,20 @@ import {
   JoinColumn,
   AfterLoad,
   Relation,
+  BeforeInsert,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { User } from './user.model';
-import type { Item } from 'electron';
+import type { Item } from './item.model';
 import { MinLength, IsIn, IsPositive, ValidateIf } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
+import Provider from '@IOC:Provider';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 @Entity('discounts')
 export class Discount {
@@ -53,14 +57,27 @@ export class Discount {
     this.total_usage = discountTransactionCount + discountOrderCount;
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @BeforeInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
 
-  @Column()
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ nullable: true })
   system_id: string;
 
   @Column()
-  creator_id: number;
+  creator_id: string;
 
   @Column({ nullable: false, unique: true })
   @MinLength(5, {

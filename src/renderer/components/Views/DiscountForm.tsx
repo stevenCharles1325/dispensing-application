@@ -239,7 +239,7 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
   });
   const [errors, setErrors] = useState<Record<string, any>>({});
 
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>();
   const [tab, setTab] = useState(0);
@@ -304,7 +304,7 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
   const items = (data?.data as DiscountDTO[]) ?? [];
   const selectedItem = items?.find(({ id }) => id === selectedIds?.[0]) ?? null;
 
-  const handleOnChangeTab = (_, newValue: number) => {
+  const handleOnChangeTab = (_: any, newValue: number) => {
     setTab(newValue);
   }
 
@@ -355,7 +355,8 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
   const handleUpdate = useCallback(async () => {
     const res = await window.discount.updateDiscount(
       selectedIds[0],
-      selectedItemIds,
+      form as DiscountDTO,
+      form.status === 'deactivated' ? [] : selectedItemIds,
     );
 
     if (res.status === 'ERROR') {
@@ -368,14 +369,13 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
     await refreshItem();
     handleCloseModal();
     displayAlert?.('Successfully updated discount', 'success');
-  }, [selectedIds, selectedItemIds]);
+  }, [selectedIds, form, selectedItemIds]);
 
   const handleDeleteSelectedItem = useCallback(() => {
     confirm?.('Are you sure you want to delete selected discount(s)?',  async (agreed) => {
       if (agreed) {
         const res = await window.discount.deleteDiscount(selectedIds)
 
-        console.log(res);
         if (res.status === 'ERROR') {
           errorHandler({
             errors: res.errors,
@@ -437,7 +437,7 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
           columns={columns}
           rowCount={data?.total}
           onRowSelectionModelChange={(itemIds) =>
-            setSelectedIds(itemIds as number[])
+            setSelectedIds(itemIds as string[])
           }
           sortingOrder={['asc', 'desc']}
           sortingMode='client'
@@ -452,7 +452,11 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
       >
         <Tabs value={tab} onChange={handleOnChangeTab} aria-label='discount-tabs'>
           <Tab label="Discount Details" {...allyProps(0)} />
-          <Tab label="Attached Items" {...allyProps(0)} />
+          {
+            form.status === 'active'
+            ? <Tab label="Attached Items" {...allyProps(1)} />
+            : null
+          }
         </Tabs>
         <Divider />
         {
@@ -694,7 +698,12 @@ export default function DiscountForm ({ onClose }: DiscountFormProps) {
                 size="small"
                 disabled={
                   modalAction === 'create' ||
-                  Boolean(form.total_usage && form.usage_limit && form.total_usage >= form.usage_limit)
+                  Boolean(
+                    form.total_usage &&
+                    form.usage_limit &&
+                    form.total_usage >= form.usage_limit
+                  ) ||
+                  form.status === 'expired'
                 }
                 getOptionDisabled={(option) => {
                   if (modalAction === 'create') {

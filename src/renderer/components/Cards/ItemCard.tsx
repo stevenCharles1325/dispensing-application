@@ -1,9 +1,11 @@
-import { Badge, Chip, IconButton } from '@mui/material';
+import { Badge, Chip, IconButton, Tooltip } from '@mui/material';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import { NumericFormat } from 'react-number-format';
 
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import getUOFSymbol from 'UI/helpers/getUOFSymbol';
+import { Add } from '@mui/icons-material';
+import capitalizeCase from 'UI/helpers/capitalCase';
 
 interface ItemCardParams {
   cardInfo: ItemDTO;
@@ -13,23 +15,23 @@ interface ItemCardParams {
 
 export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCardParams) {
   return (
-    <div className="w-[325px] h-[460px] py-2">
-      <div className="w-full h-full rounded-md border shadow flex flex-col overflow-hidden hover:border-fuchsia-500 hover:shadow-lg">
-        <div className="w-full h-[255px] bg-gray-300 relative">
+    <div className="w-[360px] h-[200px]">
+      <div className="relative w-full h-full rounded-md overflow-hidden flex flex-col overflow-hidden hover:shadow-lg">
+        <div className="w-full h-[200px] bg-white relative rounded-md">
           <img
             src={cardInfo.image?.url}
             alt={cardInfo.image?.name}
             loading="lazy"
             style={{
               objectFit: 'cover',
-              width: '325px',
-              height: '255px',
+              width: '360px',
+              height: '200px',
             }}
           />
           {cardInfo.status !== 'available' ? (
             <div className="w-full h-full absolute top-0 right-0 flex justify-center items-center bg-slate-800/50">
               <div>
-                <Chip label={cardInfo.status} color="error" size="medium" />
+                <Chip label={capitalizeCase(cardInfo.status)} color="error" size="medium" />
               </div>
             </div>
           ) : null}
@@ -43,7 +45,7 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
               </Badge>
             </div>
           ) : null}
-          {cardInfo.discount && cardInfo.discount.status === 'active' ? (
+          {/* {cardInfo.discount && cardInfo.discount.status === 'active' ? (
             <div className="absolute top-0 left-0 flex justify-center items-center p-3">
               {
                 cardInfo.discount.discount_type === 'buy-one-get-one'
@@ -73,25 +75,74 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
                 )
               }
             </div>
-          ) : null}
+          ) : null} */}
         </div>
-        <div className="grow p-3 flex flex-row justify-between">
-          <div className="grow">
-            <Chip label="Product Name:" size="small" />
-            <p
-              className="truncate mb-2 capitalize px-1"
-              style={{ color: 'var(--info-text-color)' }}
-            >
-              {cardInfo.name}
-            </p>
-            <Chip label="Quantity:" size="small" />
-            <p
-              className="truncate mb-2 px-1"
-              style={{ color: 'var(--info-text-color)' }}
-            >
-              {cardInfo.stock_quantity}
-            </p>
-            <Chip label="Price:" size="small" />
+        <div className="grow p-3 flex flex-row rounded-md justify-between border hover:border-fuchsia-500 absolute top-0 left-0 w-full h-full bg-white/30">
+          <div className="w-fit h-fit flex flex-wrap gap-3">
+            <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
+              <p className="text-md font-bold">
+                Item ID:
+              </p>
+              <div className='max-w-[150px]'>
+                <Tooltip title={cardInfo.item_code} arrow>
+                  <p
+                    className="truncate capitalize text-sm font-thin"
+                    style={{ color: 'rgba(0, 0, 0, 0.5)' }}
+                  >
+                    {capitalizeCase(cardInfo.item_code)}
+                  </p>
+                </Tooltip>
+              </div>
+            </div>
+            <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
+              <p className="text-md font-bold">
+                Quantity:
+              </p>
+              <div className='max-w-[150px]'>
+                <Tooltip
+                  title={`${cardInfo.stock_quantity} ${getUOFSymbol(cardInfo.unit_of_measurement)}}`}
+                  arrow
+                >
+                  <p
+                    className="truncate text-sm font-thin"
+                    style={{ color: 'rgba(0, 0, 0, 0.5)' }}
+                  >
+                    {cardInfo.stock_quantity} {getUOFSymbol(cardInfo.unit_of_measurement) + '.'}
+                  </p>
+                </Tooltip>
+              </div>
+            </div>
+            <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
+              <p className="text-md font-bold">
+                Batch ID:
+              </p>
+              <div className='max-w-[150px]'>
+                <Tooltip title={cardInfo.batch_code} arrow>
+                  <p
+                    className="truncate text-sm font-thin"
+                    style={{ color: 'rgba(0, 0, 0, 0.5)' }}
+                  >
+                    {cardInfo.batch_code}
+                  </p>
+                </Tooltip>
+              </div>
+            </div>
+            <div className='w-fit h-fit flex flex-col gap-1 mr-5'>
+              <p className="text-md font-bold">
+                Brand:
+              </p>
+              <div className='max-w-[150px]'>
+                <Tooltip title={cardInfo.brand?.name} arrow>
+                  <p
+                    className="truncate text-sm font-thin"
+                    style={{ color: 'rgba(0, 0, 0, 0.5)' }}
+                  >
+                    {cardInfo.brand?.name}
+                  </p>
+                </Tooltip>
+              </div>
+            </div>
+            {/* <Chip label="Price:" size="small" />
             {
               cardInfo?.discount &&
               cardInfo.discount.discount_type !== 'buy-one-get-one' &&
@@ -125,14 +176,14 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
                   disabled
                 />
               )
-            }
+            } */}
           </div>
           <div className="w-[70px] flex flex-col justify-end items-end">
             <IconButton
               disabled={cardInfo.status !== 'available' || orderNumber >= cardInfo.stock_quantity}
               onClick={() => onSelect(cardInfo.id)}
             >
-              <AddCircleOutlineOutlinedIcon color="secondary" />
+              <Add color="secondary" />
             </IconButton>
           </div>
         </div>

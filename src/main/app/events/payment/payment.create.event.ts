@@ -33,7 +33,7 @@ export default class PaymentCreateEvent implements IEvent {
       const { user } = eventData;
       const payload: PaymentDTO = eventData.payload[0];
       const requesterHasPermission = user.hasPermission?.(
-        'create-customer-payment'
+        'create-transaction'
       );
 
       if (requesterHasPermission && user.id) {
@@ -43,8 +43,8 @@ export default class PaymentCreateEvent implements IEvent {
         const order: IOrderDetails = payload;
 
         if (order.payment_method === 'cash') {
-          const discountIds: number[] = [
-            order.discount_id ?? 0,
+          const discountIds: string[] = [
+            order.discount_id ?? '',
             ...order.items.map(({ discount_id }) => discount_id),
           ];
 
@@ -70,12 +70,24 @@ export default class PaymentCreateEvent implements IEvent {
                   status: 'ERROR',
                 } as unknown as IResponse<string[]>;
               }
+
+              if (discount.status === 'expired') {
+                return {
+                  errors: [
+                    `Cannot apply ${
+                      discount.title
+                    } coupon as it is expired.`
+                  ],
+                  code: 'REQ_INVALID',
+                  status: 'ERROR',
+                } as unknown as IResponse<string[]>;
+              }
             }
           }
 
           const orderTransaction: Omit<
             IncomeDTO,
-            'id' | 'created_at' | 'updated_at' | 'system' | 'creator'
+            'id' | 'created_at' | 'updated_at' | 'system' | 'creator' | 'transaction_code'
           > = {
             // to add system_id
             creator_id: personnel.id,
@@ -86,7 +98,12 @@ export default class PaymentCreateEvent implements IEvent {
             method: 'cash',
             total: order.total,
             amount_received: order.amount_received,
+            tare_weight: order.tare_weight,
+            net_weight: order.net_weight,
+            gross_weight: order.gross_weight,
             change: order.change,
+            product_lot_number: order.product_lot_number,
+            product_used: order.product_used,
             discount_id: order.discount_id,
           };
 
@@ -111,7 +128,6 @@ export default class PaymentCreateEvent implements IEvent {
             } as unknown as IResponse<IPOSValidationError[]>;
           }
 
-          console.log('Transaction: ', transaction);
           const data = await TransactionRepository.save(transaction);
 
           const desiredOrder: any = order.items.map((item) => ({
@@ -121,6 +137,7 @@ export default class PaymentCreateEvent implements IEvent {
             tax_rate: item.tax_rate,
             price: item.selling_price,
             discount_id: item.discount_id,
+            unit_of_measurement: item.unit_of_measurement
           }));
           const orders = OrderRepository.create(desiredOrder);
           await OrderRepository.save(orders);
@@ -129,13 +146,13 @@ export default class PaymentCreateEvent implements IEvent {
           await TransactionRepository.save(data);
 
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as unknown as string,
             resource_id: data.id.toString(),
             resource_table: 'transactions',
             resource_id_type: 'uuid',
-            action: 'payment',
+            action: 'TRANSACT',
             status: 'SUCCEEDED',
-            description: `User ${user.fullName} has successfully received a customer payment`,
+            description: `User ${user.fullName} has successfully performed a transaction`,
           });
 
           return {
@@ -155,7 +172,7 @@ export default class PaymentCreateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'transactions',
         action: 'payment',
         status: 'FAILED',

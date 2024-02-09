@@ -16,13 +16,15 @@ import { Transaction } from './database/models/transaction.model';
 import { User } from './database/models/user.model';
 import { Notification } from './database/models/notification.model';
 import { InventoryRecord } from './database/models/inventory-record.model';
-import MainSeeder from './database/seeders/main.seeder';
 import { ShortcutKey } from './database/models/shortcut-key.model';
 import { Discount } from './database/models/discount.model';
+import { Upload } from './database/models/upload.model';
+import { UploadData } from './database/models/upload-data.model';
+import MainSeeder from './database/seeders/main.seeder';
 
 type DataSourceWithSeederOption = DataSourceOptions & SeederOptions;
+const IS_PROD = process.env.NODE_ENV === 'production';
 
-export const IS_PROD = process.env.NODE_ENV === 'production';
 export const DB_PATH = `${IS_PROD ? app.getPath('userData') : __dirname}/database/db.sqlite`;
 const MIGRATION_PATH = `${IS_PROD ? `${app.getAppPath()}/dist` : __dirname}/database/migrations/*`;
 
@@ -47,6 +49,8 @@ export const options: DataSourceWithSeederOption = {
     InventoryRecord,
     ShortcutKey,
     Discount,
+    Upload,
+    UploadData,
   ],
   migrations: [
     MIGRATION_PATH,

@@ -22,11 +22,10 @@ export class Supplier1696655002476 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true, // temporarily
           },
           {
             name: 'image_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             comment: 'Logo',
             foreignKeyConstraintName: 'image',

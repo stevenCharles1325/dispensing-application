@@ -11,7 +11,8 @@ const cronJobs: ICronJob[] = [
     label: 'CRON:EVERY-MINUTE',
     schedule: atEveryMinute,
     callback: async () => {
-      await Bull('DISCOUNT_JOB', {});
+      // await Bull('DISCOUNT_JOB', {});
+      await Bull('EXPIRATION_JOB', {});
     }
   },
 ]

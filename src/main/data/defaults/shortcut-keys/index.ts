@@ -21,10 +21,16 @@ const shortcutKeys: Omit<
     title: 'Place Order',
     description: '—'
   },
+  // {
+  //   key: 'add-payment',
+  //   key_combination: 'f3',
+  //   title: 'Add Payment',
+  //   description: '—'
+  // },
   {
-    key: 'add-payment',
-    key_combination: 'f3',
-    title: 'Add Payment',
+    key: 'barcode-start',
+    key_combination: 'ctrl+b',
+    title: 'Start Barcode Scanning',
     description: '—'
   },
   {

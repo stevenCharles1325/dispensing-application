@@ -13,19 +13,18 @@ export class Discount1702610770719 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
           },
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
           },
           {
             name: 'creator_id',
-            type: 'int',
+            type: 'varchar',
             foreignKeyConstraintName: 'creator',
           },
           {

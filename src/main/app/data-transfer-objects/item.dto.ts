@@ -5,15 +5,18 @@ import { Image } from 'Main/database/models/image.model';
 import InventoryRecordsDTO from './inventory-record.dto';
 import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 import DiscountDTO from './discount.dto';
+import BrandDTO from './brand.dto';
 
 export default interface ItemDTO {
   id: string;
-  image_id?: number;
+  image_id?: string;
   system_id: string;
-  category_id: number;
-  brand_id: number;
+  item_code: string;
+  batch_code: string;
+  category_id: string;
+  brand_id: string;
   supplier_id: string;
-  discount_id: number;
+  discount_id: string;
   sku: string;
   name: string;
   description: string;
@@ -27,11 +30,13 @@ export default interface ItemDTO {
   stock_quantity: number;
   status: IItemStatus;
 
+  expired_at: Date;
   created_at: Date;
   updated_at: Date;
   deleted_at?: Date;
 
   image?: ImageDTO | Image;
+  brand: BrandDTO;
   discount?: DiscountDTO;
   records: InventoryRecordsDTO[] | InventoryRecord[];
 }

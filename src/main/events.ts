@@ -27,6 +27,9 @@ const middlewareObject = requireAll(
 /*
   This is an event-reader. It reads all events from the App/Events folder
   and run it on the same order as what you see when you open any folder inside.
+
+  I also apply middlewares depending on which middleware(s) does each event
+  needs.
 */
 export default function () {
   try {

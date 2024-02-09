@@ -6,13 +6,17 @@ import {
   OneToOne,
   JoinColumn,
   AfterLoad,
+  BeforeInsert,
   Relation,
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { MinLength, IsNotEmpty, IsIn, ValidateIf } from 'class-validator';
+import { MinLength, IsNotEmpty, IsIn } from 'class-validator';
 import { ValidationMessage } from '../../app/validators/message/message';
 import type { User } from './user.model';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 @Entity('audit_trails')
 export class AuditTrail {
@@ -21,15 +25,15 @@ export class AuditTrail {
   @AfterLoad()
   async getRelated() {
     const manager = global.datasource.createEntityManager();
-    const id =
-      this.resource_id_type === 'uuid'
-        ? `'${this.resource_id}'`
-        : this.resource_id;
-    const rawData: any[] = await manager.query(
-      `SELECT * FROM '${this.resource_table}' WHERE id = ${id}`
-    );
+    const id = this.resource_id
 
-    this.related = rawData[0];
+    if (id) {
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM '${this.resource_table}' WHERE id = '${id}'`
+      );
+
+      this.related = rawData[0];
+    }
   }
 
   @AfterLoad()
@@ -37,10 +41,23 @@ export class AuditTrail {
     if (!this.user) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'users' WHERE id = ${this.user_id}`
+        `SELECT * FROM 'users' WHERE id = '${this.user_id}'`
       );
 
       this.user = rawData[0];
+    }
+  }
+
+  @BeforeInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
     }
   }
 
@@ -54,7 +71,7 @@ export class AuditTrail {
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  user_id: number;
+  user_id: string;
 
   @Column()
   @MinLength(5, { message: ValidationMessage.minLength })
@@ -66,16 +83,10 @@ export class AuditTrail {
   })
   resource_table: string;
 
-  @Column()
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
-  })
+  @Column({ nullable: true })
   resource_id: string;
 
-  @Column()
-  @IsIn(['uuid', 'integer'], {
-    message: ValidationMessage.notEmpty,
-  })
+  @Column({ nullable: true })
   resource_id_type: string;
 
   @Column()

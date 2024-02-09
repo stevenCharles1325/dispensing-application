@@ -1,82 +1,78 @@
-import { Chip } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import useErrorHandler from 'UI/hooks/useErrorHandler';
-import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
+import { Chip, Tooltip } from '@mui/material';
 
-import CircularProgress from '@mui/material/CircularProgress';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import useBarcode from 'UI/hooks/useBarcode';
+import { useMemo } from 'react';
+import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 
 export default function BarcodeIndicator () {
-  const errorHandler = useErrorHandler();
-  const [status, setStatus]= useState<'WAIT' | 'SUCCESS' | 'ERROR'>('WAIT');
+  const {
+    status,
+    connect,
+    disconnect
+  } = useBarcode();
+  const { getCommand } = useShortcutKeys();
 
-  const getBarcodeStatus = async (): Promise<"SUCCESS" | "ERROR"> => {
-    const res = await window.barcode.status();
-
-    if (res.status === 'ERROR') {
-      errorHandler({
-        errors: res.errors,
-      });
-      return 'ERROR';
+  const label = useMemo(() => {
+    if (status === 'ERROR') {
+      return 'Barcode Failed';
     }
 
-    return (res.data as IDeviceInfo).status;
-  }
+    if (status === 'SUCCESS') {
+      return 'Barcode listening...';
+    }
 
-  const { refetch } = useInfiniteQuery({
-    queryKey: ['barcode'],
-    queryFn: async () => {
-      const state = await getBarcodeStatus();
-
-      console.log('BARCODE STATUS: ', state);
-      setStatus(state);
-    },
-    refetchInterval: 5000,
-  });
-
-  const handleRefresh = async () => {
-    setStatus('WAIT');
-
-    setTimeout(() => {
-      refetch();
-    }, 2000);
-  }
-
-  useEffect(() => {
-    window.main.mainMessage((_, payload) => {
-      if (payload.channel === 'BARCODE:STATUS') {
-        console.log('BARCODE STATUS: ', payload.data);
-
-        setStatus(payload.data);
-      }
-    });
-  }, []);
+    if (status === 'WAIT') {
+      return 'Start Barcode'
+    }
+  }, [status]);
 
   return (
-    <Chip
-      label="Barcode scanning"
-      color={
-        status === 'SUCCESS'
-        ? 'success'
-        : status === 'ERROR'
-          ? 'error'
-          : status === 'WAIT'
-            ? 'secondary'
-            : undefined
-      }
-      variant="outlined"
-      icon={
-        status === 'SUCCESS'
-        ? <CheckCircleOutlineIcon fontSize='small' />
-        : status === 'ERROR'
-          ? <ErrorOutlineIcon fontSize='small' />
-          : status === 'WAIT'
-            ? <CircularProgress size={20} />
-            : undefined
-      }
-      onClick={handleRefresh}
-    />
-  )
+      <>
+        <Tooltip
+          arrow
+          title={status !== 'SUCCESS' ? getCommand?.('barcode-start') ?? '' : 'Stop/Pause barcode scanning'}
+        >
+          <div className='touch-none h-fit'>
+            <div className={status !== 'SUCCESS' ? 'visible' : 'hidden'}>
+              <Chip
+                component="button"
+                label={label}
+                color={
+                  status === 'ERROR'
+                    ? 'error'
+                    : status === 'WAIT'
+                      ? 'secondary'
+                      : undefined
+                }
+                variant="outlined"
+                icon={
+                  status === 'ERROR'
+                    ? <ErrorOutlineIcon fontSize='small' />
+                    : status === 'WAIT'
+                      ? <PauseCircleOutlineIcon fontSize='small' />
+                      : undefined
+                }
+                onClick={connect as any}
+                // ref={connectButtonRef as any}
+              />
+            </div>
+            <div className={status === 'SUCCESS' ? 'visible' : 'hidden'}>
+              <Chip
+                clickable
+                component="button"
+                label={label}
+                color='success'
+                variant="outlined"
+                icon={<PlayCircleOutlineIcon fontSize='small' />}
+                onClick={disconnect as any}
+                // ref={disconnectButtonRef as any}
+              />
+            </div>
+          </div>
+        </Tooltip>
+    </>
+  );
 }

@@ -16,9 +16,9 @@ import './styles/global.css';
 import Logs from './screens/protected/history';
 import Report from './screens/protected/report';
 import ValidatorLayout from './components/Layouts/ValidatorLayout';
-import Validate from './screens/gate/validate';
 import EmployeeManagement from './screens/protected/employee-management';
 import Settings from './screens/protected/settings';
+import Setup from './screens/gate/setup';
 
 const router = createHashRouter(
   createRoutesFromElements(
@@ -26,7 +26,7 @@ const router = createHashRouter(
       path="/"
       element={<ValidatorLayout />}
       loader={async () =>
-        defer({ isUserPermitted: await window.validation.isUserPermitted() })
+        defer({ hasSystemSetup: await window.system.hasSystemSetup() })
       }
     >
       <Route
@@ -44,8 +44,8 @@ const router = createHashRouter(
           <Route path="settings" element={<Settings />} />
         </Route>
 
+        <Route path="/setup" element={<Setup />} />
         <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/validate-user" element={<Validate />} />
       </Route>
     </Route>
   )

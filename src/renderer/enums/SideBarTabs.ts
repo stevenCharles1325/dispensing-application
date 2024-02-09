@@ -1,6 +1,4 @@
-import { SideBarItem } from 'renderer/components/Navigations/SideBar';
-
-const tabs: SideBarItem[] = [
+const tabs = [
   {
     label: 'Home',
     path: '/',

@@ -30,7 +30,6 @@ export default class ItemCreateEvent implements IEvent {
         const item = ItemRepository.create(payload);
         const errors = await validator(item);
 
-        console.log(item);
         if (errors && errors.length) {
           return {
             errors,
@@ -49,7 +48,7 @@ export default class ItemCreateEvent implements IEvent {
         const data = (await ItemRepository.save(item)) as unknown as ItemDTO;
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: data.id.toString(),
           resource_table: 'items',
           resource_id_type: 'uuid',
@@ -66,7 +65,7 @@ export default class ItemCreateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'items',
         action: 'create',
         status: 'FAILED',

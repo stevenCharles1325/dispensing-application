@@ -27,10 +27,10 @@ export default class UserArchiveEvent implements IEvent {
         const data = await userRepo.softDelete(id);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: id.toString(),
           resource_table: 'users',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'archive',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully archived a User`,
@@ -44,7 +44,7 @@ export default class UserArchiveEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'users',
         action: 'archive',
         status: 'FAILED',

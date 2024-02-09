@@ -21,17 +21,16 @@ export class Notification1699837785831 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true, // temporarily
           },
           {
             name: 'recipient_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'recipient',
           },
           {
             name: 'sender_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'sender',
           },

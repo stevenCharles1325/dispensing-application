@@ -13,10 +13,10 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
           columns: [
             {
               name: 'id',
-              type: 'integer',
+              type: 'varchar',
+              generationStrategy: 'uuid',
               isPrimary: true,
               isGenerated: true,
-              generationStrategy: 'increment',
             },
             {
               name: 'item_id',
@@ -28,7 +28,7 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
             },
             {
               name: 'creator_id',
-              type: 'int',
+              type: 'varchar',
               isPrimary: false,
               isUnique: false,
               isNullable: false,
@@ -46,7 +46,50 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
             },
             {
               name: 'quantity',
-              type: 'int',
+              type: 'real',
+              isNullable: false,
+            },
+            {
+              name: 'unit_of_measurement',
+              type: 'varchar',
+              enum: [
+                // Length/Dimension
+                'millimeters',
+                'centimeters',
+                'meters',
+                'feet',
+                'yards',
+
+                // Weight/Mass
+                'milligrams',
+                'grams',
+                'kilograms',
+                'ounces',
+                'pounds',
+
+                // Volume/Capacity
+                'milliliters',
+                'liters',
+                'cubic-centimeters',
+                'cubic-meters',
+                'fluid-ounces',
+                'gallons',
+
+                // Area
+                'square-millimeters',
+                'square-centimeters',
+                'square-meters',
+                'square-inches',
+                'square-feet',
+                'square-yards',
+
+                // Count/Quantity
+                'each',
+                'dozen',
+                'gross',
+                'pack',
+                'pair',
+              ],
               isNullable: false,
             },
             {

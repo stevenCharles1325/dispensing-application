@@ -4,7 +4,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable react/function-component-definition */
 /* eslint-disable react/no-unstable-nested-components */
-import { Button, Chip, Dialog, DialogActions, IconButton, TextField } from '@mui/material';
+import { Autocomplete, Button, Chip, Dialog, DialogActions, IconButton, MenuItem, Select, TextField } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
@@ -12,7 +12,6 @@ import ItemCard from 'UI/components/Cards/ItemCard';
 import useAlert from 'UI/hooks/useAlert';
 import useSearch from 'UI/hooks/useSearch';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NumericFormat, NumericFormatProps } from 'react-number-format';
 import { AutoSizer, List } from 'react-virtualized';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -20,24 +19,41 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import POSMenu from 'UI/components/Menu/PosMenu';
 import CategoryDTO from 'App/data-transfer-objects/category.dto';
 import { IOrderDetails } from 'App/interfaces/pos/pos.order-details.interface';
-import PaymentDTO from 'App/data-transfer-objects/payment.dto';
-import PaymentUISwitch from 'UI/components/Switches/PaymentSwitch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import useConfirm from 'UI/hooks/useConfirm';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
-import { ClearOutlined, CloseOutlined, DeleteOutline, DiscountOutlined } from '@mui/icons-material';
-import DiscountDTO from 'App/data-transfer-objects/discount.dto';
+import { DeleteOutline } from '@mui/icons-material';
+import getUOFSymbol from 'UI/helpers/getUOFSymbol';
+import titleCase from 'UI/helpers/titleCase';
+import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
+import usePrinter from 'UI/hooks/usePrinter';
+import { NumericFormatProps, NumericFormat } from 'react-number-format';
+import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
+import useBarcode from 'UI/hooks/useBarcode';
+import measurements from 'UI/data/defaults/unit-of-measurements';
+import localStorage from 'UI/modules/storage';
+import CustomAutoComplete from 'UI/components/TextField/CustomAutoComplete';
 
-const CARD_WIDTH = 325;
-const CARD_HEIGHT = 460;
+const CARD_WIDTH = 360;
+const CARD_HEIGHT = 215;
 
 const getItems = async (
   searchText = '',
-  categoryIds: Array<number>
+  categoryIds: Array<string>
 ): Promise<IPagination<ItemDTO>> => {
   const res = await window.item.getItems(
-    { name: searchText, category_id: categoryIds },
+    {
+      name: searchText,
+      category_id: categoryIds,
+      status: [
+        'available',
+        'expired',
+        'on-hold',
+        'discontinued',
+        'awaiting-shipment',
+      ]
+    },
     0,
     'max'
   );
@@ -104,28 +120,73 @@ const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
         accept="enter"
         thousandSeparator
         valueIsNumericString
-        prefix="₱"
       />
     );
   }
 );
 
+const inputStyle = {
+  '& .MuiSvgIcon-root': {
+    color: 'white',
+  },
+  '& .MuiFormLabel-root': {
+    color: 'white !important',
+  },
+  '& .MuiInput-input': {
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  '& .MuiInputBase-root:before': {
+    borderBottom: '1px solid rgba(255, 255, 255, 0.3)'
+  },
+  '& .MuiInputBase-root:after': {
+    borderBottom: '1px solid rgba(255, 255, 255, 1)'
+  }
+};
+
+
+type OrderType = {
+  unit_of_measurement: string;
+  quantity: number;
+};
+
+type WeightType = OrderType;
+
+const weightsInit = {
+  quantity: 0,
+  unit_of_measurement: 'kilograms'
+}
+
 export default function Home() {
+  const { print } = usePrinter();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
   const [selectedItemIds, setSelectedItemIds] = useState<Array<string>>([]);
-  const [payment, setPayment] = useState<number>(0);
-  const [addPayment, setAddPayment] = useState<boolean>(false);
-  const [orders, setOrders] = useState<Record<string, number>>({});
+  // const [payment, setPayment] = useState<number>(0);
+  // const [addPayment, setAddPayment] = useState<boolean>(false);
+  const [orders, setOrders] = useState<Record<string, OrderType>>({});
   const [posMenuAnchorEl, setPosMenuAnchorEl] = useState<HTMLElement | null>();
-  const [categoryIds, setCategoryIds] = useState<Array<number>>([]);
+  const [categoryIds, setCategoryIds] = useState<Array<string>>([]);
 
-  const [addCoupon, setAddCoupon] = useState<boolean>(false);
-  const [couponCode, setCouponCode] = useState<string>('');
-  const [discount, setDiscount] = useState<DiscountDTO | null>(null);
+  // const [addCoupon, setAddCoupon] = useState<boolean>(false);
+  const [barcodeNumber, setBarcodeNumber] = useState<string | null>(null);
+  const [productUsed, setProductUsed] = useState<string>('');
+  const [productLotNumber, setProductLotNumber] = useState<string>('');
+  const [tareWeight, setTareWeight] = useState<WeightType>(weightsInit);
+  const [netWeight, setNetWeight] = useState<WeightType>(weightsInit);
+  const [grossWeight, setGrossWeight] = useState<WeightType>(weightsInit);
+
+  const weights = useMemo(() => {
+    return {
+      tare_weight: `${tareWeight.quantity} ${getUOFSymbol(tareWeight.unit_of_measurement)}`,
+      net_weight: `${netWeight.quantity} ${getUOFSymbol(netWeight.unit_of_measurement)}`,
+      gross_weight: `${grossWeight.quantity} ${getUOFSymbol(grossWeight.unit_of_measurement)}`,
+    }
+  }, [tareWeight, netWeight, grossWeight]);
+  // const [couponCode, setCouponCode] = useState<string>('');
+  // const [discount, setDiscount] = useState<DiscountDTO | null>(null);
 
   // Payment switch
   const [checked, setChecked] = useState(false);
@@ -133,46 +194,46 @@ export default function Home() {
 
   const hasOrders = Boolean(selectedItemIds.length);
 
-  const handleClearDiscount = () => {
-    confirm?.('Are you sure you want to remove the coupon?', async (agreed) => {
-      if (agreed) {
-        setDiscount(null);
-        setCouponCode('');
-      }
-    });
-  }
+  // const handleClearDiscount = () => {
+  //   confirm?.('Are you sure you want to remove the coupon?', async (agreed) => {
+  //     if (agreed) {
+  //       setDiscount(null);
+  //       setCouponCode('');
+  //     }
+  //   });
+  // }
 
-  const handleAddCoupon = useCallback(async () => {
-    const res = await window.discount.getDiscounts({
-      coupon_code: couponCode,
-    });
+  // const handleAddCoupon = useCallback(async () => {
+  //   const res = await window.discount.getDiscounts({
+  //     coupon_code: couponCode,
+  //   });
 
-    if (res.status === 'ERROR') {
-      errorHandler({
-        errors: res.errors,
-      });
-      setDiscount(null);
+  //   if (res.status === 'ERROR') {
+  //     errorHandler({
+  //       errors: res.errors,
+  //     });
+  //     setDiscount(null);
 
-      return;
-    }
+  //     return;
+  //   }
 
-    const discounts = res.data as IPagination<DiscountDTO>;
-    const desiredDiscount = discounts.data[0];
+  //   const discounts = res.data as IPagination<DiscountDTO>;
+  //   const desiredDiscount = discounts.data[0];
 
-    if (!desiredDiscount) {
-      setDiscount(null);
-      displayAlert?.('coupon code does not exist', 'error');
-    } else {
-      if (desiredDiscount.status === 'active') {
-        setDiscount(desiredDiscount);
-        displayAlert?.('successfully applied coupon', 'success');
+  //   if (!desiredDiscount) {
+  //     setDiscount(null);
+  //     displayAlert?.('coupon code does not exist', 'error');
+  //   } else {
+  //     if (desiredDiscount.status === 'active') {
+  //       setDiscount(desiredDiscount);
+  //       displayAlert?.('successfully applied coupon', 'success');
 
-        setAddCoupon(false);
-      } else {
-        displayAlert?.(`coupon is ${desiredDiscount.status}`, 'error')
-      }
-    }
-  }, [couponCode]);
+  //       setAddCoupon(false);
+  //     } else {
+  //       displayAlert?.(`coupon is ${desiredDiscount.status}`, 'error')
+  //     }
+  //   }
+  // }, [couponCode]);
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText, categoryIds],
@@ -214,92 +275,118 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItemIds]);
 
-  const subTotal = useMemo(() => {
-    const ids = Object.keys(orders);
+  // const subTotal = useMemo(() => {
+  //   const ids = Object.keys(orders);
 
-    if (ids.length) {
-      return selectedItems.reduce((prev, curr) => {
-        const quantity = orders[curr.id];
+  //   if (ids.length) {
+  //     return selectedItems.reduce((prev, curr) => {
+  //       const quantity = orders[curr.id];
 
-        return prev + (curr.discounted_selling_price ?? curr.selling_price) * quantity;
-      }, 0);
-    }
+  //       return prev + (curr.discounted_selling_price ?? curr.selling_price) * quantity;
+  //     }, 0);
+  //   }
 
-    return 0;
-  }, [selectedItems, orders]);
+  //   return 0;
+  // }, [selectedItems, orders]);
 
-  const computedTax = selectedItems.reduce((prev, curr) => {
-    return prev + curr.tax_rate;
-  }, 0);
+  // const computedTax = selectedItems.reduce((prev, curr) => {
+  //   return prev + curr.tax_rate;
+  // }, 0);
 
-  const tax = useMemo(() => {
-    if (selectedItems.length) {
-      return subTotal * (computedTax / 100);
-    }
+  // const tax = useMemo(() => {
+  //   if (selectedItems.length) {
+  //     return subTotal * (computedTax / 100);
+  //   }
 
-    return 0;
-  }, [computedTax, selectedItems.length, subTotal]);
+  //   return 0;
+  // }, [computedTax, selectedItems.length, subTotal]);
 
-  const total = useMemo(() => {
-    const price = subTotal + tax;
+  // const total = useMemo(() => {
+  //   const price = subTotal + tax;
 
-    if (!discount) return price;
-    if (discount.discount_type === 'fixed-amount-off') {
-      return price - discount.discount_value;
-    }
+  //   if (!discount) return price;
+  //   if (discount.discount_type === 'fixed-amount-off') {
+  //     return price - discount.discount_value;
+  //   }
 
-    if (discount.discount_type === 'percentage-off') {
-      return price - (price * (discount.discount_value / 100));
-    }
+  //   if (discount.discount_type === 'percentage-off') {
+  //     return price - (price * (discount.discount_value / 100));
+  //   }
 
-    return price;
-  }, [discount, subTotal, tax]);
+  //   return price;
+  // }, [discount, subTotal, tax]);
 
-  const change = total < 0
-    ? 0
-    : payment - total > 0
-      ? payment - total
-      : 0;
+  // const change = total < 0
+  //   ? 0
+  //   : payment - total > 0
+  //     ? payment - total
+  //     : 0;
 
   const orderDetails: IOrderDetails = useMemo(
     () => ({
-      items: selectedItems.map(({ id, tax_rate, selling_price, discount_id }) => ({
+      items: selectedItems.map(({
+        id,
+        tax_rate,
+        selling_price,
+        discount_id,
+        unit_of_measurement,
+      }) => ({
         id,
         discount_id,
-        quantity: orders[id],
+        quantity: orders[id]?.quantity ?? 1,
+        unit_of_measurement: orders[id]?.unit_of_measurement ?? unit_of_measurement,
         tax_rate,
         selling_price,
       })),
-      total,
+      total: 0,
+      product_used: productUsed,
+      ...weights,
+      product_lot_number: productLotNumber,
       payment_method: selectedPaymentMethod,
-      amount_received: payment,
-      change,
-      discount_id: discount?.id ?? undefined, // To be included soon
+      amount_received: 0,
+      change: 0,
     }),
     [
-      total,
-      change,
       orders,
-      payment,
-      discount,
       selectedItems,
+      weights,
+      productUsed,
+      productLotNumber,
       selectedPaymentMethod,
     ]
   );
 
-  const handleAddPayment = useCallback(() => {
-    if (hasOrders) {
-      setAddPayment(true);
+  // const handleAddPayment = useCallback(() => {
+  //   if (hasOrders) {
+  //     setAddPayment(true);
+  //   }
+  // }, [hasOrders]);
+
+  const handleSelectItemByBarcode = useCallback((_, payload) => {
+    if (
+      payload.channel === 'BARCODE:DATA' &&
+      payload.data?.length &&
+      items?.length &&
+      displayAlert
+    ) {
+      setBarcodeNumber(payload.data);
     }
-  }, [hasOrders]);
+
+    if (payload.channel === 'BARCODE:ERROR') {
+      displayAlert?.(payload.data, 'error');
+    }
+  }, [items, displayAlert]);
 
   const handleCancelOrder = () => {
     confirm?.('Are you sure you want to cancel the orders?', async (agreed) => {
       if (agreed) {
-        setPayment(0);
         setSelectedItemIds([]);
+        setTareWeight(weightsInit);
+        setNetWeight(weightsInit);
+        setGrossWeight(weightsInit);
         setOrders({});
-
+        setProductUsed('');
+        setProductLotNumber('');
         displayAlert?.('Successfully cancelled order', 'success');
       }
     });
@@ -315,90 +402,169 @@ export default function Home() {
         const res = await window.payment.createPayment(orderDetails);
 
         if (res.status === 'ERROR') {
+          const onError = (field: string | null, message: string) => {
+            if (field) {
+              const fieldName = titleCase(field.split('_').join(' '));
+              displayAlert?.(`${fieldName} ${message.toLowerCase()}`, 'error');
+            }
+          }
+
           errorHandler({
             errors: res.errors,
+            onError
           });
 
           return;
         }
 
-        setDiscount(null);
-        setCouponCode('');
-        setPayment(0);
+        // const transaction = res.data as unknown as TransactionDTO;
+
+        // setDiscount(null);
+        // setCouponCode('');
+        // setPayment(0);
+
+        // Caching Product-used and Product-lot-number
+        const productUsedCache = localStorage.getItem('RELEASE:PU') as string[] ?? [];
+        const productLotNoCache: string[] = localStorage.getItem('RELEASE:PLN') as string[] ?? [];
+
+        console.log(productUsedCache, productLotNoCache);
+
+        const elementToLowerCased = (arr: string[]) => {
+          return arr.map(str => str.toLocaleLowerCase());
+        }
+
+        if (
+          !elementToLowerCased(productUsedCache)
+          .includes(
+            orderDetails.product_used.toLocaleLowerCase()
+          )
+        ) {
+          productUsedCache.push(orderDetails.product_used);
+          localStorage.setItem('RELEASE:PU', productUsedCache);
+        }
+
+        if (
+          !elementToLowerCased(productLotNoCache)
+          .includes(
+            orderDetails.product_lot_number?.toLocaleLowerCase()
+          )
+        ) {
+          productLotNoCache.push(orderDetails.product_lot_number);
+          localStorage.setItem('RELEASE:PLN', productLotNoCache);
+        }
+
+        setTareWeight(weightsInit);
+        setNetWeight(weightsInit);
+        setGrossWeight(weightsInit);
+        setProductUsed('');
+        setProductLotNumber('');
         setSelectedItemIds([]);
         setOrders({});
         refetchItems();
         displayAlert?.('Purchased successfully', 'success');
+
+        print(transaction.id);
       }
     });
   }, [orderDetails, displayAlert, refetchItems]);
 
   const handleSelectItem = useCallback(
     (id: string) => {
+      const item = items.find(item => item.id === id);
+
+      if (item || selectedItemIds.includes(id)) {
+        setNetWeight((netWeight) => ({
+          quantity: netWeight.quantity + 1,
+          unit_of_measurement: item?.unit_of_measurement ?? netWeight.unit_of_measurement,
+        }));
+      }
+
       if (selectedItemIds.includes(id)) {
         setOrders((userOrders) => ({
           ...userOrders,
-          [id]: userOrders[id] + 1,
+          [id]: {
+            ...userOrders[id],
+            quantity: userOrders[id].quantity + 1,
+          },
         }));
 
         return;
       };
 
-      setOrders((userOrders) => ({
-        ...userOrders,
-        [id]: 1,
-      }));
+      if (item) {
+        setOrders((userOrders) => ({
+          ...userOrders,
+          [id]: {
+            quantity: 1,
+            unit_of_measurement: item?.unit_of_measurement,
+          },
+        }));
+      }
 
       setSelectedItemIds((selectedIds) => {
         return [...selectedIds, id];
       });
     },
-    [selectedItemIds]
+    [selectedItemIds, items]
   );
 
-  const handleSelectItemByBarcode = useCallback(
-    (itemBarcode: string) => {
-      const item = items.find(({ barcode }) => barcode === itemBarcode);
+  // const handleSelectItemByBarcode = useCallback(
+  //   (itemBarcode: string) => {
+  //     const item = items.find(({ barcode }) => barcode === itemBarcode);
 
-      if (item) {
-        if (selectedItemIds.includes(item.id)) {
-          setOrders((userOrders) => ({
-            ...userOrders,
-            [item.id]: userOrders[item.id] += 1,
-          }));
-        } else {
-          setSelectedItemIds((selectedIds) =>
-            [...selectedIds, item.id]
-          );
+  //     if (item) {
+  //       if (selectedItemIds.includes(item.id)) {
+  //         setOrders((userOrders) => ({
+  //           ...userOrders,
+  //           [item.id]: {
+  //             ...userOrders[item.id],
+  //             quantity: userOrders[item.id].quantity + 1,
+  //           },
+  //         }));
+  //       } else {
+  //         setSelectedItemIds((selectedIds) =>
+  //           [...selectedIds, item.id]
+  //         );
 
-          setOrders((userOrders) => ({
-            ...userOrders,
-            [item.id]: 1,
-          }));
-        }
-      } else {
-        displayAlert?.(`Unable to find item with code ${itemBarcode}`, 'error');
-      }
-    },
-    [items, selectedItemIds, displayAlert]
-  );
+  //         setOrders((userOrders) => ({
+  //           ...userOrders,
+  //           [item.id]: {
+  //             unit_of_measurement: item.unit_of_measurement,
+  //             quantity: userOrders[item.id].quantity + 1,
+  //           },
+  //         }));
+  //       }
+  //     } else {
+  //       displayAlert?.(`Unable to find item with code ${itemBarcode}`, 'error');
+  //     }
+  //   },
+  //   [items, selectedItemIds, displayAlert]
+  // );
 
   const handleIterateOrderQuantity = (
     action: 'add' | 'minus' = 'add',
     id: string
   ) => {
     if (action === 'add') {
+      setNetWeight((netWeight) => ({
+        ...netWeight,
+        quantity: netWeight.quantity + 1,
+      }));
+
       setOrders((userOrders) => ({
         ...userOrders,
-        [id]: userOrders[id] + 1,
+        [id]: {
+          ...userOrders[id],
+          quantity: userOrders[id].quantity + 1,
+        },
       }));
     }
 
     if (action === 'minus') {
-      if (orders[id] - 1 <= 0) {
+      if (orders[id].quantity - 1 <= 0) {
         const tempOrders = orders;
 
-        if (orders[id] - 1 <= 0) {
+        if (orders[id].quantity - 1 <= 0) {
           delete tempOrders[id];
           const filteredSelectedIds = selectedItemIds.filter(
             (itemId) => itemId !== id
@@ -409,9 +575,17 @@ export default function Home() {
         }
       }
 
+      setNetWeight((netWeight) => ({
+        ...netWeight,
+        quantity: netWeight.quantity - 1,
+      }));
+
       setOrders((userOrders) => ({
         ...userOrders,
-        [id]: userOrders[id] - 1,
+        [id]: {
+          ...userOrders[id],
+          quantity: userOrders[id].quantity - 1,
+        },
       }));
     }
   };
@@ -430,7 +604,7 @@ export default function Home() {
           <div key={i}>
             <ItemCard
               cardInfo={card}
-              orderNumber={orders[card.id] ?? 0}
+              orderNumber={orders[card.id]?.quantity ?? 0}
               onSelect={handleSelectItem}
             />
           </div>
@@ -455,26 +629,14 @@ export default function Home() {
   }, [setPlaceHolder]);
 
   useEffect(() => {
-    window.main.mainMessage((_, payload) => {
-      if (payload.channel === 'BARCODE:DATA') {
-        handleSelectItemByBarcode(payload.data);
-      }
-
-      if (payload.channel === 'BARCODE:ERROR') {
-        displayAlert?.(payload.data, 'error');
-      }
-    })
-  }, [displayAlert, handleSelectItemByBarcode]);
-
-  useEffect(() => {
     if (addListener) {
       addListener([
-        {
-          key: 'add-payment',
-          handler: () => {
-            if (hasOrders) handleAddPayment();
-          },
-        },
+        // {
+        //   key: 'add-payment',
+        //   handler: () => {
+        //     if (hasOrders) handleAddPayment();
+        //   },
+        // },
         {
           key: 'place-order',
           handler: () => {
@@ -492,9 +654,95 @@ export default function Home() {
   },
   [
     hasOrders,
-    handleAddPayment,
     handlePurchaseItem,
   ]);
+
+  useEffect(() => {
+    window.main.mainMessage(handleSelectItemByBarcode);
+  }, [handleSelectItemByBarcode]);
+
+  useEffect(() => {
+    if (barcodeNumber && items.length) {
+      const selectedProduct = items.find(
+        ({ barcode }) =>
+          barcode === barcodeNumber
+        );
+
+      if (selectedProduct) {
+        if (selectedProduct.status !== 'available') {
+          displayAlert?.(`Product with code ${barcodeNumber} is ${selectedProduct.status}`, 'error');
+          return;
+        }
+
+        if (orders[selectedProduct.id]?.quantity + 1 > selectedProduct.stock_quantity) {
+          displayAlert?.(
+            `Product with code ${
+              barcodeNumber
+            } has only ${
+              selectedProduct.stock_quantity
+            } ${
+              getUOFSymbol(selectedProduct.unit_of_measurement)
+            }. available stock`,
+            'error'
+          );
+          return;
+        }
+
+        handleSelectItem(selectedProduct.id);
+        setBarcodeNumber(null);
+        return;
+      }
+
+      if (!selectedProduct) {
+        displayAlert?.(`Unable to find product with code ${barcodeNumber}`, 'error');
+        return;
+      }
+    }
+  }, [items, barcodeNumber, orders, handleSelectItem]);
+
+  useEffect(() => {
+    const leftOperand = {
+      quantity: netWeight.quantity,
+      unit: netWeight.unit_of_measurement,
+    };
+
+    const rightOperand = {
+      quantity: tareWeight.quantity,
+      unit: tareWeight.unit_of_measurement,
+    };
+
+    const getGrossQuantity = async () => {
+      const res = await window.pos.unitQuantityCalculator(
+        leftOperand,
+        rightOperand,
+        'add'
+      );
+
+      if (res.data) {
+        const [quantity, um] = res.data;
+
+        if (quantity && um) {
+          setGrossWeight({
+            quantity: quantity as number,
+            unit_of_measurement: um as string,
+          });
+        }
+      }
+    };
+
+    getGrossQuantity();
+  }, [netWeight, tareWeight]);
+
+  useEffect(() => {
+    if (!selectedItemIds.length) {
+      setProductUsed('');
+      setProductLotNumber('');
+
+      setTareWeight(weightsInit);
+      setNetWeight(weightsInit);
+      setGrossWeight(weightsInit);
+    }
+  }, [selectedItemIds]);
 
   return (
     <>
@@ -509,6 +757,7 @@ export default function Home() {
               onClick={handleFilterClick}
             />
             <BarcodeIndicator />
+            {/* <PrinterIndicator /> */}
           </div>
           <div className="grow">
             {items?.length ? (
@@ -548,9 +797,9 @@ export default function Home() {
             style={{ backgroundColor: 'var(--bg-color)' }}
           >
             <div className="grow flex flex-col gap-2">
-              <div className="w-full h-fit flex flex-row justify-between align-center">
-                <b style={{ color: 'white' }}>ORDERS</b>
-                <div className="w-fit h-fit">
+              <div className="w-full h-fit flex flex-row justify-start align-center">
+                <b style={{ color: 'white' }}>PRODUCTS</b>
+                {/* <div className="w-fit h-fit">
                   <Chip
                     icon={<DiscountOutlined fontSize="small" sx={{ color: 'white' }} />}
                     label={
@@ -576,14 +825,14 @@ export default function Home() {
                       color: 'white',
                     }}
                   />
-                </div>
+                </div> */}
               </div>
               <div className='h-[50px] grow overflow-auto'>
                 <div className="w-full h-fit flex flex-col h-fit gap-2">
                   {selectedItems.map((item) => (
                     <div
                       key={item.id}
-                      className="w-[98%] w-full h-[80px] shadow-md rounded-md flex flex-row overflow-hidden border border-transparent"
+                      className="relative w-[98%] w-full h-fit shadow-md rounded-md flex flex-row overflow-hidden border border-transparent"
                       style={{ backgroundColor: 'white' }}
                     >
                       <div className="min-w-[80px] w-[80px] h-full relative">
@@ -597,7 +846,7 @@ export default function Home() {
                             height: '80px',
                           }}
                         />
-                        <div className="absolute top-0 right-0 w-full h-full flex justify-center items-center bg-black/50">
+                        <div className="absolute top-0 right-0 w-full h-full flex justify-center items-center bg-white/30">
                           <IconButton
                             onClick={() => {
                               confirm?.('Are you sure you want to remove this item?', async (agreed) => {
@@ -605,7 +854,7 @@ export default function Home() {
                                   const filteredOrders = Object.keys(orders)
                                     .filter(id => id !== item.id);
 
-                                  const updatedOrders: Record<string, number> = {};
+                                  const updatedOrders: Record<string, OrderType> = {};
 
                                   filteredOrders.forEach(id => {
                                     updatedOrders[id] = orders[id];
@@ -625,21 +874,18 @@ export default function Home() {
                           </IconButton>
                         </div>
                       </div>
-                      <div className="shrink min-w-[100px] p-2 capitalize">
-                        <b>{item.name}</b>
-                        <br />
-                        <NumericFormat
-                          className="mb-2 px-1 bg-transparent"
-                          value={item.discounted_selling_price ?? item.selling_price}
-                          prefix="₱ "
-                          thousandSeparator
-                          valueIsNumericString
-                          disabled
-                        />
+                      <div className="grow min-w-[100px] p-2 capitalize">
+                        <b className='truncate'>{item.name}</b>
+                        <p className='truncate text-slate-500 text-sm'>
+                          {item.batch_code}
+                        </p>
+                        <p className='truncate text-slate-500 text-sm'>
+                          {item.unit_of_measurement}
+                        </p>
                       </div>
-                      <div className="min-w-[100px] w-[100px] max-w-fit h-[80px] flex flex-row justify-center items-center">
+                      <div className="absolute bg-white right-0 w-fit h-[80px] flex flex-row justify-center items-center">
                         <IconButton
-                          disabled={orders[item.id] <= 0}
+                          disabled={orders[item.id].quantity <= 0}
                           onClick={() =>
                             handleIterateOrderQuantity('minus', item.id)
                           }
@@ -647,20 +893,35 @@ export default function Home() {
                           <ChevronLeftIcon />
                         </IconButton>
                         <input
-                          className="input-number-hidden-buttons bg-transparent min-w-[30px] w-fit text-center"
-                          value={orders[item.id]}
+                          className="input-number-hidden-buttons bg-transparent w-[30px] w-fit text-center"
+                          value={orders[item.id].quantity}
                           max={item.stock_quantity}
                           min={0}
                           type="number"
-                          onChange={(e) =>
+                          style={{
+                            width: `${(orders[item.id].quantity?.toString().length * 10) + 40}px`
+                          }}
+                          onChange={(e) => {
+                            setNetWeight((netWeight) => ({
+                              ...netWeight,
+                              quantity: Number(e.target.value) > item.stock_quantity
+                                ? item.stock_quantity
+                                : Number(e.target.value),
+                            }));
+
                             setOrders((userOrders) => ({
                               ...userOrders,
-                              [item.id]: Number(e.target.value),
+                              [item.id]: {
+                                unit_of_measurement: item.unit_of_measurement,
+                                quantity: Number(e.target.value) > item.stock_quantity
+                                  ? item.stock_quantity
+                                  : Number(e.target.value),
+                              },
                             }))
-                          }
+                          }}
                         />
                         <IconButton
-                          disabled={orders[item.id] >= item.stock_quantity}
+                          disabled={orders[item.id].quantity >= item.stock_quantity}
                           onClick={() =>
                             handleIterateOrderQuantity('add', item.id)
                           }
@@ -670,13 +931,19 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
+                  {!selectedItems.length ?
+                  (
+                    <div className="w-full h-[50px] flex text-white/50 justify-center items-center">
+                      <p>Empty!</p>
+                    </div>
+                  )
+                  : null}
                 </div>
               </div>
             </div>
             <div className="w-full h-fit flex flex-col text-white">
-              <br />
-              <b style={{ color: 'white' }}>BILL</b>
-              <div className="flex flex-row justify-between">
+              {/* <b style={{ color: 'white' }}>BILL</b> */}
+              {/* <div className="flex flex-row justify-between">
                 <p>Sub-total:</p>
                 <div>
                   <NumericFormat
@@ -689,8 +956,8 @@ export default function Home() {
                     disabled
                   />
                 </div>
-              </div>
-              <div className="flex flex-row justify-between">
+              </div> */}
+              {/* <div className="flex flex-row justify-between">
                 <p>Discount:</p>
                 <div>
                   <NumericFormat
@@ -709,8 +976,8 @@ export default function Home() {
                     disabled
                   />
                 </div>
-              </div>
-              <div className="flex flex-row justify-between">
+              </div> */}
+              {/* <div className="flex flex-row justify-between">
                 <p>{`Tax ${tax ? `${computedTax}%` : ''} (VAT included):`}</p>
                 <div>
                   <NumericFormat
@@ -723,11 +990,178 @@ export default function Home() {
                     disabled
                   />
                 </div>
-              </div>
-              <br />
-              <div className="grow w-full border-dashed border-t-4 pt-3 flex flex-col justify-between">
-                <div className="flex flex-row justify-between">
-                  <p>Total:</p>
+              </div> */}
+              <div className="grow w-full border-t-4 pt-3 flex flex-col justify-between">
+                <br />
+                <div
+                  className={`flex flex-col gap-5 mt-3 py-3 px-3 pb-5 border ${
+                    !selectedItemIds.length
+                    ? 'border-white/30'
+                    : 'border-white'
+                  } rounded`}
+                >
+                  <CustomAutoComplete
+                    variant="standard"
+                    fullWidth
+                    disabled={!selectedItemIds.length}
+                    value={productUsed}
+                    required
+                    options={(localStorage.getItem('RELEASE:PU') as string[] ?? [])
+                      .map(value => ({ name: value }))}
+                    onAdd={(value) => {
+                      setProductUsed(value);
+                    }}
+                    onChange={({ name }) => {
+                      setProductUsed(name);
+                    }}
+                    label="Product Used:"
+                    inputSX={inputStyle}
+                  />
+                  <CustomAutoComplete
+                    required
+                    fullWidth
+                    variant="standard"
+                    value={productLotNumber}
+                    disabled={!selectedItemIds.length}
+                    options={(localStorage.getItem('RELEASE:PLN') as string[] ?? [])
+                      .map(value => ({ name: value }))}
+                    onAdd={(value) => {
+                      setProductLotNumber(value);
+                    }}
+                    onChange={({ name }) => {
+                      setProductLotNumber(name);
+                    }}
+                    label="Product Lot No.:"
+                    inputSX={inputStyle}
+                  />
+                  <div className='flex'>
+                    <TextField
+                      disabled={!selectedItemIds.length}
+                      label="Tare Weight:"
+                      color="secondary"
+                      size="small"
+                      fullWidth
+                      value={tareWeight.quantity}
+                      variant="standard"
+                      InputProps={{
+                        inputComponent: PesoNumberFormat as any,
+                      }}
+                      onChange={(e) => {
+                        setTareWeight((tareW) => ({
+                          ...tareW,
+                          quantity: Number(e.target.value),
+                        }));
+                      }}
+                      sx={inputStyle}
+                    />
+                    <Autocomplete
+                      fullWidth
+                      disabled={!selectedItemIds.length}
+                      options={measurements}
+                      size="small"
+                      value={tareWeight.unit_of_measurement}
+                      renderInput={(params) =>
+                        <TextField
+                          {...params}
+                          sx={inputStyle}
+                          variant="standard"
+                          label="Unit of Measurement"
+                        />
+                      }
+                      onChange={(e, newValue) => {
+                        setTareWeight((tareW) => ({
+                          ...tareW,
+                          unit_of_measurement: newValue ?? 'kilograms',
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div className='flex'>
+                    <TextField
+                      disabled={!selectedItemIds.length}
+                      label="Net Weight:"
+                      color="secondary"
+                      value={netWeight.quantity}
+                      size="small"
+                      fullWidth
+                      variant="standard"
+                      InputProps={{
+                        inputComponent: PesoNumberFormat as any,
+                      }}
+                      onChange={(e) => {
+                        setNetWeight((netW) => ({
+                          ...netW,
+                          quantity: Number(e.target.value),
+                        }));
+                      }}
+                      sx={inputStyle}
+                    />
+                    <Autocomplete
+                      fullWidth
+                      disabled={!selectedItemIds.length}
+                      options={measurements}
+                      size="small"
+                      value={netWeight.unit_of_measurement}
+                      renderInput={(params) =>
+                        <TextField
+                          {...params}
+                          sx={inputStyle}
+                          variant="standard"
+                          label="Unit of Measurement"
+                        />
+                      }
+                      onChange={(e, newValue) => {
+                        setNetWeight((netW) => ({
+                          ...netW,
+                          unit_of_measurement: newValue ?? 'kilograms',
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div className='flex'>
+                    <TextField
+                      disabled={!selectedItemIds.length}
+                      label="Gross Weight:"
+                      color="secondary"
+                      size="small"
+                      fullWidth
+                      variant="standard"
+                      value={grossWeight.quantity}
+                      InputProps={{
+                        inputComponent: PesoNumberFormat as any,
+                      }}
+                      onChange={(e) => {
+                        setGrossWeight((grossW) => ({
+                          ...grossW,
+                          quantity: Number(e.target.value),
+                        }));
+                      }}
+                      sx={inputStyle}
+                    />
+                    <Autocomplete
+                      disabled={!selectedItemIds.length}
+                      fullWidth
+                      options={measurements}
+                      size="small"
+                      value={grossWeight.unit_of_measurement}
+                      renderInput={(params) =>
+                        <TextField
+                          {...params}
+                          sx={inputStyle}
+                          variant="standard"
+                          label="Unit of Measurement"
+                        />
+                      }
+                      onChange={(e, newValue) => {
+                        setGrossWeight((grossW) => ({
+                          ...grossW,
+                          unit_of_measurement: newValue ?? 'kilograms',
+                        }));
+                      }}
+                    />
+                  </div>
+                  {/*
+                    <p>Total:</p>
                   <div>
                     <NumericFormat
                       className="mb-2 px-1 bg-transparent grow text-end"
@@ -773,7 +1207,7 @@ export default function Home() {
                 <div className="flex flex-row justify-between">
                   <div>
                     <p>Payment Method:</p>
-                    {/* <div className="flex flex-row justify-start items-center">
+                    <div className="flex flex-row justify-start items-center">
                       <p className="text-sm text-gray-600">Cash</p>
                       <PaymentUISwitch
                         checked={checked}
@@ -789,66 +1223,42 @@ export default function Home() {
                         }}
                       />
                       <p className="text-sm text-gray-600">Card</p>
-                    </div> */}
+                    </div>
                   </div>
                   <div>
                     <p className="capitalize">{selectedPaymentMethod}</p>
                   </div>
+                  */}
                 </div>
+                <br/>
                 <div className='w-full mt-5 flex flex-col gap-2'>
-                  {
-                    !(payment < total || !hasOrders)
-                    ? (
-                      <Button
-                        fullWidth
-                        disabled={payment < total || !hasOrders}
-                        variant="contained"
-                        color="inherit"
-                        sx={{ color: 'black' }}
-                        onClick={() => handlePurchaseItem()}
-                      >
-                        {`Place order (${getCommand?.('place-order')})`}
-                      </Button>
-                    )
-                    : null
-                  }
-                  {
-                    hasOrders
-                    ? (
-                      <>
-                        <Button
-                          fullWidth
-                          disabled={!hasOrders}
-                          variant="outlined"
-                          color="inherit"
-                          sx={{ color: 'white' }}
-                          onClick={handleAddPayment}
-                        >
-                          {`${payment === 0
-                            ? `Add Payment (${getCommand?.('add-payment')})`
-                            : `Edit Payment (${getCommand?.('add-payment')})`}`}
-                        </Button>
-                        <Button
-                          disabled={!hasOrders}
-                          fullWidth
-                          variant="text"
-                          color="inherit"
-                          sx={{ color: 'var(--info-text)' }}
-                          onClick={handleCancelOrder}
-                        >
-                          {`Cancel (${getCommand?.('cancel-order')})`}
-                        </Button>
-                      </>
-                    )
-                    : null
-                  }
+                  <Button
+                    fullWidth
+                    disabled={!hasOrders}
+                    variant="contained"
+                    color="inherit"
+                    sx={{ color: 'black' }}
+                    onClick={() => handlePurchaseItem()}
+                  >
+                    {`Place order (${getCommand?.('place-order')})`}
+                  </Button>
+                  <Button
+                    disabled={!hasOrders}
+                    fullWidth
+                    variant="text"
+                    color="inherit"
+                    sx={{ color: 'var(--info-text)' }}
+                    onClick={handleCancelOrder}
+                  >
+                    {`Cancel (${getCommand?.('cancel-order')})`}
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <Dialog
+      {/* <Dialog
         open={addPayment}
         onClose={() => setAddPayment(false)}
       >
@@ -908,8 +1318,8 @@ export default function Home() {
             Close
           </Button>
         </DialogActions>
-      </Dialog>
-      <Dialog
+      </Dialog> */}
+      {/* <Dialog
         open={addCoupon}
         onClose={() => setAddCoupon(false)}
       >
@@ -955,12 +1365,12 @@ export default function Home() {
             Apply
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
       <POSMenu
         list={categories}
         anchorEl={posMenuAnchorEl}
         open={Boolean(posMenuAnchorEl)}
-        onChange={(ids) => setCategoryIds(ids as Array<number>)}
+        onChange={(ids) => setCategoryIds(ids as Array<string>)}
         onClose={() => setPosMenuAnchorEl(null)}
       />
     </>

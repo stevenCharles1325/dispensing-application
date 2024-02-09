@@ -19,19 +19,22 @@ export class Transaction1697785919714 implements MigrationInterface {
             isGenerated: true,
           },
           {
+            name: 'transaction_code',
+            type: 'varchar',
+          },
+          {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true, // temporarily
           },
           {
             name: 'discount_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'discount',
           },
           {
             name: 'creator_id',
-            type: 'integer',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'creator',
           },
@@ -67,6 +70,31 @@ export class Transaction1697785919714 implements MigrationInterface {
             default: "'customer-payment'",
           },
           {
+            name: 'product_used',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'product_lot_number',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'tare_weight',
+            type: 'string',
+            isNullable: false,
+          },
+          {
+            name: 'net_weight',
+            type: 'string',
+            isNullable: false,
+          },
+          {
+            name: 'gross_weight',
+            type: 'string',
+            isNullable: false,
+          },
+          {
             name: 'method',
             type: 'varchar',
             isNullable: false,
@@ -87,7 +115,7 @@ export class Transaction1697785919714 implements MigrationInterface {
           {
             name: 'total',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: 'created_at',

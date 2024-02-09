@@ -26,9 +26,15 @@ export default class RoleDeleteEvent implements IEvent {
       const requesterHasPermission =
         eventData.user.hasPermission?.('delete-role');
 
-      const defaultRoleIds = [1, 2, 3, 4];
+      const defaultRoleIds = [
+        process.env.DEFAULT_ADMIN_ROLE_ID,
+        process.env.DEFAULT_CASHIER_ROLE_ID,
+        process.env.DEFAULT_OWNER_ROLE_ID,
+        process.env.DEFAULT_STORE_MANAGER_ROLE_ID,
+      ];
+
       if (
-        (typeof payload === 'number' && defaultRoleIds.includes(payload)) ||
+        (typeof payload === 'string' && defaultRoleIds.includes(payload)) ||
         (Array.isArray(payload) && payload.some((id ) => defaultRoleIds.includes(id)))
        ) {
         return {
@@ -45,10 +51,10 @@ export default class RoleDeleteEvent implements IEvent {
         if (Array.isArray(payload)) {
           for await (const id of payload) {
             await Bull('AUDIT_JOB', {
-              user_id: user.id as number,
+              user_id: user.id as unknown as string,
               resource_id: id.toString(),
               resource_table: 'roles',
-              resource_id_type: 'integer',
+              resource_id_type: 'uuid',
               action: 'delete',
               status: 'SUCCEEDED',
               description: `User ${user.fullName} has successfully deleted a Role`,
@@ -56,10 +62,10 @@ export default class RoleDeleteEvent implements IEvent {
           }
         } else {
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as unknown as string,
             resource_id: payload.toString(),
             resource_table: 'roles',
-            resource_id_type: 'integer',
+            resource_id_type: 'uuid',
             action: 'delete',
             status: 'SUCCEEDED',
             description: `User ${user.fullName} has successfully deleted a Role`,
@@ -74,7 +80,7 @@ export default class RoleDeleteEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'roles',
         action: 'delete',
         status: 'FAILED',

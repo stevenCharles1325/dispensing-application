@@ -39,7 +39,6 @@ export default class ItemDeleteEvent implements IEvent {
         const updatedItem = ItemRepository.merge(item, itemUpdate);
         const errors = await validator(updatedItem);
 
-        console.log(itemUpdate);
         if (errors.length) {
           return {
             errors,
@@ -64,14 +63,14 @@ export default class ItemDeleteEvent implements IEvent {
           updatedItem.supplier = undefined;
         }
 
-        if (itemUpdate.discount_id) {
-          const discount = await DiscountRepository.findOneByOrFail({
-            id: itemUpdate.discount_id
-          });
-          updatedItem.discount = discount;
-        } else {
-          updatedItem.discount = undefined;
-        }
+        // if (itemUpdate.discount_id) {
+        //   const discount = await DiscountRepository.findOneByOrFail({
+        //     id: itemUpdate.discount_id
+        //   });
+        //   updatedItem.discount = discount;
+        // } else {
+        //   updatedItem.discount = undefined;
+        // }
 
         updatedItem.brand = await BrandRepository.findOneByOrFail({
           id: itemUpdate.brand_id,
@@ -83,7 +82,7 @@ export default class ItemDeleteEvent implements IEvent {
         const data = await ItemRepository.save(updatedItem);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: id.toString(),
           resource_table: 'items',
           resource_id_type: 'uuid',
@@ -100,7 +99,7 @@ export default class ItemDeleteEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_id: id.toString(),
         resource_table: 'items',
         resource_id_type: 'uuid',

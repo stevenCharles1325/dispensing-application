@@ -1,5 +1,6 @@
 const itemStatuses = [
   'available',
+  'expired',
   'on-hold',
   'out-of-stock',
   'discontinued',

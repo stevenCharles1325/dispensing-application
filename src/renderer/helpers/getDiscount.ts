@@ -26,7 +26,7 @@ export default function getDiscount(
   return {
     discount,
     discountedPrice,
-    formattedDiscountedPrice: `₱ ${discountedPrice}`,
-    formattedDiscount: `₱ ${discount}`,
+    formattedDiscountedPrice: `₱ ${discountedPrice.toFixed(2)}`,
+    formattedDiscount: `₱ ${discount.toFixed(2)}`,
   };
 }

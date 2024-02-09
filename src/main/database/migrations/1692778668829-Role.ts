@@ -13,15 +13,10 @@ export class Role1692778668829 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
-          },
-          {
-            name: 'system_id',
-            type: 'varchar',
-            isNullable: true,
           },
           {
             name: 'name',
@@ -53,21 +48,9 @@ export class Role1692778668829 implements MigrationInterface {
       }),
       true
     );
-
-    await queryRunner.createForeignKey(
-      'roles',
-      new TableForeignKey({
-        name: 'system',
-        columnNames: ['system_id'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'systems',
-        onDelete: 'CASCADE',
-      })
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('roles', 'system');
     await queryRunner.dropTable('roles');
   }
 }

@@ -21,11 +21,10 @@ export class AuditTrail1698132562574 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
           },
           {
             name: 'user_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'user',
           },
@@ -48,7 +47,7 @@ export class AuditTrail1698132562574 implements MigrationInterface {
           {
             name: 'resource_id_type',
             type: 'varchar',
-            enum: ['uuid', 'integer'],
+            enum: ['uuid'],
             default: "'uuid'",
             isNullable: true,
           },

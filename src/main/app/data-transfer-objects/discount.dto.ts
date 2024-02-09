@@ -2,9 +2,9 @@ import ItemDTO from "./item.dto";
 import UserDTO from "./user.dto";
 
 export default interface DiscountDTO {
-  id: number;
+  id: string;
   system_id: string
-  creator_id: number;
+  creator_id: string;
   coupon_code: string;
   title: string;
   description?: string;

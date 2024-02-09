@@ -10,7 +10,9 @@ import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 import InventoryRecordRepository from 'App/repositories/inventory-record.repository';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import ItemRepository from 'App/repositories/item.repository';
-import UserRepository from 'App/repositories/user.repository';
+import unit from 'unitmath';
+import getUOFSymbol from 'App/modules/get-uof-symbol.module';
+import unitQuantityCalculator from 'App/modules/unit-quantity-calculator.module';
 
 export default class InventoryRecordCreateEvent implements IEvent {
   public channel: string = 'inventory-record:create';
@@ -55,12 +57,30 @@ export default class InventoryRecordCreateEvent implements IEvent {
           } as unknown as IResponse<IPOSValidationError[]>;
         }
 
+        const leftOperand = {
+          quantity: item.stock_quantity,
+          unit: item.unit_of_measurement,
+        }
+        const rightOperand = {
+          quantity: record.quantity,
+          unit: record.unit_of_measurement,
+        }
+
+        const [quantity, um] = unitQuantityCalculator(
+          leftOperand,
+          rightOperand,
+          getUOFSymbol,
+          record.type === 'stock-in' ? 'add' : 'sub',
+        );
+
         if (record.type === 'stock-in') {
-          item.stock_quantity += record.quantity;
+          item.stock_quantity = quantity;
+          item.unit_of_measurement = um;
         }
 
         if (record.type === 'stock-out') {
-          item.stock_quantity -= record.quantity;
+          item.stock_quantity = quantity;
+          item.unit_of_measurement = um;
         }
 
         await ItemRepository.save(item);
@@ -70,10 +90,10 @@ export default class InventoryRecordCreateEvent implements IEvent {
         ) as unknown as InventoryRecordDTO;
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: data.id.toString(),
-          resource_table: 'inventory-record',
-          resource_id_type: 'integer',
+          resource_table: 'inventory_records',
+          resource_id_type: 'uuid',
           action: 'create',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully created a new Stocks-record`,
@@ -87,8 +107,8 @@ export default class InventoryRecordCreateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
-        resource_table: 'inventory-record',
+        user_id: user.id as unknown as string,
+        resource_table: 'inventory_records',
         action: 'create',
         status: 'FAILED',
         description: `User ${user.fullName} has no permission to create a new Stocks-record`,

@@ -61,7 +61,7 @@ export default class ImageCreateEvent implements IEvent {
 
         const image = ImageRepository.create({
           ...imageObj,
-          uploader_id: eventData.user.id as number,
+          uploader_id: eventData.user.id as unknown as string,
           bucket_name: bucketName,
           url: imagePath,
         });
@@ -79,10 +79,10 @@ export default class ImageCreateEvent implements IEvent {
         const data: ImageDTO = await ImageRepository.save(image);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: data.id.toString(),
           resource_table: 'images',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'create',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully created a new Image`,
@@ -96,7 +96,7 @@ export default class ImageCreateEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'images',
         action: 'create',
         status: 'FAILED',

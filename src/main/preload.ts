@@ -27,11 +27,13 @@ import IDeviceInfo from 'App/interfaces/barcode/barcode.device-info.interface';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import ShortcutKeyDTO from 'App/data-transfer-objects/shortcut-key.dto';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
-import ITransactionSpreadSheet from 'App/interfaces/transaction/export/spreadsheet.transaction.interface';
-import ITransactionSQL from 'App/interfaces/transaction/export/sql.transaction.interface';
+import SystemDTO from 'App/data-transfer-objects/system.dto';
+import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import PrinterDTO from 'App/data-transfer-objects/printer.dto';
+import { IUnitCalculatorOperands } from 'App/modules/unit-quantity-calculator.module';
+import { IPrintReceiptData } from 'App/interfaces/pos/pos.printer.receipt.interface';
 
 export type Channels = 'ipc-pos';
-
 
 /* ================================
 +
@@ -61,6 +63,52 @@ const mainHandler = {
       }
     ) => void
   ) => ipcRenderer.on('main-message', callback),
+  globalEmit: (
+    channel: string,
+    data: any
+  ) => ipcRenderer.invoke('broadcast-message', channel, data),
+}
+
+/* ================================
++
++         POS EVENT HANDLER
++
++ ================================ */
+const posHandler = {
+  unitQuantityCalculator: async (
+    leftOperand: IUnitCalculatorOperands,
+    rightOperand: IUnitCalculatorOperands,
+    operation: 'add' | 'sub' = 'add',
+  ): Promise<
+    IResponse<
+      | string[]
+      | IPOSError[]
+      | [quantity: number, unit: string]
+    >
+  > =>
+    ipcRenderer.invoke(
+      'pos:unit-calculator',
+      leftOperand,
+      rightOperand,
+      operation,
+    ),
+}
+
+/* ================================
++
++         PDF EVENT HANDLER
++
++ ================================ */
+const pdfHandler = {
+  download: async (
+    pdfFileName: string,
+    pdfContent: string,
+  ): Promise<IResponse< string[] | IPOSError[]>> =>
+    ipcRenderer.invoke(
+      'pdf:download',
+      pdfFileName,
+      pdfContent,
+    ),
 }
 
 /* ================================
@@ -77,18 +125,51 @@ const barcodeHandler = {
     ipcRenderer.invoke('barcode:select', device),
 };
 
-
+/* ================================
++
++       BARCODE EVENT HANDLER
++
++ ================================ */
+const printerHandler = {
+  devices: async (): Promise<IResponse<string[] | IPOSError[] | PrinterDTO[]>> =>
+    ipcRenderer.invoke('printer:devices'),
+  select: async (device: PrinterDTO | null): Promise<IResponse<string[] | IPOSError[] | void>> =>
+    ipcRenderer.invoke('printer:select', device),
+  print: async (data: IPrintReceiptData): Promise<IResponse<string[] | IPOSError[] | void>> =>
+    ipcRenderer.invoke('printer:print', data),
+};
 
 /* ================================
 +
-+   USER VALIDATION EVENT HANDLER
++   SYSTEM VALIDATION EVENT HANDLER
 +
 + ================================ */
-const validationHandler = {
-  isUserPermitted: async (): Promise<boolean> =>
-    ipcRenderer.invoke('get:master-key'),
-  makeUserPermitted: async (key: string): Promise<boolean> =>
-    ipcRenderer.invoke('set:master-key', key),
+const systemHandler = {
+  hasSystemSetup: async (): Promise<boolean> => {
+    const res = await ipcRenderer.invoke(
+      'system:show',
+      'all',
+      1,
+      15,
+      process.env.SYSTEM_KEY
+    );
+
+    if (res.status === 'SUCCESS') {
+      return Boolean(res.data.data.length);
+    }
+
+    return false;
+  },
+  getSystems: async (
+    payload: Record<string, any | any[]> | string = 'all',
+    page: number = 1,
+    total: number | 'max' = 15
+  ): Promise<IResponse<string[] | IPOSError[] | IPagination<SystemDTO>>> =>
+    ipcRenderer.invoke('system:show', payload, page, total),
+  createSystem: async (
+    payload: Partial<SystemDTO>,
+  ): Promise<IResponse<string[] | IPOSError[] | IPOSValidationError[] | SystemDTO>> =>
+    ipcRenderer.invoke('system:create', payload, process.env.SYSTEM_KEY),
 };
 
 /* ================================
@@ -142,21 +223,22 @@ const userHandler = {
     ipcRenderer.invoke('user:show', payload, page, total),
 
   createUser: async (
-    payload: UserDTO
+    payload: Partial<UserDTO>,
+    ...others: any[]
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | UserDTO[]>
-  > => ipcRenderer.invoke('user:create', payload),
+  > => ipcRenderer.invoke('user:create', payload, ...others),
 
   updateUser: async (
-    id: number,
+    id: string,
     payload: Partial<UserDTO>
   ): Promise<IResponse<string[] | IPOSError[] | UserDTO>> =>
     ipcRenderer.invoke('user:update', id, payload),
 
-  archiveUser: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  archiveUser: async (id: string): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('user:archive', id),
 
-  deleteUser: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteUser: async (id: string | string[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('user:delete', id),
 };
 
@@ -174,7 +256,7 @@ const shortcutKeyHandler = {
     ipcRenderer.invoke('shortcut-key:show', payload, page, total),
 
   updateShortcutKey: async (
-    id: number,
+    id: string,
     payload: Pick<ShortcutKeyDTO, 'key' | 'key_combination'>
   ): Promise<IResponse<string[] | IPOSError[] | ShortcutKeyDTO>> =>
     ipcRenderer.invoke('shortcut-key:update', id, payload),
@@ -195,22 +277,22 @@ const roleHandler = {
 
   createRole: async (
     payload: RoleDTO,
-    permissionIds: number[],
+    permissionIds: string[],
   ): Promise<
     IResponse<string[] | IPOSError[] | IPOSValidationError[] | RoleDTO[]>
   > => ipcRenderer.invoke('role:create', payload, permissionIds),
 
   updateRole: async (
-    id: number,
+    id: string,
     payload: Partial<RoleDTO>,
-    permissionIds: number[],
+    permissionIds: string[],
   ): Promise<IResponse<string[] | IPOSError[] | UserDTO>> =>
     ipcRenderer.invoke('role:update', id, payload, permissionIds),
 
-  archiveRole: async (id: number): Promise<IResponse<string[] | IPOSError[]>> =>
+  archiveRole: async (id: string): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('role:archive', id),
 
-  deleteRole: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteRole: async (id: string | string[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('role:delete', id),
 };
 
@@ -290,12 +372,13 @@ const discountHandler = {
   > => ipcRenderer.invoke('discount:create', payload, itemIds),
 
   updateDiscount: async (
-    id: number,
-    payload: ItemDTO['id'][],
+    id: string,
+    payload: DiscountDTO,
+    itemIds: ItemDTO['id'][],
   ): Promise<IResponse<string[] | IPOSError[] | DiscountDTO>> =>
-    ipcRenderer.invoke('discount:update', id, payload),
+    ipcRenderer.invoke('discount:update', id, payload, itemIds),
 
-  deleteDiscount: async (id: number | number[]): Promise<IResponse<string[] | IPOSError[]>> =>
+  deleteDiscount: async (id: string | string[]): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('discount:delete', id),
 };
 
@@ -339,18 +422,18 @@ const brandHandler = {
   > => ipcRenderer.invoke('brand:create', payload),
 
   updateBrand: async (
-    id: number,
+    id: string,
     payload: Partial<BrandDTO>
   ): Promise<IResponse<string[] | IPOSError[] | BrandDTO>> =>
     ipcRenderer.invoke('brand:update', id, payload),
 
   archiveBrand: async (
-    id: number
+    id: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('brand:archive', id),
 
   deleteBrand: async (
-    id: number | number[]
+    id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('brand:delete', id),
 };
@@ -375,18 +458,18 @@ const categoryHandler = {
   > => ipcRenderer.invoke('category:create', payload),
 
   updateCategory: async (
-    id: number,
+    id: string,
     payload: Partial<CategoryDTO>
   ): Promise<IResponse<string[] | IPOSError[] | CategoryDTO>> =>
     ipcRenderer.invoke('category:update', id, payload),
 
   archiveCategory: async (
-    id: number
+    id: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('category:archive', id),
 
   deleteCategory: async (
-    id: number | number[]
+    id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('category:delete', id),
 };
@@ -415,18 +498,18 @@ const imageHandler = {
   > => ipcRenderer.invoke('image:create', bucketName, payload),
 
   updateImage: async (
-    id: number,
+    id: string,
     payload: Partial<ImageDTO>
   ): Promise<IResponse<string[] | IPOSError[] | ImageDTO>> =>
     ipcRenderer.invoke('image:update', id, payload),
 
   archiveImage: async (
-    id: number
+    id: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('image:archive', id),
 
   deleteImage: async (
-    id: number | number[]
+    id: string | string[]
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('image:delete', id),
 };
@@ -487,18 +570,18 @@ const paymentHandler = {
   > => ipcRenderer.invoke('payment:create', payload),
 
   // updateSupplier: async (
-  //   id: number,
+  //   id: string,
   //   payload: Partial<SupplierDTO>
   // ): Promise<IResponse<string[] | IPOSError[] | SupplierDTO>> =>
   //   ipcRenderer.invoke('supplier:update', id, payload),
 
   // archiveSupplier: async (
-  //   id: number
+  //   id: string
   // ): Promise<IResponse<string[] | IPOSError[]>> =>
   //   ipcRenderer.invoke('supplier:archive', id),
 
   // deleteSupplier: async (
-  //   id: number | number[]
+  //   id: string | string[]
   // ): Promise<IResponse<string[] | IPOSError[]>> =>
   //   ipcRenderer.invoke('supplier:delete', id),
 };
@@ -563,8 +646,13 @@ const exportHandler = {
   exportTransactionHistory: async (
     exportFormat: 'SQL' | 'SPREADSHEET' = 'SPREADSHEET',
     recordType?: 'WHOLE' | 'CURRENT:DAY' | 'CURRENT:MONTH' | 'CURRENT:YEAR' | undefined,
-  ): Promise<IResponse<string[] | IPOSError[] | (ITransactionSpreadSheet | ITransactionSQL)>> =>
+  ): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
     ipcRenderer.invoke('transaction-history:export', exportFormat, recordType),
+
+  exportInventoryRecord: async (
+    ids: string[] | null,
+  ): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
+    ipcRenderer.invoke('inventory-record:export', ids),
 };
 
 const importHandler = {
@@ -572,11 +660,22 @@ const importHandler = {
     sqlFilePath: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('transaction-history:import', sqlFilePath),
+  importInventoryRecords: async (
+    filePath: string
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('inventory-record:import', filePath),
+  importInventory: async (
+    filePath: string
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('inventory:import', filePath),
 };
 
 // EXPOSING HANDLERS
+contextBridge.exposeInMainWorld('pos', posHandler);
+contextBridge.exposeInMainWorld('pdf', pdfHandler);
 contextBridge.exposeInMainWorld('storage', storageHandler);
 contextBridge.exposeInMainWorld('barcode', barcodeHandler);
+contextBridge.exposeInMainWorld('printer', printerHandler);
 contextBridge.exposeInMainWorld('main', mainHandler);
 contextBridge.exposeInMainWorld('auth', authHandler);
 contextBridge.exposeInMainWorld('peer', peerHandler);
@@ -595,12 +694,15 @@ contextBridge.exposeInMainWorld('payment', paymentHandler);
 contextBridge.exposeInMainWorld('auditTrail', auditTrailHandler);
 contextBridge.exposeInMainWorld('report', reportHandler);
 contextBridge.exposeInMainWorld('notif', notifHandler);
-contextBridge.exposeInMainWorld('validation', validationHandler);
+contextBridge.exposeInMainWorld('system', systemHandler);
 contextBridge.exposeInMainWorld('export', exportHandler);
 contextBridge.exposeInMainWorld('import', importHandler);
 
+export type POSHandler = typeof posHandler;
+export type PDFHandler= typeof pdfHandler;
 export type StorageHandler = typeof storageHandler;
 export type BarcodeHandler = typeof barcodeHandler;
+export type PrinterHandler = typeof printerHandler;
 export type MainHandler = typeof mainHandler;
 export type AuthHandler = typeof authHandler;
 export type PeerHandler = typeof peerHandler;
@@ -619,6 +721,6 @@ export type PaymentHandler = typeof paymentHandler;
 export type AuditTrailHandler = typeof auditTrailHandler;
 export type ReportHandler = typeof reportHandler;
 export type NotifHandler = typeof notifHandler;
-export type ValidationHandler = typeof validationHandler;
+export type SystemHandler = typeof systemHandler;
 export type ExportHandler = typeof exportHandler;
 export type ImportHandler = typeof importHandler;

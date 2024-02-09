@@ -9,13 +9,13 @@ const getSoldItems = async (): Promise<{
   const { totalYesterday: soldYesterday } =
   (await OrderRepository.createQueryBuilder('order')
       .select('SUM(order.quantity)', 'totalYesterday')
-      .where(`strftime('%d', datetime(order.created_at, "localtime")) = strftime('%d', date('now', '-1 day'))`)
+      .where(`strftime('%d', datetime(order.created_at, "localtime")) = strftime('%d', date('now', '-1 day', 'localtime'))`)
       .getRawOne()) ?? 0;
 
   const { totalToday: soldToday } =
     (await OrderRepository.createQueryBuilder('order')
       .select('SUM(order.quantity)', 'totalToday')
-      .where(`strftime('%d', datetime(order.created_at, "localtime")) = strftime('%d', date('now'))`)
+      .where(`strftime('%d', datetime(order.created_at, "localtime")) = strftime('%d', date('now', 'localtime'))`)
       .getRawOne()) ?? 0;
 
   return {

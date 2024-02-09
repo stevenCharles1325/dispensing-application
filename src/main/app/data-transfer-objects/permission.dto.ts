@@ -1,5 +1,5 @@
 export default interface PermissionDTO {
-  id: number;
+  id: string;
   name: string;
   kebab: string;
   group_name: string;

@@ -29,7 +29,7 @@ export default class AuthUpdateMeEvent implements IEvent {
   > {
     try {
       const { user } = eventData;
-      const id = user.id as number;
+      const id = user.id as unknown as string;
       const userUpdate = eventData.payload[0];
       const { isChangingPassword = false } = userUpdate;
       const authService = Provider.ioc<IAuthService>('AuthProvider');
@@ -48,10 +48,10 @@ export default class AuthUpdateMeEvent implements IEvent {
             userUpdate.password = bcrypt.hashSync(userUpdate.password, salt);
           } else {
             await Bull('AUDIT_JOB', {
-              user_id: user.id as number,
+              user_id: user.id as string,
               resource_id: id.toString(),
               resource_table: 'users',
-              resource_id_type: 'integer',
+              resource_id_type: 'uuid',
               action: 'update',
               status: 'FAILED',
               description: `User ${user.fullName} has failed to update their profile due to incorrect password`,
@@ -83,6 +83,7 @@ export default class AuthUpdateMeEvent implements IEvent {
       const user_data = {
         id: data.id,
         email: data.email,
+        system_id: data.system_id,
         image_url: data.image_url,
         first_name: data.first_name,
         last_name: data.last_name,
@@ -108,10 +109,10 @@ export default class AuthUpdateMeEvent implements IEvent {
       authService.setAuthUser(payload);
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as string,
         resource_id: id.toString(),
         resource_table: 'users',
-        resource_id_type: 'integer',
+        resource_id_type: 'uuid',
         action: 'update',
         status: 'SUCCEEDED',
         description: `User ${user.fullName} has successfully updated their profile`,

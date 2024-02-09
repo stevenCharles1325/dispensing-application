@@ -27,10 +27,10 @@ export default class AuthSignIn implements IEvent {
 
         if (user?.status === 'deactivated') {
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
+            user_id: user.id as string,
             resource_id: user.id.toString() as string,
             resource_table: 'users',
-            resource_id_type: 'integer',
+            resource_id_type: 'uuid',
             action: 'sign-in',
             status: 'FAILED',
             description: `Deactivated user ${user.first_name} ${user.last_name} has tried signing-in`,
@@ -44,10 +44,10 @@ export default class AuthSignIn implements IEvent {
         }
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as string,
           resource_id: user.id.toString() as string,
           resource_table: 'users',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'sign-in',
           status: 'SUCCEEDED',
           description: `User ${user.first_name} ${user.last_name} has successfully signed-in`,

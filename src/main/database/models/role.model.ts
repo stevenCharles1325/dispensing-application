@@ -15,13 +15,8 @@ import type { Permission } from './permission.model';
 
 @Entity('roles')
 export class Role {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
-
-  @Column({
-    nullable: true,
-  })
-  system_id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   @MinLength(5, { message: ValidationMessage.minLength })

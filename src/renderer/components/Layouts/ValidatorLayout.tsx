@@ -12,19 +12,19 @@ import {
 export default function ValidatorLayout() {
   const navigation = useNavigate();
   const outlet = useOutlet();
-  const { isUserPermitted } = useLoaderData() as any;
+  const { hasSystemSetup } = useLoaderData() as any;
 
   useEffect(() => {
-    if (!isUserPermitted) {
-      navigation('/validate-user');
+    if (!hasSystemSetup) {
+      navigation('/setup');
     }
-  }, [isUserPermitted, navigation]);
+  }, [hasSystemSetup, navigation]);
 
   return (
     <Suspense fallback={<LinearProgress />}>
       <Await
-        resolve={isUserPermitted}
-        errorElement={<Navigate to="/validate-user" />}
+        resolve={hasSystemSetup}
+        errorElement={<Navigate to="/setup" />}
         // eslint-disable-next-line react/no-children-prop
         children={() => <>{outlet}</>}
       />

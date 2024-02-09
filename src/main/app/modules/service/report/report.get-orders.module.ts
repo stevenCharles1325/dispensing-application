@@ -9,13 +9,13 @@ const getOrders = async (): Promise<{
   const { totalYesterday: transactionYesterday } =
   (await TransactionRepository.createQueryBuilder('transaction')
       .select('COUNT(*)', 'totalYesterday')
-      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now', '-1 day'))`)
+      .where(`strftime('%d', datetime(transaction.created_at, 'localtime')) = strftime('%d', date('now', '-1 day', 'localtime'))`)
       .getRawOne()) ?? 0;
 
   const { totalToday: transactionToday } =
     (await TransactionRepository.createQueryBuilder('transaction')
       .select('COUNT(*)', 'totalToday')
-      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now'))`)
+      .where(`strftime('%d', datetime(transaction.created_at, "localtime")) = strftime('%d', date('now', 'localtime'))`)
       .getRawOne()) ?? 0;
 
   return {

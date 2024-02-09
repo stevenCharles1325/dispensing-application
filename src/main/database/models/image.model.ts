@@ -15,11 +15,11 @@ import type { User } from './user.model';
 
 @Entity('images')
 export class Image {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  uploader_id: number;
+  uploader_id: string;
 
   @Column({ unique: true })
   url: string;

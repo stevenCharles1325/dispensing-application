@@ -14,19 +14,19 @@ export class RolePermissions1692779349994 implements MigrationInterface {
           {
             name: 'id',
             type: 'integer',
+            generationStrategy: 'increment',
             isPrimary: true,
             isGenerated: true,
-            generationStrategy: 'increment',
           },
           {
             name: 'role_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'role',
           },
           {
             name: 'permission_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'permission',
           },

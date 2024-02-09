@@ -8,6 +8,7 @@ import {
   OneToOne,
   OneToMany,
   JoinColumn,
+  BeforeInsert,
   CreateDateColumn,
   PrimaryGeneratedColumn,
   AfterLoad,
@@ -26,9 +27,43 @@ import type { User } from './user.model';
 import type { Discount } from './discount.model';
 import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 import { Bull } from 'Main/jobs';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
 
 @Entity('transactions')
 export class Transaction {
+  @BeforeInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
+  @BeforeInsert()
+  async computeTransactionCode() {
+    const TransactionRepository = global.datasource.getRepository('transactions');
+
+    const date = new Date();
+
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+
+    const count = ((await TransactionRepository.createQueryBuilder()
+      .getCount()) + 1)
+      .toString()
+      .padStart(2, '0');
+
+    this.transaction_code = `${year}${month}${day}${count}`;
+  }
+
   @AfterInsert()
   async discountTotalUsageListener() {
     const DiscountRepository = global.datasource.getRepository('discounts');
@@ -97,7 +132,7 @@ export class Transaction {
     if (!this.creator) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'users' WHERE id = ${this.creator_id}`
+        `SELECT * FROM 'users' WHERE id = '${this.creator_id}'`
       );
 
       this.creator = rawData[0] as User;
@@ -116,6 +151,18 @@ export class Transaction {
     }
   }
 
+  @AfterLoad()
+  async getSystem() {
+    if (!this.system) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'systems' WHERE id = '${this.system_id}'`
+      );
+
+      this.system = rawData[0] as System;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -124,11 +171,14 @@ export class Transaction {
   })
   system_id: string | null;
 
+  @Column({ nullable: true })
+  transaction_code: string;
+
   @Column()
-  creator_id: number;
+  creator_id: string;
 
   @Column({ nullable: true })
-  discount_id: number;
+  discount_id: string;
 
   @Column()
   @IsNotEmpty({
@@ -153,6 +203,46 @@ export class Transaction {
     message: ValidationMessage.isIn,
   })
   type: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  product_used: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  product_lot_number: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  tare_weight: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  net_weight: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsNotEmpty({
+    message: ValidationMessage.notEmpty
+  })
+  gross_weight: string;
 
   @Column()
   @IsIn(paymentTypes, {

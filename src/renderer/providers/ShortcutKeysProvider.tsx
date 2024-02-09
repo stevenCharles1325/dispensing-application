@@ -22,6 +22,7 @@ interface ShortcutKeyDTOHandler extends ShortcutKeyDTO {
 
 interface IShortcutKeyContext {
   addListener: (data: ShortcutKeyData | ShortcutKeyData[]) => void;
+  reset: () => void;
   getCommand: (key: string) => string;
   refresh: () => void;
 }
@@ -59,6 +60,12 @@ export default function ShortcutKeysProvider({ children }: React.PropsWithChildr
   });
 
   const keys = data?.data as ShortcutKeyDTO[] ?? [];
+  const mergedKeysAndHandlers: ShortcutKeyDTOHandler[] = useMemo(() => {
+    return keys.map((data) => ({
+      ...data,
+      handler: shortcutKeys[data.key],
+    }));
+  }, [shortcutKeys, keys]);
 
   const addListener = useCallback((data: ShortcutKeyData | ShortcutKeyData[]) => {
     if (Array.isArray(data)) {
@@ -76,6 +83,14 @@ export default function ShortcutKeysProvider({ children }: React.PropsWithChildr
     }
   }, [shortcutKeys]);
 
+  const reset = useCallback(() => {
+    if (mergedKeysAndHandlers.length && !isLoading) {
+      mergedKeysAndHandlers.forEach((data) => {
+        hotkeys.unbind(data.key_combination);
+      });
+    }
+  }, [mergedKeysAndHandlers]);
+
   const getCommand = useCallback((key: string) => {
     return keys.find((data) => data.key === key)?.key_combination ?? '';
   }, [keys]);
@@ -83,18 +98,12 @@ export default function ShortcutKeysProvider({ children }: React.PropsWithChildr
   const value = useMemo(
     () => ({
       addListener,
+      reset,
       getCommand,
       refresh: refetch,
     }),
     [addListener, shortcutKeys]
   );
-
-  const mergedKeysAndHandlers: ShortcutKeyDTOHandler[] = useMemo(() => {
-    return keys.map((data) => ({
-      ...data,
-      handler: shortcutKeys[data.key],
-    }));
-  }, [shortcutKeys, keys]);
 
   useEffect(() => {
     if (mergedKeysAndHandlers.length && !isLoading) {
@@ -112,6 +121,8 @@ export default function ShortcutKeysProvider({ children }: React.PropsWithChildr
         });
       });
     }
+
+    return () => reset();
   }, [mergedKeysAndHandlers, isLoading]);
 
   return (

@@ -4,18 +4,15 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Chip, Dialog, Slide } from '@mui/material';
+import { Chip, Collapse, Dialog, Divider, IconButton, Slide, styled, useMediaQuery, useTheme } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
-import formatCurrency from 'UI/helpers/formatCurrency';
 import { TransitionProps } from '@mui/material/transitions';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from "react-router-dom";
 
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
-import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
-import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
@@ -30,6 +27,12 @@ import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useConfirm from 'UI/hooks/useConfirm';
+import { ChevronLeftOutlined, ChevronRightOutlined, DownloadOutlined, UploadOutlined } from '@mui/icons-material';
+import useErrorHandler from 'UI/hooks/useErrorHandler';
+import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
+import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
+
+type IImportModule = 'INVENTORY' | 'STOCKS';
 
 const columns: Array<GridColDef> = [
   {
@@ -42,10 +45,10 @@ const columns: Array<GridColDef> = [
     renderCell: ({ value }) => `${value?.length ? value : '—'}`
   },
   {
-    field: 'sku',
-    headerName: 'SKU (Stock Keeping Unit)',
+    field: 'item_code',
+    headerName: 'Item ID',
     flex: 1,
-    type: 'number',
+    type: 'string',
     align: 'left',
     headerAlign: 'left',
   },
@@ -60,12 +63,6 @@ const columns: Array<GridColDef> = [
     headerName: 'Quantity',
     flex: 1,
     type: 'string',
-  },
-  {
-    field: 'selling_price',
-    headerName: 'Selling Price (Peso)',
-    flex: 1,
-    type: 'number',
   },
   {
     field: 'status',
@@ -96,6 +93,18 @@ const columns: Array<GridColDef> = [
     },
   }
 ];
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 const getItems = async (
   searchText = '',
@@ -131,11 +140,19 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Inventory() {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('xl'));
+  const [collapse, setCollapse] = useState(false);
+
   const confirm = useConfirm();
+  const errorHandler = useErrorHandler();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [barcodeNumber, setBarcodeNumber] = useState<string | null>(null);
 
   const [brands, setBrands] = useState<Array<BrandDTO>>([]);
   const [suppliers, setSuppliers] = useState<Array<SupplierDTO>>([]);
+
+  const [moduleName, setModuleName] = useState<IImportModule | null>(null);
 
   const [categories, setCategories] = useState<Array<CategoryDTO>>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -190,6 +207,13 @@ export default function Inventory() {
     setSuppliers(pagination.data);
   };
 
+  const inputFileRef = useRef<HTMLInputElement>(null);
+
+  const handleSelectFileToImport = (moduleName: IImportModule = 'INVENTORY') => {
+    inputFileRef.current?.click();
+    setModuleName(moduleName);
+  }
+
   useEffect(() => {
     getBrands();
     getCategories();
@@ -198,6 +222,10 @@ export default function Inventory() {
     setPlaceHolder?.('Search for product name');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setPlaceHolder]);
+
+  const handleCollapse = () => {
+    setCollapse((collapse) => !collapse);
+  }
 
   const handleAddNewItem = () => {
     console.log('Adding new item');
@@ -238,18 +266,126 @@ export default function Inventory() {
     setModalAction(null);
   }
 
-  const handleSelectItemByBarcode = useCallback(
-    (itemBarcode: string) => {
-      const item = items.find(({ barcode }) => barcode === itemBarcode);
+  const handleSelectItemByBarcode = useCallback((_, payload) => {
+    if (
+      payload.channel === 'BARCODE:DATA' &&
+      payload.data?.length &&
+      items?.length &&
+      displayAlert
+    ) {
+      setBarcodeNumber(payload.data);
+    }
 
-      if (item) {
-        setSelectedIds([item.id]);
-      } else {
-        displayAlert?.(`Unable to find item with code ${itemBarcode}`, 'error');
+    if (payload.channel === 'BARCODE:ERROR') {
+      displayAlert?.(payload.data, 'error');
+    }
+  }, [items, displayAlert]);
+
+  const handleImportStocks = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      confirm?.(
+        'Are you sure you want to import this file?',
+        async (agreed) => {
+          if (agreed) {
+            const res = await window.import.importInventoryRecords(file.path);
+
+            if (res.status === 'ERROR') {
+              errorHandler({
+                errors: res.errors,
+              });
+
+              refetchItems();
+              return;
+            }
+
+            refetchItems();
+            displayAlert?.(
+              `Processing file...`,
+              'info'
+            );
+            return;
+          }
+        }
+      );
+    }
+
+    setModuleName(null);
+
+    if (inputFileRef?.current) {
+      inputFileRef.current.value = '';
+    }
+  }
+
+  const handleImportInventory = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      confirm?.(
+        'Are you sure you want to import this file?',
+        async (agreed) => {
+          if (agreed) {
+            const res = await window.import.importInventory(file.path);
+
+            console.log(res);
+            if (res.status === 'ERROR') {
+              errorHandler({
+                errors: res.errors,
+              });
+
+              refetchItems();
+              return;
+            }
+
+            refetchItems();
+            displayAlert?.(
+              `Processing file...`,
+              'info'
+            );
+            return;
+          }
+        }
+      );
+    }
+
+    setModuleName(null);
+    if (inputFileRef?.current) {
+      inputFileRef.current.value = '';
+    }
+  }
+
+  const handleExport = (ids: string[] | null = null) => {
+    let message = 'Do you want to export stocks record for all items?';
+
+    ids = ids ?? selectedIds;
+
+    if (ids) {
+      message = 'Do you want to export stocks record for this item?'
+    }
+
+    confirm?.(message, async (agreed) => {
+      if (agreed) {
+        const res = await window.export.exportInventoryRecord(ids);
+
+        if (res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
+
+          return;
+        }
+
+        const { filePath } = res.data as IExportResult;
+
+        displayAlert?.(
+          `Successful! File is saved at ${filePath}`,
+          'success'
+        );
+        return;
       }
-    },
-    [items, selectedIds, displayAlert]
-  );
+    });
+  }
 
   useEffect(() => {
     const id = searchParams.get('id');
@@ -261,26 +397,36 @@ export default function Inventory() {
   }, [searchParams]);
 
   useEffect(() => {
-    window.main.mainMessage((_, payload) => {
-      if (payload.channel === 'BARCODE:DATA') {
-        handleSelectItemByBarcode(payload.data);
+    window.main.mainMessage(handleSelectItemByBarcode);
+  }, [handleSelectItemByBarcode]);
+
+  useEffect(() => {
+    if (barcodeNumber && items.length) {
+      const selectedProduct = items.find(({ barcode }) => barcode === barcodeNumber);
+
+      if (selectedProduct) {
+        setSelectedIds([selectedProduct.id]);
+        setModalAction('update');
+        setBarcodeNumber(null);
+        return;
       }
 
-      if (payload.channel === 'BARCODE:ERROR') {
-        displayAlert?.(payload.data, 'error');
+      if (!selectedProduct) {
+        displayAlert?.(`Unable to find item with code ${barcodeNumber}`, 'error');
+        return;
       }
-    })
-  }, [displayAlert, handleSelectItemByBarcode]);
+    }
+  }, [items, barcodeNumber]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-around">
+    <div className="w-full h-full flex flex-col gap-5 pr-3">
       <div className="w-full h-fit gap-5 flex flex-row flex-wrap">
         <CounterWidget
           icon={<CategoryOutlinedIcon color="info" fontSize="large" />}
           count={data?.total}
           label="total products displayed"
         />
-        <CounterWidget
+        {/* <CounterWidget
           icon={<LocalOfferOutlinedIcon color="secondary" fontSize="large" />}
           count={
             formatCurrency(
@@ -288,8 +434,8 @@ export default function Inventory() {
             )
           }
           label="total selling price displayed"
-        />
-        <CounterWidget
+        /> */}
+        {/* <CounterWidget
           icon={<MonetizationOnOutlinedIcon color="warning" fontSize="large" />}
           count={
             formatCurrency(
@@ -297,34 +443,93 @@ export default function Inventory() {
             )
           }
           label="total cost price displayed"
-        />
+        /> */}
       </div>
       <div className="w-full h-[650px]">
-        <div className="w-full flex flex-row py-4 gap-3">
-          <Chip
-            color="primary"
-            variant="outlined"
-            icon={<AddCircleOutlineIcon />}
-            label="Add new Product"
-            onClick={handleAddNewItem}
-          />
-          <Chip
-            variant="outlined"
-            color="secondary"
-            icon={<EditOutlinedIcon />}
-            label="Edit selected Product"
-            onClick={handleEditSelectedItem}
-            disabled={selectedIds.length === 0 || selectedIds.length > 1}
-          />
-          <Chip
-            variant="outlined"
-            color="error"
-            icon={<DeleteOutlineOutlinedIcon />}
-            label="Delete selected Product"
-            onClick={handleDeleteSelectedItem}
-            disabled={selectedIds.length === 0}
-          />
-          <BarcodeIndicator />
+        <div className="w-full flex flex-row justify-between items-center py-3 h-fit">
+          <div className={`w-fit flex flex-row items-center h-fit`}>
+            <Collapse in={!fullScreen || collapse} collapsedSize={150} orientation='horizontal'>
+              <div className="flex flex-row gap-3 w-fit bg-white pr-5">
+                <Chip
+                  color="primary"
+                  variant="outlined"
+                  icon={<AddCircleOutlineIcon />}
+                  label="Add new Product"
+                  onClick={handleAddNewItem}
+                />
+                <Chip
+                  variant="outlined"
+                  color="secondary"
+                  icon={<EditOutlinedIcon />}
+                  label="Edit selected Product"
+                  onClick={handleEditSelectedItem}
+                  disabled={selectedIds.length === 0 || selectedIds.length > 1}
+                />
+                <Chip
+                  variant="outlined"
+                  color="error"
+                  icon={<DeleteOutlineOutlinedIcon />}
+                  label="Delete selected Product"
+                  onClick={handleDeleteSelectedItem}
+                  disabled={selectedIds.length === 0}
+                />
+                <BarcodeIndicator />
+                {/* <PrinterIndicator /> */}
+              </div>
+            </Collapse>
+            {
+              fullScreen
+              ? (
+                <IconButton
+                  onClick={handleCollapse}
+                >
+                  {collapse
+                  ? <ChevronLeftOutlined />
+                  : <ChevronRightOutlined />}
+                </IconButton>
+              )
+              : null
+            }
+          </div>
+
+          <div
+            className={
+              `h-fit flex items-center ${
+                !fullScreen
+                ? 'w-full h-fit justify-end'
+                : ''
+              }`
+            }
+          >
+            <div className={`w-fit flex flex-row gap-3 ${
+                fullScreen && collapse
+                ? 'hidden'
+                : 'visible'
+              }`}>
+              <Chip
+                variant="outlined"
+                color="secondary"
+                icon={<UploadOutlined />}
+                label="Import Inventory"
+                onClick={() => handleSelectFileToImport('INVENTORY')}
+              />
+              <Divider orientation='vertical' flexItem />
+              <Chip
+                variant="outlined"
+                color="secondary"
+                icon={<UploadOutlined />}
+                label="Import Stock Records"
+                onClick={() => handleSelectFileToImport('STOCKS')}
+              />
+              <Chip
+                variant="outlined"
+                color="secondary"
+                icon={<DownloadOutlined />}
+                label="Export Stock Records"
+                onClick={() => handleExport()}
+              />
+            </div>
+          </div>
         </div>
         {data ? (
           <DataGrid
@@ -332,6 +537,7 @@ export default function Inventory() {
             rows={items}
             columns={columns}
             rowCount={data?.total}
+            rowSelectionModel={selectedIds}
             onRowSelectionModelChange={(itemIds) =>
               setSelectedIds(itemIds as string[])
             }
@@ -339,6 +545,17 @@ export default function Inventory() {
             checkboxSelection
           />
         ) : null}
+        <VisuallyHiddenInput
+          ref={inputFileRef}
+          type="file"
+          multiple
+          onChange={
+            moduleName === 'INVENTORY'
+            ? handleImportInventory
+            : handleImportStocks
+          }
+          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+        />
         <Dialog
           open={Boolean(modalAction)}
           onClose={handleOnClose}
@@ -356,6 +573,8 @@ export default function Inventory() {
             getCategories={getCategories}
             getSuppliers={getSuppliers}
             onClose={handleOnClose}
+            handleExport={handleExport}
+            handleImport={handleImportStocks}
           />
         </Dialog>
       </div>

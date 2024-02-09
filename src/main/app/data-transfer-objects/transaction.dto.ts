@@ -7,17 +7,23 @@ import DiscountDTO from './discount.dto';
 export interface IncomeDTO {
   id: string;
 
+  transaction_code: string;
+
   system_id?: string | null;
 
-  creator_id: number;
+  creator_id: string;
 
-  discount_id?: number | null;
+  discount_id?: string | null;
 
   source_name: string;
 
   recipient_name: string;
 
   category: 'income';
+
+  product_used: string;
+
+  product_lot_number: string;
 
   type: 'customer-payment';
 
@@ -28,6 +34,12 @@ export interface IncomeDTO {
   change: number;
 
   total: number;
+
+  tare_weight: string;
+
+  net_weight: string;
+
+  gross_weight: string;
 
   created_at: Date;
 
@@ -45,9 +57,11 @@ export interface IncomeDTO {
 export interface ExpenseDTO {
   id: string;
 
+  transaction_code: string;
+
   system_id?: string | null;
 
-  creator_id: number;
+  creator_id: string;
 
   source_name: string;
 

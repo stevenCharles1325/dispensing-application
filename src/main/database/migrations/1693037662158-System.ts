@@ -14,13 +14,7 @@ export class System1693037662158 implements MigrationInterface {
             isGenerated: true,
           },
           {
-            name: 'uuid',
-            type: 'varchar',
-            generationStrategy: 'uuid',
-            isGenerated: true,
-          },
-          {
-            name: 'is_branch',
+            name: 'is_main',
             type: 'boolean',
             isNullable: true,
             default: false,
@@ -37,17 +31,31 @@ export class System1693037662158 implements MigrationInterface {
             isNullable: false,
           },
           {
-            name: 'master_key',
-            comment: 'The key from the application creator',
+            name: 'phone_number',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'email',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'api_url',
             type: 'varchar',
             isNullable: true,
           },
           {
-            name: 'branch_quantity',
-            comment: 'This will be incremented if a new branch is added',
-            type: 'int',
-            unsigned: true,
-            default: 0,
+            name: 'auto_sync',
+            comment: 'Sync data from local to cloud database',
+            type: 'boolean',
+            isNullable: true,
+            default: true,
+          },
+          {
+            name: 'master_key',
+            comment: 'The key from the application creator (This will also be the API key)',
+            type: 'varchar',
             isNullable: true,
           },
           {

@@ -22,29 +22,38 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true,
+          },
+          {
+            name: 'item_code',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'batch_code',
+            type: 'varchar',
+            isNullable: false,
           },
           {
             name: 'image_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'image',
           },
           {
             name: 'discount_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'discount',
           },
           {
             name: 'category_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'category',
           },
           {
             name: 'brand_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: false,
             foreignKeyConstraintName: 'brand',
           },
@@ -57,8 +66,7 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'sku',
             type: 'varchar',
-            isUnique: true,
-            isNullable: false,
+            isNullable: true,
             comment: 'Item ID or SKU (Stock Keeping Unit).',
           },
           {
@@ -74,21 +82,22 @@ export class Item1695800617464 implements MigrationInterface {
           {
             name: 'cost_price',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
             default: 0,
             comment: 'The cost of acquiring the item from the supplier.',
           },
           {
             name: 'selling_price',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
             default: 0,
             comment: 'The price at which the item is sold to customers.',
           },
           {
             name: 'tax_rate',
             type: 'int',
-            isNullable: false,
+            isNullable: true,
+            default: 0,
             comment:
               'The price at which the item is sold to customers. (percentage)',
           },
@@ -145,7 +154,7 @@ export class Item1695800617464 implements MigrationInterface {
           },
           {
             name: 'stock_quantity',
-            type: 'int',
+            type: 'real',
             isNullable: false,
           },
           {
@@ -154,12 +163,18 @@ export class Item1695800617464 implements MigrationInterface {
             isNullable: false,
             enum: [
               'available', // Can be purchased
+              'expired',
               'on-hold', // Might be having quality control
               'out-of-stock', // Not available for the meantime
               'discontinued', // Will not be selling for any reason
               'awaiting-shipment', // Has been ordered but is waiting to be delivered
             ],
             default: "'available'",
+          },
+          {
+            name: 'expired_at',
+            type: 'datetime',
+            default: 'now()',
           },
           {
             name: 'created_at',

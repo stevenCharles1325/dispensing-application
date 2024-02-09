@@ -30,10 +30,10 @@ export default class BrandArchiveEvent implements IEvent {
 
         // Copy these
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as string,
           resource_id: id.toString(),
           resource_table: 'brands', // Change this
-          resource_id_type: 'integer', // Watchout for this
+          resource_id_type: 'uuid', // Watchout for this
           action: 'archive',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully archived a Brand`, // Change this
@@ -48,7 +48,7 @@ export default class BrandArchiveEvent implements IEvent {
 
       // Copy these
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'brands', // Change this
         action: 'archive',
         status: 'FAILED',

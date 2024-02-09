@@ -16,17 +16,17 @@ const getSalesReport = async (): Promise<IReport['pos_sale_reports']> => {
     let groupByClause;
     switch (groupBy) {
       case 'daily':
-        groupByClause = "strftime('%Y-%m-%d', transaction.created_at)";
+        groupByClause = "strftime('%Y-%m-%d', transaction.created_at, 'localtime')";
         break;
       case 'monthly':
-        groupByClause = "strftime('%Y-%m', transaction.created_at)";
+        groupByClause = "strftime('%Y-%m', transaction.created_at, 'localtime')";
         break;
       case 'yearly':
-        groupByClause = "strftime('%Y', transaction.created_at)";
+        groupByClause = "strftime('%Y', transaction.created_at, 'localtime')";
         break;
 
       default:
-        groupByClause = "strftime('%Y-%m-%d', transaction.created_at)";
+        groupByClause = "strftime('%Y-%m-%d', transaction.created_at, 'localtime')";
         break;
     }
 

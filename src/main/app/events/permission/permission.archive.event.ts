@@ -29,10 +29,10 @@ export default class PermissionArchiveEvent implements IEvent {
         const data = await permissionRepo.softDelete(id);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: id.toString(),
           resource_table: 'permissions',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'archive',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully archived a Permission`,
@@ -46,7 +46,7 @@ export default class PermissionArchiveEvent implements IEvent {
       }
 
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'permissions',
         action: 'archive',
         status: 'FAILED',

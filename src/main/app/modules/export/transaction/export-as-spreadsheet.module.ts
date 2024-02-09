@@ -1,8 +1,7 @@
-import concatDateToName from "App/modules/concatDateToName.module";
+import concatDateToName from "App/modules/concat-date-to-name.module";
 import TransactionRepository from "App/repositories/transaction.repository";
 import { app } from "electron";
 import { Transaction } from "Main/database/models/transaction.model";
-import getDiscount from "UI/helpers/getDiscount";
 import xlsx from 'xlsx';
 
 export default async function exportAsSpreadsheet (recordType: string) {
@@ -43,27 +42,16 @@ export default async function exportAsSpreadsheet (recordType: string) {
 
   if (transactions) {
     const extractedTransaction = transactions.map((transaction) => {
-      const ordersQuantity = transaction.orders.reduce((prev, curr) => {
-        return prev + curr.quantity;
-      }, 0);
-
-      const ordersTotal = transaction.orders.reduce((prev, curr) => {
-        return prev + curr.price;
-      }, 0);
-
-      const { discount } = getDiscount(
-        ordersTotal,
-        transaction?.discount?.discount_type as any ?? null,
-        transaction?.discount?.discount_value,
-      );
+      // const ordersQuantity = transaction.orders.length;
 
       return ({
-        Cashier: transaction.source_name,
+        Personnel: transaction.source_name,
         Customer: transaction.recipient_name,
-        'Total Order Quantity': ordersQuantity,
-        'Discount': discount,
-        'Total Price': transaction.total,
-        'Date Sold': new Date(transaction.created_at).toLocaleDateString(),
+        'Item Number': transaction.orders[0]?.item.item_code,
+        'Batch Number': transaction.orders[0]?.item.batch_code,
+        'Product Used': transaction.product_used,
+        'Product Lot No.': transaction.product_lot_number,
+        'Date of Transaction': new Date(transaction.created_at).toLocaleDateString(),
       })
     });
 

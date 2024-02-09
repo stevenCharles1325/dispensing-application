@@ -30,6 +30,9 @@ import { ValidationMessage } from '../../app/validators/message/message';
 import type { Role } from './role.model';
 import type { InventoryRecord } from './inventory-record.model';
 import type { ShortcutKey } from './shortcut-key.model';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 @Entity('users')
 export class User {
@@ -41,15 +44,28 @@ export class User {
     this.role = role as Role;
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @BeforeInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: true,
   })
-  lead_id: number;
+  lead_id: string;
 
-  @Column()
+  @Column({ nullable: true })
   system_id: string;
 
   @Column()
@@ -200,7 +216,8 @@ export class User {
     if (!this.system_id) {
       const SystemRepository = global.datasource.getRepository('systems');
       const thisSystem = await SystemRepository.createQueryBuilder()
-        .where('uuid = main_branch_id')
+        .where('is_main = 1')
+        .orWhere('main_branch_id not null')
         .getOne();
 
       if (thisSystem) {

@@ -6,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   AfterLoad,
+  BeforeInsert,
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -19,15 +20,32 @@ import { ValidationMessage } from '../../app/validators/message/message';
 import type { Item } from './item.model';
 import type { User } from './user.model';
 import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import measurements from 'Main/data/defaults/unit-of-measurements';
 
 @Entity('inventory_records')
 export class InventoryRecord {
+  @AfterLoad()
+  async getItem() {
+    if (!this.creator) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'items' WHERE id = '${this.item_id}'`
+      );
+
+      // To-filter-out all unnecessary properties
+      this.item = rawData[0] as Item;
+    }
+  }
+
   @AfterLoad()
   async getUser() {
     if (!this.creator) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'users' WHERE id = ${this.creator_id}`
+        `SELECT * FROM 'users' WHERE id = '${this.creator_id}'`
       );
 
       // To-filter-out all unnecessary properties
@@ -35,8 +53,23 @@ export class InventoryRecord {
     }
   }
 
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @BeforeInsert()
+  async getUserData() {
+    if (this.creator_id) return;
+
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS') {
+      const user = authResponse.data as UserDTO;
+      this.creator_id = user.id;
+    }
+  }
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: false,
@@ -44,9 +77,9 @@ export class InventoryRecord {
   item_id: string;
 
   @Column({
-    nullable: false,
+    nullable: true,
   })
-  creator_id: number;
+  creator_id: string;
 
   @Column()
   @MinLength(3, { message: ValidationMessage.minLength })
@@ -66,11 +99,25 @@ export class InventoryRecord {
   )
   type: string;
 
-  @Column({ nullable: true })
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
   @IsPositive({
     message: ValidationMessage.positive,
   })
   quantity: number;
+
+  @Column()
+  @IsIn(measurements, {
+    message: ValidationMessage.isIn,
+  })
+  unit_of_measurement: string;
 
   @CreateDateColumn()
   created_at: Date;

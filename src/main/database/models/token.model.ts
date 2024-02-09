@@ -12,11 +12,11 @@ import type { User } from './user.model';
 
 @Entity('tokens')
 export class Token {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  user_id: number;
+  user_id: string;
 
   @Column()
   token: string;

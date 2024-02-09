@@ -7,6 +7,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  BeforeInsert,
   AfterLoad,
   AfterInsert,
   BeforeUpdate,
@@ -18,7 +19,6 @@ import {
 
 import {
   Length,
-  IsPositive,
   IsNotEmpty,
   IsIn,
   ValidateIf,
@@ -36,6 +36,10 @@ import type { Brand } from './brand.model';
 import type { Category } from './category.model';
 import type { InventoryRecord } from './inventory-record.model';
 import type { Discount } from './discount.model';
+import Provider from '@IOC:Provider';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import BrandDTO from 'App/data-transfer-objects/brand.dto';
 
 @Entity('items')
 export class Item {
@@ -46,7 +50,7 @@ export class Item {
     if (this.discount_id) {
       const manager = global.datasource.createEntityManager();
       const rawData: any[] = await manager.query(
-        `SELECT * FROM 'discounts' WHERE id = ${this.discount_id}`
+        `SELECT * FROM 'discounts' WHERE id = '${this.discount_id}'`
       );
 
       const discount = rawData[0] as Discount;
@@ -62,6 +66,19 @@ export class Item {
           this.discounted_selling_price = this.selling_price - this.discount.discount_value;
         }
       }
+    }
+  }
+
+  @AfterLoad()
+  async getBrand() {
+    if (this.brand_id) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'brands' WHERE id = '${this.brand_id}'`
+      );
+
+      const brand = rawData[0] as Brand;
+      this.brand = brand;
     }
   }
 
@@ -99,19 +116,39 @@ export class Item {
         item_id: this.id,
         purpose: 'initial-stock',
         quantity: this.stock_quantity,
+        unit_of_measurement: this.unit_of_measurement,
         type: 'stock-in',
       }
     );
   }
 
+  @BeforeInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
+  item_code: string;
+
+  @Column({ nullable: true })
+  batch_code: string;
+
+  @Column({ nullable: true })
   system_id: string;
 
   @Column({ nullable: true })
-  discount_id: number;
+  discount_id: string;
 
   @Column({ nullable: true })
   supplier_id: string;
@@ -119,25 +156,22 @@ export class Item {
   @Column({
     nullable: true,
   })
-  image_id: number;
+  image_id: string;
 
   @Column()
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  category_id: number;
+  category_id: string;
 
   @Column()
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  brand_id: number;
+  brand_id: string;
 
   @Column({
-    unique: true,
-  })
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
+    nullable: true,
   })
   sku: string;
 
@@ -148,7 +182,7 @@ export class Item {
   name: string;
 
   @Column()
-  @ValidateIf((item: ItemDTO) => Boolean(item.description.length))
+  @ValidateIf((item: ItemDTO) => Boolean(item?.description?.length))
   @Length(5, 1000, {
     message: ValidationMessage.maxLength,
   })
@@ -160,11 +194,9 @@ export class Item {
     scale: 2,
     transformer: {
       to: (data: number): number => data,
-      from: (data: string): number => parseFloat(data),
+      from: (data: string): number => parseFloat(data ?? '0'),
     },
-  })
-  @IsPositive({
-    message: ValidationMessage.positive,
+    default: 0,
   })
   cost_price: number;
 
@@ -174,11 +206,9 @@ export class Item {
     scale: 2,
     transformer: {
       to: (data: number): number => data,
-      from: (data: string): number => parseFloat(data),
+      from: (data: string): number => parseFloat(data  ?? '0'),
     },
-  })
-  @IsPositive({
-    message: ValidationMessage.positive,
+    default: 0,
   })
   selling_price: number;
 
@@ -188,8 +218,9 @@ export class Item {
     scale: 2,
     transformer: {
       to: (data: number): number => data,
-      from: (data: string): number => parseFloat(data),
+      from: (data: string): number => parseFloat(data ?? '0'),
     },
+    default: 0,
   })
   tax_rate: number;
 
@@ -200,13 +231,21 @@ export class Item {
   unit_of_measurement: string;
 
   @Column({ nullable: true })
-  @ValidateIf((item: ItemDTO) => Boolean(item.barcode.length))
+  @ValidateIf((item: ItemDTO) => Boolean(item?.barcode?.length))
   @IsBarcode({
     message: ValidationMessage.invalid,
   })
   barcode: string;
 
-  @Column()
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
@@ -217,6 +256,9 @@ export class Item {
     message: ValidationMessage.status,
   })
   status: string;
+
+  @Column()
+  expired_at: Date;
 
   @CreateDateColumn()
   created_at: Date;
@@ -283,6 +325,7 @@ export class Item {
           item_id: this.id,
           purpose: 'sold (buy-one-get-one)',
           quantity,
+          // unit_of_measurement: this.unit_of_measurement,
           type: 'stock-out',
         }
       );

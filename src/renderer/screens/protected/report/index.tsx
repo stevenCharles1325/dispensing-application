@@ -87,7 +87,7 @@ export default function Report() {
             <p className="text-lg font-bold">Today total overview</p>
           </div>
           <div className="flex flex-row gap-5">
-            <TotalDifferenceWidget
+            {/* <TotalDifferenceWidget
               total={formatCurrency(
                 Math.abs(revenue?.total) ?? 0
               )}
@@ -95,28 +95,28 @@ export default function Report() {
               icon={<PaidTwoToneIcon color="secondary" />}
               differenceYesterday={revenue?.difference_yesterday ?? 0}
               label="Revenue"
-            />
+            /> */}
             <TotalDifferenceWidget
               total={orders?.total ?? 0}
               hasIncreased={orders?.has_increased}
               icon={<TableRestaurantTwoToneIcon color="secondary" />}
               differenceYesterday={orders?.difference_yesterday}
-              label="Orders"
+              label="Transactions"
             />
-            <TotalDifferenceWidget
+            {/* <TotalDifferenceWidget
               total={soldItems?.total ?? 0}
               hasIncreased={soldItems?.has_increased}
               icon={<ReceiptIcon color="secondary" />}
               differenceYesterday={soldItems?.difference_yesterday}
-              label="Sold Items"
-            />
+              label="Released Items"
+            /> */}
           </div>
         </div>
       </div>
       <div className="grow w-full mt-5">
         {/* SALES */}
         <div className="p-3 text-gray-500">
-          <p className="text-lg font-bold">Sales Graphs</p>
+          <p className="text-lg font-bold">Transactions Graphs</p>
         </div>
         <div className="flex flex-col px-3 gap-5">
           {/*Current sales report*/}
@@ -131,7 +131,7 @@ export default function Report() {
                 series={[
                   {
                     data: currSalesReport?.map?.(({ count }) => count),
-                    label: 'Today Sales Report',
+                    label: 'Today Release Report',
                     area: true,
                     showMark: false,
                     color: '#9c27b0',

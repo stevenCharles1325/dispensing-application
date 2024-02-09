@@ -22,29 +22,15 @@ export default class NotificationDeleteEvent implements IEvent {
     try {
       const { user } = eventData;
       const payload: NotificationDTO['id'] = eventData.payload[0];
-      const requesterHasPermission =
-        eventData.user.hasPermission?.('delete-notification');
 
-      if (requesterHasPermission) {
-        const notificationRepo = SqliteDataSource.getRepository(Notification);
-        const data = await notificationRepo.delete(payload);
+      const notificationRepo = SqliteDataSource.getRepository(Notification);
+      const data = await notificationRepo.delete(payload);
 
-        if (Array.isArray(payload)) {
-          for await (const id of payload) {
-            await Bull('AUDIT_JOB', {
-              user_id: user.id as number,
-              resource_id: id.toString(),
-              resource_table: 'notifications',
-              resource_id_type: 'uuid',
-              action: 'delete',
-              status: 'SUCCEEDED',
-              description: `User ${user.fullName} has successfully deleted a Notification`,
-            });
-          }
-        } else {
+      if (Array.isArray(payload)) {
+        for await (const id of payload) {
           await Bull('AUDIT_JOB', {
-            user_id: user.id as number,
-            resource_id: payload.toString(),
+            user_id: user.id as unknown as string,
+            resource_id: id.toString(),
             resource_table: 'notifications',
             resource_id_type: 'uuid',
             action: 'delete',
@@ -52,27 +38,23 @@ export default class NotificationDeleteEvent implements IEvent {
             description: `User ${user.fullName} has successfully deleted a Notification`,
           });
         }
-
-        return {
-          data,
-          code: 'REQ_OK',
-          status: 'SUCCESS',
-        } as IResponse<typeof data>;
+      } else {
+        await Bull('AUDIT_JOB', {
+          user_id: user.id as unknown as string,
+          resource_id: payload.toString(),
+          resource_table: 'notifications',
+          resource_id_type: 'uuid',
+          action: 'delete',
+          status: 'SUCCEEDED',
+          description: `User ${user.fullName} has successfully deleted a Notification`,
+        });
       }
 
-      await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
-        resource_table: 'notifications',
-        action: 'delete',
-        status: 'FAILED',
-        description: `User ${user.fullName} has no permission to delete a Notification`,
-      });
-
       return {
-        errors: ['You are not allowed to delete a Notification'],
-        code: 'REQ_UNAUTH',
-        status: 'ERROR',
-      } as unknown as IResponse<string[]>;
+        data,
+        code: 'REQ_OK',
+        status: 'SUCCESS',
+      } as IResponse<typeof data>;
     } catch (err) {
       const error = handleError(err);
       console.log('ERROR HANDLER OUTPUT: ', error);

@@ -1,7 +1,7 @@
 import PermissionDTO from './permission.dto';
 
 export default interface RoleDTO {
-  id: number;
+  id: string;
   name: string;
   kebab: string;
   permissions?: PermissionDTO[] | undefined;

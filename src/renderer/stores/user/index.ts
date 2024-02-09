@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 import deepMerge from 'UI/helpers/deepMerge';
+import localStorage from 'UI/modules/storage';
 
 type PartialUserDTO = Omit<
   UserDTO,
@@ -27,28 +28,14 @@ export interface AppUserState extends PartialUserDTO {
   ): void;
 }
 
-class LocalStorage {
-  constructor() {}
 
-  getItem(key: string): any {
-    return JSON.parse(window.storage.get(key));
-  }
-
-  setItem(key: string, value: any): void {
-    window.storage.set(key, JSON.stringify(value));
-  }
-
-  removeItem(key: string): void {
-    window.storage.remove(key);
-  }
-}
 
 const useUser = create(
   persist<AppUserState>(
     (set, get) => ({
-      id: 0,
+      id: '',
       system_id: '',
-      role_id: 0,
+      role_id: '',
       image_url: '',
       birth_date: new Date(),
       address: '',
@@ -83,7 +70,7 @@ const useUser = create(
     }),
     {
       name: 'user-storage', // name of the item in the storage (must be unique)
-      storage: new LocalStorage(), // (optional) by default, 'localStorage' is used
+      storage: localStorage, // (optional) by default, 'localStorage' is used
       merge: (persistedState, currentState) =>
         deepMerge(currentState, persistedState),
       onRehydrateStorage: (state) => {

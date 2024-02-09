@@ -30,7 +30,7 @@ export default class DiscountCreateEvent implements IEvent {
       const requesterHasPermission = user.hasPermission?.('create-discount');
 
       if (requesterHasPermission) {
-        payload.creator_id = user.id as number;
+        payload.creator_id = user.id as unknown as string;
         const discount = DiscountRepository.create(payload);
         const items = await ItemRepository.createQueryBuilder()
           .where({
@@ -57,10 +57,10 @@ export default class DiscountCreateEvent implements IEvent {
         const data: Discount = await DiscountRepository.save(discount);
 
         await Bull('AUDIT_JOB', {
-          user_id: user.id as number,
+          user_id: user.id as unknown as string,
           resource_id: data.id.toString(),
           resource_table: 'discounts',
-          resource_id_type: 'integer',
+          resource_id_type: 'uuid',
           action: 'create',
           status: 'SUCCEEDED',
           description: `User ${user.fullName} has successfully created a new Discount`,
@@ -76,7 +76,7 @@ export default class DiscountCreateEvent implements IEvent {
 
       // Copy this
       await Bull('AUDIT_JOB', {
-        user_id: user.id as number,
+        user_id: user.id as unknown as string,
         resource_table: 'discounts', // Change this
         action: 'create',
         status: 'FAILED',

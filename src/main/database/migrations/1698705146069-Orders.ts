@@ -21,7 +21,6 @@ export class Orders1698705146069 implements MigrationInterface {
           {
             name: 'system_id',
             type: 'varchar',
-            isNullable: true, // temporarily
           },
           {
             name: 'transaction_id',
@@ -37,24 +36,31 @@ export class Orders1698705146069 implements MigrationInterface {
           },
           {
             name: 'discount_id',
-            type: 'int',
+            type: 'varchar',
             isNullable: true,
             foreignKeyConstraintName: 'discount',
           },
           {
             name: 'quantity',
-            type: 'int',
+            type: 'real',
+            isNullable: false,
+          },
+          {
+            name: 'unit_of_measurement',
+            type: 'string',
             isNullable: false,
           },
           {
             name: 'tax_rate',
             type: 'int',
-            isNullable: false,
+            isNullable: true,
+            default: 0
           },
           {
             name: 'price',
             type: 'real',
-            isNullable: false,
+            isNullable: true,
+            default: 0,
           },
           {
             name: 'created_at',

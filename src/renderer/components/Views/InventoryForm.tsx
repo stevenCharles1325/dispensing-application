@@ -6,7 +6,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useReducer, useState, useRef } from 'react';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
 import {
   TextField,
@@ -28,6 +28,7 @@ import {
   Select,
   SelectChangeEvent,
   Checkbox,
+  styled,
 } from '@mui/material';
 import IPOSValidationError from 'App/interfaces/pos/pos.validation-error.interface';
 import itemStatuses from 'UI/data/defaults/statuses/item';
@@ -40,7 +41,7 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import ImageDTO from 'App/data-transfer-objects/image.dto';
 import SupplierDTO from 'App/data-transfer-objects/supplier.dto';
 import SupplierForm from './SupplierForm';
-import { DateTimeField } from '@mui/x-date-pickers';
+import { DatePicker, DateTimeField } from '@mui/x-date-pickers';
 import { useQuery } from '@tanstack/react-query';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
@@ -55,10 +56,11 @@ import InventoryRecordDTO from 'App/data-transfer-objects/inventory-record.dto';
 import Loading from '../Loading';
 import {
   AddCircleOutline,
+  DownloadOutlined,
+  UploadOutlined,
   VisibilityOutlined
 } from '@mui/icons-material';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
-import CheckBox from '@mui/icons-material/CheckBox';
 
 
 const columns: Array<GridColDef> = [
@@ -146,6 +148,8 @@ interface InventoryFormProps {
   getCategories: () => Promise<void>;
   getSuppliers: () => Promise<void>;
   onClose: () => void;
+  handleExport: (id: string[] | null) => void;
+  handleImport: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 interface CustomProps {
@@ -153,29 +157,32 @@ interface CustomProps {
   name: string;
 }
 
-const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
-  function PesoNumberFormat(props, ref) {
-    const { onChange, ...other } = props;
+// const PesoNumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
+//   function PesoNumberFormat(props, ref) {
+//     const { onChange, ...other } = props;
 
-    return (
-      <NumericFormat
-        {...other}
-        getInputRef={ref}
-        onValueChange={(values) => {
-          onChange({
-            target: {
-              name: props.name,
-              value: values.value,
-            },
-          });
-        }}
-        thousandSeparator
-        valueIsNumericString
-        prefix="₱"
-      />
-    );
-  }
-);
+//     return (
+//       <NumericFormat
+//         {...other}
+//         getInputRef={ref}
+//         onValueChange={(values) => {
+//           onChange({
+//             target: {
+//               name: props.name,
+//               value: values.value,
+//             },
+//           });
+//         }}
+//         thousandSeparator
+//         valueIsNumericString
+//         prefix="₱"
+//       />
+//     );
+//   }
+// );
+
+const date = new Date();
+date.setDate(date.getDate() + 1);
 
 const NumberFormat = React.forwardRef<NumericFormatProps, CustomProps>(
   function PesoNumberFormat(props, ref) {
@@ -206,6 +213,18 @@ function allyProps(index: number) {
   }
 }
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
 export default function InventoryForm({
   action,
   selectedItem,
@@ -217,6 +236,8 @@ export default function InventoryForm({
   getCategories,
   getSuppliers,
   onClose,
+  handleExport,
+  handleImport
 }: InventoryFormProps) {
   const errorHandler = useErrorHandler();
   const { displayAlert } = useAlert();
@@ -230,6 +251,8 @@ export default function InventoryForm({
     category_id: null,
     brand_id: null,
     sku: '',
+    item_code: '',
+    batch_code: '',
     name: '',
     description: '',
     cost_price: 0,
@@ -239,6 +262,7 @@ export default function InventoryForm({
     barcode: '',
     stock_quantity: 0,
     discount_id: null,
+    expired_at: date,
     status: 'available',
   } as const;
 
@@ -285,10 +309,15 @@ export default function InventoryForm({
           ...state,
           discount_id: action.payload,
         };
-      case 'sku':
+      case 'item_code':
         return {
           ...state,
-          sku: action.payload,
+          item_code: action.payload,
+        };
+      case 'batch_code':
+        return {
+          ...state,
+          batch_code: action.payload,
         };
       case 'description':
         return {
@@ -330,6 +359,11 @@ export default function InventoryForm({
           ...state,
           status: action.payload,
         };
+      case 'expired_at':
+        return {
+          ...state,
+          expired_at: action.payload,
+        };
       default:
         return state;
     }
@@ -348,6 +382,17 @@ export default function InventoryForm({
   const [supplierToggle, setSupplierToggle] = useState<
     'add-new' | 'add-existing'
   >('add-new');
+
+  const inputFileRef = useRef<HTMLInputElement>(null);
+
+  const handleSelectFileToImport = () => {
+    inputFileRef.current?.click();
+  }
+
+  const handleImportStockRecords = (e: ChangeEvent<HTMLInputElement>) => {
+    handleImport(e);
+    refetch();
+  }
 
   const handleSupplierToggle = (value: typeof supplierToggle) => {
     dispatch({
@@ -522,7 +567,7 @@ export default function InventoryForm({
   }, [action, selectedItem]);
 
   // Records states
-  const [selectedRecordIds, setSelectedRecordIds] = useState<number[]>([]);
+  const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [recordFormErrors, setRecordFormErrors] = useState<Record<string, string>>({
   });
   const [recordForm, setRecordForm] = useState<Partial<InventoryRecordDTO>>({
@@ -561,7 +606,7 @@ export default function InventoryForm({
     }
   }
 
-  const handleOnChangeTab = (_, newValue: number) => {
+  const handleOnChangeTab = (_: any, newValue: number) => {
     setTab(newValue);
   }
 
@@ -641,7 +686,7 @@ export default function InventoryForm({
     return res.data as IPagination<DiscountDTO>;
   }, []);
 
-  const [selectedDiscountId, setSelectedDiscountId] = useState<number | null>(null);
+  const [selectedDiscountId, setSelectedDiscountId] = useState<string | null>(null);
   const { data: discountList, isLoading: isDiscountLoading } = useQuery({
     queryKey: ['inventory-discount'],
     queryFn: getDiscounts,
@@ -708,6 +753,7 @@ export default function InventoryForm({
       renderCell: (params: any) => (
         <>
           <Checkbox
+            disabled={['deactivated', 'expired'].includes(params.row.status)}
             checked={selectedDiscountId === params.id}
             onChange={() => {
               if (selectedDiscountId === params.id) {
@@ -735,7 +781,7 @@ export default function InventoryForm({
           ? <Tab label="Stocks" {...allyProps(1)} />
           : null
         }
-        <Tab label="Discount" {...allyProps(2)} />
+        {/* <Tab label="Discount" {...allyProps(2)} /> */}
       </Tabs>
       <Divider />
       {
@@ -766,13 +812,13 @@ export default function InventoryForm({
                     error={Boolean(errors.name)}
                   />
                   <TextField
-                    label="Stock Keeping Unit (SKU)"
+                    label="Batch ID"
                     required
-                    value={form.sku}
+                    value={form.batch_code}
                     color="secondary"
                     onChange={(event) => {
                       dispatch({
-                        type: 'sku',
+                        type: 'batch_code',
                         payload: event.target.value?.toUpperCase(),
                       });
                     }}
@@ -781,8 +827,27 @@ export default function InventoryForm({
                     sx={{
                       width: 300,
                     }}
-                    helperText={errors.sku}
-                    error={Boolean(errors.sku)}
+                    helperText={errors.batch_code}
+                    error={Boolean(errors.batch_code)}
+                  />
+                  <TextField
+                    label="Item ID"
+                    required
+                    value={form.item_code}
+                    color="secondary"
+                    onChange={(event) => {
+                      dispatch({
+                        type: 'item_code',
+                        payload: event.target.value?.toUpperCase(),
+                      });
+                    }}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      width: 300,
+                    }}
+                    helperText={errors.item_code}
+                    error={Boolean(errors.item_code)}
                   />
                   <TextField
                     label="Barcode"
@@ -860,6 +925,31 @@ export default function InventoryForm({
                       />
                     )}
                   />
+                  <DatePicker
+                    label="Expiration Date"
+                    views={['year', 'month', 'day']}
+                    value={dayjs(form.expired_at)}
+                    onChange={(value) => {
+                      if (!value) return;
+
+                      dispatch({
+                        type: 'expired_at',
+                        payload: new Date(value.toString()),
+                      });
+                    }}
+                    minDate={dayjs(date)}
+                    slotProps={{
+                      textField: {
+                        helperText: errors['expired_at'],
+                        error: Boolean(errors['expired_at']),
+                        size: 'small',
+                        color: 'secondary'
+                      },
+                    }}
+                    sx={{
+                      width: 300
+                    }}
+                  />
                   <TextField
                     label="Description"
                     color="secondary"
@@ -884,7 +974,7 @@ export default function InventoryForm({
               </div>
 
               {/* PRICING INFORMATION */}
-              <div className="w-full h-fit">
+              {/* <div className="w-full h-fit">
                 <h3>Pricing Information</h3>
                 <br />
                 <div className="w-full flex flex-wrap gap-5">
@@ -955,7 +1045,7 @@ export default function InventoryForm({
                     error={Boolean(errors.tax_rate)}
                   />
                 </div>
-              </div>
+              </div> */}
 
               {/* INVENTORY INFORMATION */}
               <div className="w-full h-fit">
@@ -966,7 +1056,7 @@ export default function InventoryForm({
                     required
                     disabled={action === 'update'}
                     color="secondary"
-                    label="Stock Quantity"
+                    label="Quantity"
                     value={form.stock_quantity}
                     type="number"
                     onChange={(event) => {
@@ -1193,14 +1283,36 @@ export default function InventoryForm({
               ? <Loading />
               : (
                 <>
-                  <div className="w-full flex flex-row py-4 gap-3">
-                    <Chip
-                      color="primary"
-                      variant="outlined"
-                      icon={<AddCircleOutline />}
-                      label="Add new record"
-                      onClick={() => setRecordAction('create')}
-                    />
+                  <div className='w-full h-fit flex justify-between py-4'>
+                    <div className="w-fit flex flex-row gap-3">
+                      <Chip
+                        color="primary"
+                        variant="outlined"
+                        icon={<AddCircleOutline />}
+                        label="Add new record"
+                        onClick={() => setRecordAction('create')}
+                      />
+                    </div>
+                    <div className="w-fit flex flex-row gap-3">
+                      <Chip
+                        color="secondary"
+                        variant="outlined"
+                        icon={<UploadOutlined />}
+                        label="Import Record"
+                        onClick={handleSelectFileToImport}
+                      />
+                      <Chip
+                        color="secondary"
+                        variant="outlined"
+                        icon={<DownloadOutlined />}
+                        label="Export Record"
+                        onClick={() => {
+                          if (selectedItem) {
+                            handleExport([selectedItem.id]);
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                   <DataGrid
                     sx={{
@@ -1211,8 +1323,9 @@ export default function InventoryForm({
                     rowCount={stocksRecords?.total}
                     disableRowSelectionOnClick
                     onRowSelectionModelChange={(recordIds) =>
-                      setSelectedRecordIds(recordIds as number[])
+                      setSelectedRecordIds(recordIds as string[])
                     }
+                    sortingMode='client'
                   />
                 </>
               )
@@ -1245,6 +1358,7 @@ export default function InventoryForm({
               }
               <div className='w-[500px] h-[600px] p-5 flex flex-col gap-3'>
                 <TextField
+                  required
                   color="secondary"
                   disabled={recordAction === 'view'}
                   fullWidth
@@ -1255,8 +1369,8 @@ export default function InventoryForm({
                   error={Boolean(recordFormErrors['purpose'])}
                   helperText={recordFormErrors['purpose']}
                 />
-
                 <TextField
+                  required
                   color="secondary"
                   disabled={recordAction === 'view'}
                   fullWidth
@@ -1274,6 +1388,31 @@ export default function InventoryForm({
                   }}
                   value={recordForm?.quantity ?? 0}
                   onChange={handleRecordFormUpdate('quantity')}
+                />
+                <Autocomplete
+                  size="small"
+                  disabled={recordAction === 'view'}
+                  color="secondary"
+                  options={measurements}
+                  value={recordForm.unit_of_measurement}
+                  onChange={(_, value: string | null) => {
+                    handleRecordFormUpdate('unit_of_measurement')({
+                      target: {
+                        value,
+                      }
+                    } as any);
+                  }}
+                  fullWidth
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      color="secondary"
+                      label="Unit of measurement"
+                      helperText={recordFormErrors.unit_of_measurement}
+                      error={Boolean(recordFormErrors.unit_of_measurement)}
+                    />
+                  )}
                 />
                 <FormControl
                   fullWidth
@@ -1399,6 +1538,13 @@ export default function InventoryForm({
         )
         : null
       }
+      <VisuallyHiddenInput
+        ref={inputFileRef}
+        type="file"
+        multiple
+        onChange={handleImportStockRecords}
+        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+      />
     </div>
   );
 }

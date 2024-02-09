@@ -7,6 +7,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import capitalizeCase from 'UI/helpers/capitalCase';
 
 type AlertType = 'info' | 'warning' | 'success' | 'error';
 
@@ -28,7 +29,7 @@ export default function AlertProvider({ children }: React.PropsWithChildren) {
   const [open, setOpen] = useState<boolean>(false);
 
   const displayAlert = (msg: string, type: AlertType = 'info') => {
-    if (message) return;
+    // if (message) return;
 
     setMessage({
       content: msg,
@@ -67,10 +68,8 @@ export default function AlertProvider({ children }: React.PropsWithChildren) {
             backgroundColor: 'white',
             color: 'var(--text-color)',
             fontFamily: 'Rubik',
-            textTransform: 'capitalize',
           },
           '& .MuiSnackbarContent-message': {
-            textTransform: 'lowercase',
             width: '100%',
           },
         }}
@@ -80,7 +79,7 @@ export default function AlertProvider({ children }: React.PropsWithChildren) {
         onClose={onClose}
         message={
           <div className="flex flex-row justify-between items-center">
-            <div>{message?.content}</div>
+            <div>{capitalizeCase(message?.content ?? '')}</div>
             {getIcon(message?.type)}
           </div>
         }

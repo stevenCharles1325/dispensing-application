@@ -115,10 +115,10 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
   const [form, setForm] = useState<Partial<RoleDTO>>({});
   const [errors, setErrors] = useState<Record<string, any>>({});
 
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<'create' | 'update' | null>();
   const [selectedPermissions, setSelectedPermissions] = useState<
-    Record<string, number[]>
+    Record<string, string[]>
   >({});
 
   const permissionIds = useMemo(() => {
@@ -356,7 +356,7 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
           columns={columns}
           rowCount={data?.total}
           onRowSelectionModelChange={(itemIds) =>
-            setSelectedIds(itemIds as number[])
+            setSelectedIds(itemIds as string[])
           }
           sortingOrder={['asc', 'desc']}
           sortingMode='client'
@@ -371,7 +371,11 @@ export default function RolesAndPermissionsForm ({ onClose }: RolesAndPermission
       >
         <div ref={modalRef} className="w-full h-full p-5 flex flex-col gap-5">
           <DialogTitle style={{ paddingLeft: 5 }}>
-            {`Add new Role`}
+            {
+              modalAction === 'create'
+              ? 'Create a new Role'
+              : 'Update role'
+            }
           </DialogTitle>
           <Stepper activeStep={activeStep} className="mb-4">
             {steps.map((label, index) => {

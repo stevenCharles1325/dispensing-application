@@ -1,6 +1,7 @@
 import RoleDTO from 'App/data-transfer-objects/role.dto';
 
-const administrator: Omit<RoleDTO, 'id'> = {
+const administrator: RoleDTO = {
+  id: process.env.DEFAULT_ADMIN_ROLE_ID as string,
   name: 'Administrator',
   kebab: 'administrator',
 };

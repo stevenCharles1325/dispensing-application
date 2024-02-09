@@ -13,14 +13,14 @@ export class Image1696656747120 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'integer',
-            generationStrategy: 'increment',
+            type: 'varchar',
+            generationStrategy: 'uuid',
             isPrimary: true,
             isGenerated: true,
           },
           {
             name: 'uploader_id',
-            type: 'int',
+            type: 'varchar',
             foreignKeyConstraintName: 'uploader',
           },
           {

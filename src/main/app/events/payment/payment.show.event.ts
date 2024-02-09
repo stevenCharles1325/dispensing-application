@@ -23,7 +23,7 @@ export default class PaymentShowEvent implements IEvent {
   > {
     try {
       const requesterHasPermission = eventData.user.hasPermission?.(
-        'view-customer-payment'
+        'view-transaction'
       );
 
       if (requesterHasPermission) {

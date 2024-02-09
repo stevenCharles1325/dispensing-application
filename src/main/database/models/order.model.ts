@@ -10,6 +10,7 @@ import {
   Entity,
   CreateDateColumn,
   AfterLoad,
+  BeforeInsert,
   PrimaryGeneratedColumn,
   Relation,
   AfterInsert,
@@ -18,6 +19,9 @@ import type { Transaction } from './transaction.model';
 import type { Item } from './item.model';
 import type { Discount } from './discount.model';
 import { Bull } from 'Main/jobs';
+import Provider from '@IOC:Provider';
+import UserDTO from 'App/data-transfer-objects/user.dto';
+import IAuthService from 'App/interfaces/service/service.auth.interface';
 
 @Entity('orders')
 export class Order {
@@ -80,28 +84,52 @@ export class Order {
     await ItemRepository.save(item);
   }
 
+  @BeforeInsert()
+  async getSystemData() {
+    const authService = Provider.ioc<IAuthService>('AuthProvider');
+    const token = authService.getAuthToken?.()?.token;
+
+    const authResponse = authService.verifyToken(token);
+
+    if (authResponse.status === 'SUCCESS' && !this.system_id) {
+      const user = authResponse.data as UserDTO;
+      this.system_id = user.system_id;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   system_id: string;
 
   @Column()
   item_id: string;
 
-  @Column()
-  discount_id: number;
+  @Column({ nullable: true })
+  discount_id: string;
 
   @Column()
   transaction_id: string;
 
-  @Column()
+  @Column('numeric', {
+    nullable: true,
+    precision: 7,
+    scale: 2,
+    transformer: {
+      to: (data: number): number => data,
+      from: (data: string): number => parseFloat(data),
+    },
+  })
   quantity: number;
 
   @Column()
+  unit_of_measurement: string;
+
+  @Column({ nullable: true })
   tax_rate: number;
 
-  @Column()
+  @Column({ nullable: true })
   price: number;
 
   @CreateDateColumn()

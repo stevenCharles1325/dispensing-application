@@ -17,8 +17,11 @@ import {
   Chip,
   Dialog,
   DialogActions,
+  DialogTitle,
   Divider,
+  FormControl,
   IconButton,
+  InputLabel,
   ListItem,
   ListItemButton,
   ListItemIcon,
@@ -27,12 +30,13 @@ import {
   MenuItem,
   TextField,
   Tooltip,
+  Input,
 } from '@mui/material';
-import Input, { InputRef } from '../TextField/Input';
 import useSearch from 'UI/hooks/useSearch';
 import debounce from 'lodash.debounce';
 import { List, ListRowRenderer } from 'react-virtualized';
 import Loading from '../Loading';
+import useConnectionStatus from 'UI/hooks/useConnectionStatus';
 
 // Icons
 import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
@@ -65,6 +69,9 @@ import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined
 import usePermission from 'UI/hooks/usePermission';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import useDateTime from 'UI/hooks/useDateTime';
+import CircleIcon from '@mui/icons-material/Circle';
+import SyncIcon from '@mui/icons-material/Sync';
+import SyncDisabledOutlinedIcon from '@mui/icons-material/SyncDisabledOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -119,7 +126,6 @@ const getNotifs = async (
 
   if (res.status === 'ERROR') {
     const errorMessage = res.errors?.[0] as unknown as string;
-    console.log(errorMessage);
 
     return {
       data: [],
@@ -135,21 +141,28 @@ const getNotifs = async (
 };
 
 export default function AppNavigation({ children }: React.PropsWithChildren) {
-  const inputRef = useRef<InputRef>(null);
+  const inputRef = useRef<any>(null);
 
   const { date, time } = useDateTime();
   const hasPermission = usePermission();
-  const { addListener, getCommand } = useShortcutKeys();
+  const { addListener, reset, getCommand } = useShortcutKeys();
 
   const drive = useAppDrive();
   const [openDrive, driveListener] =
     drive?.subscribe?.('APP_NAVIGATION') ?? [];
 
+  const connection = useConnectionStatus();
   const navigate = useNavigate();
   const location = useLocation();
   const { displayAlert } = useAlert();
   const { searchText, placeHolder, disabled, setSearchText, setDisabled } =
     useSearch();
+
+  const connectionColor = connection === 'offline'
+    ? 'gray'
+    : connection === 'online'
+      ? 'rgb(68, 183, 0)'
+      : '#ed6c02';
 
   const activeRouteId = navigationRoutes.findIndex(({ redirectPath }) =>
     redirectPath === location?.pathname
@@ -223,7 +236,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         const res = await window.notif.updateNotif(notif.id, 'SEEN');
 
         if (res.status === 'ERROR') {
-          console.log(res.errors);
           const errorMessage = res.errors?.[0] as unknown as string;
 
           return console.log(errorMessage);
@@ -237,9 +249,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
   const handleVisitedNotif = async (id: string) => {
     const res = await window.notif.updateNotif(id, 'VISITED');
 
-    console.log('RES: ', res);
     if (res.status === 'ERROR') {
-      console.log(res.errors);
       const errorMessage = res.errors?.[0] as unknown as string;
       return console.log(errorMessage);
     }
@@ -251,7 +261,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     const res = await window.notif.deleteNotif(id);
 
     if (res.status === 'ERROR') {
-      console.log(res.errors);
       const errorMessage = res.errors?.[0] as unknown as string;
       return console.log(errorMessage);
     }
@@ -265,7 +274,6 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
       const res = await window.notif.deleteNotif(ids);
 
       if (res.status === 'ERROR') {
-        console.log(res.errors);
         const errorMessage = res.errors?.[0] as unknown as string;
         return console.log(errorMessage);
       }
@@ -318,6 +326,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
       return displayAlert?.(errorMessage ?? 'Please try again', 'error');
     }
 
+    reset?.();
     displayAlert?.('Successfully signed-out', 'success');
     return navigate('/sign-in', { replace: true });
   };
@@ -442,6 +451,14 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
     getInitialUnseenNotifs();
   }, []);
 
+  // Notifications
+  const [selectedNotif, setSelectedNotif] = useState<NotificationDTO | null>(null);
+  const isNotifDialogOpen = Boolean(selectedNotif);
+
+  const handleCloseNotif = () => {
+    setSelectedNotif(null);
+  }
+
   const notifRowRenderer: ListRowRenderer = ({ index, key, style }) => {
     const notif = notifs[index];
 
@@ -468,7 +485,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               handleCloseMenuNotif();
               navigate(notif.link, { replace: true });
             } else {
-              displayAlert?.('This notification has no redirection', 'warning');
+              setSelectedNotif(notif);
             }
           }}
         >
@@ -506,7 +523,10 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         },
         {
           key: 'search-bar',
-          handler: () => inputRef.current?.focus?.(),
+          handler: () => {
+            console.log('SHEES: ', inputRef.current);
+            inputRef.current?.focus?.();
+          },
         },
         {
           key: 'log-out',
@@ -514,7 +534,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         }
       ]);
     }
-  }, []);
+  }, [inputRef.current]);
 
   return (
     <>
@@ -582,51 +602,65 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           ))}
         </div>
         <div className="navigation-screen-container grow my-5 mr-5 bg-white rounded-2xl p-5 flex flex-col overflow-auto">
-          <div className="w-full h-[50px] flex justify-between px-5">
-            <Input
-              ref={inputRef as Ref<InputRef>}
-              opacity="clear"
-              disabled={disabled}
-              leftIcon={
-                <IconButton disabled>
-                  <SearchOutlinedIcon />
-                </IconButton>
-              }
-              rightIcon={
-                <IconButton
-                  disabled={!text?.length}
-                  onClick={() => {
-                    setText('');
-                    setSearchText?.('');
+          <div className="w-full h-[50px] flex justify-between pr-5 mb-3">
+            <div className='flex w-fit h-fit'>
+              <div className='flex justify-center items-center'>
+                <SearchOutlinedIcon fontSize="large" sx={{ color: 'action.active' }}/>
+              </div>
+              <FormControl sx={{ m: 1, width: 300 }} variant="standard">
+                <Input
+                  id="search-box"
+                  disabled={disabled}
+                  color="secondary"
+                  inputRef={inputRef}
+                  endAdornment={
+                    <IconButton
+                      disabled={!text?.length}
+                      onClick={() => {
+                        setText('');
+                        setSearchText?.('');
+                      }}
+                    >
+                      {text?.length ? <CloseOutlinedIcon /> : null}
+                    </IconButton>
+                  }
+                  value={text}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    handleDebouncedSearching(e.target.value);
                   }}
-                >
-                  {text?.length ? <CloseOutlinedIcon /> : null}
+                  placeholder={`${placeHolder} ${!disabled ? `(${getCommand?.('search-bar')?.toLocaleUpperCase()})` : '' }`}
+                />
+              </FormControl>
+            </div>
+            <div className='flex flex-row gap-10 items-center'>
+              {/* <div className='p-1 border rounded-full border-[#9c27b0] flex gap-4'>
+                <CircleIcon
+                  fontSize='small'
+                  sx={{
+                    color: connectionColor
+                  }}
+                />
+                <SyncIcon
+                  fontSize='small'
+                />
+              </div> */}
+              <div className="w-[100px] flex justify-end gap-5 items-center">
+                {
+                  hasPermission('view-notification')
+                  ? (
+                    <IconButton onClick={handleOpenNotifMenu}>
+                      <Badge badgeContent={unseenNotifs?.length ?? 0} color="secondary">
+                        <NotificationsNoneOutlinedIcon />
+                      </Badge>
+                    </IconButton>
+                  )
+                  : null
+                }
+                <IconButton onClick={handleOpenProfileMenu}>
+                  <PersonOutlinedIcon />
                 </IconButton>
-              }
-              placeholder={`${placeHolder} ${!disabled ? `(${getCommand?.('search-bar')?.toLocaleUpperCase()})` : '' }`}
-              width={300}
-              height="full"
-              value={text}
-              onChange={(e) => {
-                setText(e.target.value);
-                handleDebouncedSearching(e.target.value);
-              }}
-            />
-            <div className="w-[100px] flex justify-end gap-5 items-center">
-              {
-                hasPermission('view-notification')
-                ? (
-                  <IconButton onClick={handleOpenNotifMenu}>
-                    <Badge badgeContent={unseenNotifs?.length ?? 0} color="secondary">
-                      <NotificationsNoneOutlinedIcon />
-                    </Badge>
-                  </IconButton>
-                )
-                : null
-              }
-              <IconButton onClick={handleOpenProfileMenu}>
-                <PersonOutlinedIcon />
-              </IconButton>
+              </div>
             </div>
           </div>
           <div className="grow overflow-auto scrollbar scrollbar-thumb-blue-700 scrollbar-track-blue-300">{children}</div>
@@ -890,6 +924,33 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
           </Button>
           <Button onClick={handleUpdateProfile}>Save</Button>
         </DialogActions>
+      </Dialog>
+      <Dialog
+        maxWidth="lg"
+        open={isNotifDialogOpen}
+        onClose={handleCloseNotif}
+      >
+        {selectedNotif
+        ? (
+          <>
+            <DialogTitle>
+              <p className='text-xl font-bold text-black/70'>{selectedNotif.title}</p>
+            </DialogTitle>
+            <Divider />
+            <div className='w-[500px] h-[400px] text-pretty overflow-auto m-5'>
+              <div className='w-full h-full px-2'>
+                <p className='text-md font-light text-pretty text-slate-500'>{selectedNotif.description}</p>
+              </div>
+            </div>
+            <Divider />
+            <DialogActions>
+              <Button onClick={handleCloseNotif}>
+                Close
+              </Button>
+            </DialogActions>
+          </>
+        )
+        : null}
       </Dialog>
     </>
   );

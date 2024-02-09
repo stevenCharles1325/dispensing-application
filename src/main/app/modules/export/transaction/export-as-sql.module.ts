@@ -3,15 +3,29 @@ import { app } from 'electron';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import handleError from 'App/modules/error-handler.module';
-import concatDateToName from 'App/modules/concatDateToName.module';
+import concatDateToName from 'App/modules/concat-date-to-name.module';
+import path from 'path';
+import { getPlatform } from 'App/modules/get-platform.module';
+import AppRootDir from 'app-root-dir';
 
+const IS_PROD = process.env.NODE_ENV === 'production';
 const asyncExec = promisify(exec);
 
+const EXEC_PATH = IS_PROD
+  ? path.join(
+      AppRootDir.get(),
+      `../../assets/binaries/sqlite3/${getPlatform()}/bin`
+    )
+  : `${AppRootDir.get()}/assets/binaries/sqlite3/${getPlatform()}/bin`;
+
 export default async function exportAsSQL() {
-  const fileName =
-    app.getPath('downloads') + `/${
+  const fileName = path.join(
+    app.getPath('downloads'),
+    `${
       concatDateToName('xgen_transaction_orders')
-    }.sqlite`;
+    }.sqlite`
+  );
+
   const tableNames = [
     'images',
     'discounts',
@@ -23,17 +37,37 @@ export default async function exportAsSQL() {
   ];
 
   try {
-    const command =
-      `sqlite3 ${DB_PATH} '.mode insert' '.dump ${
-        tableNames.join(' ')
-      }' > ${fileName}`;
+    const platform = getPlatform();
+    const sqlite = platform === 'win'
+      ? '.\\sqlite3.exe'
+      : 'sqlite3';
 
-    await asyncExec(command);
+    if (platform === 'win') {
+      const command =
+        `cd "${EXEC_PATH}" && ${sqlite} ${DB_PATH} '.mode insert' '.dump ${
+          tableNames.join(' ')
+        }' > ${fileName}`;
 
-    return {
-      data: { filePath: fileName },
-      code: 'REQ_OK',
-      status: 'SUCCESS',
+      await asyncExec(command);
+
+      return {
+        data: { filePath: fileName },
+        code: 'REQ_OK',
+        status: 'SUCCESS',
+      }
+    } else {
+      const command =
+        `${sqlite} ${DB_PATH} '.mode insert' '.dump ${
+          tableNames.join(' ')
+        }' > ${fileName}`;
+
+      await asyncExec(command);
+
+      return {
+        data: { filePath: fileName },
+        code: 'REQ_OK',
+        status: 'SUCCESS',
+      }
     }
   } catch (err) {
     console.log(err);
