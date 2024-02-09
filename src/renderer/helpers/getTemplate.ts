@@ -203,7 +203,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.orders?.[0]?.item.item_code,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -224,7 +224,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.orders?.[0]?.item.batch_code,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -245,7 +245,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.tare_weight,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -266,7 +266,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.net_weight,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -287,7 +287,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.gross_weight,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -308,7 +308,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: titleCase(data?.source_name),
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -329,7 +329,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: '',
                 attributes: {
-                  style: 'text-align: right; width: 80px; height: 100%; border-bottom: 2px solid rgba(0, 0, 0, 0.5);'
+                  style: 'text-align: LEFT; width: 80px; height: 100%; border-bottom: 2px solid rgba(0, 0, 0, 0.5);'
                 }
               },
             ]
@@ -350,7 +350,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.product_lot_number,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -371,7 +371,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                 element: 'td',
                 htmlText: data?.product_used,
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -399,7 +399,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                   }
                 ),
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -428,7 +428,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
                   }
                 ),
                 attributes: {
-                  style: 'text-align: right;'
+                  style: 'text-align: LEFT;'
                 }
               },
             ]
@@ -487,7 +487,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.orders?.[0]?.item.item_code,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -508,7 +508,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.orders?.[0]?.item.batch_code,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -529,7 +529,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.tare_weight,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -550,7 +550,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.net_weight,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -571,7 +571,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.gross_weight,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -592,7 +592,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: titleCase(data?.source_name),
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -613,7 +613,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: '',
                     attributes: {
-                      style: 'text-align: right; height: 100%; border-bottom: 2px solid black;'
+                      style: 'text-align: LEFT; height: 100%; border-bottom: 2px solid black;'
                     }
                   },
                 ]
@@ -634,7 +634,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.product_lot_number,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -655,7 +655,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data?.product_used,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -683,7 +683,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                       }
                     ),
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -712,7 +712,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                       }
                     ),
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -733,7 +733,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data.transaction_code,
                     attributes: {
-                      style: 'text-align: right;'
+                      style: 'text-align: LEFT;'
                     }
                   },
                 ]
@@ -770,7 +770,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: data.orders?.[0]?.item?.item_code ?? '—',
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -784,7 +784,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: data.orders?.[0]?.item?.batch_code ?? '—',
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -798,7 +798,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: data.tare_weight ?? '—',
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -812,7 +812,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: data.net_weight ?? '—',
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -826,7 +826,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: data.gross_weight ?? '—',
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -840,7 +840,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: titleCase(data.source_name ?? '—'),
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -854,7 +854,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: '_________',
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -868,7 +868,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: data.product_lot_number,
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -882,7 +882,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: data.product_used,
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -903,7 +903,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
                 year: 'numeric'
               }
             ),
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -925,7 +925,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
                 hour: '2-digit'
               }
             ),
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
@@ -939,7 +939,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           },
           {
             text: data.transaction_code,
-            align: 'RIGHT',
+            align: 'LEFT',
           },
         ]
       }
