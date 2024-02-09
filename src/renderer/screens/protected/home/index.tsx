@@ -155,7 +155,7 @@ const weightsInit = {
 }
 
 export default function Home() {
-  // const { print } = usePrinter();
+  const { print } = usePrinter();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
@@ -430,7 +430,7 @@ export default function Home() {
         refetchItems();
         displayAlert?.('Purchased successfully', 'success');
 
-        // print(transaction.id);
+        print(transaction.id);
       }
     });
   }, [orderDetails, displayAlert, refetchItems]);
