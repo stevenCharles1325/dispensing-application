@@ -1,38 +1,90 @@
-## X-GEN POS
 
-`Description`
+# XGEN DISPENSING APPLICATION
 
-An endeavor to implement SOLID principles in a more useful application that I could also profit from. The design was carefully crafted to make it very user-friendly to its users compared to other POS software. It is still in development mode, but lots of its features in the Master branch are working accordingly. The SOLID principle was implemented on the Main (NodeJS) side of the project as I just used the common principles for the Front-end. The struggles I have gone through in this project were the keys to my growth. I also used some of the ideas I have learned in building REST API to the Main side, as I saw that it fits well with the project.
+## Tech Stack
 
-`Technologies`
-- Electron (ERB)
-- NodeJS
-- ReactJS
-- Docker
-- MinIO (Object-storage)
-- CRON (node-schedule)
-- BullMQ
-- JWT
-- Redis
-- node-hid
-- TypeORM
-- Sqlite
+- Electron
+- Electron React Boilerplate
+- React
 - Zustand
-- MUI
+- ReactRouter
+- TailwindCSS
+- Material UI
+- NodeJS
+- SQLite
+- JWT
+- MinIO (Object-storage)
+- Docker
+- CRON
 
-`Features`
-- Inventory System
-- Stock In & Out
+## 3rd-party dependencies
+- [Zadig](https://zadig.akeo.ie/)
+- [WKHTMLTOPDF](https://wkhtmltopdf.org/downloads.html)
+
+## Features
+- Auto unit-of-measurement calculation
+- Barcode Scanning
+- Device Storage Monitoring
 - Employee Management
-- Categories and Brand Management
-- Shortcut-keys Management
-- Discount Management
-- Logs and Transaction History with Exporting
-- Graph Reports with History
-- Role Management with Permissions
-- Notification
-- Full Offline Mode
+- Excel - Transaction Import/Export (Overall, or Current day, month, or year)
+- Export a transaction as PDF or Receipt
+- Image Management
+- In-App Notifications
+- Offline
+- Product Bulk Upload
+- Product Expiration Monitoring
+- Receipt Printing
+- Report Graphs
+- Roles & Permissions Management
+- Shortcut-key Management
+- SQL - Transaction Export
+- Stock Movement Management
+- Stock-in and Stock-out
 
-`Sample Image`
 
-![home-with-lots-of-samples](https://github.com/stevenCharles1325/pos-client/assets/65751942/4cf1aecd-9380-4baa-a0c5-c6c6401572a4)
+
+## Run Locally
+
+1. Clone the project
+
+```bash
+  git clone https://github.com/stevenCharles1325/dispensing-application.git
+```
+
+2. Go to the project directory
+
+```bash
+  cd dispensing-application
+```
+
+3. Install dependencies (Run the 3rd-party deps as well)
+
+```bash
+  nvm install && npm i --legacy-peer-dep && npm run dep:binaries:minio
+```
+
+4. Edit index.js of `/resources/app/node_modules/escpos-usb`.
+Look for the line with `usb.on('detach', ...` and change it to `usb.usb.on('detach', ...`
+
+
+5. Start the server
+
+```bash
+  npm start
+```
+
+
+## Deployment
+
+To package this project run
+
+```bash
+  npm run package -- --[linux, win]
+```
+Or with debuggin on
+```bash
+  npx cross-env DEBUG_PROD=true npm run package -- --[linux, win]
+```
+
+Note: Run in administrator mode on Windows.
+
