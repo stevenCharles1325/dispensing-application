@@ -51,15 +51,17 @@ export default function SignIn() {
 
   return (
     <div className="w-screen h-screen bg-transparent flex justify-center items-center shadow-inner">
-      <div className="w-[397px] h-[450px] bg-white rounded-[20px] shadow-2xl p-5 flex flex-col items-center">
+      <div className="w-[397px] h-[450px] bg-white rounded shadow-2xl p-5 flex flex-col items-center">
         <div className="mb-[30px]">
           <AppLogo withName />
+          <p className='text-sm text-black/50 text-center'>Dispensing Application</p>
         </div>
 
         <div className="mb-[30px] flex flex-col gap-1">
           <TextField
             autoFocus
             label="Email"
+            size="small"
             placeholder="Email"
             fullWidth
             color="secondary"
@@ -74,6 +76,7 @@ export default function SignIn() {
           <br />
           <PasswordInput
             label="Password"
+            size="small"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => {
@@ -84,11 +87,11 @@ export default function SignIn() {
           />
         </div>
 
-        <div className="flex flex-col">
+        <div className="w-full flex flex-row justify-end px-[43px]">
           <Button
             variant="outlined"
             color="success"
-            size="large"
+            size="medium"
             onClick={login}
           >
             Sign-In

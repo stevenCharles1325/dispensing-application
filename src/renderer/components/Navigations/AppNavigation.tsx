@@ -542,8 +542,13 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         <div className={`${isSideNavCollapsed ? 'min-w-[120px] w-[120px]' : 'min-w-[280px] w-[280px]'} h-full flex flex-col bg-transparent pt-5`}>
           <div className="w-full h-[60px] flex flex-col justify-center items-center mb-5">
             <div className="ml-[25px] mt-5 w-fit flex flex-wrap justify-center items-center">
-              <div className='flex justify-center' style={{ width: isSideNavCollapsed ? '100px' : '190px' }}>
+              <div className='flex flex-col items-center justify-center' style={{ width: isSideNavCollapsed ? '100px' : '190px' }}>
                 <AppLogo size={30} color="light" withName={!isSideNavCollapsed} />
+                {
+                  !isSideNavCollapsed
+                  ? <p className='pl-5 text-xs text-white/50'>Dispensing Application</p>
+                  : null
+                }
               </div>
               <div className='w-fit'>
                 <Tooltip

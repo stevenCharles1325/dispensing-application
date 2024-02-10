@@ -4,7 +4,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable react/function-component-definition */
 /* eslint-disable react/no-unstable-nested-components */
-import { Autocomplete, Button, Chip, Dialog, DialogActions, IconButton, MenuItem, Select, TextField } from '@mui/material';
+import { Autocomplete, Button, Chip, IconButton, TextField } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
@@ -26,14 +26,12 @@ import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import { DeleteOutline } from '@mui/icons-material';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
 import titleCase from 'UI/helpers/titleCase';
-import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
 import usePrinter from 'UI/hooks/usePrinter';
 import { NumericFormatProps, NumericFormat } from 'react-number-format';
-import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
-import useBarcode from 'UI/hooks/useBarcode';
 import measurements from 'UI/data/defaults/unit-of-measurements';
 import localStorage from 'UI/modules/storage';
 import CustomAutoComplete from 'UI/components/TextField/CustomAutoComplete';
+import transaction from 'Main/data/defaults/categories/transaction';
 
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 215;

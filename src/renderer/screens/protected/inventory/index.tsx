@@ -6,7 +6,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { ChangeEvent, ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Chip, Collapse, Dialog, Divider, IconButton, Slide, styled, useMediaQuery, useTheme } from '@mui/material';
+import { Chip, Collapse, Dialog, Divider, IconButton, ListItem, ListItemButton, ListItemText, Menu, Slide, styled, useMediaQuery, useTheme } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
 import { TransitionProps } from '@mui/material/transitions';
 import { useQuery } from '@tanstack/react-query';
@@ -30,7 +30,8 @@ import useConfirm from 'UI/hooks/useConfirm';
 import { ChevronLeftOutlined, ChevronRightOutlined, DownloadOutlined, UploadOutlined } from '@mui/icons-material';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
-import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
+import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
+// import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
 
 type IImportModule = 'INVENTORY' | 'STOCKS';
 
@@ -161,6 +162,19 @@ export default function Inventory() {
   );
   const { displayAlert } = useAlert();
   const { searchText, setPlaceHolder } = useSearch();
+
+  const [stockActionAnchorEl, setStockActionAnchorEl] = useState<null | HTMLElement>(null);
+  const openMenuStockRecordAction= Boolean(stockActionAnchorEl);
+
+  const handleOpenStockRecordMenu = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    setStockActionAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseStockRecordMenu = () => {
+    setStockActionAnchorEl(null);
+  };
 
   const { data, refetch: refetchItems } = useQuery({
     queryKey: ['items', searchText],
@@ -513,8 +527,14 @@ export default function Inventory() {
                 label="Import Inventory"
                 onClick={() => handleSelectFileToImport('INVENTORY')}
               />
-              <Divider orientation='vertical' flexItem />
               <Chip
+                variant="outlined"
+                color="secondary"
+                icon={<DirectionsWalkIcon fontSize='small'/>}
+                label="Stock Records Action"
+                onClick={handleOpenStockRecordMenu}
+              />
+              {/* <Chip
                 variant="outlined"
                 color="secondary"
                 icon={<UploadOutlined />}
@@ -527,7 +547,7 @@ export default function Inventory() {
                 icon={<DownloadOutlined />}
                 label="Export Stock Records"
                 onClick={() => handleExport()}
-              />
+              /> */}
             </div>
           </div>
         </div>
@@ -577,6 +597,48 @@ export default function Inventory() {
             handleImport={handleImportStocks}
           />
         </Dialog>
+        <Menu
+          id="basic-menu"
+          anchorEl={stockActionAnchorEl}
+          open={openMenuStockRecordAction}
+          onClose={handleCloseStockRecordMenu}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          MenuListProps={{
+            'aria-labelledby': 'export-menu',
+          }}
+        >
+          <div className='w-[300px]'>
+            <ListItem
+              component="div"
+              alignItems="center"
+              disablePadding
+            >
+              <ListItemButton
+                onClick={() => handleSelectFileToImport('STOCKS') as any}
+              >
+                <ListItemText primary={`Import Stock Records`} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem
+              component="div"
+              alignItems="center"
+              disablePadding
+            >
+              <ListItemButton
+                onClick={() => handleExport()}
+              >
+                <ListItemText primary={`Export Stock Records`} />
+              </ListItemButton>
+            </ListItem>
+          </div>
+        </Menu>
       </div>
     </div>
   );

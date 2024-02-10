@@ -12,7 +12,8 @@ import {
   ListItemButton,
   ListItemText,
   CircularProgress,
-  DialogActions
+  DialogActions,
+  Divider
 } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
@@ -470,7 +471,7 @@ export default function Logs() {
             <ListItemButton
               onClick={handleExportTransactionHistoryAsSpreadsheet('WHOLE')}
             >
-              <ListItemText primary={`Whole`} />
+              <ListItemText primary={`Overall`} />
               {exportDownloadState['WHOLE'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
               {exportDownloadState['WHOLE'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" color="success" /> : null}
               {exportDownloadState['WHOLE'] === 'ERROR' ? <CloseOutlinedIcon fontSize="small" color="error" /> : null}
@@ -553,6 +554,7 @@ export default function Logs() {
                   icon={<DownloadOutlinedIcon fontSize="small" />}
                   onClick={handleOpenExportMenu}
                 />
+                <Divider orientation='vertical' flexItem />
                 <div className='flex gap-1'>
                   <Chip
                     label="Export SQL"
