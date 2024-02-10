@@ -279,8 +279,8 @@ export default class InventoryImportJob implements IJob {
             const date = new Date();
             date.setDate(date.getDate() + 1);
 
-            itemClone.name = record['Item Name']
-            itemClone.item_code = record['Item Number']
+            itemClone.name = record['Item Name'];
+            itemClone.item_code = record['Item Number'];
             itemClone.batch_code = record['Batch Number'];
             itemClone.stock_quantity = record['Quantity'];
             itemClone.unit_of_measurement = getUOFSymbol(record['UM'], true) ?? record['UM'];
