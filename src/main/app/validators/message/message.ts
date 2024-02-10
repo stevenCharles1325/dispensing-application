@@ -5,6 +5,7 @@ const message = {
   minLength: 'Length must be at least $constraint1',
   maxLength: 'Length must be between $constraint1 to $constraint2',
   positive: 'Value must be greater than zero',
+  min: 'Value greater than or equal $constraint1',
   email: 'Email is invalid',
   unique: 'Already taken',
   date: 'Date is invalid',

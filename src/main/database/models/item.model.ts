@@ -21,7 +21,7 @@ import {
   Length,
   IsNotEmpty,
   IsIn,
-  IsPositive,
+  Min,
   ValidateIf,
 } from 'class-validator';
 import { Bull } from 'Main/jobs';
@@ -250,7 +250,7 @@ export class Item {
   @IsNotEmpty({
     message: ValidationMessage.notEmpty,
   })
-  @IsPositive({
+  @Min(0, {
     message: ValidationMessage.positive,
   })
   stock_quantity: number;
