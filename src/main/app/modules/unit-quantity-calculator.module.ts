@@ -37,14 +37,28 @@ export default function unitQuantityCalculator (
     NORMAL_UNITS.includes(leftOperand.unit.toLocaleLowerCase()) ||
     NORMAL_UNITS.includes(rightOperand.unit.toLocaleLowerCase())
     ) {
+
+    const um = unitFormatter(leftOperand.unit, true);
+
+    if (!um) {
+      throw new Error('Unknown unit of measurement');
+    }
+
     return [
       (Number(leftOperand.quantity) - Number(rightOperand.quantity)) ?? 0,
       unitFormatter(leftOperand.unit, true),
     ];
   }
 
-  const itemQuantity = `${leftOperand.quantity} ${unitFormatter(leftOperand.unit)}`;
-  const otherQuantity = `${rightOperand.quantity} ${unitFormatter(rightOperand.unit)}`;
+  const itemUM = unitFormatter(leftOperand.unit);
+  const otherUM = unitFormatter(rightOperand.unit);
+
+  if (!itemUM || !otherUM) {
+    throw new Error('Unknown unit of measurement');
+  }
+
+  const itemQuantity = `${leftOperand.quantity} ${itemUM}`;
+  const otherQuantity = `${rightOperand.quantity} ${otherUM}`;
 
   const result = unit(itemQuantity)
     [operation](otherQuantity)

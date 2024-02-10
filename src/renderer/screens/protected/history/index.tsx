@@ -547,7 +547,7 @@ export default function Logs() {
             ? (
               <div className='w-full h-fit flex flex-row-reverse mb-3 gap-3'>
                 <Chip
-                  label="Excel"
+                  label="Export As Excel"
                   color="secondary"
                   variant="outlined"
                   disabled={!selectedRows.length}

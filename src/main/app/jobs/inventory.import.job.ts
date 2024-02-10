@@ -20,6 +20,7 @@ import unit from 'unitmath';
 import xlsx from 'xlsx';
 import { Brand } from 'Main/database/models/brand.model';
 import { Category } from 'Main/database/models/category.model';
+import unitQuantityCalculator from 'App/modules/unit-quantity-calculator.module';
 
 export default class InventoryImportJob implements IJob {
   readonly key = 'INVENTORY_IMPORT_JOB';
@@ -170,31 +171,6 @@ export default class InventoryImportJob implements IJob {
 
           Object.assign(itemClone, item);
 
-          const recordUM = getUOFSymbol(inventoryRecord.unit_of_measurement);
-          const itemUM = getUOFSymbol(item.unit_of_measurement);
-
-          if (!recordUM || !itemUM) record['Error'] = 'Unknown unit of measurement'
-
-          if (record['Error']) {
-            errorCount += 1;
-            await updateUploadStatusCount(record, 'error');
-            await queryRunner.commitTransaction();
-            continue;
-          }
-
-          const recordQuantity = `${inventoryRecord.quantity} ${recordUM}`;
-          const itemQuantity = `${item.stock_quantity} ${itemUM}`;
-
-          if (inventoryRecord.type === 'stock-in') {
-            const resultQuantity = unit(itemQuantity)
-              .add(recordQuantity)
-              .toString({ precision: 4 });
-            const [quantity, um] = resultQuantity.split(' ');
-
-            itemClone.stock_quantity = (Number(quantity) ?? 0);
-            itemClone.unit_of_measurement = getUOFSymbol(um);
-          }
-
           // if (inventoryRecord.type === 'stock-out') {
           //   const resultQuantity = unit(itemQuantity)
           //     .sub(recordQuantity)
@@ -206,6 +182,28 @@ export default class InventoryImportJob implements IJob {
           // }
 
           try {
+            const leftOperand = {
+              quantity: item.stock_quantity,
+              unit: item.unit_of_measurement,
+            }
+
+            const rightOperand = {
+              quantity: inventoryRecord.quantity,
+              unit: inventoryRecord.unit_of_measurement,
+            }
+
+            if (inventoryRecord.type === 'stock-in') {
+              const [quantity, um] = unitQuantityCalculator(
+                leftOperand,
+                rightOperand,
+                getUOFSymbol,
+                'add',
+              );
+
+              itemClone.stock_quantity = quantity ?? 0;
+              itemClone.unit_of_measurement = um;
+            }
+
             await validate(itemClone, record);
             await validate(inventoryRecord, record);
 
@@ -224,7 +222,7 @@ export default class InventoryImportJob implements IJob {
             const error = handleError(err);
 
             errorCount += 1;
-            record['Error'] = error;
+            record['Error'] = error?.message ?? error;
             await queryRunner.rollbackTransaction();
 
             await updateUploadStatusCount(record, 'error');

@@ -178,7 +178,6 @@ export default class InventoryRecordImportJob implements IJob {
           record['Error'] = "This record came from this device, and might cause conflict.";
         }
 
-
         if (record['Error']) {
           errorCount += 1;
           await updateUploadStatusCount(record, 'error');
@@ -210,17 +209,17 @@ export default class InventoryRecordImportJob implements IJob {
             unit: inventoryRecord.unit_of_measurement,
           }
 
-          const [quantity, um] = unitQuantityCalculator(
-            leftOperand,
-            rightOperand,
-            getUOFSymbol,
-            inventoryRecord.type === 'stock-in' ? 'add' : 'sub',
-          );
-
-          itemClone.stock_quantity = quantity;
-          itemClone.unit_of_measurement = um;
-
           try {
+            const [quantity, um] = unitQuantityCalculator(
+              leftOperand,
+              rightOperand,
+              getUOFSymbol,
+              inventoryRecord.type === 'stock-in' ? 'add' : 'sub',
+            );
+
+            itemClone.stock_quantity = quantity;
+            itemClone.unit_of_measurement = um;
+
             await validate(itemClone, record);
             await validate(inventoryRecord, record);
 
@@ -240,7 +239,7 @@ export default class InventoryRecordImportJob implements IJob {
             const error = handleError(err);
 
             errorCount += 1;
-            record['Error'] = error;
+            record['Error'] = error?.message ?? error;
             await queryRunner.rollbackTransaction();
             await queryRunner.startTransaction();
 
