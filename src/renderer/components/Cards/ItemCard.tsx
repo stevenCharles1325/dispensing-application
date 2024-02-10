@@ -15,7 +15,7 @@ interface ItemCardParams {
 
 export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCardParams) {
   return (
-    <div className="w-[360px] h-[200px]">
+    <div className="w-[340px] h-[200px]">
       <div className="relative w-full h-full rounded-md overflow-hidden flex flex-col overflow-hidden hover:shadow-lg">
         <div className="w-full h-[200px] bg-white relative rounded-md">
           <img

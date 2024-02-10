@@ -33,7 +33,7 @@ import localStorage from 'UI/modules/storage';
 import CustomAutoComplete from 'UI/components/TextField/CustomAutoComplete';
 import transaction from 'Main/data/defaults/categories/transaction';
 
-const CARD_WIDTH = 360;
+const CARD_WIDTH = 340;
 const CARD_HEIGHT = 215;
 
 const getItems = async (
