@@ -80,7 +80,7 @@ export class Order {
       id: this.item_id as unknown as string,
     });
 
-    item.purchase(this.quantity);
+    item.purchase(this.quantity, this.unit_of_measurement);
     await ItemRepository.save(item);
   }
 

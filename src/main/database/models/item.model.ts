@@ -41,6 +41,9 @@ import Provider from '@IOC:Provider';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import UserDTO from 'App/data-transfer-objects/user.dto';
 import BrandDTO from 'App/data-transfer-objects/brand.dto';
+import { IItemMeasurement } from 'App/interfaces/item/item.measurements.interface';
+import unitQuantityCalculator from 'App/modules/unit-quantity-calculator.module';
+import getUOFSymbol from 'App/modules/get-uof-symbol.module';
 
 @Entity('items')
 export class Item {
@@ -315,7 +318,7 @@ export class Item {
   discount?: Relation<Discount> | null;
 
   // Custom functions
-  async purchase(quantity: number = 1) {
+  async purchase(quantity: number = 1, unit_of_measurement: IItemMeasurement) {
     if (
       this.discount?.discount_type === 'buy-one-get-one' &&
       this.discount?.status === 'active'
@@ -334,7 +337,25 @@ export class Item {
         }
       );
     } else {
-      this.stock_quantity -= quantity;
+      const leftOperand = {
+        quantity: this.stock_quantity,
+        unit: this.unit_of_measurement,
+      }
+
+      const rightOperand = {
+        quantity,
+        unit: unit_of_measurement,
+      }
+
+      const [qt, um] = unitQuantityCalculator(
+        leftOperand,
+        rightOperand,
+        getUOFSymbol,
+        'sub'
+      );
+
+      this.stock_quantity = qt;
+      this.unit_of_measurement = um;
 
       await Bull(
         'STOCK_JOB',
@@ -342,6 +363,7 @@ export class Item {
           item_id: this.id,
           purpose: 'sold',
           quantity,
+          unit_of_measurement: um,
           type: 'stock-out',
         }
       );

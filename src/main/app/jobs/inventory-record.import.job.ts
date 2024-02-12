@@ -192,7 +192,7 @@ export default class InventoryRecordImportJob implements IJob {
           inventoryRecord.purpose = record['Purpose'];
           inventoryRecord.item_id = item.id;
           inventoryRecord.note = record['Note'];
-          inventoryRecord.type = record['Type'];
+          inventoryRecord.type = record['Type']?.toLocaleLowerCase();
           inventoryRecord.quantity = record['Quantity'];
           inventoryRecord.unit_of_measurement = record['UM']?.toLocaleLowerCase();
           inventoryRecord.creator_id = user.id;
@@ -214,7 +214,7 @@ export default class InventoryRecordImportJob implements IJob {
               leftOperand,
               rightOperand,
               getUOFSymbol,
-              inventoryRecord.type === 'stock-in' ? 'add' : 'sub',
+              inventoryRecord.type?.toLocaleLowerCase() === 'stock-in' ? 'add' : 'sub',
             );
 
             itemClone.stock_quantity = quantity;
@@ -240,6 +240,7 @@ export default class InventoryRecordImportJob implements IJob {
 
             errorCount += 1;
             record['Error'] = error?.message ?? error;
+
             await queryRunner.rollbackTransaction();
             await queryRunner.startTransaction();
 

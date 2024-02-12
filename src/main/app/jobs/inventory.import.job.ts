@@ -223,7 +223,6 @@ export default class InventoryImportJob implements IJob {
 
             errorCount += 1;
             record['Error'] = error?.message ?? error;
-            await queryRunner.rollbackTransaction();
 
             await updateUploadStatusCount(record, 'error');
             await queryRunner.commitTransaction();
@@ -304,7 +303,10 @@ export default class InventoryImportJob implements IJob {
 
             errorCount += 1;
             record['Error'] = error;
-            await queryRunner.rollbackTransaction();
+
+            if (queryRunner.isTransactionActive) {
+              await queryRunner.rollbackTransaction();
+            }
             await queryRunner.startTransaction();
 
             await updateUploadStatusCount(record, 'error');
