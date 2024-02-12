@@ -69,9 +69,6 @@ import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined
 import usePermission from 'UI/hooks/usePermission';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import useDateTime from 'UI/hooks/useDateTime';
-import CircleIcon from '@mui/icons-material/Circle';
-import SyncIcon from '@mui/icons-material/Sync';
-import SyncDisabledOutlinedIcon from '@mui/icons-material/SyncDisabledOutlined';
 
 export const navigationRoutes: INavButtonprops[] = [
   {

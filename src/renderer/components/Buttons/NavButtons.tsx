@@ -72,7 +72,7 @@ export default function NavButton({
         </>
       ) : (
         <div
-          className={`gap-3 bg-transparent rounded-l-full w-full p-5 flex flex-row cursor-pointer pl-[40px] ${
+          className={`gap-3 bg-transparent rounded-l-full w-full p-5 flex flex-row cursor-pointer pl-[40px] hover:bg-black/20 ${
             disabled ? 'disabled:opacity-75' : ''
           }`}
           onClick={!disabled ? handleClick : undefined}

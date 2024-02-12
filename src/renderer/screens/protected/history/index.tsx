@@ -161,7 +161,7 @@ function a11yProps(index: number) {
 export default function Logs() {
   const { print } = usePrinter();
   const { displayAlert } = useAlert();
-  const { downloadPDF } = usePDF()
+  const { downloadPDF } = usePDF();
   const confirm = useConfirm();
   const errorHandler = useErrorHandler();
   const { searchText, setPlaceHolder } = useSearch();
