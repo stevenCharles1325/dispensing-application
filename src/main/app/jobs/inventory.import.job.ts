@@ -16,7 +16,6 @@ import process from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import { capitalize } from 'lodash';
 import validator from 'App/modules/validator.module';
-import unit from 'unitmath';
 import xlsx from 'xlsx';
 import { Brand } from 'Main/database/models/brand.model';
 import { Category } from 'Main/database/models/category.model';
