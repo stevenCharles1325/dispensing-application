@@ -361,7 +361,7 @@ export class Item {
         'STOCK_JOB',
         {
           item_id: this.id,
-          purpose: 'sold',
+          purpose: 'dispensed',
           quantity,
           unit_of_measurement: um,
           type: 'stock-out',
