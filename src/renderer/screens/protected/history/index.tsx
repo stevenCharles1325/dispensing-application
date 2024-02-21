@@ -22,7 +22,6 @@ import { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { NumericFormat } from 'react-number-format';
 import useAlert from 'UI/hooks/useAlert';
 
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
@@ -607,22 +606,27 @@ export default function Logs() {
                     RAW MATERIAL DISPENSING SLIP
                   </p>
                   <div className='w-full text-sm h-fit flex flex-col gap-5 mt-5 items-center text-black/70'>
-                    <div className='w-[80%] flex justify-between'>
-                      <p className='text-left'>
-                        Item Number:
-                      </p>
-                      <p className='text-left'>
-                        {selectedPayment.orders?.[0]?.item?.item_code}
-                      </p>
-                    </div>
-                    <div className='w-[80%] flex justify-between'>
-                      <p className='text-left'>
-                        Batch Number:
-                      </p>
-                      <p className='text-left'>
-                        {selectedPayment.orders?.[0]?.item?.batch_code}
-                      </p>
-                    </div>
+                    {selectedPayment.orders?.map((order, index) => (
+                      <>
+                        <div className='w-[80%] flex justify-between'>
+                          <p className='text-left'>
+                            {`Item Number [${index + 1}]:`}
+                          </p>
+                          <p className='text-left'>
+                            {order?.item?.item_code}
+                          </p>
+                        </div>
+                        <div className='w-[80%] flex justify-between'>
+                          <p className='text-left'>
+                            {`Batch Number [${index + 1}]:`}
+
+                          </p>
+                          <p className='text-left'>
+                            {order?.item?.batch_code}
+                          </p>
+                        </div>
+                      </>
+                    ))}
                     <div className='w-[80%] flex justify-between'>
                       <p className='text-left'>
                         Tare Wt.:
@@ -649,10 +653,10 @@ export default function Logs() {
                     </div>
                     <div className='w-[80%] flex justify-between'>
                       <p className='text-left'>
-                        Dispensing By:
+                        Dispensed By:
                       </p>
                       <p className='text-left'>
-                        {selectedPayment.source_name}
+                        {titleCase(selectedPayment.source_name)}
                       </p>
                     </div>
                     <div className='w-[80%] flex justify-between'>

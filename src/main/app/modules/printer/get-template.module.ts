@@ -78,7 +78,7 @@ export function getTemplate (data: IPrintTemplate) {
     {
       type: 'table',
       tableBody: [
-        ['Dispensing by: ', titleCase(data.source_name)],
+        ['Dispensed By: ', titleCase(data.source_name)],
       ],
       tableBodyStyle: 'border: none;',
     },

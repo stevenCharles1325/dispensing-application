@@ -1,6 +1,6 @@
 import OrderDTO from "App/data-transfer-objects/order.dto";
 import titleCase from "./titleCase";
-import { IPrintReceiptData } from "App/interfaces/pos/pos.printer.receipt.interface";
+import { IPrintReceiptData, IPrintReceiptDatum } from "App/interfaces/pos/pos.printer.receipt.interface";
 import { IPrintData } from "App/interfaces/pos/pos.printer.pdf.interface";
 
 export interface IPrintTemplate {
@@ -86,7 +86,7 @@ export function getTemplate (data: IPrintTemplate) {
     {
       type: 'table',
       rows: [
-        ['Dispensing by: ', titleCase(data.source_name)],
+        ['Dispensed By: ', titleCase(data.source_name)],
       ],
       bodyStyle: 'border: none;',
       rowStyle: 'border: none;',
@@ -293,13 +293,13 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
             ]
           },
 
-          // DISPENSING BY
+          // Dispensed By
           {
             element: 'tr',
             children: [
               {
                 element: 'td',
-                htmlText: 'Dispensing By:',
+                htmlText: 'Dispensed By:',
                 attributes: {
                   style: 'text-align: left;'
                 }
@@ -472,47 +472,51 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
               style: 'width: 100%; font-size: 0.5em; line-height: 2;',
             },
             children: [
-              // ITEM NUMBER
-              {
-                element: 'tr',
-                children: [
+              ...data.orders?.reduce((prev: IPrintData[], curr, index) => {
+                prev = [
+                  ...prev,
                   {
-                    element: 'td',
-                    htmlText: 'Item Number:',
-                    attributes: {
-                      style: 'text-align: left;'
-                    }
+                    element: 'tr',
+                    children: [
+                      {
+                        element: 'td',
+                        htmlText: `Item Number [${index + 1}]:`,
+                        attributes: {
+                          style: 'text-align: left;'
+                        }
+                      },
+                      {
+                        element: 'td',
+                        htmlText: curr?.item.item_code,
+                        attributes: {
+                          style: 'text-align: LEFT;'
+                        }
+                      },
+                    ]
                   },
                   {
-                    element: 'td',
-                    htmlText: data?.orders?.[0]?.item.item_code,
-                    attributes: {
-                      style: 'text-align: LEFT;'
-                    }
+                    element: 'tr',
+                    children: [
+                      {
+                        element: 'td',
+                        htmlText: `Batch Number [${index + 1}]:`,
+                        attributes: {
+                          style: 'text-align: left;'
+                        }
+                      },
+                      {
+                        element: 'td',
+                        htmlText: curr?.item.batch_code,
+                        attributes: {
+                          style: 'text-align: LEFT;'
+                        }
+                      },
+                    ]
                   },
-                ]
-              },
+                ];
 
-              // BATCH NUMBER
-              {
-                element: 'tr',
-                children: [
-                  {
-                    element: 'td',
-                    htmlText: 'Batch Number:',
-                    attributes: {
-                      style: 'text-align: left;'
-                    }
-                  },
-                  {
-                    element: 'td',
-                    htmlText: data?.orders?.[0]?.item.batch_code,
-                    attributes: {
-                      style: 'text-align: LEFT;'
-                    }
-                  },
-                ]
-              },
+                return prev;
+              }, []),
 
               // TARE WEIGHT
               {
@@ -577,13 +581,13 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                 ]
               },
 
-              // DISPENSING BY
+              // Dispensed By
               {
                 element: 'tr',
                 children: [
                   {
                     element: 'td',
-                    htmlText: 'Dispensing By:',
+                    htmlText: 'Dispensed By:',
                     attributes: {
                       style: 'text-align: left;'
                     }
@@ -764,35 +768,41 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
     {
       style: 'NORMAL',
     },
-    {
-      tableCustom: {
-        rows: [
-          {
-            text: 'Item Number:',
-            align: 'LEFT',
-          },
-          {
-            text: data.orders?.[0]?.item?.item_code ?? '—',
-            align: 'LEFT',
-          },
-        ],
-      }
-    },
-    {
-      tableCustom: {
-        rows: [
-          {
-            text: 'Batch Number:',
-            align: 'LEFT',
-          },
-          {
-            text: data.orders?.[0]?.item?.batch_code ?? '—',
-            align: 'LEFT',
-          },
-        ],
+    ...data.orders?.reduce((prev: IPrintReceiptDatum[], curr, index) => {
+      prev = [
+        ...prev,
+        {
+          tableCustom: {
+            rows: [
+              {
+                text: `Item Number [${index + 1}]:`,
+                align: 'LEFT',
+              },
+              {
+                text: curr?.item?.item_code ?? '—',
+                align: 'LEFT',
+              },
+            ],
+          }
+        },
+        {
+          tableCustom: {
+            rows: [
+              {
+                text: `Batch Number [${index + 1}]:`,
+                align: 'LEFT',
+              },
+              {
+                text: curr?.item?.batch_code ?? '—',
+                align: 'LEFT',
+              },
+            ],
+          }
+        }
+      ];
 
-      }
-    },
+      return prev;
+    }, []),
     {
       tableCustom: {
         rows: [
@@ -842,7 +852,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
       tableCustom: {
         rows: [
           {
-            text: 'Dispensing By:',
+            text: 'Dispensed By:',
             align: 'LEFT',
           },
           {

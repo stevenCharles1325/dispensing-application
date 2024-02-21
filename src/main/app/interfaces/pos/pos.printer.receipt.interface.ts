@@ -1,4 +1,4 @@
-interface IPrintReceiptDatum {
+export interface IPrintReceiptDatum {
   text?: string;
   font?: "A" | "B";
   align?: "LT" | "CT" | "RT";
