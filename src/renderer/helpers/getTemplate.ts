@@ -473,6 +473,10 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
             },
             children: [
               ...data.orders?.reduce((prev: IPrintData[], curr, index) => {
+                const multipleIndicator = data?.orders?.length > 1
+                  ? `[${index + 1}]`
+                  : '';
+
                 prev = [
                   ...prev,
                   {
@@ -480,7 +484,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     children: [
                       {
                         element: 'td',
-                        htmlText: `Item Number [${index + 1}]:`,
+                        htmlText: `Item Number ${multipleIndicator}:`,
                         attributes: {
                           style: 'text-align: left;'
                         }
@@ -499,7 +503,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     children: [
                       {
                         element: 'td',
-                        htmlText: `Batch Number [${index + 1}]:`,
+                        htmlText: `Batch Number ${multipleIndicator}:`,
                         attributes: {
                           style: 'text-align: left;'
                         }
@@ -769,13 +773,17 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
       style: 'NORMAL',
     },
     ...data.orders?.reduce((prev: IPrintReceiptDatum[], curr, index) => {
+      const multipleIndicator = data?.orders?.length > 1
+        ? `[${index + 1}]`
+        : '';
+
       prev = [
         ...prev,
         {
           tableCustom: {
             rows: [
               {
-                text: `Item Number [${index + 1}]:`,
+                text: `Item Number ${multipleIndicator}:`,
                 align: 'LEFT',
               },
               {
@@ -789,7 +797,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
           tableCustom: {
             rows: [
               {
-                text: `Batch Number [${index + 1}]:`,
+                text: `Batch Number ${multipleIndicator}:`,
                 align: 'LEFT',
               },
               {

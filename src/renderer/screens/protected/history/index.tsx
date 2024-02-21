@@ -610,7 +610,11 @@ export default function Logs() {
                       <>
                         <div className='w-[80%] flex justify-between'>
                           <p className='text-left'>
-                            {`Item Number [${index + 1}]:`}
+                            {`Item Number ${
+                              selectedPayment.orders!.length > 1
+                              ? `[${index + 1}]`
+                              : ''
+                            }:`}
                           </p>
                           <p className='text-left'>
                             {order?.item?.item_code}
@@ -618,8 +622,11 @@ export default function Logs() {
                         </div>
                         <div className='w-[80%] flex justify-between'>
                           <p className='text-left'>
-                            {`Batch Number [${index + 1}]:`}
-
+                            {`Batch Number ${
+                              selectedPayment.orders!.length > 1
+                              ? `[${index + 1}]`
+                              : ''
+                            }:`}
                           </p>
                           <p className='text-left'>
                             {order?.item?.batch_code}
