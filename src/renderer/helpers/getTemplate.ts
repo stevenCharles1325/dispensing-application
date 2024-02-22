@@ -517,6 +517,33 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                       },
                     ]
                   },
+                  {
+                    element: 'tr',
+                    children: [
+                      {
+                        element: 'td',
+                        htmlText: `Expiration Date ${multipleIndicator}:`,
+                        attributes: {
+                          style: 'text-align: left;'
+                        }
+                      },
+                      {
+                        element: 'td',
+                        htmlText: curr?.item.expired_at.toLocaleTimeString(
+                          'default',
+                          {
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true,
+                            hour: '2-digit'
+                          }
+                        ),
+                        attributes: {
+                          style: 'text-align: LEFT;'
+                        }
+                      },
+                    ]
+                  },
                 ];
 
                 return prev;
@@ -802,6 +829,28 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
               },
               {
                 text: curr?.item?.batch_code ?? '—',
+                align: 'LEFT',
+              },
+            ],
+          }
+        },
+        {
+          tableCustom: {
+            rows: [
+              {
+                text: `Expiration Date ${multipleIndicator}:`,
+                align: 'LEFT',
+              },
+              {
+                text: curr?.item?.expired_at.toLocaleTimeString(
+                  'default',
+                  {
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true,
+                    hour: '2-digit'
+                  }
+                ) ?? '—',
                 align: 'LEFT',
               },
             ],

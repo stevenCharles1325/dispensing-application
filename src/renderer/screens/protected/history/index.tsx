@@ -632,6 +632,26 @@ export default function Logs() {
                             {order?.item?.batch_code}
                           </p>
                         </div>
+                        <div className='w-[80%] flex justify-between'>
+                          <p className='text-left'>
+                            {`Expiration Date ${
+                              selectedPayment.orders!.length > 1
+                              ? `[${index + 1}]`
+                              : ''
+                            }:`}
+                          </p>
+                          <p className='text-left'>
+                            {order?.item?.expired_at.toLocaleTimeString(
+                              'default',
+                              {
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: true,
+                                hour: '2-digit'
+                              }
+                            )}
+                          </p>
+                        </div>
                       </>
                     ))}
                     <div className='w-[80%] flex justify-between'>
