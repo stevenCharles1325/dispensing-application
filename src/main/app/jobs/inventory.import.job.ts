@@ -96,6 +96,7 @@ export default class InventoryImportJob implements IJob {
       const validationField = async (record: Record<string, any>) => {
         const requiredColumns = [
           'Device ID',
+          'Barcode',
           'Item Name',
           'Item Number',
           'Batch Number',
@@ -153,7 +154,8 @@ export default class InventoryImportJob implements IJob {
         const item = (await queryRunner.query(
           `SELECT *
           FROM items
-          WHERE item_code = '${record['Item Number']}'
+          WHERE barcode
+          AND item_code = '${record['Item Number']}'
           AND batch_code = '${record['Batch Number']}'
         `))?.[0] as Item;
 
@@ -278,6 +280,7 @@ export default class InventoryImportJob implements IJob {
             date.setDate(date.getDate() + 1);
 
             itemClone.name = record['Item Name'];
+            itemClone.barcode = record['Barcode'];
             itemClone.item_code = record['Item Number'];
             itemClone.batch_code = record['Batch Number'];
             itemClone.stock_quantity = record['Quantity'];
