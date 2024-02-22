@@ -23,6 +23,7 @@
 
 ## Features
 - Auto unit-of-measurement calculation
+- Product Information Printing
 - Barcode Scanning
 - Device Storage Monitoring
 - Employee Management
