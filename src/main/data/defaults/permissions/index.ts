@@ -141,31 +141,31 @@ const permissions = [
   // },
 
   // Discount management permissions
-  {
-    name: 'View Discount',
-    kebab: 'view-discount',
-    group_name: 'products',
-  },
-  {
-    name: 'Create Discount',
-    kebab: 'create-discount',
-    group_name: 'products',
-  },
-  {
-    name: 'Update Discount',
-    kebab: 'update-discount',
-    group_name: 'products',
-  },
+  // {
+  //   name: 'View Discount',
+  //   kebab: 'view-discount',
+  //   group_name: 'products',
+  // },
+  // {
+  //   name: 'Create Discount',
+  //   kebab: 'create-discount',
+  //   group_name: 'products',
+  // },
+  // {
+  //   name: 'Update Discount',
+  //   kebab: 'update-discount',
+  //   group_name: 'products',
+  // },
   // {
   //   name: 'Archive Item',
   //   kebab: 'archive-item',
   //   group_name: 'products',
   // },
-  {
-    name: 'Delete Discount',
-    kebab: 'delete-discount',
-    group_name: 'products',
-  },
+  // {
+  //   name: 'Delete Discount',
+  //   kebab: 'delete-discount',
+  //   group_name: 'products',
+  // },
 
   // Category management permissions
   {
@@ -462,7 +462,7 @@ const permissions = [
   // },
 
    // Notification permissions
-   {
+  {
     name: 'View Notification',
     kebab: 'view-notification',
     group_name: 'notification',
@@ -506,28 +506,28 @@ const permissions = [
     kebab: 'view-system',
     group_name: 'system',
   },
-  {
-    name: 'Update System',
-    kebab: 'update-system',
-    group_name: 'system',
-  },
+  // {
+  //   name: 'Update System',
+  //   kebab: 'update-system',
+  //   group_name: 'system',
+  // },
 
   // Data/Peer/Graph management permissions
-  {
-    name: 'View Data',
-    kebab: 'view-data',
-    group_name: 'data',
-  },
-  {
-    name: 'Create Data',
-    kebab: 'create-data',
-    group_name: 'data',
-  },
-  {
-    name: 'Update Data',
-    kebab: 'update-data',
-    group_name: 'data',
-  },
+  // {
+  //   name: 'View Data',
+  //   kebab: 'view-data',
+  //   group_name: 'data',
+  // },
+  // {
+  //   name: 'Create Data',
+  //   kebab: 'create-data',
+  //   group_name: 'data',
+  // },
+  // {
+  //   name: 'Update Data',
+  //   kebab: 'update-data',
+  //   group_name: 'data',
+  // },
   // {
   //   name: 'Archive Data',
   //   kebab: 'archive-data',
@@ -548,11 +548,11 @@ const permissions = [
     kebab: 'upload-data',
     group_name: 'data',
   },
-  {
-    name: 'Request Data', // Main peer request permission
-    kebab: 'request-data',
-    group_name: 'data',
-  },
+  // {
+  //   name: 'Request Data', // Main peer request permission
+  //   kebab: 'request-data',
+  //   group_name: 'data',
+  // },
 ] as const;
 
 export type PermissionsKebabType = typeof permissions[number]['kebab'];

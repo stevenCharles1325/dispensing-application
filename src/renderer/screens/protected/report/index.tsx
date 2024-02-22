@@ -2,7 +2,7 @@
 import TotalDifferenceWidget from 'UI/components/Widgets/TotalDifferenceWidget';
 import PaidTwoToneIcon from '@mui/icons-material/PaidTwoTone';
 import TableRestaurantTwoToneIcon from '@mui/icons-material/TableRestaurantTwoTone';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   LineChart,
   PieChart,
@@ -15,12 +15,15 @@ import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import Loading from 'UI/components/Loading';
 import styled from '@mui/material/styles/styled';
-import { Chip } from '@mui/material';
+import { Button, ButtonGroup, Chip } from '@mui/material';
 import useSearch from 'UI/hooks/useSearch';
-import formatCurrency from 'UI/helpers/formatCurrency';
-import ReceiptIcon from '@mui/icons-material/Receipt';
+// import formatCurrency from 'UI/helpers/formatCurrency';
+// import ReceiptIcon from '@mui/icons-material/Receipt';
 import LiquidFillChart from 'UI/components/Charts/LiquidFillChart';
 import GraphWithDate from 'UI/components/Graphs/GraphWithDate';
+import useErrorHandler from 'UI/hooks/useErrorHandler';
+import useAlert from 'UI/hooks/useAlert';
+import useConfirm from 'UI/hooks/useConfirm';
 
 const colorsPalette = ['#9C27B0', '#B02780', '#5727B0'];
 
@@ -30,6 +33,18 @@ const StyledText = styled('text')(({ theme }) => ({
   dominantBaseline: 'central',
   fontSize: 20,
 }));
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 function PieCenterLabel({ children }: { children: React.ReactNode }) {
   const { width, height, left, top } = useDrawingArea();
@@ -49,7 +64,11 @@ const getReport = async (): Promise<
 };
 
 export default function Report() {
+  const errorHandler = useErrorHandler();
+  const confirm = useConfirm();
+  const { displayAlert } = useAlert();
   const { setPlaceHolder, setDisabled } = useSearch();
+  const hiddenInputRef = useRef<any>();
 
   const {
     data,
@@ -65,9 +84,9 @@ export default function Report() {
   });
 
   const report: IReport = data?.data as IReport;
-  const revenue = report?.daily_overview_reports.revenue;
+  // const revenue = report?.daily_overview_reports.revenue;
   const orders = report?.daily_overview_reports.orders;
-  const soldItems = report?.daily_overview_reports.sold_items;
+  // const soldItems = report?.daily_overview_reports.sold_items;
   const currSalesReport = report?.current_sale_reports;
   const trendCategories = report?.trend_categories;
   const trendProducts = report?.trend_products;
@@ -78,6 +97,43 @@ export default function Report() {
     setDisabled?.(true);
   }, [setDisabled, setPlaceHolder]);
 
+  const handleImport = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      confirm?.('Do you really want to import this file?', async (agreed) => {
+        if (agreed) {
+          const res = await window.import.importDatabase(file.path);
+
+          if (res.status === 'ERROR') {
+            errorHandler({
+              errors: res.errors,
+            });
+
+            return;
+          }
+
+          displayAlert?.('Successfully imported database', 'success');
+        }
+      })
+    }
+  }
+
+  const handleImportBegin = () => {
+    hiddenInputRef.current?.click();
+  }
+
+  const handleExport = async () => {
+    const res = await window.export.exportDatabase();
+
+    if (res.status === 'ERROR') {
+      return errorHandler({
+        errors: res.errors,
+      });
+    }
+
+    displayAlert?.('Successfully backed-up database', 'success');
+  }
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -248,12 +304,26 @@ export default function Report() {
         <div className="px-3 gap-5">
           <div className="grow h-[570px] p-5 border shadow-lg rounded">
             <div className="w-full h-full">
-              <Chip
-                label="Device Space"
-                color="secondary"
-                variant="outlined"
-                size="medium"
-              />
+              <div className='w-full h-fit flex justify-between'>
+                <Chip
+                  label="Device Space"
+                  color="secondary"
+                  variant="outlined"
+                  size="medium"
+                />
+
+                {/* <VisuallyHiddenInput
+                  ref={hiddenInputRef}
+                  type="file"
+                  accept=".sqlite, .db"
+                  onChange={handleImport}
+                /> */}
+
+                <ButtonGroup color="secondary" size='small'>
+                  {/* <Button onClick={handleImportBegin}>Import</Button> */}
+                  <Button onClick={handleExport}>Export</Button>
+                </ButtonGroup>
+              </div>
               {
                 dbAvailableSpace
                 ? (

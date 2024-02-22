@@ -37,7 +37,7 @@ export class AuditTrail1698132562574 implements MigrationInterface {
           {
             name: 'resource_table',
             type: 'varchar',
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: 'resource_id',

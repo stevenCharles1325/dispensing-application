@@ -654,6 +654,9 @@ const exportHandler = {
     ids: string[] | null,
   ): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
     ipcRenderer.invoke('inventory-record:export', ids),
+
+  exportDatabase: async (): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
+    ipcRenderer.invoke('pos-database:export'),
 };
 
 const importHandler = {
@@ -669,6 +672,10 @@ const importHandler = {
     filePath: string
   ): Promise<IResponse<string[] | IPOSError[]>> =>
     ipcRenderer.invoke('inventory:import', filePath),
+  importDatabase: async (
+    filePath: string
+  ): Promise<IResponse<string[] | IPOSError[]>> =>
+    ipcRenderer.invoke('pos-database:import', filePath),
 };
 
 // EXPOSING HANDLERS

@@ -17,7 +17,7 @@ export default class ImportTransactionHistoryEvent implements IEvent {
   public async listener({
     eventData,
   }: IEventListenerProperties): Promise<
-    IResponse<string[] | IPOSError[] | IExportResult | any>
+    IResponse<string[] | IPOSError[] | any>
   > {
     try {
       const { user } = eventData;

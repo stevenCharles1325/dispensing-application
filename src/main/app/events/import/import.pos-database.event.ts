@@ -5,14 +5,12 @@ import IEventListenerProperties from 'App/interfaces/event/event.listener-props.
 import IPOSError from 'App/interfaces/pos/pos.error.interface';
 import IResponse from 'App/interfaces/pos/pos.response.interface';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
-import chunkImport from 'App/modules/chunk-import.module';
 import handleError from 'App/modules/error-handler.module';
+import importSQL from 'App/modules/import/pos/import.pos.module';
 import { Bull } from 'Main/jobs';
 
-const excelToJson = require('convert-excel-to-json');
-
-export default class ImportInventoryRecordEvent implements IEvent {
-  public channel: string = 'inventory-record:import';
+export default class ImportPOSDatabaseEvent implements IEvent {
+  public channel: string = 'pos-database:import';
 
   public middlewares = ['auth.middleware'];
 
@@ -28,34 +26,26 @@ export default class ImportInventoryRecordEvent implements IEvent {
 
       if (requesterHasPermission) {
         const filePath = eventData.payload[0] as string;
+        const res = await importSQL(filePath);
 
-        const result = await excelToJson({
-          sourceFile: filePath,
-          columnToKey: {
-            '*': '{{columnHeader}}'
-          }
-        });
-
-        const list = result['Stock-records'].slice(1);
-
-        await chunkImport(
-          list,
-          {
-            filePath,
-            processorName: 'INVENTORY_RECORD_IMPORT_JOB'
-          }
-        );
+        if (res.status === 'ERROR') {
+          return {
+            errors: res.errors,
+            code: 'REQ_ERR',
+            status: 'ERROR',
+          };
+        }
 
         await Bull('AUDIT_JOB', {
           user_id: user.id as unknown as string,
           resource_id: null,
-          resource_table: 'inventory_records',
+          resource_table: null,
           resource_id_type: null,
           action: 'import',
           status: 'SUCCEEDED',
           description: `User ${
             user.fullName
-          } has successfully imported a stock records`,
+          } has successfully imported database`,
         });
 
         return {
@@ -66,7 +56,7 @@ export default class ImportInventoryRecordEvent implements IEvent {
       }
 
       return {
-        errors: ['You are not allowed to import stock records'],
+        errors: ['You are not allowed to import database'],
         code: 'REQ_UNAUTH',
         status: 'ERROR',
       } as unknown as IResponse<string[]>;

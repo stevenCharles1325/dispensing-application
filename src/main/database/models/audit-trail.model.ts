@@ -24,6 +24,8 @@ export class AuditTrail {
 
   @AfterLoad()
   async getRelated() {
+    if (!this.resource_table) return;
+
     const manager = global.datasource.createEntityManager();
     const id = this.resource_id
 
@@ -78,9 +80,6 @@ export class AuditTrail {
   description: string;
 
   @Column()
-  @IsNotEmpty({
-    message: ValidationMessage.notEmpty,
-  })
   resource_table: string;
 
   @Column({ nullable: true })
