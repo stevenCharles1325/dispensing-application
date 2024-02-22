@@ -35,6 +35,8 @@ export default class PrinterReceipt implements Partial<IPrinterAdaptor> {
               case 'align':
               case 'style':
               case 'lineSpace':
+                if (!value) break;
+
                 _printer = printer[key](value);
                 break;
 
@@ -47,9 +49,20 @@ export default class PrinterReceipt implements Partial<IPrinterAdaptor> {
                 break;
 
               case 'tableCustom':
+                if (!value || !value.rows?.length) break;
+
                 _printer = printer.tableCustom(
                   value.rows,
                   value.options
+                );
+                break;
+
+              case 'barcode':
+                if (!value?.code || !value?.type) break;
+
+                _printer = printer.barcode(
+                  value.code,
+                  value.type ?? 'EAN13'
                 );
                 break;
 

@@ -6,6 +6,10 @@ import InventoryRecordsDTO from './inventory-record.dto';
 import { InventoryRecord } from 'Main/database/models/inventory-record.model';
 import DiscountDTO from './discount.dto';
 import BrandDTO from './brand.dto';
+import SystemDTO from './system.dto';
+import SupplierDTO from './supplier.dto';
+import { Supplier } from 'Main/database/models/supplier.model';
+import CategoryDTO from './category.dto';
 
 export default interface ItemDTO {
   id: string;
@@ -36,7 +40,10 @@ export default interface ItemDTO {
   deleted_at?: Date;
 
   image?: ImageDTO | Image;
+  supplier?: SupplierDTO | Supplier;
   brand: BrandDTO;
+  category: CategoryDTO;
+  system: SystemDTO;
   discount?: DiscountDTO;
   records: InventoryRecordsDTO[] | InventoryRecord[];
 }

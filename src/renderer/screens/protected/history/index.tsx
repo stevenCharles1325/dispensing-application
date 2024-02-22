@@ -239,7 +239,8 @@ export default function Logs() {
 
     if (payment) {
       const htmlJSON = getTemplateV3({
-        store_name: payment.system?.store_name ?? 'X-GEN POS',
+        device_code: payment.system!.id,
+        store_name: payment.system!.store_name ?? 'X-GEN POS',
         orders: payment.orders as OrderDTO[],
         ...payment
       });
@@ -602,9 +603,10 @@ export default function Logs() {
                   <p className='font-bold text-center text-2xl'>
                     {selectedPayment.system?.store_name?.toLocaleUpperCase()}
                   </p>
-                  <p className='text-center text-md py-3 border-y mt-3'>
-                    RAW MATERIAL DISPENSING SLIP
-                  </p>
+                  <div className='text-center py-3 border-y mt-3'>
+                    <p className='text-md'>RAW MATERIAL DISPENSING SLIP</p>
+                    <p className='text-xs text-black/50'>{`DDCODE:${selectedPayment.system!.id}`}</p>
+                  </div>
                   <div className='w-full text-sm h-fit flex flex-col gap-5 mt-5 items-center text-black/70'>
                     {selectedPayment.orders?.map((order, index) => (
                       <>

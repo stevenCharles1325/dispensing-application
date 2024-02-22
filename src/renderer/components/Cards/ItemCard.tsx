@@ -2,6 +2,7 @@ import { Badge, Chip, IconButton, Tooltip } from '@mui/material';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import { NumericFormat } from 'react-number-format';
 
+import LocalPrintshopOutlinedIcon from '@mui/icons-material/LocalPrintshopOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import getUOFSymbol from 'UI/helpers/getUOFSymbol';
 import { Add } from '@mui/icons-material';
@@ -11,9 +12,10 @@ interface ItemCardParams {
   cardInfo: ItemDTO;
   orderNumber: number;
   onSelect: (id: string) => void;
+  onPrint: (id: string) => void;
 }
 
-export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCardParams) {
+export default function ItemCard({ cardInfo, orderNumber = 0, onSelect, onPrint }: ItemCardParams) {
   return (
     <div className="w-[340px] h-[200px]">
       <div className="relative w-full h-full rounded-md overflow-hidden flex flex-col overflow-hidden hover:shadow-lg">
@@ -178,12 +180,17 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect }: ItemCa
               )
             } */}
           </div>
-          <div className="w-[70px] flex flex-col justify-end items-end">
+          <div className="w-[70px] flex flex-row justify-end items-end">
             <IconButton
               disabled={cardInfo.status !== 'available' || orderNumber >= cardInfo.stock_quantity}
               onClick={() => onSelect(cardInfo.id)}
             >
               <Add color="secondary" />
+            </IconButton>
+            <IconButton
+              onClick={() => onPrint(cardInfo.id)}
+            >
+              <LocalPrintshopOutlinedIcon color="secondary" />
             </IconButton>
           </div>
         </div>

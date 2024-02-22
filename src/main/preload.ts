@@ -66,7 +66,8 @@ const mainHandler = {
   globalEmit: (
     channel: string,
     data: any
-  ) => ipcRenderer.invoke('broadcast-message', channel, data),
+  ) => ipcRenderer.invoke('pos:broadcast-message', channel, data),
+  copyToClipboard: (text: string): any => ipcRenderer.sendSync('pos:copy-to-clipboard', text),
 }
 
 /* ================================

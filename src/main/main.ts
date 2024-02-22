@@ -16,7 +16,7 @@
 import 'reflect-metadata';
 import dotenv from 'dotenv';
 import path, { join } from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, clipboard } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -428,7 +428,14 @@ app
           }
         });
 
-        ipcMain.handle('broadcast-message', (_, ...payload: any[]) => {
+        ipcMain.on('pos:copy-to-clipboard', (event, ...payload) => {
+          const [text] = payload;
+
+          clipboard.writeText(text);
+          event.returnValue = 'Copied to clipboard!';
+        });
+
+        ipcMain.handle('pos:broadcast-message', (_, ...payload: any[]) => {
           const [channel, data] = payload;
 
           global.emitToRenderer(channel, data);

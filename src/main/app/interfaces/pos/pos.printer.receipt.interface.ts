@@ -10,6 +10,10 @@ export interface IPrintReceiptDatum {
     width: 1 | 2;
     height: 1 | 2;
   };
+  barcode?: {
+    code: string,
+    type?: "UPC_A" | "UPC_E" | "EAN13" | "EAN8" | "CODE39" | "ITF" | "NW7" | "CODE93" | "CODE128";
+  },
   tableCustom?: {
     rows: {
       text: string;

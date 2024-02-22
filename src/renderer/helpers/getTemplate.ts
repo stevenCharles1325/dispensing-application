@@ -2,8 +2,12 @@ import OrderDTO from "App/data-transfer-objects/order.dto";
 import titleCase from "./titleCase";
 import { IPrintReceiptData, IPrintReceiptDatum } from "App/interfaces/pos/pos.printer.receipt.interface";
 import { IPrintData } from "App/interfaces/pos/pos.printer.pdf.interface";
+import ItemDTO from "App/data-transfer-objects/item.dto";
+import getUOFSymbol from "./getUOFSymbol";
+import getBarcodeFormat from "./getBarcodeFormat";
 
 export interface IPrintTemplate {
+  device_code?: string; // Dispensing Device Code
   store_name: string;
   source_name: string;
   product_used: string;
@@ -15,6 +19,8 @@ export interface IPrintTemplate {
   gross_weight: string;
   orders: OrderDTO[];
 }
+
+export interface IPrintItemTemplate extends ItemDTO {}
 
 export function getTemplate (data: IPrintTemplate) {
   return [
@@ -460,11 +466,26 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
             }
           },
           {
-            element: 'h5',
-            htmlText: 'RAW MATERIAL DISPENSING SLIP',
+            element: 'div',
             attributes: {
-              style: 'font-weight: 300; text-align: center; margin: 10 0 5 0; padding: 5 0 5 0; border-top: 1px solid black; border-bottom: 1px solid black;',
-            }
+              style: 'text-align: center; margin: 10 0 5 0; padding: 5 0 5 0; border-top: 1px solid black; border-bottom: 1px solid black;',
+            },
+            children: [
+              {
+                element: 'p',
+                htmlText: 'RAW MATERIAL DISPENSING SLIP',
+                attributes: {
+                  style: 'font-weight: 500; font-size: 0.7em !important; padding: 0;',
+                }
+              },
+              {
+                element: 'p',
+                htmlText: `DDCODE:${data.device_code}`,
+                attributes: {
+                  style: 'font-weight: normal; font-size: 0.4em; padding: 0; color: rgba(0, 0, 0, 0.5);',
+                }
+              }
+            ],
           },
           {
             element: 'table',
@@ -768,7 +789,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                     element: 'td',
                     htmlText: data.transaction_code,
                     attributes: {
-                      style: 'text-align: LEFT;'
+                      style: 'text-align: left;'
                     }
                   },
                 ]
@@ -794,6 +815,11 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
       align: 'CT',
       style: 'B',
       text: 'RAW MATERIAL DISPENSING SLIP',
+    },
+    {
+      align: 'CT',
+      style: 'NORMAL',
+      text: `DDCODE:${data?.device_code}`,
       drawLine: true,
     },
     {
@@ -1024,6 +1050,195 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
         ],
 
       }
+    },
+    {
+      feed: 2
+    },
+  ]
+}
+
+export function getTemplateForItemPrinting (data: IPrintItemTemplate): IPrintReceiptData {
+  return [
+    {
+      font: 'A',
+      align: 'CT',
+      style: 'B',
+      text: data?.system.store_name?.toLocaleUpperCase(),
+      drawLine: true,
+    },
+    {
+      align: 'CT',
+      style: 'NORMAL',
+      text: `DDCODE:${data?.id}`,
+      drawLine: true,
+    },
+    {
+      style: 'NORMAL',
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Item Name:`,
+            align: 'LEFT',
+          },
+          {
+            text: data?.name ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Item Number:`,
+            align: 'LEFT',
+          },
+          {
+            text: data?.item_code ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Batch Number:`,
+            align: 'LEFT',
+          },
+          {
+            text: data?.batch_code ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Brand:`,
+            align: 'LEFT',
+          },
+          {
+            text: data?.brand.name ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Category:`,
+            align: 'LEFT',
+          },
+          {
+            text: data?.category.name ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Quantity:`,
+            align: 'LEFT',
+          },
+          {
+            text: `${
+              data?.stock_quantity
+            } ${getUOFSymbol(data?.unit_of_measurement)}.` ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Supplier:`,
+            align: 'LEFT',
+          },
+          {
+            text: data?.supplier?.name ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Supplier Email:`,
+            align: 'LEFT',
+          },
+          {
+            text: data?.supplier?.email ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Status:`,
+            align: 'LEFT',
+          },
+          {
+            text: data.status,
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      tableCustom: {
+        rows: [
+          {
+            text: `Expiration Date:`,
+            align: 'LEFT',
+          },
+          {
+            text: data.expired_at.toLocaleTimeString(
+              'default',
+              {
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+                hour: '2-digit'
+              }
+            ) ?? '—',
+            align: 'LEFT',
+          },
+        ],
+      }
+    },
+    {
+      drawLine: true,
+      feed: 2
+    },
+    {
+      barcode: {
+        code: data?.barcode ?? '',
+        type: getBarcodeFormat(data?.barcode) ?? 'EAN13',
+      }
+    },
+    {
+      align: 'CT',
+      style: 'NORMAL',
+      text: `DDCODE:${data?.system.id}`,
     },
     {
       feed: 2

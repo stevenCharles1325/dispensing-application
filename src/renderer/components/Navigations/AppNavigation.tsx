@@ -39,6 +39,8 @@ import Loading from '../Loading';
 import useConnectionStatus from 'UI/hooks/useConnectionStatus';
 
 // Icons
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import LandscapeOutlinedIcon from '@mui/icons-material/LandscapeOutlined';
 import CottageOutlinedIcon from '@mui/icons-material/CottageOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
@@ -69,6 +71,7 @@ import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined
 import usePermission from 'UI/hooks/usePermission';
 import useShortcutKeys from 'UI/hooks/useShortcutKeys';
 import useDateTime from 'UI/hooks/useDateTime';
+import useUser from 'UI/stores/user';
 
 export const navigationRoutes: INavButtonprops[] = [
   {
@@ -142,6 +145,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
 
   const { date, time } = useDateTime();
   const hasPermission = usePermission();
+  const { system_id } = useUser((store) => store);
   const { addListener, reset, getCommand } = useShortcutKeys();
 
   const drive = useAppDrive();
@@ -692,14 +696,14 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         }}
       >
         <div
-          className="w-[300px] h-[350px]"
+          className="w-[300px] h-[380px]"
           style={{
             color: 'white',
             backgroundColor: 'var(--bg-color)',
           }}
         >
           <div
-            className="w-full h-[250px] flex flex-col justify-center items-center rounded-b-lg shadow-lg"
+            className="w-full h-[280px] flex flex-col justify-center items-center rounded-b-lg shadow-lg"
             style={{ backgroundColor: 'white' }}
           >
             <div className="w-[55%] h-[160px] overflow-hidden rounded-full bg-gray-300 flex justify-center items-center text-white shadow-lg">
@@ -730,6 +734,33 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
               variant="outlined"
               size="small"
             />
+            <Tooltip
+              title={(
+                <p className='text-base'>
+                  {`DDCODE:${system_id} `}
+                  <IconButton
+                    onClick={() => {
+                      const message = window.main.copyToClipboard(`DDCODE:${system_id}`);
+
+                      displayAlert?.(message, 'success');
+                    }}
+                  >
+                    <ContentCopyOutlinedIcon fontSize='small' htmlColor='white'/>
+                  </IconButton>
+                </p>
+              )}
+              placement="left-start"
+              arrow
+            >
+              <div className='flex flex-row gap-2 justify-center items-center'>
+                <p className='text-xs my-2 text-black/30'>
+                  Dispensing Device Code
+                </p>
+                <div className='w-fit h-fit'>
+                  <VisibilityOutlinedIcon fontSize='small' htmlColor='rgba(0, 0, 0, 0.3)'/>
+                </div>
+              </div>
+            </Tooltip>
           </div>
           <br />
           <MenuItem

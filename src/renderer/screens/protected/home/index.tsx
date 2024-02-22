@@ -32,6 +32,7 @@ import measurements from 'UI/data/defaults/unit-of-measurements';
 import localStorage from 'UI/modules/storage';
 import CustomAutoComplete from 'UI/components/TextField/CustomAutoComplete';
 import transaction from 'Main/data/defaults/categories/transaction';
+import { getTemplateForItemPrinting } from 'UI/helpers/getTemplate';
 
 const CARD_WIDTH = 340;
 const CARD_HEIGHT = 215;
@@ -155,7 +156,7 @@ const weightsInit = {
 }
 
 export default function Home() {
-  const { print } = usePrinter();
+  const { print, printCustom } = usePrinter();
   const confirm = useConfirm();
   const { addListener, getCommand } = useShortcutKeys();
   const errorHandler = useErrorHandler();
@@ -506,6 +507,17 @@ export default function Home() {
     [selectedItemIds, items]
   );
 
+  const handlePrintItem = useCallback((id: string) => {
+    const item = items.find(item => item.id === id);
+
+    if (item) {
+      const data = getTemplateForItemPrinting(item);
+      printCustom(data);
+    }
+
+    displayAlert?.('Cannot find selected item. Please try again!', 'error');
+  }, [items, displayAlert]);
+
   // const handleSelectItemByBarcode = useCallback(
   //   (itemBarcode: string) => {
   //     const item = items.find(({ barcode }) => barcode === itemBarcode);
@@ -604,6 +616,7 @@ export default function Home() {
               cardInfo={card}
               orderNumber={orders[card.id]?.quantity ?? 0}
               onSelect={handleSelectItem}
+              onPrint={handlePrintItem}
             />
           </div>
         );

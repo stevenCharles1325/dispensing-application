@@ -4,7 +4,6 @@ import PrinterDTO from 'App/data-transfer-objects/printer.dto';
 import { getTemplateForReceipt, getTemplateV2 } from 'UI/helpers/getTemplate';
 import TransactionDTO, { IncomeDTO } from 'App/data-transfer-objects/transaction.dto';
 import IPagination from 'App/interfaces/pagination/pagination.interface';
-import { toHtmlText } from "from-json-to-html";
 import { IPrintReceiptData } from 'App/interfaces/pos/pos.printer.receipt.interface';
 
 interface IPrinterContext {
@@ -12,6 +11,7 @@ interface IPrinterContext {
   status: 'SUCCESS' | 'ERROR' | 'WAIT';
   refetchDevices: () => void;
   print: (id: string) => void;
+  printCustom: (id: IPrintReceiptData) => void;
   selectDevice: (printer: PrinterDTO) => void;
 }
 
@@ -20,6 +20,7 @@ export const PrinterContext = createContext<IPrinterContext>({
   status: 'WAIT',
   refetchDevices: () => {},
   print: () => {},
+  printCustom: () => {},
   selectDevice: () => null,
 });
 
@@ -53,6 +54,7 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
     setStatus('SUCCESS');
   }
 
+  // Print for transaction receipt only
   const print = async (transactionId: string) => {
     const res = await window.payment.getPayments({
       id: transactionId
@@ -68,6 +70,7 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
 
     // const htmlString = toHtmlText(template);
     const printData = getTemplateForReceipt({
+      device_code: transaction.system!.id,
       store_name: transaction.system?.store_name ?? 'X-GEN',
       ...transaction as any,
     })
@@ -83,7 +86,24 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
         return;
       }
     } catch (err) {
-      console.log('PRINTING ERROR');
+      console.log('PRINTING ERROR: ', err);
+    }
+  }
+
+  // Print for custom data
+  const printCustom = async (data: IPrintReceiptData) => {
+    try {
+      const res = await window.printer.print(data);
+
+      if (res.errors) {
+        errorHandler({
+          errors: res.errors,
+        });
+
+        return;
+      }
+    } catch (err) {
+      console.log('PRINTING ERROR: ', err);
     }
   }
 
@@ -97,6 +117,7 @@ export default function PrinterProvider({ children }: React.PropsWithChildren) {
     selectDevice,
     refetchDevices: getDevices,
     print,
+    printCustom,
   }), [status, devices]);
 
   return (

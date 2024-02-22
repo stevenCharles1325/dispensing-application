@@ -40,7 +40,6 @@ import type { Discount } from './discount.model';
 import Provider from '@IOC:Provider';
 import IAuthService from 'App/interfaces/service/service.auth.interface';
 import UserDTO from 'App/data-transfer-objects/user.dto';
-import BrandDTO from 'App/data-transfer-objects/brand.dto';
 import { IItemMeasurement } from 'App/interfaces/item/item.measurements.interface';
 import unitQuantityCalculator from 'App/modules/unit-quantity-calculator.module';
 import getUOFSymbol from 'App/modules/get-uof-symbol.module';
@@ -48,6 +47,30 @@ import getUOFSymbol from 'App/modules/get-uof-symbol.module';
 @Entity('items')
 export class Item {
   discounted_selling_price: number;
+
+  @AfterLoad()
+  async getSystem() {
+    if (!this.system) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'systems' WHERE id = '${this.system_id}'`
+      );
+
+      this.system = rawData[0] as System;
+    }
+  }
+
+  @AfterLoad()
+  async getSSupplier() {
+    if (!this.supplier) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'suppliers' WHERE id = '${this.supplier_id}'`
+      );
+
+      this.supplier = rawData[0] as Supplier;
+    }
+  }
 
   @AfterLoad()
   async getDiscount() {
@@ -83,6 +106,19 @@ export class Item {
 
       const brand = rawData[0] as Brand;
       this.brand = brand;
+    }
+  }
+
+  @AfterLoad()
+  async getCategory() {
+    if (this.category_id) {
+      const manager = global.datasource.createEntityManager();
+      const rawData: any[] = await manager.query(
+        `SELECT * FROM 'categories' WHERE id = '${this.category_id}'`
+      );
+
+      const category = rawData[0] as Category;
+      this.category = category;
     }
   }
 
