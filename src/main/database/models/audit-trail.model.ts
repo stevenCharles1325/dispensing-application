@@ -46,7 +46,9 @@ export class AuditTrail {
         `SELECT * FROM 'users' WHERE id = '${this.user_id}'`
       );
 
-      this.user = rawData[0];
+      if (rawData[0]) {
+        this.user = rawData[0];
+      }
     }
   }
 

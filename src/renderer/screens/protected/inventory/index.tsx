@@ -31,6 +31,7 @@ import { ChevronLeftOutlined, ChevronRightOutlined, DownloadOutlined, UploadOutl
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
+import usePermission from 'UI/hooks/usePermission';
 // import PrinterIndicator from 'UI/components/Indicators/PrinterIndicator';
 
 type IImportModule = 'INVENTORY' | 'STOCKS';
@@ -146,6 +147,7 @@ export default function Inventory() {
   const [collapse, setCollapse] = useState(false);
 
   const confirm = useConfirm();
+  const hasPermission = usePermission();
   const errorHandler = useErrorHandler();
   const [searchParams, setSearchParams] = useSearchParams();
   const [barcodeNumber, setBarcodeNumber] = useState<string | null>(null);
@@ -432,6 +434,8 @@ export default function Inventory() {
     }
   }, [items, barcodeNumber]);
 
+  {console.log(hasPermission('upload-data'))}
+
   return (
     <div className="w-full h-full flex flex-col gap-5 pr-3">
       <div className="w-full h-fit gap-5 flex flex-row flex-wrap">
@@ -520,20 +524,32 @@ export default function Inventory() {
                 ? 'hidden'
                 : 'visible'
               }`}>
-              <Chip
-                variant="outlined"
-                color="secondary"
-                icon={<UploadOutlined />}
-                label="Import Inventory"
-                onClick={() => handleSelectFileToImport('INVENTORY')}
-              />
-              <Chip
-                variant="outlined"
-                color="secondary"
-                icon={<DirectionsWalkIcon fontSize='small'/>}
-                label="Stock Records Action"
-                onClick={handleOpenStockRecordMenu}
-              />
+              {
+                hasPermission('upload-data')
+                ? (
+                  <Chip
+                    variant="outlined"
+                    color="secondary"
+                    icon={<UploadOutlined />}
+                    label="Import Inventory"
+                    onClick={() => handleSelectFileToImport('INVENTORY')}
+                  />
+                )
+                : null
+              }
+              {
+                hasPermission('upload-data') || hasPermission('download-data')
+                ? (
+                  <Chip
+                    variant="outlined"
+                    color="secondary"
+                    icon={<DirectionsWalkIcon fontSize='small'/>}
+                    label="Stock Records Action"
+                    onClick={handleOpenStockRecordMenu}
+                  />
+                )
+                : null
+              }
               {/* <Chip
                 variant="outlined"
                 color="secondary"
@@ -615,28 +631,40 @@ export default function Inventory() {
           }}
         >
           <div className='w-[300px]'>
-            <ListItem
-              component="div"
-              alignItems="center"
-              disablePadding
-            >
-              <ListItemButton
-                onClick={() => handleSelectFileToImport('STOCKS') as any}
-              >
-                <ListItemText primary={`Import Stock Records`} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem
-              component="div"
-              alignItems="center"
-              disablePadding
-            >
-              <ListItemButton
-                onClick={() => handleExport()}
-              >
-                <ListItemText primary={`Export Stock Records`} />
-              </ListItemButton>
-            </ListItem>
+            {
+              hasPermission('upload-data')
+              ? (
+                <ListItem
+                  component="div"
+                  alignItems="center"
+                  disablePadding
+                >
+                  <ListItemButton
+                    onClick={() => handleSelectFileToImport('STOCKS') as any}
+                  >
+                    <ListItemText primary={`Import Stock Records`} />
+                  </ListItemButton>
+                </ListItem>
+              )
+              : null
+            }
+            {
+              hasPermission('download-data')
+              ? (
+                <ListItem
+                  component="div"
+                  alignItems="center"
+                  disablePadding
+                >
+                  <ListItemButton
+                    onClick={() => handleExport()}
+                  >
+                    <ListItemText primary={`Export Stock Records`} />
+                  </ListItemButton>
+                </ListItem>
+              )
+              : null
+            }
           </div>
         </Menu>
       </div>

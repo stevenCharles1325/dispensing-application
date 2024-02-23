@@ -21,10 +21,10 @@ export default async function importSQL (filePath: string) {
     const platform = getPlatform();
     const sqlite = platform === 'win'
       ? '.\\sqlite3.exe'
-      : 'sqlite3';
+      : './sqlite3';
 
     if (platform === 'win') {
-      const command = `cd "${EXEC_PATH}" && ${sqlite} ${DB_PATH} < ${filePath}`;
+      const command = `cd "${EXEC_PATH}" && ${sqlite} ${DB_PATH} '.import' < ${filePath}`;
       const result = await asyncExec(command);
 
       if (result.stderr.length) {
@@ -42,7 +42,7 @@ export default async function importSQL (filePath: string) {
         status: 'SUCCESS',
       };
     } else {
-      const command = `sqlite3 ${DB_PATH} < ${filePath}`;
+      const command = `cd "${EXEC_PATH}" && ${sqlite} ${DB_PATH} < ${filePath}`;
       const result = await asyncExec(command);
 
       if (result.stderr.length) {
@@ -61,13 +61,14 @@ export default async function importSQL (filePath: string) {
       };
     }
   } catch (err) {
+    console.log(err);
     const error = handleError(err);
 
     return {
       errors: [
         {
           code: 'REQ_ERR',
-          message: 'Some failure occur failed because some data already exist.',
+          message: 'Some failure occur, because some data already exist.',
           verbose: error,
         }
       ],

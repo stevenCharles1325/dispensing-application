@@ -51,7 +51,7 @@ const logsColumns: Array<GridColDef> = [
     align: 'left',
     headerAlign: 'left',
     valueFormatter(params) {
-      return titleCase(`${params.value.first_name} ${params.value.last_name}`);
+      return titleCase(`${params.value?.first_name ?? '—'} ${params.value?.last_name ?? '—'}`);
     },
   },
   {

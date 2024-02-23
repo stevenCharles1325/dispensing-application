@@ -61,6 +61,7 @@ import {
   VisibilityOutlined
 } from '@mui/icons-material';
 import DiscountDTO from 'App/data-transfer-objects/discount.dto';
+import usePermission from 'UI/hooks/usePermission';
 
 
 const columns: Array<GridColDef> = [
@@ -240,6 +241,7 @@ export default function InventoryForm({
   handleImport
 }: InventoryFormProps) {
   const errorHandler = useErrorHandler();
+  const hasPermission = usePermission();
   const { displayAlert } = useAlert();
   const drive = useAppDrive?.();
   const [openDrive, driveListener] = drive?.subscribe?.('INVENTORY_FORM') ?? [];
@@ -672,27 +674,27 @@ export default function InventoryForm({
     }
   }, [selectedRecord]);
 
-  const getDiscounts = useCallback(async (): Promise<IPagination<DiscountDTO>> => {
-    const res = await window.discount.getDiscounts('all', 1, 'max');
+  // const getDiscounts = useCallback(async (): Promise<IPagination<DiscountDTO>> => {
+  //   const res = await window.discount.getDiscounts('all', 1, 'max');
 
-    if (res.errors) {
-      errorHandler({
-        errors: res.errors,
-      });
+  //   if (res.errors) {
+  //     errorHandler({
+  //       errors: res.errors,
+  //     });
 
-      return [] as unknown as IPagination<DiscountDTO>;
-    }
+  //     return [] as unknown as IPagination<DiscountDTO>;
+  //   }
 
-    return res.data as IPagination<DiscountDTO>;
-  }, []);
+  //   return res.data as IPagination<DiscountDTO>;
+  // }, []);
 
   const [selectedDiscountId, setSelectedDiscountId] = useState<string | null>(null);
-  const { data: discountList, isLoading: isDiscountLoading } = useQuery({
-    queryKey: ['inventory-discount'],
-    queryFn: getDiscounts,
-  });
+  // const { data: discountList, isLoading: isDiscountLoading } = useQuery({
+  //   queryKey: ['inventory-discount'],
+  //   queryFn: getDiscounts,
+  // });
 
-  const discounts = (discountList?.data as DiscountDTO[]) ?? [];
+  // const discounts = (discountList?.data as DiscountDTO[]) ?? [];
 
   useEffect(() => {
     if (selectedItem && action === 'update') {
@@ -777,7 +779,7 @@ export default function InventoryForm({
       <Tabs value={tab} onChange={handleOnChangeTab} aria-label='inventory-tabs'>
         <Tab label="Product Details" {...allyProps(0)} />
         {
-          action === 'update'
+          action === 'update' && hasPermission('view-stock-record')
           ? <Tab label="Stocks" {...allyProps(1)} />
           : null
         }
@@ -1502,7 +1504,7 @@ export default function InventoryForm({
         )
         : null
       }
-      {
+      {/* {
         tab === 2 || (tab === 1 && action === 'create')
         ? (
           <div className='min-w-[1000px] w-fit h-[780px] p-3'>
@@ -1537,7 +1539,7 @@ export default function InventoryForm({
           </div>
         )
         : null
-      }
+      } */}
       <VisuallyHiddenInput
         ref={inputFileRef}
         type="file"

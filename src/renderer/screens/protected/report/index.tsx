@@ -312,12 +312,12 @@ export default function Report() {
                   size="medium"
                 />
 
-                {/* <VisuallyHiddenInput
+                <VisuallyHiddenInput
                   ref={hiddenInputRef}
                   type="file"
                   accept=".sqlite, .db"
                   onChange={handleImport}
-                /> */}
+                />
 
                 <ButtonGroup color="secondary" size='small'>
                   {/* <Button onClick={handleImportBegin}>Import</Button> */}

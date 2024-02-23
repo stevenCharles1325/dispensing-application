@@ -4,10 +4,10 @@ const getCurrentSalesReport = async (): Promise<
   Array<{ hour: string; count: number }>
 > => {
   // Current sales report
-  let hours = Array(24)
+  let hours = Array(25)
     .fill(null)
     .map((_, index) => ({
-      hour: `${(index + 1).toString().padStart(2, '0')}`,
+      hour: `${(index).toString().padStart(2, '0')}`,
       count: 0,
     }));
 
