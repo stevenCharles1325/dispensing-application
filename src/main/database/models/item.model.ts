@@ -271,10 +271,10 @@ export class Item {
   unit_of_measurement: string;
 
   @Column({ nullable: true })
-  @ValidateIf((item: ItemDTO) => Boolean(item?.barcode?.length))
-  @IsBarcode({
-    message: ValidationMessage.invalid,
-  })
+  // @ValidateIf((item: ItemDTO) => Boolean(item?.barcode?.length))
+  // @IsBarcode({
+  //   message: ValidationMessage.invalid,
+  // })
   barcode: string;
 
   @Column('numeric', {
