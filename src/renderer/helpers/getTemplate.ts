@@ -553,10 +553,9 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                         htmlText: curr?.item.expired_at.toLocaleTimeString(
                           'default',
                           {
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: true,
-                            hour: '2-digit'
+                            month: '2-digit',
+                            day: '2-digit',
+                            year: 'numeric'
                           }
                         ),
                         attributes: {
@@ -871,10 +870,9 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
                 text: curr?.item?.expired_at.toLocaleTimeString(
                   'default',
                   {
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true,
-                    hour: '2-digit'
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric'
                   }
                 ) ?? '—',
                 align: 'LEFT',
@@ -1214,10 +1212,9 @@ export function getTemplateForItemPrinting (data: IPrintItemTemplate): IPrintRec
             text: data.expired_at.toLocaleTimeString(
               'default',
               {
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true,
-                hour: '2-digit'
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
               }
             ) ?? '—',
             align: 'LEFT',
