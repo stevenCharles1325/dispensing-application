@@ -672,27 +672,27 @@ export default function InventoryForm({
     }
   }, [selectedRecord]);
 
-  const getDiscounts = useCallback(async (): Promise<IPagination<DiscountDTO>> => {
-    const res = await window.discount.getDiscounts('all', 1, 'max');
+  // const getDiscounts = useCallback(async (): Promise<IPagination<DiscountDTO>> => {
+  //   const res = await window.discount.getDiscounts('all', 1, 'max');
 
-    if (res.errors) {
-      errorHandler({
-        errors: res.errors,
-      });
+  //   if (res.errors) {
+  //     errorHandler({
+  //       errors: res.errors,
+  //     });
 
-      return [] as unknown as IPagination<DiscountDTO>;
-    }
+  //     return [] as unknown as IPagination<DiscountDTO>;
+  //   }
 
-    return res.data as IPagination<DiscountDTO>;
-  }, []);
+  //   return res.data as IPagination<DiscountDTO>;
+  // }, []);
 
   const [selectedDiscountId, setSelectedDiscountId] = useState<string | null>(null);
-  const { data: discountList, isLoading: isDiscountLoading } = useQuery({
-    queryKey: ['inventory-discount'],
-    queryFn: getDiscounts,
-  });
+  // const { data: discountList, isLoading: isDiscountLoading } = useQuery({
+  //   queryKey: ['inventory-discount'],
+  //   queryFn: getDiscounts,
+  // });
 
-  const discounts = (discountList?.data as DiscountDTO[]) ?? [];
+  // const discounts = (discountList?.data as DiscountDTO[]) ?? [];
 
   useEffect(() => {
     if (selectedItem && action === 'update') {
@@ -1506,7 +1506,7 @@ export default function InventoryForm({
         tab === 2 || (tab === 1 && action === 'create')
         ? (
           <div className='min-w-[1000px] w-fit h-[780px] p-3'>
-            {
+            {/* {
               isDiscountLoading
               ? <Loading />
               : (
@@ -1522,7 +1522,7 @@ export default function InventoryForm({
                   />
                 </>
               )
-            }
+            } */}
             <div className='w-full my-5 flex flex-row-reverse'>
               <Button
                 variant="outlined"
