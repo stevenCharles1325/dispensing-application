@@ -85,12 +85,16 @@ export default function Report() {
 
   const report: IReport = data?.data as IReport;
   // const revenue = report?.daily_overview_reports.revenue;
-  const orders = report?.daily_overview_reports.orders;
+  const orders = report?.daily_overview_reports?.orders ?? {
+    total: 0,
+    has_increased: false,
+    difference_yesterday: 0,
+  };
   // const soldItems = report?.daily_overview_reports.sold_items;
-  const currSalesReport = report?.current_sale_reports;
-  const trendCategories = report?.trend_categories;
-  const trendProducts = report?.trend_products;
-  const dbAvailableSpace = report?.space_report;
+  const currSalesReport = report?.current_sale_reports ?? [];
+  const trendCategories = report?.trend_categories ?? [];
+  const trendProducts = report?.trend_products ?? [];
+  const dbAvailableSpace = report?.space_report ?? { percentage: 0 };
 
   useEffect(() => {
     setPlaceHolder?.('Search is disabled here');
@@ -242,7 +246,7 @@ export default function Report() {
                 series={[
                   {
                     cornerRadius: 7,
-                    data: trendCategories.map(({ category_name, frequency }) => ({
+                    data: trendCategories?.map?.(({ category_name, frequency }) => ({
                       label: category_name,
                       value: frequency ?? 0,
                     })),
@@ -280,7 +284,7 @@ export default function Report() {
                 series={[
                   {
                     cornerRadius: 7,
-                    data: trendProducts.map(({ product_name, frequency }) => ({
+                    data: trendProducts?.map?.(({ product_name, frequency }) => ({
                       label: product_name,
                       value: frequency ?? 0,
                     })),
