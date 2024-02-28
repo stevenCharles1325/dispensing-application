@@ -7,8 +7,8 @@ export interface IPrintReceiptDatum {
   feed?: number;
   drawLine?: boolean;
   size?: {
-    width: 1 | 2;
-    height: 1 | 2;
+    width: number;
+    height: number;
   };
   barcode?: {
     code: string,

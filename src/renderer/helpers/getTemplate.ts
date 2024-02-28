@@ -818,11 +818,13 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
     {
       align: 'CT',
       style: 'NORMAL',
+      size: { width: 0.3, height: 0.3 },
       text: `DDCODE:${data?.device_code}`,
       drawLine: true,
     },
     {
       style: 'NORMAL',
+      size: { width: 0.5, height: 0.5 },
     },
     ...data.orders?.reduce((prev: IPrintReceiptDatum[], curr, index) => {
       const multipleIndicator = data?.orders?.length > 1
