@@ -507,16 +507,14 @@ export default function Home() {
     [selectedItemIds, items]
   );
 
-  const handlePrintItem = useCallback((id: string) => {
-    const item = items.find(item => item.id === id);
-
+  const handlePrintItem = useCallback((item: ItemDTO) => {
     if (item) {
       const data = getTemplateForItemPrinting(item);
       printCustom(data);
     }
 
     displayAlert?.('Cannot find selected item. Please try again!', 'error');
-  }, [items, displayAlert]);
+  }, [displayAlert]);
 
   // const handleSelectItemByBarcode = useCallback(
   //   (itemBarcode: string) => {
