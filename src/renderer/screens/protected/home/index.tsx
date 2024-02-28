@@ -43,7 +43,7 @@ const getItems = async (
 ): Promise<IPagination<ItemDTO>> => {
   const res = await window.item.getItems(
     {
-      name: searchText,
+      item_code: searchText?.toLocaleUpperCase(),
       category_id: categoryIds,
       status: [
         'available',
@@ -254,8 +254,8 @@ export default function Home() {
 
   const items = useMemo(() => {
     return (
-      data?.data.filter(({ name }) =>
-        name.toLowerCase().includes(searchText?.toLowerCase() ?? '')
+      data?.data.filter(({ item_code }) =>
+        item_code.toLowerCase().includes(searchText?.toLowerCase() ?? '')
       ) ?? []
     );
   }, [data, searchText]);
@@ -636,7 +636,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    setPlaceHolder?.('Search for product name');
+    setPlaceHolder?.('Search for Item ID');
   }, [setPlaceHolder]);
 
   useEffect(() => {

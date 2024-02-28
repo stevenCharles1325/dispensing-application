@@ -524,10 +524,7 @@ export default function AppNavigation({ children }: React.PropsWithChildren) {
         },
         {
           key: 'search-bar',
-          handler: () => {
-            console.log('SHEES: ', inputRef.current);
-            inputRef.current?.focus?.();
-          },
+          handler: () => inputRef.current?.focus?.(),
         },
         {
           key: 'log-out',
