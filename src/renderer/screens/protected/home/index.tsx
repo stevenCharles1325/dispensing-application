@@ -396,7 +396,7 @@ export default function Home() {
       return displayAlert?.('No item to be purchased', 'error');
     }
 
-    confirm?.('Are you sure you want to dispense?', async (agreed) => {
+    confirm?.('Are you sure you want to proceed?', async (agreed) => {
       if (agreed) {
         const res = await window.payment.createPayment(orderDetails);
 
