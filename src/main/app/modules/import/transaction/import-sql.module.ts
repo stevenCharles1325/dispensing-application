@@ -20,11 +20,11 @@ export default async function importSQLDump (filePath: string) {
   try {
     const platform = getPlatform();
     const sqlite = platform === 'win'
-      ? '.\\sqlite3.exe'
+      ? '\\sqlite3.exe'
       : 'sqlite3';
 
     if (platform === 'win') {
-      const command = `cd "${EXEC_PATH}" && ${sqlite} ${DB_PATH} < ${filePath}`;
+      const command = `cd "${EXEC_PATH}${sqlite}" ${DB_PATH} < ${filePath}`;
       const result = await asyncExec(command);
 
       if (result.stderr.length) {

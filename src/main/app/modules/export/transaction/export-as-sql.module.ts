@@ -44,9 +44,9 @@ export default async function exportAsSQL() {
 
     if (platform === 'win') {
       const command =
-        `"${EXEC_PATH}${sqlite}" "${DB_PATH}" .mode insert .dump ${
+        `"${EXEC_PATH}${sqlite}" "${DB_PATH}" ".output '${fileName}'" ".dump ${
           tableNames.join(' ')
-        } > ${fileName}`;
+        }" ".exit"`;
 
       await asyncExec(command);
 
