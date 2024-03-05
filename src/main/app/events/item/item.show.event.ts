@@ -50,11 +50,12 @@ export default class ItemShowEvent implements IEvent {
 
             if (propertyFind instanceof Array) {
               itemQuery
-                .where(`item.${propertyName} IN (:...${propertyName})`)
+                .andWhere(`item.${propertyName} IN (:...${propertyName})`)
                 .setParameter(propertyName, propertyFind);
+
             } else {
               itemQuery
-                .where(`item.${propertyName} LIKE :${propertyName}`)
+                .andWhere(`item.${propertyName} LIKE :${propertyName}`)
                 .setParameter(propertyName, `%${propertyFind}%`);
             }
           }

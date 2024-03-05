@@ -572,7 +572,8 @@ export default function InventoryForm({
   });
   const [recordForm, setRecordForm] = useState<Partial<InventoryRecordDTO>>({
     item_id: selectedItem?.id,
-    type: 'stock-in'
+    type: 'stock-in',
+    unit_of_measurement: selectedItem?.unit_of_measurement,
   });
   const [recordAction, setRecordAction] = useState<'create' | 'view' | null>();
   const [tab, setTab] = useState(0);
@@ -583,6 +584,7 @@ export default function InventoryForm({
     setRecordForm({
       type: 'stock-in',
       item_id: selectedItem?.id ?? undefined,
+      unit_of_measurement: selectedItem?.unit_of_measurement,
     });
     setRecordAction(null);
     setRecordFormErrors({});

@@ -39,14 +39,14 @@ export default async function exportAsSQL() {
   try {
     const platform = getPlatform();
     const sqlite = platform === 'win'
-      ? '.\\sqlite3.exe'
+      ? '\\sqlite3.exe'
       : 'sqlite3';
 
     if (platform === 'win') {
       const command =
-        `cd "${EXEC_PATH}" && ${sqlite} ${DB_PATH} '.mode insert' '.dump ${
+        `"${EXEC_PATH}${sqlite}" "${DB_PATH}" .mode insert .dump ${
           tableNames.join(' ')
-        }' > ${fileName}`;
+        } > ${fileName}`;
 
       await asyncExec(command);
 
