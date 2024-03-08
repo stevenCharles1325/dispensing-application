@@ -1067,7 +1067,7 @@ export function getTemplateForItemPrinting (data: IPrintItemTemplate): IPrintRec
     {
       align: 'CT',
       style: 'NORMAL',
-      text: `DDCODE:${data?.id}`,
+      text: `DDCODE:${data.system?.id}`,
       drawLine: true,
     },
     {
@@ -1231,11 +1231,6 @@ export function getTemplateForItemPrinting (data: IPrintItemTemplate): IPrintRec
         code: data?.barcode ?? '',
         type: getBarcodeFormat(data?.barcode) ?? 'EAN13',
       }
-    },
-    {
-      align: 'CT',
-      style: 'NORMAL',
-      text: `DDCODE:${data?.system.id}`,
     },
     {
       feed: 2
