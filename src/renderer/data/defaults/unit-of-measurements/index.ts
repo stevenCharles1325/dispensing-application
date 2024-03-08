@@ -35,6 +35,8 @@ const measurements = [
   'gross',
   'pack',
   'pair',
+  'pieces',
+  'set',
 ] as const;
 
 export default measurements;
