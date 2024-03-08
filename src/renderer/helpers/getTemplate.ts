@@ -1209,7 +1209,7 @@ export function getTemplateForItemPrinting (data: IPrintItemTemplate): IPrintRec
             align: 'LEFT',
           },
           {
-            text: data.expired_at.toLocaleTimeString(
+            text: data.expired_at.toLocaleDateString(
               'default',
               {
                 month: '2-digit',
