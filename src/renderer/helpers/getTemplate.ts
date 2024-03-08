@@ -550,7 +550,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                       },
                       {
                         element: 'td',
-                        htmlText: curr?.item.expired_at.toLocaleTimeString(
+                        htmlText: curr?.item.expired_at.toLocaleDateString(
                           'default',
                           {
                             month: '2-digit',
@@ -867,7 +867,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
                 align: 'LEFT',
               },
               {
-                text: curr?.item?.expired_at.toLocaleTimeString(
+                text: curr?.item?.expired_at.toLocaleDateString(
                   'default',
                   {
                     month: '2-digit',

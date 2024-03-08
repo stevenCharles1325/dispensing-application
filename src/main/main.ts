@@ -248,7 +248,7 @@ const createWindow = async () => {
     mainWindow?.webContents.send('main-message', { channel, data });
   }
 
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();

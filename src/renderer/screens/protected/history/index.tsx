@@ -643,7 +643,7 @@ export default function Logs() {
                             }:`}
                           </p>
                           <p className='text-left'>
-                            {order?.item?.expired_at.toLocaleTimeString(
+                            {order?.item?.expired_at.toLocaleDateString(
                               'default',
                               {
                                 month: '2-digit',

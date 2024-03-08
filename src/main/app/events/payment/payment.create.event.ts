@@ -91,7 +91,7 @@ export default class PaymentCreateEvent implements IEvent {
           > = {
             // to add system_id
             creator_id: personnel.id,
-            source_name: personnel.fullName(),
+            source_name: personnel.last_name,
             recipient_name: 'N/A',
             category: 'income',
             type: 'customer-payment',
