@@ -33,6 +33,7 @@ import localStorage from 'UI/modules/storage';
 import CustomAutoComplete from 'UI/components/TextField/CustomAutoComplete';
 import transaction from 'Main/data/defaults/categories/transaction';
 import { getTemplateForItemPrinting } from 'UI/helpers/getTemplate';
+import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 
 const CARD_WIDTH = 340;
 const CARD_HEIGHT = 215;
@@ -416,7 +417,7 @@ export default function Home() {
           return;
         }
 
-        // const transaction = res.data as unknown as TransactionDTO;
+        const transaction = res.data as unknown as TransactionDTO;
 
         // setDiscount(null);
         // setCouponCode('');
@@ -425,8 +426,6 @@ export default function Home() {
         // Caching Product-used and Product-lot-number
         const productUsedCache = localStorage.getItem('RELEASE:PU') as string[] ?? [];
         const productLotNoCache: string[] = localStorage.getItem('RELEASE:PLN') as string[] ?? [];
-
-        console.log(productUsedCache, productLotNoCache);
 
         const elementToLowerCased = (arr: string[]) => {
           return arr.map(str => str.toLocaleLowerCase());
