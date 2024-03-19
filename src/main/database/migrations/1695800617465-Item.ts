@@ -142,6 +142,8 @@ export class Item1695800617464 implements MigrationInterface {
               'gross',
               'pack',
               'pair',
+              'pieces',
+              'set',
             ],
             default: "'each'",
             comment:

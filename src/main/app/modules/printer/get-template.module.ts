@@ -30,7 +30,7 @@ export function getTemplate (data: IPrintTemplate) {
     },
     {
       type: 'text',
-      value: 'RAW MATERIAL DISPENSING SLIP',
+      value: 'MATERIAL DISPENSING SLIP',
       style: {
         textAlign: 'center',
         fontSize: '14px',
@@ -157,7 +157,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
       },
       {
         element: 'h4',
-        htmlText: 'RAW MATERIAL DISPENSING SLIP',
+        htmlText: 'MATERIAL DISPENSING SLIP',
         attributes: {
           style: 'font-weight: 700; text-align: center; font-size: 25px',
         }

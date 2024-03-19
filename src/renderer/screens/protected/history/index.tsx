@@ -604,7 +604,7 @@ export default function Logs() {
                     {selectedPayment.system?.store_name?.toLocaleUpperCase()}
                   </p>
                   <div className='text-center py-3 border-y mt-3'>
-                    <p className='text-md'>RAW MATERIAL DISPENSING SLIP</p>
+                    <p className='text-md'>MATERIAL DISPENSING SLIP</p>
                     <p className='text-xs text-black/50'>{`DDCODE:${selectedPayment.system!.id}`}</p>
                   </div>
                   <div className='w-full text-sm h-fit flex flex-col gap-5 mt-5 items-center text-black/70'>
