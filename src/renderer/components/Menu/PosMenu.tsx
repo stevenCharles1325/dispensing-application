@@ -99,6 +99,7 @@ export default function POSMenu({
               size="small"
               placeholder="Enter name"
               label="Name"
+              color="secondary"
               onChange={(e) => {
                 e.stopPropagation();
 
@@ -120,6 +121,7 @@ export default function POSMenu({
               <ListItemIcon>
                 <Checkbox
                   {...label}
+                  color="secondary"
                   checked={selectedIds.includes(id)}
                   onClick={(e) => {
                     e.stopPropagation();

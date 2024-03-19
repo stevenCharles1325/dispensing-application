@@ -19,6 +19,7 @@ const NORMAL_UNITS = [
   'pair',
   'pieces',
   'piece',
+  'set',
 ];
 
 export default function unitQuantityCalculator (

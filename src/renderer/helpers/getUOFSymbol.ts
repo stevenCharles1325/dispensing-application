@@ -35,6 +35,8 @@ const measurementSymbols: Record<string, string> = {
   'gross': 'gr',
   'pack': 'pk',
   'pair': 'pr',
+  'pieces': 'pcs',
+  'set': 'set',
 };
 
 export default function getUOFSymbol(name: string, longName: boolean = false) {

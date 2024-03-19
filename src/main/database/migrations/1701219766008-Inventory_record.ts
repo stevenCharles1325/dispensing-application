@@ -89,6 +89,8 @@ export class InventoryRecord1701219766008 implements MigrationInterface {
                 'gross',
                 'pack',
                 'pair',
+                'pieces',
+                'set',
               ],
               isNullable: false,
             },

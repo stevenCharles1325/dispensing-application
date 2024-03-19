@@ -515,7 +515,7 @@ export default function Logs() {
             >
               <ListItemText primary={`Current year`} />
               {exportDownloadState['CURRENT:YEAR'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
-              {exportDownloadState['CURRENT:YEAR'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" /> : null}
+              {exportDownloadState['CURRENT:YEAR'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" color="success" /> : null}
               {exportDownloadState['CURRENT:YEAR'] === 'ERROR' ? <CloseOutlinedIcon fontSize="small" color="error" /> : null}
             </ListItemButton>
           </ListItem>
