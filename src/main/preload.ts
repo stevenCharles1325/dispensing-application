@@ -164,7 +164,7 @@ const systemHandler = {
   getSystems: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<SystemDTO>>> =>
     ipcRenderer.invoke('system:show', payload, page, total),
   createSystem: async (
@@ -219,7 +219,7 @@ const userHandler = {
   getUsers: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<UserDTO>>> =>
     ipcRenderer.invoke('user:show', payload, page, total),
 
@@ -252,7 +252,7 @@ const shortcutKeyHandler = {
   getShortcutkeys: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<ShortcutKeyDTO>>> =>
     ipcRenderer.invoke('shortcut-key:show', payload, page, total),
 
@@ -272,7 +272,7 @@ const roleHandler = {
   getRoles: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<RoleDTO>>> =>
     ipcRenderer.invoke('role:show', payload, page, total),
 
@@ -306,7 +306,7 @@ const permissionHandler = {
   getPermissions: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<PermissionDTO>>> =>
     ipcRenderer.invoke('permission:show', payload, page, total),
 
@@ -325,7 +325,7 @@ const itemHandler = {
   getItems: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<ItemDTO>>> =>
     ipcRenderer.invoke('item:show', payload, page, total),
 
@@ -361,7 +361,7 @@ const discountHandler = {
   getDiscounts: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<DiscountDTO>>> =>
     ipcRenderer.invoke('discount:show', payload, page, total),
 
@@ -392,7 +392,7 @@ const inventoryRecordHandler = {
   getRecords: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<InventoryRecordDTO>>> =>
     ipcRenderer.invoke('inventory-record:show', payload, page, total),
 
@@ -412,7 +412,7 @@ const brandHandler = {
   getBrands: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<BrandDTO>>> =>
     ipcRenderer.invoke('brand:show', payload, page, total),
 
@@ -448,7 +448,7 @@ const categoryHandler = {
   getCategories: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<CategoryDTO>>> =>
     ipcRenderer.invoke('category:show', payload, page, total),
 
@@ -524,7 +524,7 @@ const supplierHandler = {
   getSuppliers: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<SupplierDTO>>> =>
     ipcRenderer.invoke('supplier:show', payload, page, total),
 
@@ -560,7 +560,7 @@ const paymentHandler = {
   getPayments: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<IncomeDTO>>> =>
     ipcRenderer.invoke('payment:show', payload, page, total),
 
@@ -596,7 +596,7 @@ const auditTrailHandler = {
   getAuditTrail: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<AuditTrailDTO>>> =>
     ipcRenderer.invoke('audit-trail:show', payload, page, total),
 };
@@ -627,7 +627,7 @@ const notifHandler = {
   getNotifs: async (
     payload: Record<string, any | any[]> | string = 'all',
     page: number = 1,
-    total: number | 'max' = 15
+    total: number | 'max' = 'max'
   ): Promise<IResponse<string[] | IPOSError[] | IPagination<NotificationDTO>>> =>
     ipcRenderer.invoke('notification:show', payload, page, total),
 
