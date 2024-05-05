@@ -29,12 +29,12 @@ export default async function exportSQL() {
   try {
     const platform = getPlatform();
     const sqlite = platform === 'win'
-      ? '.\\sqlite3.exe'
+      ? '\\sqlite3.exe'
       : './sqlite3';
 
     if (platform === 'win') {
       const command =
-        `cd "${EXEC_PATH}" && ${sqlite} "${DB_PATH}" '.dump' > "${fileName}"`;
+        `"${EXEC_PATH}${sqlite}" "${DB_PATH}" .dump > "${fileName}"`;
 
       await asyncExec(command);
 

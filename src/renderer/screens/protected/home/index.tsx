@@ -33,6 +33,7 @@ import localStorage from 'UI/modules/storage';
 import CustomAutoComplete from 'UI/components/TextField/CustomAutoComplete';
 import transaction from 'Main/data/defaults/categories/transaction';
 import { getTemplateForItemPrinting } from 'UI/helpers/getTemplate';
+import TransactionDTO from 'App/data-transfer-objects/transaction.dto';
 
 const CARD_WIDTH = 340;
 const CARD_HEIGHT = 215;
@@ -43,7 +44,7 @@ const getItems = async (
 ): Promise<IPagination<ItemDTO>> => {
   const res = await window.item.getItems(
     {
-      name: searchText,
+      item_code: searchText?.toLocaleUpperCase(),
       category_id: categoryIds,
       status: [
         'available',
@@ -254,8 +255,8 @@ export default function Home() {
 
   const items = useMemo(() => {
     return (
-      data?.data.filter(({ name }) =>
-        name.toLowerCase().includes(searchText?.toLowerCase() ?? '')
+      data?.data.filter(({ item_code }) =>
+        item_code.toLowerCase().includes(searchText?.toLowerCase() ?? '')
       ) ?? []
     );
   }, [data, searchText]);
@@ -396,7 +397,7 @@ export default function Home() {
       return displayAlert?.('No item to be purchased', 'error');
     }
 
-    confirm?.('Are you sure you want to purchase?', async (agreed) => {
+    confirm?.('Are you sure you want to proceed?', async (agreed) => {
       if (agreed) {
         const res = await window.payment.createPayment(orderDetails);
 
@@ -416,7 +417,7 @@ export default function Home() {
           return;
         }
 
-        // const transaction = res.data as unknown as TransactionDTO;
+        const transaction = res.data as unknown as TransactionDTO;
 
         // setDiscount(null);
         // setCouponCode('');
@@ -425,8 +426,6 @@ export default function Home() {
         // Caching Product-used and Product-lot-number
         const productUsedCache = localStorage.getItem('RELEASE:PU') as string[] ?? [];
         const productLotNoCache: string[] = localStorage.getItem('RELEASE:PLN') as string[] ?? [];
-
-        console.log(productUsedCache, productLotNoCache);
 
         const elementToLowerCased = (arr: string[]) => {
           return arr.map(str => str.toLocaleLowerCase());
@@ -507,16 +506,14 @@ export default function Home() {
     [selectedItemIds, items]
   );
 
-  const handlePrintItem = useCallback((id: string) => {
-    const item = items.find(item => item.id === id);
-
+  const handlePrintItem = useCallback((item: ItemDTO) => {
     if (item) {
       const data = getTemplateForItemPrinting(item);
       printCustom(data);
     }
 
     displayAlert?.('Cannot find selected item. Please try again!', 'error');
-  }, [items, displayAlert]);
+  }, [displayAlert]);
 
   // const handleSelectItemByBarcode = useCallback(
   //   (itemBarcode: string) => {
@@ -636,7 +633,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    setPlaceHolder?.('Search for product name');
+    setPlaceHolder?.('Search for Item ID');
   }, [setPlaceHolder]);
 
   useEffect(() => {

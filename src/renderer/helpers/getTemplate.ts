@@ -35,7 +35,7 @@ export function getTemplate (data: IPrintTemplate) {
     },
     {
       type: 'text',
-      value: 'RAW MATERIAL DISPENSING SLIP',
+      value: 'MATERIAL DISPENSING SLIP',
       style: {
         textAlign: 'center',
         fontSize: '14px',
@@ -183,7 +183,7 @@ export function getTemplateV2 (data: IPrintTemplate): IPrintData {
       },
       {
         element: 'h5',
-        htmlText: 'RAW MATERIAL DISPENSING SLIP',
+        htmlText: 'MATERIAL DISPENSING SLIP',
         attributes: {
           style: 'font-weight: 300; text-align: center; margin: 10 0 5 0; padding: 5 0 5 0; border-top: 1px solid black; border-bottom: 1px solid black;',
         }
@@ -473,7 +473,7 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
             children: [
               {
                 element: 'p',
-                htmlText: 'RAW MATERIAL DISPENSING SLIP',
+                htmlText: 'MATERIAL DISPENSING SLIP',
                 attributes: {
                   style: 'font-weight: 500; font-size: 0.7em !important; padding: 0;',
                 }
@@ -550,13 +550,12 @@ export function getTemplateV3 (data: IPrintTemplate): IPrintData {
                       },
                       {
                         element: 'td',
-                        htmlText: curr?.item.expired_at.toLocaleTimeString(
+                        htmlText: curr?.item.expired_at.toLocaleDateString(
                           'default',
                           {
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: true,
-                            hour: '2-digit'
+                            month: '2-digit',
+                            day: '2-digit',
+                            year: 'numeric'
                           }
                         ),
                         attributes: {
@@ -814,7 +813,7 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
     {
       align: 'CT',
       style: 'B',
-      text: 'RAW MATERIAL DISPENSING SLIP',
+      text: 'MATERIAL DISPENSING SLIP',
     },
     {
       align: 'CT',
@@ -868,13 +867,12 @@ export function getTemplateForReceipt (data: IPrintTemplate): IPrintReceiptData 
                 align: 'LEFT',
               },
               {
-                text: curr?.item?.expired_at.toLocaleTimeString(
+                text: curr?.item?.expired_at.toLocaleDateString(
                   'default',
                   {
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true,
-                    hour: '2-digit'
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric'
                   }
                 ) ?? '—',
                 align: 'LEFT',
@@ -1069,7 +1067,7 @@ export function getTemplateForItemPrinting (data: IPrintItemTemplate): IPrintRec
     {
       align: 'CT',
       style: 'NORMAL',
-      text: `DDCODE:${data?.id}`,
+      text: `DDCODE:${data.system?.id}`,
       drawLine: true,
     },
     {
@@ -1211,13 +1209,12 @@ export function getTemplateForItemPrinting (data: IPrintItemTemplate): IPrintRec
             align: 'LEFT',
           },
           {
-            text: data.expired_at.toLocaleTimeString(
+            text: data.expired_at.toLocaleDateString(
               'default',
               {
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true,
-                hour: '2-digit'
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
               }
             ) ?? '—',
             align: 'LEFT',
@@ -1234,11 +1231,6 @@ export function getTemplateForItemPrinting (data: IPrintItemTemplate): IPrintRec
         code: data?.barcode ?? '',
         type: getBarcodeFormat(data?.barcode) ?? 'EAN13',
       }
-    },
-    {
-      align: 'CT',
-      style: 'NORMAL',
-      text: `DDCODE:${data?.system.id}`,
     },
     {
       feed: 2

@@ -19,6 +19,7 @@ const NORMAL_UNITS = [
   'pair',
   'pieces',
   'piece',
+  'set',
 ];
 
 export default function unitQuantityCalculator (
@@ -41,20 +42,31 @@ export default function unitQuantityCalculator (
     const um = unitFormatter(leftOperand.unit, true);
 
     if (!um) {
-      throw new Error('Unknown unit of measurement');
+      throw new Error('[Unit Calculator Error]: Unknown unit of measurement');
     }
 
-    return [
-      (Number(leftOperand.quantity) - Number(rightOperand.quantity)) ?? 0,
-      unitFormatter(leftOperand.unit, true),
-    ];
+    if (operation === 'add') {
+      return [
+        (Number(leftOperand.quantity) + Number(rightOperand.quantity)) ?? 0,
+        unitFormatter(leftOperand.unit, true),
+      ];
+    }
+
+    if (operation === 'sub') {
+      return [
+        (Number(leftOperand.quantity) - Number(rightOperand.quantity)) ?? 0,
+        unitFormatter(leftOperand.unit, true),
+      ];
+    }
+
+    throw new Error('[Unit Calculator Error]: Unknown operation');
   }
 
   const itemUM = unitFormatter(leftOperand.unit);
   const otherUM = unitFormatter(rightOperand.unit);
 
   if (!itemUM || !otherUM) {
-    throw new Error('Unknown unit of measurement');
+    throw new Error('[Unit Calculator Error]: Unknown unit of measurement');
   }
 
   const itemQuantity = `${leftOperand.quantity} ${itemUM}`;

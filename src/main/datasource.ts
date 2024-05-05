@@ -21,12 +21,13 @@ import { Discount } from './database/models/discount.model';
 import { Upload } from './database/models/upload.model';
 import { UploadData } from './database/models/upload-data.model';
 import MainSeeder from './database/seeders/main.seeder';
+import path from 'path';
 
 type DataSourceWithSeederOption = DataSourceOptions & SeederOptions;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
-export const DB_PATH = `${IS_PROD ? app.getPath('userData') : __dirname}/database/db.sqlite`;
-const MIGRATION_PATH = `${IS_PROD ? `${app.getAppPath()}/dist` : __dirname}/database/migrations/*`;
+export const DB_PATH = path.join(IS_PROD ? app.getPath('userData') : __dirname, '/database/db.sqlite');
+const MIGRATION_PATH = path.join(IS_PROD ? `${app.getAppPath()}/dist` : __dirname, '/database/migrations/*');
 
 export const options: DataSourceWithSeederOption = {
   type: 'sqlite',

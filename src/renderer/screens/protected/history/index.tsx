@@ -515,7 +515,7 @@ export default function Logs() {
             >
               <ListItemText primary={`Current year`} />
               {exportDownloadState['CURRENT:YEAR'] === 'LOADING' ? <CircularProgress size="20px" /> : null}
-              {exportDownloadState['CURRENT:YEAR'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" /> : null}
+              {exportDownloadState['CURRENT:YEAR'] === 'SUCCESS' ? <CheckOutlinedIcon fontSize="small" color="success" /> : null}
               {exportDownloadState['CURRENT:YEAR'] === 'ERROR' ? <CloseOutlinedIcon fontSize="small" color="error" /> : null}
             </ListItemButton>
           </ListItem>
@@ -604,7 +604,7 @@ export default function Logs() {
                     {selectedPayment.system?.store_name?.toLocaleUpperCase()}
                   </p>
                   <div className='text-center py-3 border-y mt-3'>
-                    <p className='text-md'>RAW MATERIAL DISPENSING SLIP</p>
+                    <p className='text-md'>MATERIAL DISPENSING SLIP</p>
                     <p className='text-xs text-black/50'>{`DDCODE:${selectedPayment.system!.id}`}</p>
                   </div>
                   <div className='w-full text-sm h-fit flex flex-col gap-5 mt-5 items-center text-black/70'>
@@ -643,13 +643,12 @@ export default function Logs() {
                             }:`}
                           </p>
                           <p className='text-left'>
-                            {order?.item?.expired_at.toLocaleTimeString(
+                            {order?.item?.expired_at.toLocaleDateString(
                               'default',
                               {
-                                minute: '2-digit',
-                                second: '2-digit',
-                                hour12: true,
-                                hour: '2-digit'
+                                month: '2-digit',
+                                day: '2-digit',
+                                year: 'numeric'
                               }
                             )}
                           </p>

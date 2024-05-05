@@ -13,7 +13,6 @@ export default class StockJob implements IJob {
 
   async handler({ data }: Job) {
     try {
-      console.log(data);
       const authService = Provider.ioc<IAuthService>('AuthProvider');
       const authUser = authService.getAuthUser();
 

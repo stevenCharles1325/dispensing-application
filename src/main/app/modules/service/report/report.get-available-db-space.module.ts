@@ -1,20 +1,23 @@
+import { DB_PATH } from 'Main/datasource';
 import checkDiskSpace from 'check-disk-space';
-import { app } from 'electron';
-
-const IS_PROD = process.env.NODE_ENV === 'production';
 
 const convertBytesToMegabytes = (bytes: any) => {
   return bytes / (1024 * 1024);
 }
 
 const getAvailableDBSpace = async () => {
-  const DB_PATH = IS_PROD ? app.getPath('userData') : __dirname;
-  const { free, size } = await checkDiskSpace(`${DB_PATH}/database/db.sqlite`)
+  try {
+    const { free, size } = await checkDiskSpace(DB_PATH);
 
-  return {
-    free: Number(convertBytesToMegabytes(free).toFixed(2)),
-    size: Number(convertBytesToMegabytes(size).toFixed(2)),
-    percentage: ((size - free) / size),
+    return {
+      free: Number(convertBytesToMegabytes(free).toFixed(2)),
+      size: Number(convertBytesToMegabytes(size).toFixed(2)),
+      percentage: ((size - free) / size),
+    }
+  } catch (err) {
+    console.log(`[DISK SPACE CHECK ERROR]: ${err}`);
+
+    throw new Error(`[DISK SPACE CHECK ERROR]: ${err}`);
   }
 }
 

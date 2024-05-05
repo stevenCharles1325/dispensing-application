@@ -12,7 +12,7 @@ interface ItemCardParams {
   cardInfo: ItemDTO;
   orderNumber: number;
   onSelect: (id: string) => void;
-  onPrint: (id: string) => void;
+  onPrint: (item: ItemDTO) => void;
 }
 
 export default function ItemCard({ cardInfo, orderNumber = 0, onSelect, onPrint }: ItemCardParams) {
@@ -188,7 +188,7 @@ export default function ItemCard({ cardInfo, orderNumber = 0, onSelect, onPrint 
               <Add color="secondary" />
             </IconButton>
             <IconButton
-              onClick={() => onPrint(cardInfo.id)}
+              onClick={() => onPrint(cardInfo)}
             >
               <LocalPrintshopOutlinedIcon color="secondary" />
             </IconButton>

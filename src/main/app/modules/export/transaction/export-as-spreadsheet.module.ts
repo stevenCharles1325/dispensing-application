@@ -1,4 +1,5 @@
 import concatDateToName from "App/modules/concat-date-to-name.module";
+import titleCase from "App/modules/title-case.module";
 import TransactionRepository from "App/repositories/transaction.repository";
 import { app } from "electron";
 import { Transaction } from "Main/database/models/transaction.model";
@@ -41,19 +42,30 @@ export default async function exportAsSpreadsheet (recordType: string) {
   }
 
   if (transactions) {
-    const extractedTransaction = transactions.map((transaction) => {
-      // const ordersQuantity = transaction.orders.length;
+    const extractedTransaction = transactions.reduce(
+      (prev: Record<string, any>[], curr: Transaction) => {
+        const transaction = curr.orders.map(({ item }) => ({
+          Personnel: titleCase(curr.source_name),
+          Customer: titleCase(curr.recipient_name),
+          'Transaction Number': curr.transaction_code,
+          'Item Number': item.item_code,
+          'Batch Number': item.batch_code,
+          'Net Weight': curr.net_weight,
+          'Tare Weight': curr.tare_weight,
+          'Gross Weight': curr.gross_weight,
+          'Product Used': curr.product_used,
+          'Product Lot No.': curr.product_lot_number,
+          'Date of Transaction': new Date(curr.created_at).toLocaleDateString(),
+        }));
 
-      return ({
-        Personnel: transaction.source_name,
-        Customer: transaction.recipient_name,
-        'Item Number': transaction.orders[0]?.item.item_code,
-        'Batch Number': transaction.orders[0]?.item.batch_code,
-        'Product Used': transaction.product_used,
-        'Product Lot No.': transaction.product_lot_number,
-        'Date of Transaction': new Date(transaction.created_at).toLocaleDateString(),
-      })
-    });
+        return [
+          ...prev,
+          ...transaction,
+        ];
+      },
+      []
+    );
+
 
     if (!extractedTransaction.length) {
       return {

@@ -574,7 +574,8 @@ export default function InventoryForm({
   });
   const [recordForm, setRecordForm] = useState<Partial<InventoryRecordDTO>>({
     item_id: selectedItem?.id,
-    type: 'stock-in'
+    type: 'stock-in',
+    unit_of_measurement: selectedItem?.unit_of_measurement,
   });
   const [recordAction, setRecordAction] = useState<'create' | 'view' | null>();
   const [tab, setTab] = useState(0);
@@ -585,6 +586,7 @@ export default function InventoryForm({
     setRecordForm({
       type: 'stock-in',
       item_id: selectedItem?.id ?? undefined,
+      unit_of_measurement: selectedItem?.unit_of_measurement,
     });
     setRecordAction(null);
     setRecordFormErrors({});
@@ -1508,7 +1510,7 @@ export default function InventoryForm({
         tab === 2 || (tab === 1 && action === 'create')
         ? (
           <div className='min-w-[1000px] w-fit h-[780px] p-3'>
-            {
+            {/* {
               isDiscountLoading
               ? <Loading />
               : (
@@ -1524,7 +1526,7 @@ export default function InventoryForm({
                   />
                 </>
               )
-            }
+            } */}
             <div className='w-full my-5 flex flex-row-reverse'>
               <Button
                 variant="outlined"

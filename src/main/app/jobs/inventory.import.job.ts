@@ -286,7 +286,7 @@ export default class InventoryImportJob implements IJob {
             itemClone.stock_quantity = record['Quantity'];
             itemClone.unit_of_measurement = getUOFSymbol(record['UM'], true) ?? record['UM'];
             itemClone.status = record['Quantity'] === 0 ? 'out-of-stock' : 'available';
-            itemClone.expired_at = date;
+            itemClone.expired_at = new Date(record['Expiry Date']) ?? date;
 
             await validate(itemClone, record);
 
