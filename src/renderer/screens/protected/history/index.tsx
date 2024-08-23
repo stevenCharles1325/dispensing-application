@@ -531,7 +531,7 @@ export default function Logs() {
             indicatorColor="secondary"
           >
             <Tab label="Audit Trail" {...a11yProps(0)} />
-            <Tab label="Transaction History" {...a11yProps(1)} />
+            <Tab label="Dispensing History" {...a11yProps(1)} />
           </Tabs>
         </div>
         <div className='hidden'>

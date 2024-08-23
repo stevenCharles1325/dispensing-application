@@ -468,8 +468,6 @@ export default function Inventory() {
     }
   }, [items, barcodeNumber]);
 
-  {console.log(hasPermission('upload-data'))}
-
   return (
     <div className="w-full h-full flex flex-col gap-5 pr-3">
       <div className="w-full h-fit gap-5 flex flex-row flex-wrap">

@@ -161,7 +161,7 @@ export default function Report() {
               hasIncreased={orders?.has_increased}
               icon={<TableRestaurantTwoToneIcon color="secondary" />}
               differenceYesterday={orders?.difference_yesterday}
-              label="Transactions"
+              label="Releases"
             />
             {/* <TotalDifferenceWidget
               total={soldItems?.total ?? 0}
@@ -176,7 +176,7 @@ export default function Report() {
       <div className="grow w-full mt-5">
         {/* SALES */}
         <div className="p-3 text-gray-500">
-          <p className="text-lg font-bold">Transactions Graphs</p>
+          <p className="text-lg font-bold">Release Graphs</p>
         </div>
         <div className="flex flex-col px-3 gap-5">
           {/*Current sales report*/}
