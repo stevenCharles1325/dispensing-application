@@ -1506,7 +1506,7 @@ export default function InventoryForm({
         )
         : null
       }
-      {/* {
+      {
         tab === 2 || (tab === 1 && action === 'create')
         ? (
           <div className='min-w-[1000px] w-fit h-[780px] p-3'>
@@ -1541,7 +1541,7 @@ export default function InventoryForm({
           </div>
         )
         : null
-      } */}
+      }
       <VisuallyHiddenInput
         ref={inputFileRef}
         type="file"

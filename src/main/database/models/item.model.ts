@@ -28,7 +28,6 @@ import { Bull } from 'Main/jobs';
 import { ValidationMessage } from '../../app/validators/message/message';
 import measurements from 'Main/data/defaults/unit-of-measurements';
 import itemStatuses from 'Main/data/defaults/statuses/item';
-import { IsBarcode } from '../../app/validators/IsBarcode';
 import ItemDTO from 'App/data-transfer-objects/item.dto';
 import type { System } from './system.model';
 import type { Image } from './image.model';

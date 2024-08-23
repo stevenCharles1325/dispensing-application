@@ -655,6 +655,11 @@ const exportHandler = {
   ): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
     ipcRenderer.invoke('inventory-record:export', ids),
 
+  exportProductRecords: async (
+    payload: Record<string, any | any[]> | string = 'all',
+  ): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
+    ipcRenderer.invoke('item:export', payload),
+
   exportDatabase: async (): Promise<IResponse<string[] | IPOSError[] | IExportResult>> =>
     ipcRenderer.invoke('pos-database:export'),
 };

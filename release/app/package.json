@@ -34,7 +34,6 @@
     "escpos-usb": "^3.0.0-alpha.4",
     "jimp": "^0.22.10",
     "jsonwebtoken": "^9.0.1",
-    "node-hid": "^3.0.0",
     "node-html-to-image": "^4.0.0",
     "node-schedule": "^2.1.1",
     "pdf-to-printer": "github:Yuri-Lima/pdf-to-printer",

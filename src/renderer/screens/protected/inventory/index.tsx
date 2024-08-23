@@ -4,9 +4,9 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { ChangeEvent, ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Chip, Collapse, Dialog, Divider, IconButton, ListItem, ListItemButton, ListItemText, Menu, Slide, styled, useMediaQuery, useTheme } from '@mui/material';
+import { Chip, Collapse, Dialog, IconButton, ListItem, ListItemButton, ListItemText, Menu, Slide, styled, useMediaQuery, useTheme } from '@mui/material';
 import CounterWidget from 'UI/components/Widgets/CounterWidget';
 import { TransitionProps } from '@mui/material/transitions';
 import { useQuery } from '@tanstack/react-query';
@@ -27,7 +27,7 @@ import IPagination from 'App/interfaces/pagination/pagination.interface';
 import useSearch from 'UI/hooks/useSearch';
 import BarcodeIndicator from 'UI/components/Indicators/BarcodeIndicator';
 import useConfirm from 'UI/hooks/useConfirm';
-import { ChevronLeftOutlined, ChevronRightOutlined, DownloadOutlined, UploadOutlined } from '@mui/icons-material';
+import { ChevronLeftOutlined, ChevronRightOutlined, UploadOutlined } from '@mui/icons-material';
 import useErrorHandler from 'UI/hooks/useErrorHandler';
 import IExportResult from 'App/interfaces/transaction/export/export.result.interface';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
@@ -403,6 +403,40 @@ export default function Inventory() {
     });
   }
 
+  const handleExportOnHandStocks = (ids: string[] | null = null) => {
+    let message = 'Do you want to export on-hand stock record for all items?';
+
+    ids = ids ?? selectedIds;
+
+    if (ids) {
+      message = 'Do you want to export on-hand stock record for this item?'
+    }
+
+    confirm?.(message, async (agreed) => {
+      if (agreed) {
+        const res = await window.export.exportProductRecords({
+          status: ['available']
+        });
+
+        if (res.status === 'ERROR') {
+          errorHandler({
+            errors: res.errors,
+          });
+
+          return;
+        }
+
+        const { filePath } = res.data as IExportResult;
+
+        displayAlert?.(
+          `Successful! File is saved at ${filePath}`,
+          'success'
+        );
+        return;
+      }
+    });
+  }
+
   useEffect(() => {
     const id = searchParams.get('id');
 
@@ -651,17 +685,30 @@ export default function Inventory() {
             {
               hasPermission('download-data')
               ? (
-                <ListItem
-                  component="div"
-                  alignItems="center"
-                  disablePadding
-                >
-                  <ListItemButton
-                    onClick={() => handleExport()}
+                <>
+                  <ListItem
+                    component="div"
+                    alignItems="center"
+                    disablePadding
                   >
-                    <ListItemText primary={`Export Stock Records`} />
-                  </ListItemButton>
-                </ListItem>
+                    <ListItemButton
+                      onClick={() => handleExport()}
+                    >
+                      <ListItemText primary={`Export Stock Records`} />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem
+                    component="div"
+                    alignItems="center"
+                    disablePadding
+                  >
+                    <ListItemButton
+                      onClick={() => handleExportOnHandStocks()}
+                    >
+                      <ListItemText primary={`Export On-hand Stock Records`} />
+                    </ListItemButton>
+                  </ListItem>
+                </>
               )
               : null
             }
